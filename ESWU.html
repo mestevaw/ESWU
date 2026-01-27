@@ -1,0 +1,3980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESWU</title>
+    <style>
+        :root {
+            --primary: #1a365d;
+            --primary-dark: #0f2744;
+            --secondary: #2c5282;
+            --accent: #3182ce;
+            --success: #38a169;
+            --danger: #e53e3e;
+            --warning: #dd6b20;
+            --bg: #f7fafc;
+            --card-bg: #ffffff;
+            --text: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Login Page */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+
+        .login-container.hidden {
+            display: none;
+        }
+
+        .login-box {
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h1 {
+            color: var(--primary);
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--text-light);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--text);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2f855a;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Main App */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .app-container.active {
+            display: block;
+        }
+
+        /* Header */
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--card-bg);
+            padding: 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-list {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-item {
+            flex: 1;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 1rem 2rem;
+            color: var(--text);
+            text-decoration: none;
+            text-align: center;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--bg);
+            color: var(--accent);
+        }
+
+        .nav-link.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            background: var(--bg);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .summary-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* Tables Grid */
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--bg);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: var(--bg);
+            cursor: pointer;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .filter-section select {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .close-modal:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: flex-end;
+        }
+
+        /* Info Section */
+        .info-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .info-item {
+            padding: 0.75rem;
+            background: var(--bg);
+            border-radius: 6px;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Payment History */
+        .payment-history {
+            margin-top: 1.5rem;
+        }
+
+        .payment-item {
+            padding: 0.75rem;
+            background: var(--bg);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Link style */
+        .link {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        /* Status Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-warning {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        .badge-danger {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        /* Dropdown styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-toggle {
+            font-size: 1.5rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1000;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .dropdown-content.show {
+            display: block;
+        }
+        
+        .dropdown-content a {
+            color: var(--text);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: var(--bg);
+        }
+
+        /* File upload area */
+        .file-upload {
+            border: 2px dashed var(--border);
+            border-radius: 6px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .file-upload:hover {
+            border-color: var(--accent);
+            background: var(--bg);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        /* Number formatting */
+        .currency {
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-list {
+                flex-wrap: wrap;
+            }
+
+            .nav-item {
+                flex: 1 0 50%;
+            }
+
+            .tables-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginContainer" class="login-container">
+        <div class="login-box">
+            <h1>ESWU</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Seleccione Usuario</label>
+                    <select id="username" required style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-size: 1rem;">
+                        <option value="">-- Seleccione un usuario --</option>
+                        <option value="Anabel">Anabel</option>
+                        <option value="Doris">Doris</option>
+                        <option value="Miguel">Miguel</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="appContainer" class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <h1>ESWU</h1>
+            <div class="user-info">
+                <span id="currentUser"></span>
+                <button onclick="logout()" class="btn btn-secondary btn-sm">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <ul class="nav-list">
+                <li class="nav-item"><a href="#" class="nav-link active" onclick="showPage('home')">Home</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="showPage('inquilinos')">Inquilinos</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="showPage('proveedores')">Proveedores</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="showPage('activos')">Activos</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="showPage('chat')">Chat</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- HOME PAGE -->
+            <div id="homePage" class="page active">
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-label">Ingresos</div>
+                        <div class="summary-value currency" id="summaryIngresos">$0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Gastos</div>
+                        <div class="summary-value currency" id="summaryGastos">$0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Ingreso Neto</div>
+                        <div class="summary-value currency" id="summaryNeto">$0</div>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <label>Ver por:</label>
+                    <select id="homeFilter" onchange="updateHomeView()">
+                        <option value="anual">Anual</option>
+                        <option value="mensual">Mensual</option>
+                    </select>
+                    <select id="homeYear" onchange="updateHomeView()">
+                        <!-- Years will be populated dynamically -->
+                    </select>
+                    <select id="homeMonth" onchange="updateHomeView()" class="hidden">
+                        <option value="0">Enero</option>
+                        <option value="1">Febrero</option>
+                        <option value="2">Marzo</option>
+                        <option value="3">Abril</option>
+                        <option value="4">Mayo</option>
+                        <option value="5">Junio</option>
+                        <option value="6">Julio</option>
+                        <option value="7">Agosto</option>
+                        <option value="8">Septiembre</option>
+                        <option value="9">Octubre</option>
+                        <option value="10">Noviembre</option>
+                        <option value="11">Diciembre</option>
+                    </select>
+                </div>
+
+                <div class="tables-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Ingresos por Renta</h2>
+                        </div>
+                        <div class="table-container">
+                            <table id="homeIngresosTable">
+                                <thead>
+                                    <tr>
+                                        <th>Inquilino</th>
+                                        <th>Fecha</th>
+                                        <th>Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Gastos</h2>
+                        </div>
+                        <div class="table-container">
+                            <table id="homeGastosTable">
+                                <thead>
+                                    <tr>
+                                        <th>Proveedor</th>
+                                        <th>Fecha</th>
+                                        <th>Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INQUILINOS PAGE -->
+            <div id="inquilinosPage" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title" id="inquilinosTitulo">Inquilinos</h2>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" onclick="toggleDropdown('inquilinosDropdown')">
+                                ☰
+                            </button>
+                            <div id="inquilinosDropdown" class="dropdown-content">
+                                <a href="#" onclick="event.preventDefault(); showInquilinosView('list');">Listado</a>
+                                <a href="#" onclick="event.preventDefault(); showAddInquilinoModal();">Agregar Inquilino</a>
+                                <a href="#" onclick="event.preventDefault(); showInquilinosView('rentasRecibidas');">Rentas Recibidas</a>
+                                <a href="#" onclick="event.preventDefault(); showInquilinosView('vencimientoContratos');">Vencimiento Contratos</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vista principal de inquilinos -->
+                    <div id="inquilinosListView">
+                        <div class="table-container">
+                            <table id="inquilinosTable">
+                                <thead>
+                                    <tr>
+                                        <th>Empresa</th>
+                                        <th>Renta Mensual</th>
+                                        <th>Vencimiento Contrato</th>
+                                        <th>Contrato</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Vista Rentas Recibidas -->
+                    <div id="inquilinosRentasRecibidasView" class="hidden">
+                        <div style="padding: 1rem 0;">
+                            <div class="filter-section">
+                                <select id="inquilinosRentasFilter" onchange="renderInquilinosRentasRecibidas()">
+                                    <option value="anual">Anual</option>
+                                    <option value="mensual">Mensual</option>
+                                </select>
+                                <select id="inquilinosRentasYear" onchange="renderInquilinosRentasRecibidas()">
+                                </select>
+                                <select id="inquilinosRentasMonth" onchange="renderInquilinosRentasRecibidas()" class="hidden">
+                                    <option value="0">Enero</option>
+                                    <option value="1">Febrero</option>
+                                    <option value="2">Marzo</option>
+                                    <option value="3">Abril</option>
+                                    <option value="4">Mayo</option>
+                                    <option value="5">Junio</option>
+                                    <option value="6">Julio</option>
+                                    <option value="7">Agosto</option>
+                                    <option value="8">Septiembre</option>
+                                    <option value="9">Octubre</option>
+                                    <option value="10">Noviembre</option>
+                                    <option value="11">Diciembre</option>
+                                </select>
+                            </div>
+                            <div class="table-container">
+                                <table id="inquilinosRentasRecibidasTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Empresa</th>
+                                            <th>Renta Recibida</th>
+                                            <th>Fecha de Pago</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vista Vencimiento Contratos -->
+                    <div id="inquilinosVencimientoContratosView" class="hidden">
+                        <div style="padding: 1rem 0;">
+                            <div class="table-container">
+                                <table id="inquilinosVencimientoContratosTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Inquilino</th>
+                                            <th>Fecha Inicio</th>
+                                            <th>Fecha Vencimiento</th>
+                                            <th>Días Restantes</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROVEEDORES PAGE -->
+            <div id="proveedoresPage" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title" id="proveedoresTitulo">Proveedores</h2>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" onclick="toggleDropdown('proveedoresDropdown')">
+                                ☰
+                            </button>
+                            <div id="proveedoresDropdown" class="dropdown-content">
+                                <a href="#" onclick="event.preventDefault(); showProveedoresView('list');">Listado</a>
+                                <a href="#" onclick="event.preventDefault(); showAddProveedorModal();">Agregar Proveedor</a>
+                                <a href="#" onclick="event.preventDefault(); showProveedoresView('facturasPagadas');">Facturas Pagadas</a>
+                                <a href="#" onclick="event.preventDefault(); showProveedoresView('facturasPendientes');">Facturas Por Pagar</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vista principal de proveedores -->
+                    <div id="proveedoresListView">
+                        <div class="table-container">
+                            <table id="proveedoresTable">
+                                <thead>
+                                    <tr>
+                                        <th>Proveedor</th>
+                                        <th>Contacto</th>
+                                        <th>Teléfono</th>
+                                        <th>Servicio</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Vista Facturas Pagadas -->
+                    <div id="proveedoresFacturasPagadasView" class="hidden">
+                        <div style="padding: 1rem 0;">
+                            <div class="filter-section">
+                                <select id="proveedoresFacturasPagadasFilter" onchange="renderProveedoresFacturasPagadas()">
+                                    <option value="anual">Anual</option>
+                                    <option value="mensual">Mensual</option>
+                                </select>
+                                <select id="proveedoresFacturasPagadasYear" onchange="renderProveedoresFacturasPagadas()">
+                                </select>
+                                <select id="proveedoresFacturasPagadasMonth" onchange="renderProveedoresFacturasPagadas()" class="hidden">
+                                    <option value="0">Enero</option>
+                                    <option value="1">Febrero</option>
+                                    <option value="2">Marzo</option>
+                                    <option value="3">Abril</option>
+                                    <option value="4">Mayo</option>
+                                    <option value="5">Junio</option>
+                                    <option value="6">Julio</option>
+                                    <option value="7">Agosto</option>
+                                    <option value="8">Septiembre</option>
+                                    <option value="9">Octubre</option>
+                                    <option value="10">Noviembre</option>
+                                    <option value="11">Diciembre</option>
+                                </select>
+                            </div>
+                            <div class="table-container">
+                                <table id="proveedoresFacturasPagadasTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Proveedor</th>
+                                            <th>Número Factura</th>
+                                            <th>Fecha de Pago</th>
+                                            <th>Monto</th>
+                                            <th>Factura</th>
+                                            <th>Pago</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vista Facturas Pendientes -->
+                    <div id="proveedoresFacturasPendientesView" class="hidden">
+                        <div style="padding: 1rem 0;">
+                            <div class="table-container">
+                                <table id="proveedoresFacturasPendientesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Proveedor</th>
+                                            <th>Número Factura</th>
+                                            <th>Fecha Factura</th>
+                                            <th>Pagar en</th>
+                                            <th>Monto</th>
+                                            <th>Días Restantes</th>
+                                            <th>PDF</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTIVOS PAGE -->
+            <div id="activosPage" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Activos</h2>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" onclick="toggleDropdown('activosDropdown')">
+                                ☰
+                            </button>
+                            <div id="activosDropdown" class="dropdown-content">
+                                <a href="#" onclick="event.preventDefault(); showAddActivoModal();">Agregar Activo</a>
+                                <a href="#" onclick="event.preventDefault(); showActivosView('proximosMantenimientos');">Próximos Mantenimientos</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vista principal de activos -->
+                    <div id="activosListView">
+                        <div class="table-container">
+                            <table id="activosTable">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Último Mantenimiento</th>
+                                        <th>Próximo Mantenimiento</th>
+                                        <th>Proveedor</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Vista Próximos Mantenimientos -->
+                    <div id="activosProximosMantenimientosView" class="hidden">
+                        <button onclick="showActivosView('list')" class="btn btn-secondary" style="margin-bottom: 1rem;">← Volver a Activos</button>
+                        <div style="padding: 1rem 0;">
+                            <div class="table-container">
+                                <table id="activosProximosMantenimientosTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Activo</th>
+                                            <th>Último Mantenimiento</th>
+                                            <th>Próximo Mantenimiento</th>
+                                            <th>Días Restantes</th>
+                                            <th>Proveedor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORTES PAGE -->
+            <div id="reportesPage" class="page">
+                <!-- Facturas Pagadas -->
+                <div class="card">
+                    <div class="card-header" onclick="toggleReporte('reporteFacturasPagadas')" style="cursor: pointer;">
+                        <h2 class="card-title">Facturas Pagadas <span id="iconFacturasPagadas">▼</span></h2>
+                    </div>
+                    <div id="reporteFacturasPagadas" class="hidden">
+                        <div style="padding: 1.5rem;">
+                            <div class="filter-section">
+                                <select id="facturasPagadasFilter" onchange="renderReporteFacturasPagadas()">
+                                    <option value="anual">Anual</option>
+                                    <option value="mensual">Mensual</option>
+                                </select>
+                                <select id="facturasPagadasYear" onchange="renderReporteFacturasPagadas()">
+                                    <!-- Years will be populated dynamically -->
+                                </select>
+                                <select id="facturasPagadasMonth" onchange="renderReporteFacturasPagadas()" class="hidden">
+                                    <option value="0">Enero</option>
+                                    <option value="1">Febrero</option>
+                                    <option value="2">Marzo</option>
+                                    <option value="3">Abril</option>
+                                    <option value="4">Mayo</option>
+                                    <option value="5">Junio</option>
+                                    <option value="6">Julio</option>
+                                    <option value="7">Agosto</option>
+                                    <option value="8">Septiembre</option>
+                                    <option value="9">Octubre</option>
+                                    <option value="10">Noviembre</option>
+                                    <option value="11">Diciembre</option>
+                                </select>
+                            </div>
+                            <div class="table-container">
+                                <table id="reporteFacturasPagadasTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Proveedor</th>
+                                            <th>Número Factura</th>
+                                            <th>Fecha de Pago</th>
+                                            <th>Monto</th>
+                                            <th>Factura</th>
+                                            <th>Pago</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Facturas Pendientes por Pagar -->
+                <div class="card">
+                    <div class="card-header" onclick="toggleReporte('reporteFacturasPendientes')" style="cursor: pointer;">
+                        <h2 class="card-title">Facturas Pendientes por Pagar <span id="iconFacturasPendientes">▼</span></h2>
+                    </div>
+                    <div id="reporteFacturasPendientes" class="hidden">
+                        <div style="padding: 1.5rem;">
+                            <div class="table-container">
+                                <table id="reporteFacturasTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Proveedor</th>
+                                            <th>Número Factura</th>
+                                            <th>Fecha Factura</th>
+                                            <th>Pagar en</th>
+                                            <th>Monto</th>
+                                            <th>Días Restantes</th>
+                                            <th>PDF</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fechas Mantenimiento de Activos -->
+                <div class="card">
+                    <div class="card-header" onclick="toggleReporte('reporteMantenimiento')" style="cursor: pointer;">
+                        <h2 class="card-title">Fechas Mantenimiento de Activos <span id="iconMantenimiento">▼</span></h2>
+                    </div>
+                    <div id="reporteMantenimiento" class="hidden">
+                        <div style="padding: 1.5rem;">
+                            <div class="table-container">
+                                <table id="reporteMantenimientoTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Activo</th>
+                                            <th>Último Mantenimiento</th>
+                                            <th>Próximo Mantenimiento</th>
+                                            <th>Días Restantes</th>
+                                            <th>Proveedor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rentas Recibidas -->
+                <div class="card">
+                    <div class="card-header" onclick="toggleReporte('reporteRentas')" style="cursor: pointer;">
+                        <h2 class="card-title">Rentas Recibidas <span id="iconRentas">▼</span></h2>
+                    </div>
+                    <div id="reporteRentas" class="hidden">
+                        <div style="padding: 1.5rem;">
+                            <div class="filter-section">
+                                <select id="rentasFilter" onchange="renderReporteRentas()">
+                                    <option value="anual">Anual</option>
+                                    <option value="mensual">Mensual</option>
+                                </select>
+                                <select id="rentasYear" onchange="renderReporteRentas()">
+                                    <!-- Years will be populated dynamically -->
+                                </select>
+                                <select id="rentasMonth" onchange="renderReporteRentas()" class="hidden">
+                                    <option value="0">Enero</option>
+                                    <option value="1">Febrero</option>
+                                    <option value="2">Marzo</option>
+                                    <option value="3">Abril</option>
+                                    <option value="4">Mayo</option>
+                                    <option value="5">Junio</option>
+                                    <option value="6">Julio</option>
+                                    <option value="7">Agosto</option>
+                                    <option value="8">Septiembre</option>
+                                    <option value="9">Octubre</option>
+                                    <option value="10">Noviembre</option>
+                                    <option value="11">Diciembre</option>
+                                </select>
+                            </div>
+                            <div class="table-container">
+                                <table id="reporteRentasTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Empresa</th>
+                                            <th>Renta Recibida</th>
+                                            <th>Fecha de Pago</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vencimiento de Contratos -->
+                <div class="card">
+                    <div class="card-header" onclick="toggleReporte('reporteContratos')" style="cursor: pointer;">
+                        <h2 class="card-title">Vencimiento de Contratos <span id="iconContratos">▼</span></h2>
+                    </div>
+                    <div id="reporteContratos" class="hidden">
+                        <div style="padding: 1.5rem;">
+                            <div class="table-container">
+                                <table id="reporteContratosTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Inquilino</th>
+                                            <th>Fecha Inicio</th>
+                                            <th>Fecha Vencimiento</th>
+                                            <th>Días Restantes</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHAT PAGE -->
+            <div id="chatPage" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Chat</h2>
+                    </div>
+                    <p style="color: var(--text-light); text-align: center; padding: 2rem;">Esta funcionalidad se implementará próximamente.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Inquilino Detail Modal -->
+    <div id="inquilinoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalles del Inquilino</h2>
+                <button class="close-modal" onclick="closeModal('inquilinoModal')">&times;</button>
+            </div>
+            <div id="inquilinoDetails"></div>
+            <div class="modal-actions">
+                <button onclick="editInquilino()" class="btn btn-primary">Editar</button>
+                <button onclick="showAddPagoModal()" class="btn btn-success">Agregar Pago</button>
+                <button onclick="deleteInquilino()" class="btn btn-danger">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Inquilino Modal -->
+    <div id="addInquilinoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="inquilinoModalTitle">Agregar Inquilino</h2>
+                <button class="close-modal" onclick="closeModal('addInquilinoModal')">&times;</button>
+            </div>
+            <form id="inquilinoForm">
+                <div class="form-group">
+                    <label>Nombre de la Empresa</label>
+                    <input type="text" id="inquilinoNombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Contacto</label>
+                    <input type="text" id="inquilinoContacto" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="inquilinoTelefono" required>
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="inquilinoEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>CLABE</label>
+                    <input type="text" id="inquilinoCLABE">
+                </div>
+                <div class="form-group">
+                    <label>RFC</label>
+                    <input type="text" id="inquilinoRFC">
+                </div>
+                <div class="form-group">
+                    <label>Metros Cuadrados Rentados</label>
+                    <input type="number" id="inquilinoM2" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Renta Mensual</label>
+                    <input type="number" id="inquilinoRenta" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha Inicio Contrato</label>
+                    <input type="date" id="inquilinoFechaInicio" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha Vencimiento Contrato</label>
+                    <input type="date" id="inquilinoFechaVencimiento" required>
+                </div>
+                <div class="form-group">
+                    <label>Notas</label>
+                    <textarea id="inquilinoNotas" rows="3" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-family: inherit;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Contrato (PDF)</label>
+                    <div class="file-upload" onclick="document.getElementById('inquilinoContrato').click()">
+                        <input type="file" id="inquilinoContrato" accept="application/pdf">
+                        <p>Click para seleccionar archivo PDF</p>
+                        <p id="contratoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('addInquilinoModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Pago Modal -->
+    <div id="addPagoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar Pago de Renta</h2>
+                <button class="close-modal" onclick="closeModal('addPagoModal')">&times;</button>
+            </div>
+            <form id="pagoForm">
+                <div class="form-group">
+                    <label>¿Es pago completo?</label>
+                    <select id="pagoCompleto">
+                        <option value="si">Sí</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                <div class="form-group" id="pagoMontoGroup">
+                    <label>Monto del Pago</label>
+                    <input type="number" id="pagoMonto" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Pago</label>
+                    <input type="date" id="pagoFecha" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('addPagoModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Pago</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Editar Pago Modal -->
+    <div id="editarPagoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Editar Pago de Renta</h2>
+                <button class="close-modal" onclick="closeModal('editarPagoModal')">&times;</button>
+            </div>
+            <form id="editarPagoForm">
+                <div class="form-group">
+                    <label>Monto del Pago</label>
+                    <input type="number" id="editPagoMonto" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Pago</label>
+                    <input type="date" id="editPagoFecha" required>
+                </div>
+                <div class="form-group">
+                    <label>PDF del Pago de Renta</label>
+                    <div class="file-upload" onclick="document.getElementById('editPagoPDF').click()">
+                        <input type="file" id="editPagoPDF" accept="application/pdf">
+                        <p>Click para seleccionar archivo PDF</p>
+                        <p id="editPagoPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                    </div>
+                    <div id="editPagoPDFExistente" style="margin-top: 0.5rem;"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="eliminarPago()" class="btn btn-danger">Eliminar Pago</button>
+                    <button type="button" onclick="closeModal('editarPagoModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Proveedor Detail Modal -->
+    <div id="proveedorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalles del Proveedor</h2>
+                <button class="close-modal" onclick="closeModal('proveedorModal')">&times;</button>
+            </div>
+            <div id="proveedorDetails"></div>
+            <div class="modal-actions">
+                <button onclick="editProveedor()" class="btn btn-primary">Editar</button>
+                <button onclick="showAddFacturaModal()" class="btn btn-success">Agregar Factura</button>
+                <button onclick="deleteProveedor()" class="btn btn-danger">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Proveedor Modal -->
+    <div id="addProveedorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="proveedorModalTitle">Agregar Proveedor</h2>
+                <button class="close-modal" onclick="closeModal('addProveedorModal')">&times;</button>
+            </div>
+            <form id="proveedorForm">
+                <div class="form-group">
+                    <label>Nombre del Proveedor</label>
+                    <input type="text" id="proveedorNombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Servicio que Provee</label>
+                    <input type="text" id="proveedorServicio" required>
+                </div>
+                <div class="form-group">
+                    <label>Contacto</label>
+                    <input type="text" id="proveedorContacto" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="proveedorTelefono">
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="proveedorEmail">
+                </div>
+                <div class="form-group">
+                    <label>CLABE</label>
+                    <input type="text" id="proveedorCLABE">
+                </div>
+                <div class="form-group">
+                    <label>RFC</label>
+                    <input type="text" id="proveedorRFC">
+                </div>
+                <div class="form-group">
+                    <label>Notas</label>
+                    <textarea id="proveedorNotas" rows="3" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-family: inherit;"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('addProveedorModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Factura Modal -->
+    <div id="addFacturaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar Factura</h2>
+                <button class="close-modal" onclick="closeModal('addFacturaModal')">&times;</button>
+            </div>
+            <form id="facturaForm">
+                <div class="form-group">
+                    <label>Número de Factura</label>
+                    <input type="text" id="facturaNumero" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Factura</label>
+                    <input type="date" id="facturaFecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Vencimiento</label>
+                    <input type="date" id="facturaVencimiento" required>
+                </div>
+                <div class="form-group">
+                    <label>Monto</label>
+                    <input type="number" id="facturaMonto" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Documento de Factura (PDF)</label>
+                    <div class="file-upload" onclick="document.getElementById('facturaDocumento').click()">
+                        <input type="file" id="facturaDocumento" accept="application/pdf">
+                        <p>Click para seleccionar archivo PDF</p>
+                        <p id="facturaFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('addFacturaModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Factura</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Editar Factura Modal -->
+    <div id="editFacturaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Modificar Factura</h2>
+                <button class="close-modal" onclick="closeModal('editFacturaModal')">&times;</button>
+            </div>
+            <form id="editFacturaForm">
+                <div class="form-group">
+                    <label>Número de Factura</label>
+                    <input type="text" id="editFacturaNumero" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Factura</label>
+                    <input type="date" id="editFacturaFecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Vencimiento</label>
+                    <input type="date" id="editFacturaVencimiento" required>
+                </div>
+                <div class="form-group">
+                    <label>Monto</label>
+                    <input type="number" id="editFacturaMonto" step="0.01" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('editFacturaModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Agregar PDF a Factura Modal -->
+    <div id="agregarPDFFacturaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar PDF a Factura</h2>
+                <button class="close-modal" onclick="closeModal('agregarPDFFacturaModal')">&times;</button>
+            </div>
+            <form id="agregarPDFFacturaForm">
+                <div class="form-group">
+                    <label>Documento de Factura (PDF)</label>
+                    <div class="file-upload" onclick="document.getElementById('agregarPDFDocumento').click()">
+                        <input type="file" id="agregarPDFDocumento" accept="application/pdf" required>
+                        <p>Click para seleccionar archivo PDF</p>
+                        <p id="agregarPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('agregarPDFFacturaModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar PDF</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Factura Detail Modal -->
+    <div id="facturaDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalles de Factura</h2>
+                <button class="close-modal" onclick="closeModal('facturaDetailModal')">&times;</button>
+            </div>
+            <div id="facturaDetailContent"></div>
+            <div class="modal-actions">
+                <button onclick="showPagarFacturaModal()" class="btn btn-success">Registrar Pago</button>
+                <button onclick="closeModal('facturaDetailModal')" class="btn btn-secondary">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagar Factura Modal -->
+    <div id="pagarFacturaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Registrar Pago de Factura</h2>
+                <button class="close-modal" onclick="closeModal('pagarFacturaModal')">&times;</button>
+            </div>
+            <form id="pagarFacturaForm">
+                <div class="form-group">
+                    <label>Fecha de Pago</label>
+                    <input type="date" id="fechaPagoFactura" required>
+                </div>
+                <div class="form-group">
+                    <label>PDF del Pago Factura</label>
+                    <div class="file-upload" onclick="document.getElementById('pdfPagoFactura').click()">
+                        <input type="file" id="pdfPagoFactura" accept="application/pdf" required>
+                        <p>Click para seleccionar archivo PDF</p>
+                        <p id="pdfPagoFacturaFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('pagarFacturaModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Pago</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Factura Rápida Modal -->
+    <div id="addFacturaRapidaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar Factura</h2>
+                <button class="close-modal" onclick="closeModal('addFacturaRapidaModal')">&times;</button>
+            </div>
+            <form id="facturaRapidaForm">
+                <div class="form-group">
+                    <label>Proveedor</label>
+                    <select id="facturaRapidaProveedor" required>
+                        <option value="">Seleccione un proveedor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Número de Factura</label>
+                    <input type="text" id="facturaRapidaNumero" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Factura</label>
+                    <input type="date" id="facturaRapidaFecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Monto</label>
+                    <input type="number" id="facturaRapidaMonto" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Vencimiento</label>
+                    <input type="date" id="facturaRapidaVencimiento" required>
+                </div>
+                <div class="form-group">
+                    <label>Documento de Factura (PDF)</label>
+                    <div class="file-upload" onclick="document.getElementById('facturaRapidaDocumento').click()">
+                        <input type="file" id="facturaRapidaDocumento" accept="application/pdf">
+                        <p>Click para seleccionar archivo PDF</p>
+                        <p id="facturaRapidaFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('addFacturaRapidaModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Factura</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pagar Factura Reporte Modal -->
+    <div id="pagarFacturaReporteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Registrar Pago de Factura</h2>
+                <button class="close-modal" onclick="closeModal('pagarFacturaReporteModal')">&times;</button>
+            </div>
+            <form id="pagarFacturaReporteForm">
+                <div class="form-group">
+                    <label>Fecha de Pago</label>
+                    <input type="date" id="fechaPagoFacturaReporte" required>
+                </div>
+                <div class="form-group">
+                    <label>PDF del Pago Factura</label>
+                    <div class="file-upload" onclick="document.getElementById('pdfPagoFacturaReporte').click()">
+                        <input type="file" id="pdfPagoFacturaReporte" accept="application/pdf" required>
+                        <p>Click para seleccionar archivo PDF</p>
+                        <p id="pdfPagoFacturaReporteFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('pagarFacturaReporteModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Pago</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ver PDF Modal -->
+    <div id="verPDFModal" class="modal">
+        <div class="modal-content" style="max-width: 90%; max-height: 95vh;">
+            <div class="modal-header">
+                <h2 class="modal-title">Documento PDF</h2>
+                <button class="close-modal" onclick="closeModal('verPDFModal')">&times;</button>
+            </div>
+            <div style="height: 80vh;">
+                <iframe id="pdfViewer" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Activo Modal -->
+    <div id="addActivoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="activoModalTitle">Agregar Activo</h2>
+                <button class="close-modal" onclick="closeModal('addActivoModal')">&times;</button>
+            </div>
+            <form id="activoForm">
+                <div class="form-group">
+                    <label>Nombre del Activo</label>
+                    <input type="text" id="activoNombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha Último Mantenimiento</label>
+                    <input type="date" id="activoUltimoMant">
+                </div>
+                <div class="form-group">
+                    <label>Fecha Próximo Mantenimiento</label>
+                    <input type="date" id="activoProximoMant">
+                </div>
+                <div class="form-group">
+                    <label>Proveedor de Mantenimiento</label>
+                    <select id="activoProveedor">
+                        <option value="">Ninguno</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fotos</label>
+                    <div class="file-upload" onclick="document.getElementById('activoFotos').click()">
+                        <input type="file" id="activoFotos" accept="image/*" multiple>
+                        <p>Click para seleccionar fotos</p>
+                        <p id="activoFotosNames" style="color: var(--success); margin-top: 0.5rem;"></p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notas</label>
+                    <textarea id="activoNotas" rows="4" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-family: inherit;"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('addActivoModal')" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Activo Detail Modal -->
+    <div id="activoDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalles del Activo</h2>
+                <button class="close-modal" onclick="closeModal('activoDetailModal')">&times;</button>
+            </div>
+            <div id="activoDetails"></div>
+            <div class="modal-actions">
+                <button onclick="editActivo()" class="btn btn-primary">Editar</button>
+                <button onclick="deleteActivo()" class="btn btn-danger">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentUser = '';
+        let currentInquilinoId = null;
+        let currentProveedorId = null;
+        let currentFacturaId = null;
+        let currentActivoId = null;
+        let currentPagoIndex = null;
+        let isEditMode = false;
+
+        // Data storage
+        let inquilinos = [];
+        let proveedores = [];
+        let activos = [];
+
+        // Initialize app on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing app...');
+            
+            // Login form
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('Login form submitted');
+                    const username = document.getElementById('username').value;
+                    if (username) {
+                        login(username);
+                    } else {
+                        alert('Por favor seleccione un usuario');
+                    }
+                });
+            }
+            
+            // Initialize app function
+            function initApp() {
+                loadData();
+                populateYearSelect();
+                setTodayDate();
+                
+                // File upload listeners
+                const inquilinoContrato = document.getElementById('inquilinoContrato');
+                if (inquilinoContrato) {
+                    inquilinoContrato.addEventListener('change', function(e) {
+                        if (e.target.files.length > 0) {
+                            document.getElementById('contratoFileName').textContent = e.target.files[0].name;
+                        }
+                    });
+                }
+                
+                const facturaDocumento = document.getElementById('facturaDocumento');
+                if (facturaDocumento) {
+                    facturaDocumento.addEventListener('change', function(e) {
+                        if (e.target.files.length > 0) {
+                            document.getElementById('facturaFileName').textContent = e.target.files[0].name;
+                        }
+                    });
+                }
+
+                const activoFotos = document.getElementById('activoFotos');
+                if (activoFotos) {
+                    activoFotos.addEventListener('change', function(e) {
+                        if (e.target.files.length > 0) {
+                            const names = Array.from(e.target.files).map(f => f.name).join(', ');
+                            document.getElementById('activoFotosNames').textContent = names;
+                        }
+                    });
+                }
+
+                // Pago completo listener
+                const pagoCompleto = document.getElementById('pagoCompleto');
+                if (pagoCompleto) {
+                    pagoCompleto.addEventListener('change', function() {
+                        const montoGroup = document.getElementById('pagoMontoGroup');
+                        if (this.value === 'no') {
+                            montoGroup.classList.remove('hidden');
+                            document.getElementById('pagoMonto').required = true;
+                        } else {
+                            montoGroup.classList.add('hidden');
+                            document.getElementById('pagoMonto').required = false;
+                        }
+                    });
+                }
+            }
+            
+            // Make initApp globally accessible for login function
+            window.initAppGlobal = initApp;
+        });
+
+        function login(username) {
+            console.log('Login function called with:', username);
+            if (!username || username === '') {
+                alert('Por favor seleccione un usuario');
+                return;
+            }
+            
+            currentUser = username;
+            const userDisplay = document.getElementById('currentUser');
+            if (userDisplay) {
+                userDisplay.textContent = username;
+            }
+            
+            const loginContainer = document.getElementById('loginContainer');
+            const appContainer = document.getElementById('appContainer');
+            
+            if (loginContainer) {
+                loginContainer.classList.add('hidden');
+            }
+            if (appContainer) {
+                appContainer.classList.add('active');
+            }
+            
+            // Inicializar la app después del login
+            setTimeout(function() {
+                if (typeof window.initAppGlobal === 'function') {
+                    window.initAppGlobal();
+                }
+            }, 100);
+        }
+
+        function logout() {
+            currentUser = '';
+            document.getElementById('username').value = '';
+            document.getElementById('loginContainer').classList.remove('hidden');
+            document.getElementById('appContainer').classList.remove('active');
+        }
+        
+        // Dropdown toggle function
+        function toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            // Cerrar otros dropdowns
+            document.querySelectorAll('.dropdown-content').forEach(dd => {
+                if (dd.id !== dropdownId) {
+                    dd.classList.remove('show');
+                }
+            });
+            dropdown.classList.toggle('show');
+        }
+        
+        // Cerrar dropdowns al hacer click fuera
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropdown-toggle')) {
+                document.querySelectorAll('.dropdown-content').forEach(dd => {
+                    dd.classList.remove('show');
+                });
+            }
+        }
+        
+        // Funciones para cambiar vistas en Proveedores
+        function showProveedoresView(view) {
+            document.getElementById('proveedoresDropdown').classList.remove('show');
+            
+            // Ocultar todas las vistas
+            document.getElementById('proveedoresListView').classList.add('hidden');
+            document.getElementById('proveedoresFacturasPagadasView').classList.add('hidden');
+            document.getElementById('proveedoresFacturasPendientesView').classList.add('hidden');
+            
+            // Cambiar título según la vista
+            const titulo = document.getElementById('proveedoresTitulo');
+            
+            // Mostrar la vista seleccionada
+            if (view === 'list') {
+                titulo.textContent = 'Proveedores - Listado';
+                document.getElementById('proveedoresListView').classList.remove('hidden');
+            } else if (view === 'facturasPagadas') {
+                titulo.textContent = 'Proveedores - Facturas Pagadas';
+                document.getElementById('proveedoresFacturasPagadasView').classList.remove('hidden');
+                populateProveedoresYearSelects();
+                renderProveedoresFacturasPagadas();
+            } else if (view === 'facturasPendientes') {
+                titulo.textContent = 'Proveedores - Facturas Por Pagar';
+                document.getElementById('proveedoresFacturasPendientesView').classList.remove('hidden');
+                renderProveedoresFacturasPendientes();
+            }
+        }
+        
+        // Funciones para cambiar vistas en Inquilinos
+        function showInquilinosView(view) {
+            document.getElementById('inquilinosDropdown').classList.remove('show');
+            
+            // Ocultar todas las vistas
+            document.getElementById('inquilinosListView').classList.add('hidden');
+            document.getElementById('inquilinosRentasRecibidasView').classList.add('hidden');
+            document.getElementById('inquilinosVencimientoContratosView').classList.add('hidden');
+            
+            // Cambiar título según la vista
+            const titulo = document.getElementById('inquilinosTitulo');
+            
+            // Mostrar la vista seleccionada
+            if (view === 'list') {
+                titulo.textContent = 'Inquilinos - Listado';
+                document.getElementById('inquilinosListView').classList.remove('hidden');
+            } else if (view === 'rentasRecibidas') {
+                titulo.textContent = 'Inquilinos - Rentas Recibidas';
+                document.getElementById('inquilinosRentasRecibidasView').classList.remove('hidden');
+                populateInquilinosYearSelects();
+                renderInquilinosRentasRecibidas();
+            } else if (view === 'vencimientoContratos') {
+                titulo.textContent = 'Inquilinos - Vencimiento Contratos';
+                document.getElementById('inquilinosVencimientoContratosView').classList.remove('hidden');
+                renderInquilinosVencimientoContratos();
+            }
+        }
+        
+        // Funciones para cambiar vistas en Activos
+        function showActivosView(view) {
+            document.getElementById('activosDropdown').classList.remove('show');
+            
+            // Ocultar todas las vistas
+            document.getElementById('activosListView').classList.add('hidden');
+            document.getElementById('activosProximosMantenimientosView').classList.add('hidden');
+            
+            // Mostrar la vista seleccionada
+            if (view === 'list') {
+                document.getElementById('activosListView').classList.remove('hidden');
+            } else if (view === 'proximosMantenimientos') {
+                document.getElementById('activosProximosMantenimientosView').classList.remove('hidden');
+                renderActivosProximosMantenimientos();
+            }
+        }
+
+        // Navigation
+        function showPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            
+            // Show selected page
+            document.getElementById(pageName + 'Page').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Refresh data for the page
+            switch(pageName) {
+                case 'home':
+                    updateHomeView();
+                    break;
+                case 'inquilinos':
+                    renderInquilinos();
+                    break;
+                case 'proveedores':
+                    renderProveedores();
+                    break;
+                case 'activos':
+                    renderActivos();
+                    break;
+                case 'reportes':
+                    renderReportes();
+                    break;
+            }
+        }
+
+        // Utility functions
+        function formatCurrency(amount) {
+            return '$' + Number(amount).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString + 'T00:00:00');
+            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            return `${day} ${month} ${year}`;
+        }
+
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('pagoFecha').value = today;
+            document.getElementById('fechaPagoFactura').value = today;
+        }
+
+        function populateYearSelect() {
+            const yearSelect = document.getElementById('homeYear');
+            const currentYear = new Date().getFullYear();
+            for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) option.selected = true;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        // Data persistence
+        function saveData() {
+            localStorage.setItem('eswu_inquilinos', JSON.stringify(inquilinos));
+            localStorage.setItem('eswu_proveedores', JSON.stringify(proveedores));
+            localStorage.setItem('eswu_activos', JSON.stringify(activos));
+        }
+
+        function loadData() {
+            const savedInquilinos = localStorage.getItem('eswu_inquilinos');
+            const savedProveedores = localStorage.getItem('eswu_proveedores');
+            const savedActivos = localStorage.getItem('eswu_activos');
+            
+            inquilinos = savedInquilinos ? JSON.parse(savedInquilinos) : [];
+            proveedores = savedProveedores ? JSON.parse(savedProveedores) : [];
+            activos = savedActivos ? JSON.parse(savedActivos) : [];
+        }
+
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // HOME PAGE FUNCTIONS
+        function updateHomeView() {
+            const filterType = document.getElementById('homeFilter').value;
+            const year = parseInt(document.getElementById('homeYear').value);
+            const monthSelect = document.getElementById('homeMonth');
+            
+            if (filterType === 'mensual') {
+                monthSelect.classList.remove('hidden');
+            } else {
+                monthSelect.classList.add('hidden');
+            }
+            
+            const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+            
+            calculateSummary(year, month);
+            renderHomeIngresos(year, month);
+            renderHomeGastos(year, month);
+        }
+
+        function calculateSummary(year, month) {
+            let ingresos = 0;
+            let gastos = 0;
+            
+            // Calculate ingresos
+            inquilinos.forEach(inquilino => {
+                if (inquilino.pagos) {
+                    inquilino.pagos.forEach(pago => {
+                        const pagoDate = new Date(pago.fecha + 'T00:00:00');
+                        if (pagoDate.getFullYear() === year) {
+                            if (month === null || pagoDate.getMonth() === month) {
+                                ingresos += pago.monto;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Calculate gastos
+            proveedores.forEach(proveedor => {
+                if (proveedor.facturas) {
+                    proveedor.facturas.forEach(factura => {
+                        if (factura.fechaPago) {
+                            const pagoDate = new Date(factura.fechaPago + 'T00:00:00');
+                            if (pagoDate.getFullYear() === year) {
+                                if (month === null || pagoDate.getMonth() === month) {
+                                    gastos += factura.monto;
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            
+            const neto = ingresos - gastos;
+            
+            document.getElementById('summaryIngresos').textContent = formatCurrency(ingresos);
+            document.getElementById('summaryGastos').textContent = formatCurrency(gastos);
+            document.getElementById('summaryNeto').textContent = formatCurrency(neto);
+        }
+
+        function renderHomeIngresos(year, month) {
+            const tbody = document.getElementById('homeIngresosTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const pagos = [];
+            let totalIngresos = 0;
+            
+            inquilinos.forEach(inquilino => {
+                if (inquilino.pagos) {
+                    inquilino.pagos.forEach(pago => {
+                        const pagoDate = new Date(pago.fecha + 'T00:00:00');
+                        if (pagoDate.getFullYear() === year) {
+                            if (month === null || pagoDate.getMonth() === month) {
+                                pagos.push({
+                                    inquilino: inquilino.nombre,
+                                    fecha: pago.fecha,
+                                    monto: pago.monto
+                                });
+                                totalIngresos += pago.monto;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            pagos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            pagos.forEach(pago => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${pago.inquilino}</td>
+                    <td>${formatDate(pago.fecha)}</td>
+                    <td class="currency">${formatCurrency(pago.monto)}</td>
+                `;
+            });
+            
+            if (pagos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-light);">No hay ingresos registrados</td></tr>';
+            } else {
+                // Agregar fila de total
+                const rowTotal = tbody.insertRow();
+                rowTotal.style.fontWeight = 'bold';
+                rowTotal.style.backgroundColor = '#d4edda';
+                rowTotal.innerHTML = `
+                    <td colspan="2" style="text-align: right; padding: 1rem;">TOTAL:</td>
+                    <td class="currency" style="color: var(--success); font-size: 1.1rem;">${formatCurrency(totalIngresos)}</td>
+                `;
+            }
+        }
+
+        function renderHomeGastos(year, month) {
+            const tbody = document.getElementById('homeGastosTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const gastos = [];
+            let totalGastos = 0;
+            
+            proveedores.forEach(proveedor => {
+                if (proveedor.facturas) {
+                    proveedor.facturas.forEach(factura => {
+                        if (factura.fechaPago) {
+                            const pagoDate = new Date(factura.fechaPago + 'T00:00:00');
+                            if (pagoDate.getFullYear() === year) {
+                                if (month === null || pagoDate.getMonth() === month) {
+                                    gastos.push({
+                                        proveedor: proveedor.nombre,
+                                        fecha: factura.fechaPago,
+                                        monto: factura.monto
+                                    });
+                                    totalGastos += factura.monto;
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            
+            gastos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            gastos.forEach(gasto => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${gasto.proveedor}</td>
+                    <td>${formatDate(gasto.fecha)}</td>
+                    <td class="currency">${formatCurrency(gasto.monto)}</td>
+                `;
+            });
+            
+            if (gastos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-light);">No hay gastos registrados</td></tr>';
+            } else {
+                // Agregar fila de total
+                const rowTotal = tbody.insertRow();
+                rowTotal.style.fontWeight = 'bold';
+                rowTotal.style.backgroundColor = '#fed7d7';
+                rowTotal.innerHTML = `
+                    <td colspan="2" style="text-align: right; padding: 1rem;">TOTAL:</td>
+                    <td class="currency" style="color: var(--danger); font-size: 1.1rem;">${formatCurrency(totalGastos)}</td>
+                `;
+            }
+        }
+
+        // INQUILINOS FUNCTIONS
+        function renderInquilinos() {
+            const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const sortedInquilinos = [...inquilinos].sort((a, b) => a.nombre.localeCompare(b.nombre));
+            
+            sortedInquilinos.forEach(inquilino => {
+                const row = tbody.insertRow();
+                row.onclick = () => showInquilinoDetail(inquilino.id);
+                row.innerHTML = `
+                    <td>${inquilino.nombre}</td>
+                    <td class="currency">${formatCurrency(inquilino.renta)}</td>
+                    <td>${formatDate(inquilino.fechaVencimiento)}</td>
+                    <td>${inquilino.contratoFile ? `<a href="#" class="link" onclick="event.stopPropagation(); viewContrato(${inquilino.id})">Ver Contrato</a>` : '-'}</td>
+                `;
+            });
+            
+            if (sortedInquilinos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light);">No hay inquilinos registrados</td></tr>';
+            }
+        }
+
+        function showAddInquilinoModal() {
+            isEditMode = false;
+            currentInquilinoId = null;
+            document.getElementById('inquilinoModalTitle').textContent = 'Agregar Inquilino';
+            document.getElementById('inquilinoForm').reset();
+            document.getElementById('contratoFileName').textContent = '';
+            document.getElementById('addInquilinoModal').classList.add('active');
+        }
+
+        function showInquilinoDetail(id) {
+            currentInquilinoId = id;
+            const inquilino = inquilinos.find(i => i.id === id);
+            
+            let pagosHTML = '';
+            if (inquilino.pagos && inquilino.pagos.length > 0) {
+                pagosHTML = '<div class="payment-history"><h3 style="margin-bottom: 1rem; color: var(--primary);">Historial de Pagos</h3>';
+                inquilino.pagos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).forEach((pago, index) => {
+                    const pdfIcon = pago.pagoFile ? '📄' : '';
+                    pagosHTML += `
+                        <div class="payment-item" onclick="showEditarPagoModal(${index})" style="cursor: pointer;">
+                            <div>
+                                <div><strong>${formatDate(pago.fecha)}</strong> ${pdfIcon}</div>
+                                <div style="font-size: 0.875rem; color: var(--text-light);">${pago.completo ? 'Pago completo' : 'Pago parcial'}</div>
+                            </div>
+                            <div class="currency" style="font-weight: 600;">${formatCurrency(pago.monto)}</div>
+                        </div>
+                    `;
+                });
+                pagosHTML += '</div>';
+            } else {
+                pagosHTML = '<p style="color: var(--text-light); text-align: center; padding: 1rem;">No hay pagos registrados</p>';
+            }
+            
+            document.getElementById('inquilinoDetails').innerHTML = `
+                <div class="info-section">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Contacto</div>
+                            <div class="info-value">${inquilino.contacto}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Teléfono</div>
+                            <div class="info-value">${inquilino.telefono}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">${inquilino.email}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">M² Rentados</div>
+                            <div class="info-value">${inquilino.m2 || '-'}</div>
+                        </div>
+                        <div class="info-item" style="grid-column: 1 / -1;">
+                            <div class="info-label">RFC: ${inquilino.rfc || '-'}  |  CLABE: ${inquilino.clabe || '-'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Renta Mensual</div>
+                            <div class="info-value currency">${formatCurrency(inquilino.renta)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Inicio Contrato</div>
+                            <div class="info-value">${formatDate(inquilino.fechaInicio)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Vencimiento Contrato</div>
+                            <div class="info-value">${formatDate(inquilino.fechaVencimiento)}</div>
+                        </div>
+                    </div>
+                    ${inquilino.notas ? `<div style="margin-top: 1rem;"><h4 style="margin-bottom: 0.5rem; color: var(--primary);">Notas</h4><p style="background: var(--bg); padding: 1rem; border-radius: 6px; white-space: pre-wrap;">${inquilino.notas}</p></div>` : ''}
+                </div>
+                ${pagosHTML}
+            `;
+            
+            // Cambiar título del modal
+            document.querySelector('#inquilinoModal .modal-title').textContent = inquilino.nombre;
+            
+            // Actualizar botones
+            const modalActions = document.querySelector('#inquilinoModal .modal-actions');
+            const contratoBtn = inquilino.contratoFile 
+                ? '<button onclick="viewContratoInModal()" class="btn btn-primary">Ver Contrato</button>'
+                : '<button onclick="showAgregarContratoModal()" class="btn btn-primary">Agregar Contrato</button>';
+            
+            modalActions.innerHTML = `
+                <button onclick="editInquilino()" class="btn btn-secondary">Editar</button>
+                ${contratoBtn}
+                <button onclick="showAddPagoModal()" class="btn btn-success">Agregar Pago</button>
+            `;
+            
+            document.getElementById('inquilinoModal').classList.add('active');
+        }
+
+        function editInquilino() {
+            const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
+            isEditMode = true;
+            
+            document.getElementById('inquilinoModalTitle').textContent = 'Editar Inquilino';
+            document.getElementById('inquilinoNombre').value = inquilino.nombre;
+            document.getElementById('inquilinoContacto').value = inquilino.contacto;
+            document.getElementById('inquilinoTelefono').value = inquilino.telefono;
+            document.getElementById('inquilinoEmail').value = inquilino.email;
+            document.getElementById('inquilinoCLABE').value = inquilino.clabe || '';
+            document.getElementById('inquilinoRFC').value = inquilino.rfc || '';
+            document.getElementById('inquilinoM2').value = inquilino.m2 || '';
+            document.getElementById('inquilinoRenta').value = inquilino.renta;
+            document.getElementById('inquilinoFechaInicio').value = inquilino.fechaInicio;
+            document.getElementById('inquilinoFechaVencimiento').value = inquilino.fechaVencimiento;
+            document.getElementById('inquilinoNotas').value = inquilino.notas || '';
+            
+            if (inquilino.contratoFile) {
+                document.getElementById('contratoFileName').textContent = inquilino.contratoFileName || 'Archivo existente';
+            }
+            
+            closeModal('inquilinoModal');
+            document.getElementById('addInquilinoModal').classList.add('active');
+        }
+
+        function deleteInquilino() {
+            if (confirm('¿Estás seguro de que deseas eliminar este inquilino?')) {
+                inquilinos = inquilinos.filter(i => i.id !== currentInquilinoId);
+                saveData();
+                closeModal('inquilinoModal');
+                renderInquilinos();
+            }
+        }
+
+        function showAddPagoModal() {
+            const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
+            document.getElementById('pagoMonto').value = inquilino.renta;
+            setTodayDate();
+            document.getElementById('pagoCompleto').value = 'si';
+            document.getElementById('pagoMontoGroup').classList.add('hidden');
+            closeModal('inquilinoModal');
+            document.getElementById('addPagoModal').classList.add('active');
+        }
+
+        function showEditarPagoModal(pagoIndex) {
+            event.stopPropagation();
+            currentPagoIndex = pagoIndex;
+            
+            const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
+            const pago = inquilino.pagos[pagoIndex];
+            
+            document.getElementById('editPagoMonto').value = pago.monto;
+            document.getElementById('editPagoFecha').value = pago.fecha;
+            document.getElementById('editPagoPDFFileName').textContent = '';
+            
+            // Mostrar si ya tiene PDF
+            const pdfExistente = document.getElementById('editPagoPDFExistente');
+            if (pago.pagoFile) {
+                pdfExistente.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: var(--bg); border-radius: 6px;">
+                        <span>PDF actual: ${pago.pagoFileName || 'pago.pdf'}</span>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="verPDFBase64('${pago.pagoFile}')">Ver PDF</button>
+                    </div>
+                `;
+            } else {
+                pdfExistente.innerHTML = '<p style="color: var(--text-light); font-size: 0.875rem;">No hay PDF adjunto</p>';
+            }
+            
+            closeModal('inquilinoModal');
+            document.getElementById('editarPagoModal').classList.add('active');
+        }
+
+        function eliminarPago() {
+            if (confirm('¿Estás seguro de que deseas eliminar este pago?')) {
+                const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
+                inquilino.pagos.splice(currentPagoIndex, 1);
+                
+                saveData();
+                closeModal('editarPagoModal');
+                showInquilinoDetail(currentInquilinoId);
+                updateHomeView();
+            }
+        }
+
+        function viewContrato(id) {
+            const inquilino = inquilinos.find(i => i.id === id);
+            if (inquilino.contratoFile) {
+                const blob = base64ToBlob(inquilino.contratoFile, 'application/pdf');
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+            }
+        }
+
+        // Form submissions
+        document.getElementById('inquilinoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const inquilino = {
+                id: isEditMode ? currentInquilinoId : Date.now(),
+                nombre: document.getElementById('inquilinoNombre').value,
+                contacto: document.getElementById('inquilinoContacto').value,
+                telefono: document.getElementById('inquilinoTelefono').value,
+                email: document.getElementById('inquilinoEmail').value,
+                clabe: document.getElementById('inquilinoCLABE').value,
+                rfc: document.getElementById('inquilinoRFC').value,
+                m2: document.getElementById('inquilinoM2').value,
+                renta: parseFloat(document.getElementById('inquilinoRenta').value),
+                fechaInicio: document.getElementById('inquilinoFechaInicio').value,
+                fechaVencimiento: document.getElementById('inquilinoFechaVencimiento').value,
+                notas: document.getElementById('inquilinoNotas').value,
+                pagos: isEditMode ? inquilinos.find(i => i.id === currentInquilinoId).pagos : []
+            };
+            
+            const contratoFile = document.getElementById('inquilinoContrato').files[0];
+            if (contratoFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    inquilino.contratoFile = e.target.result;
+                    inquilino.contratoFileName = contratoFile.name;
+                    saveInquilino(inquilino);
+                };
+                reader.readAsDataURL(contratoFile);
+            } else {
+                if (isEditMode) {
+                    const existing = inquilinos.find(i => i.id === currentInquilinoId);
+                    inquilino.contratoFile = existing.contratoFile;
+                    inquilino.contratoFileName = existing.contratoFileName;
+                }
+                saveInquilino(inquilino);
+            }
+        });
+
+        function saveInquilino(inquilino) {
+            if (isEditMode) {
+                const index = inquilinos.findIndex(i => i.id === currentInquilinoId);
+                inquilinos[index] = inquilino;
+            } else {
+                inquilinos.push(inquilino);
+            }
+            
+            saveData();
+            closeModal('addInquilinoModal');
+            renderInquilinos();
+        }
+
+        document.getElementById('pagoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
+            const completo = document.getElementById('pagoCompleto').value === 'si';
+            
+            const pago = {
+                fecha: document.getElementById('pagoFecha').value,
+                monto: completo ? inquilino.renta : parseFloat(document.getElementById('pagoMonto').value),
+                completo: completo
+            };
+            
+            if (!inquilino.pagos) {
+                inquilino.pagos = [];
+            }
+            inquilino.pagos.push(pago);
+            
+            saveData();
+            closeModal('addPagoModal');
+            renderInquilinos();
+            updateHomeView();
+        });
+
+        // Form submission para editar pago
+        document.getElementById('editarPagoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
+            const pago = inquilino.pagos[currentPagoIndex];
+            
+            pago.monto = parseFloat(document.getElementById('editPagoMonto').value);
+            pago.fecha = document.getElementById('editPagoFecha').value;
+            
+            const pdfFile = document.getElementById('editPagoPDF').files[0];
+            if (pdfFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    pago.pagoFile = e.target.result;
+                    pago.pagoFileName = pdfFile.name;
+                    
+                    saveData();
+                    closeModal('editarPagoModal');
+                    showInquilinoDetail(currentInquilinoId);
+                    updateHomeView();
+                };
+                reader.readAsDataURL(pdfFile);
+            } else {
+                saveData();
+                closeModal('editarPagoModal');
+                showInquilinoDetail(currentInquilinoId);
+                updateHomeView();
+            }
+        });
+
+        // PROVEEDORES FUNCTIONS
+        function renderProveedores() {
+            const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const sortedProveedores = [...proveedores].sort((a, b) => a.nombre.localeCompare(b.nombre));
+            
+            sortedProveedores.forEach(proveedor => {
+                const row = tbody.insertRow();
+                row.onclick = () => showProveedorDetail(proveedor.id);
+                row.innerHTML = `
+                    <td>${proveedor.nombre}</td>
+                    <td>${proveedor.contacto}</td>
+                    <td>${proveedor.telefono}</td>
+                    <td>${proveedor.servicio}</td>
+                `;
+            });
+            
+            if (sortedProveedores.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light);">No hay proveedores registrados</td></tr>';
+            }
+        }
+
+        function showAddProveedorModal() {
+            isEditMode = false;
+            currentProveedorId = null;
+            document.getElementById('proveedorModalTitle').textContent = 'Agregar Proveedor';
+            document.getElementById('proveedorForm').reset();
+            document.getElementById('addProveedorModal').classList.add('active');
+        }
+
+        function showProveedorDetail(id) {
+            currentProveedorId = id;
+            const proveedor = proveedores.find(p => p.id === id);
+            
+            let facturasHTML = '';
+            if (proveedor.facturas && proveedor.facturas.length > 0) {
+                facturasHTML = '<div class="payment-history"><h3 style="margin-bottom: 1rem; color: var(--primary);">Facturas</h3>';
+                proveedor.facturas.forEach((factura, index) => {
+                    const isPagada = factura.fechaPago ? true : false;
+                    facturasHTML += `
+                        <div class="payment-item" onclick="showFacturaDetail(${id}, ${index})" style="cursor: pointer;">
+                            <div>
+                                <div><strong>Factura ${factura.numero}</strong></div>
+                                <div style="font-size: 0.875rem; color: var(--text-light);">
+                                    Fecha: ${formatDate(factura.fecha)} | Venc: ${formatDate(factura.vencimiento)}
+                                    ${isPagada ? ` | Pagada: ${formatDate(factura.fechaPago)}` : ''}
+                                </div>
+                            </div>
+                            <div>
+                                <div class="currency" style="font-weight: 600;">${formatCurrency(factura.monto)}</div>
+                                <div style="text-align: right; margin-top: 0.25rem;">
+                                    ${isPagada ? '<span class="badge badge-success">Pagada</span>' : '<span class="badge badge-warning">Pendiente</span>'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                facturasHTML += '</div>';
+            } else {
+                facturasHTML = '<p style="color: var(--text-light); text-align: center; padding: 1rem;">No hay facturas registradas</p>';
+            }
+            
+            document.getElementById('proveedorDetails').innerHTML = `
+                <div class="info-section">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Servicio</div>
+                            <div class="info-value">${proveedor.servicio}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Contacto</div>
+                            <div class="info-value">${proveedor.contacto}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Teléfono</div>
+                            <div class="info-value">${proveedor.telefono}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">${proveedor.email}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">CLABE</div>
+                            <div class="info-value">${proveedor.clabe || '-'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">RFC</div>
+                            <div class="info-value">${proveedor.rfc || '-'}</div>
+                        </div>
+                    </div>
+                    ${proveedor.notas ? `<div style="margin-top: 1rem;"><h4 style="margin-bottom: 0.5rem; color: var(--primary);">Notas</h4><p style="background: var(--bg); padding: 1rem; border-radius: 6px; white-space: pre-wrap;">${proveedor.notas}</p></div>` : ''}
+                </div>
+                ${facturasHTML}
+            `;
+            
+            // Cambiar título del modal
+            document.querySelector('#proveedorModal .modal-title').textContent = proveedor.nombre;
+            
+            // Actualizar botones (sin eliminar)
+            const modalActions = document.querySelector('#proveedorModal .modal-actions');
+            modalActions.innerHTML = `
+                <button onclick="editProveedor()" class="btn btn-primary">Editar</button>
+                <button onclick="showAddFacturaModal()" class="btn btn-success">Agregar Factura</button>
+            `;
+            
+            document.getElementById('proveedorModal').classList.add('active');
+        }
+
+        function editProveedor() {
+            const proveedor = proveedores.find(p => p.id === currentProveedorId);
+            isEditMode = true;
+            
+            document.getElementById('proveedorModalTitle').textContent = 'Editar Proveedor';
+            document.getElementById('proveedorNombre').value = proveedor.nombre;
+            document.getElementById('proveedorServicio').value = proveedor.servicio;
+            document.getElementById('proveedorContacto').value = proveedor.contacto;
+            document.getElementById('proveedorTelefono').value = proveedor.telefono;
+            document.getElementById('proveedorEmail').value = proveedor.email;
+            document.getElementById('proveedorCLABE').value = proveedor.clabe || '';
+            document.getElementById('proveedorRFC').value = proveedor.rfc || '';
+            document.getElementById('proveedorNotas').value = proveedor.notas || '';
+            
+            closeModal('proveedorModal');
+            document.getElementById('addProveedorModal').classList.add('active');
+        }
+
+        function deleteProveedor() {
+            if (confirm('¿Estás seguro de que deseas eliminar este proveedor?')) {
+                proveedores = proveedores.filter(p => p.id !== currentProveedorId);
+                saveData();
+                closeModal('proveedorModal');
+                renderProveedores();
+            }
+        }
+
+        function showAddFacturaModal() {
+            document.getElementById('facturaForm').reset();
+            document.getElementById('facturaFileName').textContent = '';
+            closeModal('proveedorModal');
+            document.getElementById('addFacturaModal').classList.add('active');
+        }
+
+        function showFacturaDetail(proveedorId, facturaIndex) {
+            event.stopPropagation();
+            currentProveedorId = proveedorId;
+            currentFacturaId = facturaIndex;
+            
+            const proveedor = proveedores.find(p => p.id === proveedorId);
+            const factura = proveedor.facturas[facturaIndex];
+            
+            const pdfSection = factura.documentoFile 
+                ? `<div class="info-item" style="grid-column: 1 / -1;">
+                    <div class="info-label">Documento PDF</div>
+                    <button onclick="verPDFFacturaDesdeDetalle()" class="btn btn-primary" style="margin-top: 0.5rem;">Ver PDF</button>
+                   </div>`
+                : `<div class="info-item" style="grid-column: 1 / -1;">
+                    <div class="info-label">Documento PDF</div>
+                    <div class="info-value">No hay documento adjunto</div>
+                   </div>`;
+            
+            document.getElementById('facturaDetailContent').innerHTML = `
+                <div class="info-section">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Proveedor</div>
+                            <div class="info-value">${proveedor.nombre}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Número de Factura</div>
+                            <div class="info-value">${factura.numero}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Monto</div>
+                            <div class="info-value currency">${formatCurrency(factura.monto)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Fecha Factura</div>
+                            <div class="info-value">${formatDate(factura.fecha)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Fecha Vencimiento</div>
+                            <div class="info-value">${formatDate(factura.vencimiento)}</div>
+                        </div>
+                        ${factura.fechaPago ? `
+                        <div class="info-item">
+                            <div class="info-label">Fecha de Pago</div>
+                            <div class="info-value">${formatDate(factura.fechaPago)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Estado</div>
+                            <div class="info-value"><span class="badge badge-success">Pagada</span></div>
+                        </div>
+                        ` : `
+                        <div class="info-item">
+                            <div class="info-label">Estado</div>
+                            <div class="info-value"><span class="badge badge-warning">Pendiente</span></div>
+                        </div>
+                        `}
+                        ${pdfSection}
+                    </div>
+                </div>
+            `;
+            
+            // Actualizar botones según el estado de la factura
+            const modalActions = document.querySelector('#facturaDetailModal .modal-actions');
+            
+            const agregarPDFBtn = factura.documentoFile
+                ? ''
+                : '<button onclick="showAgregarPDFFacturaModal()" class="btn btn-primary">Agregar PDF</button>';
+            
+            modalActions.innerHTML = `
+                <button onclick="editarFactura()" class="btn btn-primary">Modificar</button>
+                ${agregarPDFBtn}
+                <button onclick="eliminarFactura()" class="btn btn-danger">Eliminar</button>
+            `;
+            
+            closeModal('proveedorModal');
+            document.getElementById('facturaDetailModal').classList.add('active');
+        }
+
+        function showPagarFacturaModal() {
+            const proveedor = proveedores.find(p => p.id === currentProveedorId);
+            const factura = proveedor.facturas[currentFacturaId];
+            
+            if (factura.fechaPago) {
+                alert('Esta factura ya ha sido pagada');
+                return;
+            }
+            
+            setTodayDate();
+            closeModal('facturaDetailModal');
+            document.getElementById('pagarFacturaModal').classList.add('active');
+        }
+
+        document.getElementById('proveedorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const proveedor = {
+                id: isEditMode ? currentProveedorId : Date.now(),
+                nombre: document.getElementById('proveedorNombre').value,
+                servicio: document.getElementById('proveedorServicio').value,
+                contacto: document.getElementById('proveedorContacto').value,
+                telefono: document.getElementById('proveedorTelefono').value,
+                email: document.getElementById('proveedorEmail').value,
+                clabe: document.getElementById('proveedorCLABE').value,
+                rfc: document.getElementById('proveedorRFC').value,
+                notas: document.getElementById('proveedorNotas').value,
+                facturas: isEditMode ? proveedores.find(p => p.id === currentProveedorId).facturas : []
+            };
+            
+            if (isEditMode) {
+                const index = proveedores.findIndex(p => p.id === currentProveedorId);
+                proveedores[index] = proveedor;
+            } else {
+                proveedores.push(proveedor);
+            }
+            
+            saveData();
+            closeModal('addProveedorModal');
+            renderProveedores();
+        });
+
+        document.getElementById('facturaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const proveedor = proveedores.find(p => p.id === currentProveedorId);
+            
+            const factura = {
+                numero: document.getElementById('facturaNumero').value,
+                fecha: document.getElementById('facturaFecha').value,
+                vencimiento: document.getElementById('facturaVencimiento').value,
+                monto: parseFloat(document.getElementById('facturaMonto').value),
+                fechaPago: null
+            };
+            
+            const facturaFile = document.getElementById('facturaDocumento').files[0];
+            if (facturaFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    factura.documentoFile = e.target.result;
+                    factura.documentoFileName = facturaFile.name;
+                    saveFactura(factura);
+                };
+                reader.readAsDataURL(facturaFile);
+            } else {
+                saveFactura(factura);
+            }
+        });
+
+        function saveFactura(factura) {
+            const proveedor = proveedores.find(p => p.id === currentProveedorId);
+            if (!proveedor.facturas) {
+                proveedor.facturas = [];
+            }
+            proveedor.facturas.push(factura);
+            
+            saveData();
+            closeModal('addFacturaModal');
+            renderProveedores();
+        }
+
+        document.getElementById('pagarFacturaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const proveedor = proveedores.find(p => p.id === currentProveedorId);
+            const factura = proveedor.facturas[currentFacturaId];
+            
+            const pdfFile = document.getElementById('pdfPagoFactura').files[0];
+            if (pdfFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    factura.fechaPago = document.getElementById('fechaPagoFactura').value;
+                    factura.pagoFile = e.target.result;
+                    factura.pagoFileName = pdfFile.name;
+                    
+                    saveData();
+                    closeModal('pagarFacturaModal');
+                    closeModal('facturaDetailModal');
+                    renderProveedores();
+                    updateHomeView();
+                };
+                reader.readAsDataURL(pdfFile);
+            } else {
+                factura.fechaPago = document.getElementById('fechaPagoFactura').value;
+                saveData();
+                closeModal('pagarFacturaModal');
+                closeModal('facturaDetailModal');
+                renderProveedores();
+                updateHomeView();
+            }
+        });
+
+        // ACTIVOS FUNCTIONS
+        function renderActivos() {
+            const tbody = document.getElementById('activosTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            activos.forEach(activo => {
+                const row = tbody.insertRow();
+                row.onclick = () => showActivoDetail(activo.id);
+                row.innerHTML = `
+                    <td>${activo.nombre}</td>
+                    <td>${formatDate(activo.ultimoMant) || '-'}</td>
+                    <td>${formatDate(activo.proximoMant) || '-'}</td>
+                    <td>${activo.proveedor || '-'}</td>
+                `;
+            });
+            
+            if (activos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light);">No hay activos registrados</td></tr>';
+            }
+        }
+
+        function showAddActivoModal() {
+            isEditMode = false;
+            currentActivoId = null;
+            document.getElementById('activoModalTitle').textContent = 'Agregar Activo';
+            document.getElementById('activoForm').reset();
+            document.getElementById('activoFotosNames').textContent = '';
+            
+            // Poblar dropdown de proveedores
+            const select = document.getElementById('activoProveedor');
+            select.innerHTML = '<option value="">Ninguno</option>';
+            const sortedProveedores = [...proveedores].sort((a, b) => a.nombre.localeCompare(b.nombre));
+            sortedProveedores.forEach(proveedor => {
+                const option = document.createElement('option');
+                option.value = proveedor.nombre;
+                option.textContent = proveedor.nombre;
+                select.appendChild(option);
+            });
+            
+            document.getElementById('addActivoModal').classList.add('active');
+        }
+
+        function showActivoDetail(id) {
+            currentActivoId = id;
+            const activo = activos.find(a => a.id === id);
+            
+            let fotosHTML = '';
+            if (activo.fotos && activo.fotos.length > 0) {
+                fotosHTML = '<div style="margin-top: 1rem;"><h4 style="margin-bottom: 0.5rem; color: var(--primary);">Fotos</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;">';
+                activo.fotos.forEach((foto, index) => {
+                    fotosHTML += `<img src="${foto}" alt="Foto ${index + 1}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 6px;">`;
+                });
+                fotosHTML += '</div></div>';
+            }
+            
+            document.getElementById('activoDetails').innerHTML = `
+                <div class="info-section">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Nombre</div>
+                            <div class="info-value">${activo.nombre}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Último Mantenimiento</div>
+                            <div class="info-value">${formatDate(activo.ultimoMant) || '-'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Próximo Mantenimiento</div>
+                            <div class="info-value">${formatDate(activo.proximoMant) || '-'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Proveedor</div>
+                            <div class="info-value">${activo.proveedor || '-'}</div>
+                        </div>
+                    </div>
+                </div>
+                ${activo.notas ? `<div style="margin-top: 1rem;"><h4 style="margin-bottom: 0.5rem; color: var(--primary);">Notas</h4><p style="background: var(--bg); padding: 1rem; border-radius: 6px;">${activo.notas}</p></div>` : ''}
+                ${fotosHTML}
+            `;
+            
+            document.getElementById('activoDetailModal').classList.add('active');
+        }
+
+        function editActivo() {
+            const activo = activos.find(a => a.id === currentActivoId);
+            isEditMode = true;
+            
+            document.getElementById('activoModalTitle').textContent = 'Editar Activo';
+            document.getElementById('activoNombre').value = activo.nombre;
+            document.getElementById('activoUltimoMant').value = activo.ultimoMant || '';
+            document.getElementById('activoProximoMant').value = activo.proximoMant || '';
+            document.getElementById('activoNotas').value = activo.notas || '';
+            
+            // Poblar dropdown de proveedores
+            const select = document.getElementById('activoProveedor');
+            select.innerHTML = '<option value="">Ninguno</option>';
+            const sortedProveedores = [...proveedores].sort((a, b) => a.nombre.localeCompare(b.nombre));
+            sortedProveedores.forEach(proveedor => {
+                const option = document.createElement('option');
+                option.value = proveedor.nombre;
+                option.textContent = proveedor.nombre;
+                if (proveedor.nombre === activo.proveedor) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            
+            if (activo.fotos && activo.fotos.length > 0) {
+                document.getElementById('activoFotosNames').textContent = `${activo.fotos.length} foto(s) existente(s)`;
+            }
+            
+            closeModal('activoDetailModal');
+            document.getElementById('addActivoModal').classList.add('active');
+        }
+
+        function deleteActivo() {
+            if (confirm('¿Estás seguro de que deseas eliminar este activo?')) {
+                activos = activos.filter(a => a.id !== currentActivoId);
+                saveData();
+                closeModal('activoDetailModal');
+                renderActivos();
+            }
+        }
+
+        document.getElementById('activoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const activo = {
+                id: isEditMode ? currentActivoId : Date.now(),
+                nombre: document.getElementById('activoNombre').value,
+                ultimoMant: document.getElementById('activoUltimoMant').value,
+                proximoMant: document.getElementById('activoProximoMant').value,
+                proveedor: document.getElementById('activoProveedor').value,
+                notas: document.getElementById('activoNotas').value,
+                fotos: isEditMode ? activos.find(a => a.id === currentActivoId).fotos || [] : []
+            };
+            
+            const fotoFiles = document.getElementById('activoFotos').files;
+            if (fotoFiles.length > 0) {
+                let fotosProcessed = 0;
+                const newFotos = [];
+                
+                for (let i = 0; i < fotoFiles.length; i++) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        newFotos.push(e.target.result);
+                        fotosProcessed++;
+                        
+                        if (fotosProcessed === fotoFiles.length) {
+                            activo.fotos = [...activo.fotos, ...newFotos];
+                            saveActivo(activo);
+                        }
+                    };
+                    reader.readAsDataURL(fotoFiles[i]);
+                }
+            } else {
+                saveActivo(activo);
+            }
+        });
+
+        function saveActivo(activo) {
+            if (isEditMode) {
+                const index = activos.findIndex(a => a.id === currentActivoId);
+                activos[index] = activo;
+            } else {
+                activos.push(activo);
+            }
+            
+            saveData();
+            closeModal('addActivoModal');
+            renderActivos();
+        }
+
+        // REPORTES FUNCTIONS
+        function toggleReporte(reporteId) {
+            const reporte = document.getElementById(reporteId);
+            const isHidden = reporte.classList.contains('hidden');
+            
+            // Determinar cuál icono actualizar
+            let iconId = '';
+            if (reporteId === 'reporteRentas') iconId = 'iconRentas';
+            else if (reporteId === 'reporteFacturasPagadas') iconId = 'iconFacturasPagadas';
+            else if (reporteId === 'reporteContratos') iconId = 'iconContratos';
+            else if (reporteId === 'reporteFacturasPendientes') iconId = 'iconFacturasPendientes';
+            else if (reporteId === 'reporteMantenimiento') iconId = 'iconMantenimiento';
+            
+            const icon = document.getElementById(iconId);
+            
+            if (isHidden) {
+                reporte.classList.remove('hidden');
+                icon.textContent = '▲';
+                
+                // Renderizar el reporte cuando se expande
+                if (reporteId === 'reporteRentas') renderReporteRentas();
+                else if (reporteId === 'reporteFacturasPagadas') renderReporteFacturasPagadas();
+                else if (reporteId === 'reporteContratos') renderReporteContratos();
+                else if (reporteId === 'reporteFacturasPendientes') renderReporteFacturas();
+                else if (reporteId === 'reporteMantenimiento') renderReporteMantenimiento();
+            } else {
+                reporte.classList.add('hidden');
+                icon.textContent = '▼';
+            }
+        }
+        
+        function renderReportes() {
+            populateReportYearSelects();
+            // No renderizamos nada inicialmente, solo cuando el usuario expande
+        }
+
+        function populateReportYearSelects() {
+            const currentYear = new Date().getFullYear();
+            const yearSelects = ['rentasYear', 'facturasPagadasYear'];
+            
+            yearSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '';
+                for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    if (year === currentYear) option.selected = true;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        function renderReporteRentas() {
+            const tbody = document.getElementById('reporteRentasTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const filterType = document.getElementById('rentasFilter').value;
+            const year = parseInt(document.getElementById('rentasYear').value);
+            const monthSelect = document.getElementById('rentasMonth');
+            
+            if (filterType === 'mensual') {
+                monthSelect.classList.remove('hidden');
+            } else {
+                monthSelect.classList.add('hidden');
+            }
+            
+            const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+            
+            const rentas = [];
+            inquilinos.forEach(inquilino => {
+                if (inquilino.pagos) {
+                    inquilino.pagos.forEach(pago => {
+                        const pagoDate = new Date(pago.fecha + 'T00:00:00');
+                        if (pagoDate.getFullYear() === year) {
+                            if (month === null || pagoDate.getMonth() === month) {
+                                rentas.push({
+                                    empresa: inquilino.nombre,
+                                    monto: pago.monto,
+                                    fecha: pago.fecha
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+            
+            rentas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            rentas.forEach(renta => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${renta.empresa}</td>
+                    <td class="currency">${formatCurrency(renta.monto)}</td>
+                    <td>${formatDate(renta.fecha)}</td>
+                `;
+            });
+            
+            if (rentas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-light);">No hay rentas recibidas en este período</td></tr>';
+            }
+        }
+
+        function renderReporteFacturasPagadas() {
+            const tbody = document.getElementById('reporteFacturasPagadasTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const filterType = document.getElementById('facturasPagadasFilter').value;
+            const year = parseInt(document.getElementById('facturasPagadasYear').value);
+            const monthSelect = document.getElementById('facturasPagadasMonth');
+            
+            if (filterType === 'mensual') {
+                monthSelect.classList.remove('hidden');
+            } else {
+                monthSelect.classList.add('hidden');
+            }
+            
+            const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+            
+            const facturasPagadas = [];
+            proveedores.forEach(proveedor => {
+                if (proveedor.facturas) {
+                    proveedor.facturas.forEach(factura => {
+                        if (factura.fechaPago) {
+                            const pagoDate = new Date(factura.fechaPago + 'T00:00:00');
+                            if (pagoDate.getFullYear() === year) {
+                                if (month === null || pagoDate.getMonth() === month) {
+                                    facturasPagadas.push({
+                                        proveedor: proveedor.nombre,
+                                        numero: factura.numero,
+                                        fechaPago: factura.fechaPago,
+                                        monto: factura.monto,
+                                        documentoFile: factura.documentoFile,
+                                        pagoFile: factura.pagoFile
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            
+            facturasPagadas.sort((a, b) => new Date(b.fechaPago) - new Date(a.fechaPago));
+            
+            let totalPeriodo = 0;
+            
+            facturasPagadas.forEach(factura => {
+                totalPeriodo += factura.monto;
+                
+                const row = tbody.insertRow();
+                const pdfFacturaBtn = factura.documentoFile 
+                    ? `<button class="btn btn-sm btn-primary" onclick="verPDFBase64('${factura.documentoFile}')">PDF</button>`
+                    : '-';
+                const pdfPagoBtn = factura.pagoFile 
+                    ? `<button class="btn btn-sm btn-success" onclick="verPDFBase64('${factura.pagoFile}')">PDF</button>`
+                    : '-';
+                    
+                row.innerHTML = `
+                    <td>${factura.proveedor}</td>
+                    <td>${factura.numero}</td>
+                    <td>${formatDate(factura.fechaPago)}</td>
+                    <td class="currency">${formatCurrency(factura.monto)}</td>
+                    <td>${pdfFacturaBtn}</td>
+                    <td>${pdfPagoBtn}</td>
+                `;
+            });
+            
+            if (facturasPagadas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-light);">No hay facturas pagadas en este período</td></tr>';
+            } else {
+                // Agregar línea de separación
+                const rowSeparator = tbody.insertRow();
+                rowSeparator.style.height = '10px';
+                rowSeparator.innerHTML = '<td colspan="6" style="border: none;"></td>';
+                
+                // Calcular total del mes seleccionado (si aplica)
+                let totalMes = 0;
+                const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                
+                if (filterType === 'mensual') {
+                    // Total del mes seleccionado
+                    totalMes = totalPeriodo;
+                } else {
+                    // Si es vista anual, calcular cada mes
+                    const totalesPorMes = {};
+                    for (let m = 0; m < 12; m++) {
+                        totalesPorMes[m] = 0;
+                    }
+                    
+                    proveedores.forEach(proveedor => {
+                        if (proveedor.facturas) {
+                            proveedor.facturas.forEach(factura => {
+                                if (factura.fechaPago) {
+                                    const pagoDate = new Date(factura.fechaPago + 'T00:00:00');
+                                    if (pagoDate.getFullYear() === year) {
+                                        totalesPorMes[pagoDate.getMonth()] += factura.monto;
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Mostrar totales por mes
+                    for (let m = 0; m < 12; m++) {
+                        if (totalesPorMes[m] > 0) {
+                            const rowMes = tbody.insertRow();
+                            rowMes.style.fontWeight = 'bold';
+                            rowMes.style.backgroundColor = '#e6f2ff';
+                            rowMes.innerHTML = `
+                                <td colspan="3" style="text-align: right; padding: 0.75rem;">Total ${monthNames[m]} ${year}:</td>
+                                <td class="currency" style="color: var(--primary);">${formatCurrency(totalesPorMes[m])}</td>
+                                <td colspan="2"></td>
+                            `;
+                        }
+                    }
+                }
+                
+                // Si es vista mensual, mostrar total del mes seleccionado
+                if (filterType === 'mensual') {
+                    const rowMes = tbody.insertRow();
+                    rowMes.style.fontWeight = 'bold';
+                    rowMes.style.backgroundColor = '#e6f2ff';
+                    rowMes.innerHTML = `
+                        <td colspan="3" style="text-align: right; padding: 1rem; font-size: 1.1rem;">TOTAL PAGADO EN ${monthNames[month].toUpperCase()} ${year}:</td>
+                        <td class="currency" style="color: var(--primary); font-size: 1.2rem;">${formatCurrency(totalMes)}</td>
+                        <td colspan="2"></td>
+                    `;
+                }
+                
+                // Calcular y mostrar total del año completo
+                let totalAnual = 0;
+                proveedores.forEach(proveedor => {
+                    if (proveedor.facturas) {
+                        proveedor.facturas.forEach(factura => {
+                            if (factura.fechaPago) {
+                                const pagoDate = new Date(factura.fechaPago + 'T00:00:00');
+                                if (pagoDate.getFullYear() === year) {
+                                    totalAnual += factura.monto;
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                const rowAnual = tbody.insertRow();
+                rowAnual.style.fontWeight = 'bold';
+                rowAnual.style.backgroundColor = '#d4edda';
+                rowAnual.innerHTML = `
+                    <td colspan="3" style="text-align: right; padding: 1rem; font-size: 1.1rem;">TOTAL PAGADO EN ${year}:</td>
+                    <td class="currency" style="color: var(--success); font-size: 1.2rem;">${formatCurrency(totalAnual)}</td>
+                    <td colspan="2"></td>
+                `;
+            }
+        }
+
+        function renderReporteContratos() {
+            const tbody = document.getElementById('reporteContratosTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            inquilinos.forEach(inquilino => {
+                const vencimiento = new Date(inquilino.fechaVencimiento + 'T00:00:00');
+                const diffTime = vencimiento - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                let estado = '';
+                let badgeClass = '';
+                if (diffDays < 0) {
+                    estado = 'Vencido';
+                    badgeClass = 'badge-danger';
+                } else if (diffDays <= 30) {
+                    estado = 'Próximo a vencer';
+                    badgeClass = 'badge-warning';
+                } else {
+                    estado = 'Vigente';
+                    badgeClass = 'badge-success';
+                }
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${inquilino.nombre}</td>
+                    <td>${formatDate(inquilino.fechaInicio)}</td>
+                    <td>${formatDate(inquilino.fechaVencimiento)}</td>
+                    <td>${diffDays}</td>
+                    <td><span class="badge ${badgeClass}">${estado}</span></td>
+                `;
+            });
+            
+            if (inquilinos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">No hay contratos registrados</td></tr>';
+            }
+        }
+
+        function renderReporteMantenimiento() {
+            const tbody = document.getElementById('reporteMantenimientoTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            activos.forEach(activo => {
+                let diffDays = null;
+                if (activo.proximoMant) {
+                    const proximoMant = new Date(activo.proximoMant + 'T00:00:00');
+                    const diffTime = proximoMant - today;
+                    diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                }
+                
+                const row = tbody.insertRow();
+                row.onclick = () => showActivoDetail(activo.id);
+                row.style.cursor = 'pointer';
+                
+                const diffDaysText = diffDays !== null ? diffDays : '-';
+                const diffDaysColor = diffDays !== null && diffDays < 0 ? 'var(--danger)' : 
+                                     diffDays !== null && diffDays <= 7 ? 'var(--warning)' : 'var(--text)';
+                
+                row.innerHTML = `
+                    <td>${activo.nombre}</td>
+                    <td>${formatDate(activo.ultimoMant) || '-'}</td>
+                    <td>${formatDate(activo.proximoMant) || '-'}</td>
+                    <td style="color: ${diffDaysColor};">${diffDaysText}</td>
+                    <td>${activo.proveedor || '-'}</td>
+                `;
+            });
+            
+            if (activos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">No hay activos registrados</td></tr>';
+            }
+        }
+
+        function verPDFBase64(base64Data) {
+            const iframe = document.getElementById('pdfViewer');
+            iframe.src = base64Data;
+            document.getElementById('verPDFModal').classList.add('active');
+        }
+
+        function renderReporteFacturas() {
+            const tbody = document.getElementById('reporteFacturasTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const facturasPendientes = [];
+            proveedores.forEach(proveedor => {
+                if (proveedor.facturas) {
+                    proveedor.facturas.forEach((factura, index) => {
+                        if (!factura.fechaPago) {
+                            const vencimiento = new Date(factura.vencimiento + 'T00:00:00');
+                            const diffTime = vencimiento - today;
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            
+                            facturasPendientes.push({
+                                proveedorId: proveedor.id,
+                                facturaIndex: index,
+                                proveedor: proveedor.nombre,
+                                numero: factura.numero,
+                                fecha: factura.fecha,
+                                vencimiento: factura.vencimiento,
+                                monto: factura.monto,
+                                diffDays: diffDays,
+                                documentoFile: factura.documentoFile
+                            });
+                        }
+                    });
+                }
+            });
+            
+            facturasPendientes.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
+            
+            // Calcular totales por categoría de fecha
+            let totalVencidas = 0;
+            let totalProximasSemana = 0;
+            let totalProximoMes = 0;
+            let totalMasDeUnMes = 0;
+            
+            facturasPendientes.forEach(factura => {
+                if (factura.diffDays < 0) {
+                    totalVencidas += factura.monto;
+                } else if (factura.diffDays <= 7) {
+                    totalProximasSemana += factura.monto;
+                } else if (factura.diffDays <= 30) {
+                    totalProximoMes += factura.monto;
+                } else {
+                    totalMasDeUnMes += factura.monto;
+                }
+            });
+            
+            const totalGeneral = totalVencidas + totalProximasSemana + totalProximoMes + totalMasDeUnMes;
+            
+            facturasPendientes.forEach(factura => {
+                const row = tbody.insertRow();
+                row.style.cursor = 'pointer';
+                row.onclick = function(e) {
+                    // No abrir si se hizo click en un botón
+                    if (e.target.tagName === 'BUTTON') return;
+                    showFacturaDetail(factura.proveedorId, factura.facturaIndex);
+                };
+                
+                const pdfBtn = factura.documentoFile 
+                    ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); verPDFFactura(${factura.proveedorId}, ${factura.facturaIndex})">PDF</button>`
+                    : '-';
+                    
+                row.innerHTML = `
+                    <td>${factura.proveedor}</td>
+                    <td>${factura.numero}</td>
+                    <td>${formatDate(factura.fecha)}</td>
+                    <td>${formatDate(factura.vencimiento)}</td>
+                    <td class="currency">${formatCurrency(factura.monto)}</td>
+                    <td style="color: ${factura.diffDays < 0 ? 'var(--danger)' : factura.diffDays <= 7 ? 'var(--warning)' : 'var(--text)'};">${factura.diffDays}</td>
+                    <td>${pdfBtn}</td>
+                    <td><button class="btn btn-sm btn-success" onclick="event.stopPropagation(); pagarFacturaDesdeReporte(${factura.proveedorId}, ${factura.facturaIndex})">Dar X Pagada</button></td>
+                `;
+            });
+            
+            if (facturasPendientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-light);">No hay facturas pendientes</td></tr>';
+            } else {
+                // Agregar fila de totales
+                const rowTotal = tbody.insertRow();
+                rowTotal.style.fontWeight = 'bold';
+                rowTotal.style.backgroundColor = 'var(--bg)';
+                rowTotal.innerHTML = `
+                    <td colspan="4" style="text-align: right; padding: 1rem;">TOTAL A PAGAR:</td>
+                    <td class="currency" style="color: var(--primary); font-size: 1.1rem;">${formatCurrency(totalGeneral)}</td>
+                    <td colspan="3"></td>
+                `;
+                
+                // Agregar desglose por fechas
+                if (totalVencidas > 0) {
+                    const rowVencidas = tbody.insertRow();
+                    rowVencidas.style.backgroundColor = '#fed7d7';
+                    rowVencidas.innerHTML = `
+                        <td colspan="4" style="text-align: right; padding: 0.5rem 1rem;">Vencidas:</td>
+                        <td class="currency" style="color: var(--danger);">${formatCurrency(totalVencidas)}</td>
+                        <td colspan="3"></td>
+                    `;
+                }
+                
+                if (totalProximasSemana > 0) {
+                    const rowSemana = tbody.insertRow();
+                    rowSemana.style.backgroundColor = '#feebc8';
+                    rowSemana.innerHTML = `
+                        <td colspan="4" style="text-align: right; padding: 0.5rem 1rem;">Próximos 7 días:</td>
+                        <td class="currency" style="color: var(--warning);">${formatCurrency(totalProximasSemana)}</td>
+                        <td colspan="3"></td>
+                    `;
+                }
+                
+                if (totalProximoMes > 0) {
+                    const rowMes = tbody.insertRow();
+                    rowMes.style.backgroundColor = '#fef3c7';
+                    rowMes.innerHTML = `
+                        <td colspan="4" style="text-align: right; padding: 0.5rem 1rem;">8-30 días:</td>
+                        <td class="currency">${formatCurrency(totalProximoMes)}</td>
+                        <td colspan="3"></td>
+                    `;
+                }
+                
+                if (totalMasDeUnMes > 0) {
+                    const rowFuturo = tbody.insertRow();
+                    rowFuturo.style.backgroundColor = '#c6f6d5';
+                    rowFuturo.innerHTML = `
+                        <td colspan="4" style="text-align: right; padding: 0.5rem 1rem;">Más de 30 días:</td>
+                        <td class="currency">${formatCurrency(totalMasDeUnMes)}</td>
+                        <td colspan="3"></td>
+                    `;
+                }
+            }
+        }
+
+        // Funciones para facturas desde reportes
+        function pagarFacturaDesdeReporte(proveedorId, facturaIndex) {
+            currentProveedorId = proveedorId;
+            currentFacturaId = facturaIndex;
+            setTodayDate();
+            document.getElementById('pagarFacturaReporteModal').classList.add('active');
+        }
+
+        function verPDFFactura(proveedorId, facturaIndex) {
+            const proveedor = proveedores.find(p => p.id === proveedorId);
+            const factura = proveedor.facturas[facturaIndex];
+            
+            if (factura.documentoFile) {
+                const iframe = document.getElementById('pdfViewer');
+                iframe.src = factura.documentoFile;
+                document.getElementById('verPDFModal').classList.add('active');
+            }
+        }
+
+        function verPDFFacturaDesdeDetalle() {
+            const proveedor = proveedores.find(p => p.id === currentProveedorId);
+            const factura = proveedor.facturas[currentFacturaId];
+            
+            if (factura.documentoFile) {
+                const iframe = document.getElementById('pdfViewer');
+                iframe.src = factura.documentoFile;
+                closeModal('facturaDetailModal');
+                document.getElementById('verPDFModal').classList.add('active');
+            }
+        }
+
+        function eliminarFactura() {
+            if (confirm('¿Estás seguro de que deseas eliminar esta factura?')) {
+                const proveedor = proveedores.find(p => p.id === currentProveedorId);
+                proveedor.facturas.splice(currentFacturaId, 1);
+                
+                saveData();
+                closeModal('facturaDetailModal');
+                renderProveedores();
+                
+                // Si el modal de proveedor estaba abierto, actualizarlo
+                if (document.getElementById('proveedorModal').classList.contains('active')) {
+                    showProveedorDetail(currentProveedorId);
+                }
+            }
+        }
+
+        function editarFactura() {
+            const proveedor = proveedores.find(p => p.id === currentProveedorId);
+            const factura = proveedor.facturas[currentFacturaId];
+            
+            document.getElementById('editFacturaNumero').value = factura.numero;
+            document.getElementById('editFacturaFecha').value = factura.fecha;
+            document.getElementById('editFacturaVencimiento').value = factura.vencimiento;
+            document.getElementById('editFacturaMonto').value = factura.monto;
+            
+            closeModal('facturaDetailModal');
+            document.getElementById('editFacturaModal').classList.add('active');
+        }
+
+        function showAgregarPDFFacturaModal() {
+            document.getElementById('agregarPDFFileName').textContent = '';
+            document.getElementById('agregarPDFDocumento').value = '';
+            closeModal('facturaDetailModal');
+            document.getElementById('agregarPDFFacturaModal').classList.add('active');
+        }
+
+        // Función para agregar factura rápida
+        function showAddFacturaRapidaModal() {
+            document.getElementById('facturaRapidaForm').reset();
+            document.getElementById('facturaRapidaFileName').textContent = '';
+            
+            // Poblar select de proveedores
+            const select = document.getElementById('facturaRapidaProveedor');
+            select.innerHTML = '<option value="">Seleccione un proveedor</option>';
+            
+            const sortedProveedores = [...proveedores].sort((a, b) => a.nombre.localeCompare(b.nombre));
+            sortedProveedores.forEach(proveedor => {
+                const option = document.createElement('option');
+                option.value = proveedor.id;
+                option.textContent = proveedor.nombre;
+                select.appendChild(option);
+            });
+            
+            document.getElementById('addFacturaRapidaModal').classList.add('active');
+        }
+
+        // Funciones para contrato del inquilino
+        function viewContratoInModal() {
+            const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
+            if (inquilino.contratoFile) {
+                const iframe = document.getElementById('pdfViewer');
+                iframe.src = inquilino.contratoFile;
+                closeModal('inquilinoModal');
+                document.getElementById('verPDFModal').classList.add('active');
+            }
+        }
+
+        function showAgregarContratoModal() {
+            // Usar el mismo modal de editar pero solo para agregar contrato
+            editInquilino();
+        }
+        
+        // Funciones para poblar selects de año en las nuevas vistas
+        function populateProveedoresYearSelects() {
+            const currentYear = new Date().getFullYear();
+            const select = document.getElementById('proveedoresFacturasPagadasYear');
+            select.innerHTML = '';
+            for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) option.selected = true;
+                select.appendChild(option);
+            }
+        }
+        
+        function populateInquilinosYearSelects() {
+            const currentYear = new Date().getFullYear();
+            const select = document.getElementById('inquilinosRentasYear');
+            select.innerHTML = '';
+            for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) option.selected = true;
+                select.appendChild(option);
+            }
+        }
+        
+        // Render para Proveedores - Facturas Pagadas
+        function renderProveedoresFacturasPagadas() {
+            const tbody = document.getElementById('proveedoresFacturasPagadasTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const filterType = document.getElementById('proveedoresFacturasPagadasFilter').value;
+            const year = parseInt(document.getElementById('proveedoresFacturasPagadasYear').value);
+            const monthSelect = document.getElementById('proveedoresFacturasPagadasMonth');
+            
+            if (filterType === 'mensual') {
+                monthSelect.classList.remove('hidden');
+            } else {
+                monthSelect.classList.add('hidden');
+            }
+            
+            const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+            
+            const facturasPagadas = [];
+            proveedores.forEach(proveedor => {
+                if (proveedor.facturas) {
+                    proveedor.facturas.forEach(factura => {
+                        if (factura.fechaPago) {
+                            const pagoDate = new Date(factura.fechaPago + 'T00:00:00');
+                            if (pagoDate.getFullYear() === year) {
+                                if (month === null || pagoDate.getMonth() === month) {
+                                    facturasPagadas.push({
+                                        proveedor: proveedor.nombre,
+                                        numero: factura.numero,
+                                        fechaPago: factura.fechaPago,
+                                        monto: factura.monto,
+                                        documentoFile: factura.documentoFile,
+                                        pagoFile: factura.pagoFile
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            
+            facturasPagadas.sort((a, b) => new Date(b.fechaPago) - new Date(a.fechaPago));
+            
+            let totalPeriodo = 0;
+            
+            facturasPagadas.forEach(factura => {
+                totalPeriodo += factura.monto;
+                
+                const row = tbody.insertRow();
+                const pdfFacturaBtn = factura.documentoFile 
+                    ? `<button class="btn btn-sm btn-primary" onclick="verPDFBase64('${factura.documentoFile}')">PDF</button>`
+                    : '-';
+                const pdfPagoBtn = factura.pagoFile 
+                    ? `<button class="btn btn-sm btn-success" onclick="verPDFBase64('${factura.pagoFile}')">PDF</button>`
+                    : '-';
+                    
+                row.innerHTML = `
+                    <td>${factura.proveedor}</td>
+                    <td>${factura.numero}</td>
+                    <td>${formatDate(factura.fechaPago)}</td>
+                    <td class="currency">${formatCurrency(factura.monto)}</td>
+                    <td>${pdfFacturaBtn}</td>
+                    <td>${pdfPagoBtn}</td>
+                `;
+            });
+            
+            if (facturasPagadas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-light);">No hay facturas pagadas en este período</td></tr>';
+            } else {
+                // Agregar línea de separación
+                const rowSeparator = tbody.insertRow();
+                rowSeparator.style.height = '10px';
+                rowSeparator.innerHTML = '<td colspan="6" style="border: none;"></td>';
+                
+                const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                
+                // Si es vista mensual, mostrar total del mes
+                if (filterType === 'mensual') {
+                    const rowMes = tbody.insertRow();
+                    rowMes.style.fontWeight = 'bold';
+                    rowMes.style.backgroundColor = '#e6f2ff';
+                    rowMes.innerHTML = `
+                        <td colspan="3" style="text-align: right; padding: 1rem; font-size: 1.1rem;">TOTAL PAGADO EN ${monthNames[month].toUpperCase()} ${year}:</td>
+                        <td class="currency" style="color: var(--primary); font-size: 1.2rem;">${formatCurrency(totalPeriodo)}</td>
+                        <td colspan="2"></td>
+                    `;
+                }
+                
+                // Calcular y mostrar total del año completo
+                let totalAnual = 0;
+                proveedores.forEach(proveedor => {
+                    if (proveedor.facturas) {
+                        proveedor.facturas.forEach(factura => {
+                            if (factura.fechaPago) {
+                                const pagoDate = new Date(factura.fechaPago + 'T00:00:00');
+                                if (pagoDate.getFullYear() === year) {
+                                    totalAnual += factura.monto;
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                const rowAnual = tbody.insertRow();
+                rowAnual.style.fontWeight = 'bold';
+                rowAnual.style.backgroundColor = '#d4edda';
+                rowAnual.innerHTML = `
+                    <td colspan="3" style="text-align: right; padding: 1rem; font-size: 1.1rem;">TOTAL PAGADO EN ${year}:</td>
+                    <td class="currency" style="color: var(--success); font-size: 1.2rem;">${formatCurrency(totalAnual)}</td>
+                    <td colspan="2"></td>
+                `;
+            }
+        }
+        
+        // Render para Proveedores - Facturas Pendientes
+        function renderProveedoresFacturasPendientes() {
+            const tbody = document.getElementById('proveedoresFacturasPendientesTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const facturasPendientes = [];
+            proveedores.forEach(proveedor => {
+                if (proveedor.facturas) {
+                    proveedor.facturas.forEach((factura, index) => {
+                        if (!factura.fechaPago) {
+                            const vencimiento = new Date(factura.vencimiento + 'T00:00:00');
+                            const diffTime = vencimiento - today;
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            
+                            facturasPendientes.push({
+                                proveedorId: proveedor.id,
+                                facturaIndex: index,
+                                proveedor: proveedor.nombre,
+                                numero: factura.numero,
+                                fecha: factura.fecha,
+                                vencimiento: factura.vencimiento,
+                                monto: factura.monto,
+                                diffDays: diffDays,
+                                documentoFile: factura.documentoFile
+                            });
+                        }
+                    });
+                }
+            });
+            
+            facturasPendientes.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
+            
+            // Calcular totales
+            let totalVencidas = 0;
+            let totalProximasSemana = 0;
+            let totalProximoMes = 0;
+            let totalMasDeUnMes = 0;
+            
+            facturasPendientes.forEach(factura => {
+                if (factura.diffDays < 0) {
+                    totalVencidas += factura.monto;
+                } else if (factura.diffDays <= 7) {
+                    totalProximasSemana += factura.monto;
+                } else if (factura.diffDays <= 30) {
+                    totalProximoMes += factura.monto;
+                } else {
+                    totalMasDeUnMes += factura.monto;
+                }
+            });
+            
+            const totalGeneral = totalVencidas + totalProximasSemana + totalProximoMes + totalMasDeUnMes;
+            
+            facturasPendientes.forEach(factura => {
+                const row = tbody.insertRow();
+                row.style.cursor = 'pointer';
+                row.onclick = function(e) {
+                    if (e.target.tagName === 'BUTTON') return;
+                    showFacturaDetail(factura.proveedorId, factura.facturaIndex);
+                };
+                
+                const pdfBtn = factura.documentoFile 
+                    ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); verPDFFactura(${factura.proveedorId}, ${factura.facturaIndex})">PDF</button>`
+                    : '-';
+                    
+                row.innerHTML = `
+                    <td>${factura.proveedor}</td>
+                    <td>${factura.numero}</td>
+                    <td>${formatDate(factura.fecha)}</td>
+                    <td>${formatDate(factura.vencimiento)}</td>
+                    <td class="currency">${formatCurrency(factura.monto)}</td>
+                    <td style="color: ${factura.diffDays < 0 ? 'var(--danger)' : factura.diffDays <= 7 ? 'var(--warning)' : 'var(--text)'};">${factura.diffDays}</td>
+                    <td>${pdfBtn}</td>
+                    <td><button class="btn btn-sm btn-success" onclick="event.stopPropagation(); pagarFacturaDesdeReporte(${factura.proveedorId}, ${factura.facturaIndex})">Dar X Pagada</button></td>
+                `;
+            });
+            
+            if (facturasPendientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-light);">No hay facturas pendientes</td></tr>';
+            } else {
+                // Agregar fila de totales
+                const rowTotal = tbody.insertRow();
+                rowTotal.style.fontWeight = 'bold';
+                rowTotal.style.backgroundColor = 'var(--bg)';
+                rowTotal.innerHTML = `
+                    <td colspan="4" style="text-align: right; padding: 1rem;">TOTAL A PAGAR:</td>
+                    <td class="currency" style="color: var(--primary); font-size: 1.1rem;">${formatCurrency(totalGeneral)}</td>
+                    <td colspan="3"></td>
+                `;
+                
+                // Agregar desglose por fechas
+                if (totalVencidas > 0) {
+                    const rowVencidas = tbody.insertRow();
+                    rowVencidas.style.backgroundColor = '#fed7d7';
+                    rowVencidas.innerHTML = `
+                        <td colspan="4" style="text-align: right; padding: 0.5rem 1rem;">Vencidas:</td>
+                        <td class="currency" style="color: var(--danger);">${formatCurrency(totalVencidas)}</td>
+                        <td colspan="3"></td>
+                    `;
+                }
+                
+                if (totalProximasSemana > 0) {
+                    const rowSemana = tbody.insertRow();
+                    rowSemana.style.backgroundColor = '#feebc8';
+                    rowSemana.innerHTML = `
+                        <td colspan="4" style="text-align: right; padding: 0.5rem 1rem;">Próximos 7 días:</td>
+                        <td class="currency" style="color: var(--warning);">${formatCurrency(totalProximasSemana)}</td>
+                        <td colspan="3"></td>
+                    `;
+                }
+                
+                if (totalProximoMes > 0) {
+                    const rowMes = tbody.insertRow();
+                    rowMes.style.backgroundColor = '#fef3c7';
+                    rowMes.innerHTML = `
+                        <td colspan="4" style="text-align: right; padding: 0.5rem 1rem;">8-30 días:</td>
+                        <td class="currency">${formatCurrency(totalProximoMes)}</td>
+                        <td colspan="3"></td>
+                    `;
+                }
+                
+                if (totalMasDeUnMes > 0) {
+                    const rowFuturo = tbody.insertRow();
+                    rowFuturo.style.backgroundColor = '#c6f6d5';
+                    rowFuturo.innerHTML = `
+                        <td colspan="4" style="text-align: right; padding: 0.5rem 1rem;">Más de 30 días:</td>
+                        <td class="currency">${formatCurrency(totalMasDeUnMes)}</td>
+                        <td colspan="3"></td>
+                    `;
+                }
+            }
+        }
+        
+        // Render para Inquilinos - Rentas Recibidas
+        function renderInquilinosRentasRecibidas() {
+            const tbody = document.getElementById('inquilinosRentasRecibidasTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const filterType = document.getElementById('inquilinosRentasFilter').value;
+            const year = parseInt(document.getElementById('inquilinosRentasYear').value);
+            const monthSelect = document.getElementById('inquilinosRentasMonth');
+            
+            if (filterType === 'mensual') {
+                monthSelect.classList.remove('hidden');
+            } else {
+                monthSelect.classList.add('hidden');
+            }
+            
+            const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+            
+            const rentas = [];
+            let totalPeriodo = 0;
+            
+            inquilinos.forEach(inquilino => {
+                if (inquilino.pagos) {
+                    inquilino.pagos.forEach(pago => {
+                        const pagoDate = new Date(pago.fecha + 'T00:00:00');
+                        if (pagoDate.getFullYear() === year) {
+                            if (month === null || pagoDate.getMonth() === month) {
+                                rentas.push({
+                                    empresa: inquilino.nombre,
+                                    monto: pago.monto,
+                                    fecha: pago.fecha
+                                });
+                                totalPeriodo += pago.monto;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            rentas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            rentas.forEach(renta => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${renta.empresa}</td>
+                    <td class="currency">${formatCurrency(renta.monto)}</td>
+                    <td>${formatDate(renta.fecha)}</td>
+                `;
+            });
+            
+            if (rentas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-light);">No hay rentas recibidas en este período</td></tr>';
+            } else {
+                // Agregar línea de separación
+                const rowSeparator = tbody.insertRow();
+                rowSeparator.style.height = '10px';
+                rowSeparator.innerHTML = '<td colspan="3" style="border: none;"></td>';
+                
+                const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                
+                // Si es vista mensual, mostrar total del mes
+                if (filterType === 'mensual') {
+                    const rowMes = tbody.insertRow();
+                    rowMes.style.fontWeight = 'bold';
+                    rowMes.style.backgroundColor = '#e6f2ff';
+                    rowMes.innerHTML = `
+                        <td style="text-align: right; padding: 1rem; font-size: 1.1rem;">TOTAL RECIBIDO EN ${monthNames[month].toUpperCase()} ${year}:</td>
+                        <td class="currency" style="color: var(--primary); font-size: 1.2rem;">${formatCurrency(totalPeriodo)}</td>
+                        <td></td>
+                    `;
+                }
+                
+                // Calcular y mostrar total del año completo
+                let totalAnual = 0;
+                inquilinos.forEach(inquilino => {
+                    if (inquilino.pagos) {
+                        inquilino.pagos.forEach(pago => {
+                            const pagoDate = new Date(pago.fecha + 'T00:00:00');
+                            if (pagoDate.getFullYear() === year) {
+                                totalAnual += pago.monto;
+                            }
+                        });
+                    }
+                });
+                
+                const rowAnual = tbody.insertRow();
+                rowAnual.style.fontWeight = 'bold';
+                rowAnual.style.backgroundColor = '#d4edda';
+                rowAnual.innerHTML = `
+                    <td style="text-align: right; padding: 1rem; font-size: 1.1rem;">TOTAL RECIBIDO EN ${year}:</td>
+                    <td class="currency" style="color: var(--success); font-size: 1.2rem;">${formatCurrency(totalAnual)}</td>
+                    <td></td>
+                `;
+            }
+        }
+        
+        // Render para Inquilinos - Vencimiento Contratos
+        function renderInquilinosVencimientoContratos() {
+            const tbody = document.getElementById('inquilinosVencimientoContratosTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            inquilinos.forEach(inquilino => {
+                const vencimiento = new Date(inquilino.fechaVencimiento + 'T00:00:00');
+                const diffTime = vencimiento - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                let estado = '';
+                let badgeClass = '';
+                if (diffDays < 0) {
+                    estado = 'Vencido';
+                    badgeClass = 'badge-danger';
+                } else if (diffDays <= 30) {
+                    estado = 'Próximo a vencer';
+                    badgeClass = 'badge-warning';
+                } else {
+                    estado = 'Vigente';
+                    badgeClass = 'badge-success';
+                }
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${inquilino.nombre}</td>
+                    <td>${formatDate(inquilino.fechaInicio)}</td>
+                    <td>${formatDate(inquilino.fechaVencimiento)}</td>
+                    <td>${diffDays}</td>
+                    <td><span class="badge ${badgeClass}">${estado}</span></td>
+                `;
+            });
+            
+            if (inquilinos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">No hay contratos registrados</td></tr>';
+            }
+        }
+        
+        // Render para Activos - Próximos Mantenimientos
+        function renderActivosProximosMantenimientos() {
+            const tbody = document.getElementById('activosProximosMantenimientosTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Filtrar solo activos con próximo mantenimiento
+            const activosConMantenimiento = activos.filter(a => a.proximoMant);
+            
+            activosConMantenimiento.forEach(activo => {
+                const proximoMant = new Date(activo.proximoMant + 'T00:00:00');
+                const diffTime = proximoMant - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                const row = tbody.insertRow();
+                row.onclick = () => showActivoDetail(activo.id);
+                row.style.cursor = 'pointer';
+                
+                const diffDaysColor = diffDays < 0 ? 'var(--danger)' : 
+                                     diffDays <= 7 ? 'var(--warning)' : 'var(--text)';
+                
+                row.innerHTML = `
+                    <td>${activo.nombre}</td>
+                    <td>${formatDate(activo.ultimoMant) || '-'}</td>
+                    <td>${formatDate(activo.proximoMant)}</td>
+                    <td style="color: ${diffDaysColor};">${diffDays}</td>
+                    <td>${activo.proveedor || '-'}</td>
+                `;
+            });
+            
+            if (activosConMantenimiento.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">No hay mantenimientos programados</td></tr>';
+            }
+        }
+
+        // Utility for file conversion
+        function base64ToBlob(base64, contentType) {
+            const byteCharacters = atob(base64.split(',')[1]);
+            const byteArrays = [];
+            
+            for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                const slice = byteCharacters.slice(offset, offset + 512);
+                const byteNumbers = new Array(slice.length);
+                
+                for (let i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+                
+                const byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+            
+            return new Blob(byteArrays, { type: contentType });
+        }
+    </script>
+</body>
+</html>
