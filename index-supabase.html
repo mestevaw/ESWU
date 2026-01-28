@@ -163,6 +163,7 @@
         <nav class="nav">
             <ul class="nav-list">
                 <li class="nav-item"><a href="#" class="nav-link active" onclick="showPage('home')">Home</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="showPage('inquilinos')">Inquilinos</a></li>
                 <li class="nav-item"><a href="#" class="nav-link" onclick="showPage('chat')">Chat</a></li>
             </ul>
         </nav>
@@ -219,6 +220,26 @@
                     </div>
                 </div>
             </div>
+            <div id="inquilinosPage" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Inquilinos</h2>
+                        <button onclick="alert('Funcionalidad próximamente')" class="btn btn-success">+ Agregar Inquilino</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="inquilinosTable">
+                            <thead>
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th>Renta Mensual</th>
+                                    <th>Vencimiento Contrato</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             <div id="chatPage" class="page">
                 <div class="card">
                     <div class="card-header"><h2 class="card-title">Chat</h2></div>
@@ -264,6 +285,7 @@
             document.getElementById(pageName + 'Page').classList.add('active');
             event.target.classList.add('active');
             if (pageName === 'home') updateHomeView();
+            if (pageName === 'inquilinos') renderInquilinosTable();
         }
 
         async function loadAllData() {
@@ -519,7 +541,25 @@
                 row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem">TOTAL:</td><td class="currency" style="color:var(--danger);font-size:1.1rem">${formatCurrency(total)}</td>`;
             }
         }
-
+function renderInquilinosTable() {
+            const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            inquilinos.forEach(inq => {
+                const row = tbody.insertRow();
+                row.style.cursor = 'pointer';
+                row.onclick = () => alert('Ver detalles de ' + inq.nombre);
+                row.innerHTML = `
+                    <td>${inq.nombre}</td>
+                    <td class="currency">${formatCurrency(inq.renta)}</td>
+                    <td>${formatDate(inq.fechaVencimiento)}</td>
+                `;
+            });
+            
+            if (inquilinos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay inquilinos registrados</td></tr>';
+            }
+        }
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 ESWU con Supabase iniciado');
             const loginForm = document.getElementById('loginForm');
