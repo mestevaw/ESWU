@@ -2557,11 +2557,11 @@
                 const docInput = document.getElementById('bancoDocumento');
                 if (docInput.files.length === 0) {
                     alert('Por favor seleccione un documento PDF');
-                    hideLoading();
+             hideLoading();
                     return;
                 }
                 
-const docData = await fileToBase64(docInput.files[0]);
+                const docData = await fileToBase64(docInput.files[0]);
                 
                 const bancoData = {
                     tipo: document.getElementById('bancoTipo').value,
