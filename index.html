@@ -44,12 +44,11 @@
                     <button class="dropdown-toggle" onclick="toggleMainMenu()">☰</button>
                     <div id="mainMenuDropdown" class="main-menu-content"></div>
                 </div>
+                <a href="#" class="header-icon" id="homeIcon" onclick="event.preventDefault(); showPageFromMenu('home');" title="Home">⌂</a>
+                <a href="#" class="header-icon" id="chatIcon" onclick="event.preventDefault(); alert('Chat próximamente');" title="Chat">💬</a>
             </div>
             <div class="header-title" id="headerTitle">ESWU</div>
-            <div class="header-right">
-                <a href="#" class="header-icon" id="chatIcon" onclick="event.preventDefault(); alert('Chat próximamente');" title="Chat">💬</a>
-                <a href="#" class="header-icon" id="homeIcon" onclick="event.preventDefault(); showPageFromMenu('home');" title="Home">⌂</a>
-            </div>
+            <div class="header-right"></div>
         </div>
 
         <!-- Main Content -->
@@ -272,7 +271,7 @@
                             </div>
                             <div class="table-container">
                                 <table id="bancosTable">
-                                    <thead><tr><th>Tipo</th><th>Fecha Subida</th><th>Usuario</th><th>PDF</th></tr></thead>
+                                    <thead><tr><th style="width: 70%;">Documento</th><th style="width: 30%;">Fecha</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -309,18 +308,6 @@
                                 <p>Click para seleccionar PDF del contrato</p>
                                 <p id="contratoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Documentos Adicionales (PDF)</label>
-                            <div class="file-upload" onclick="document.getElementById('inquilinoDocAdicional').click()">
-                                <input type="file" id="inquilinoDocAdicional" accept=".pdf">
-                                <p>Click para seleccionar PDF adicional</p>
-                                <p id="docAdicionalFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
-                            </div>
-                        </div>
-                        <div class="form-group hidden" id="nombreDocGroup">
-                            <label>Nombre del Documento *</label>
-                            <input type="text" id="inquilinoNombreDoc" autocomplete="off">
                         </div>
                         <div class="form-group"><label>Notas</label><textarea id="inquilinoNotas"></textarea></div>
                         <div class="modal-actions">
@@ -381,24 +368,32 @@
                             <div class="tabs">
                                 <button class="tab active" onclick="switchTab('inquilino', 'renta')">Datos de Renta</button>
                                 <button class="tab" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos</button>
+                                <button class="tab" onclick="switchTab('inquilino', 'contrato')">Contrato Original</button>
                                 <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos Adicionales</button>
+                                <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
                             </div>
                             <div id="inquilinoRentaTab" class="tab-content active">
                                 <div class="info-grid">
-                                    <div class="info-item"><div class="info-label">Renta Mensual</div><div class="info-value currency" id="detailRenta"></div></div>
+                                    <div class="info-item" style="grid-column: 1;"><div class="info-label">Renta Mensual</div><div class="info-value currency" id="detailRenta"></div></div>
                                     <div class="info-item"><div class="info-label">M²</div><div class="info-value" id="detailM2"></div></div>
-                                    <div class="info-item"><div class="info-label">Fecha Inicio</div><div class="info-value" id="detailFechaInicio"></div></div>
-                                    <div class="info-item"><div class="info-label">Fecha Vencimiento</div><div class="info-value" id="detailFechaVenc"></div></div>
-                                </div>
-                                <div id="contratoSection" class="hidden" style="margin-top: 1rem;">
-                                    <button class="btn btn-sm btn-primary" onclick="viewContrato()">Ver Contrato PDF</button>
+                                    <div class="info-item"><div class="info-label">Inicio Rentando en:</div><div class="info-value" id="detailFechaInicio"></div></div>
+                                    <div class="info-item"><div class="info-label">Contrato actual vence en</div><div class="info-value" id="detailFechaVenc"></div></div>
                                 </div>
                             </div>
                             <div id="inquilinoPagosTab" class="tab-content">
                                 <div id="historialPagos"></div>
                             </div>
+                            <div id="inquilinoContratoTab" class="tab-content">
+                                <div id="contratoOriginalSection"></div>
+                            </div>
                             <div id="inquilinoDocsTab" class="tab-content">
                                 <div id="documentosAdicionales"></div>
+                                <div style="margin-top: 2rem; padding-top: 1rem; border-top: 2px solid var(--border);">
+                                    <button class="btn btn-success" onclick="showAgregarDocumentoModal()">Agregar Documento</button>
+                                </div>
+                            </div>
+                            <div id="inquilinoNotasTab" class="tab-content">
+                                <div id="notasInquilino" style="padding: 1rem; background: var(--bg); border-radius: 6px; min-height: 150px; white-space: pre-wrap;"></div>
                             </div>
                         </div>
                     </div>
@@ -430,6 +425,36 @@
                         <div class="modal-actions">
                             <button type="button" class="btn btn-secondary" onclick="closeModal('registrarPagoModal')">Cancelar</button>
                             <button type="submit" class="btn btn-success">Guardar Pago</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Agregar Documento Adicional Modal -->
+            <div id="agregarDocumentoModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Agregar Documento Adicional</h2>
+                        <button class="close-modal" onclick="closeModal('agregarDocumentoModal')">×</button>
+                    </div>
+                    <form onsubmit="saveDocumentoAdicional(event)">
+                        <div style="padding: 1.5rem;">
+                            <div class="form-group">
+                                <label>Nombre del Documento *</label>
+                                <input type="text" id="nuevoDocNombre" required autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label>Documento (PDF) *</label>
+                                <div class="file-upload" onclick="document.getElementById('nuevoDocPDF').click()">
+                                    <input type="file" id="nuevoDocPDF" accept=".pdf" required>
+                                    <p>Click para seleccionar PDF</p>
+                                    <p id="nuevoDocPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('agregarDocumentoModal')">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Guardar</button>
                         </div>
                     </form>
                 </div>
