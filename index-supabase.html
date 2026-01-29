@@ -360,9 +360,12 @@
                             </div>
                         </div>
                     </div>
-                    <div id="adminBancosView" class="hidden">
-                        <div style="padding: 1rem;">
-                            <div class="table-container">
+<div id="adminBancosView" class="hidden">
+    <div style="padding: 1rem;">
+        <div style="margin-bottom: 1rem;">
+            <button class="btn btn-success" onclick="showAddBancoModal()">Agregar Documento</button>
+        </div>
+        <div class="table-container">
                                 <table id="bancosTable">
                                     <thead><tr><th>Tipo</th><th>Fecha Subida</th><th>Usuario</th><th>PDF</th></tr></thead>
                                     <tbody></tbody>
@@ -791,6 +794,7 @@
             currentUser = username;
             document.getElementById('loginContainer').classList.add('hidden');
             document.getElementById('appContainer').classList.add('active');
+            document.body.classList.add('logged-in');
             updateMainMenuForPage();
             setTimeout(() => loadAllData(), 100);
         }
@@ -801,6 +805,7 @@
             document.getElementById('username').value = '';
             document.getElementById('loginContainer').classList.remove('hidden');
             document.getElementById('appContainer').classList.remove('active');
+            document.body.classList.remove('logged-in');
         }
 
         function toggleMainMenu() {
@@ -2255,14 +2260,14 @@
         }
 
         function renderBancosTable() {
-            const tbody = document.getElementById('bancosTable').querySelector('tbody');
-            tbody.innerHTML = '';
-            bancosDocumentos.forEach(b => {
-                const row = tbody.insertRow();
-                const pdfLink = `<a href="#" class="pdf-link" onclick="event.preventDefault(); viewDocumento('${b.archivoPdf}')">Ver PDF</a>`;
-                row.innerHTML = `<td>${b.tipo}</td><td>${formatDate(b.fechaSubida)}</td><td>${b.usuarioSubio}</td><td>${pdfLink}</td>`;
-            });
-            if (bancosDocumentos.length === 0) {
+    const tbody = document.getElementById('bancosTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    bancosDocumentos.forEach(b => {
+        const row = tbody.insertRow();
+        const pdfLink = `<a href="#" class="pdf-link" onclick="event.preventDefault(); viewDocumento('${b.archivoPdf}')">Ver PDF</a>`;
+        const tipoAbreviado = b.tipo === 'Consulta de Movimientos' ? 'Mov' : 'EdeC';
+        row.innerHTML = `<td>${tipoAbreviado}</td><td>${formatDate(b.fechaSubida)}</td><td>${b.usuarioSubio}</td><td>${pdfLink}</td>`;
+    });            if (bancosDocumentos.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay documentos</td></tr>';
             }
         }
