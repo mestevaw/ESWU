@@ -2561,8 +2561,7 @@
                     return;
                 }
                 
-                const docData = await fileToBase64(doc 
-                                                   Input.files[0]);
+const docData = await fileToBase64(docInput.files[0]);
                 
                 const bancoData = {
                     tipo: document.getElementById('bancoTipo').value,
