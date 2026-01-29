@@ -843,24 +843,26 @@
         function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
         function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
 
-        function login(username) {
-            if (!username) return;
-            currentUser = username;
-            document.getElementById('loginContainer').classList.add('hidden');
-            document.getElementById('appContainer').classList.add('active');
-            document.body.classList.add('logged-in');
-            updateMainMenuForPage();
-            setTimeout(() => loadAllData(), 100);
-        }
+       function login(username) {
+    if (!username || username === '') return;
+    currentUser = username;
+    document.getElementById('loginContainer').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'block';
+    document.getElementById('appContainer').classList.add('active');
+    document.body.classList.add('logged-in');
+    updateMainMenuForPage();
+    setTimeout(() => loadAllData(), 100);
+}
 
         function logout() {
-            if (!confirm('¿Cerrar sesión?')) return;
-            currentUser = '';
-            document.getElementById('username').value = '';
-            document.getElementById('loginContainer').classList.remove('hidden');
-            document.getElementById('appContainer').classList.remove('active');
-            document.body.classList.remove('logged-in');
-        }
+    if (!confirm('¿Cerrar sesión?')) return;
+    currentUser = '';
+    document.getElementById('username').value = '';
+    document.getElementById('loginContainer').style.display = 'flex';
+    document.getElementById('appContainer').style.display = 'none';
+    document.getElementById('appContainer').classList.remove('active');
+    document.body.classList.remove('logged-in');
+}
 
         function toggleMainMenu() {
             const dropdown = document.getElementById('mainMenuDropdown');
