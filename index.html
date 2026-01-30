@@ -175,11 +175,21 @@
                         <h2 class="card-title" id="proveedoresTitulo">Proveedores - Listado</h2>
                     </div>
                     <div id="proveedoresListView">
-                        <div class="table-container">
-                            <table id="proveedoresTable">
-                                <thead><tr><th style="width:35%;max-width:250px">Nombre</th><th>Servicio</th><th style="width:35%;max-width:250px">Contacto</th><th>Teléfono</th><th>Email</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
+                        <!-- Barra de búsqueda -->
+                        <div style="padding: 1rem; padding-bottom: 0;">
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="text" id="proveedorBusqueda" placeholder="Buscar proveedor..." style="flex: 1; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;">
+                                <button class="btn btn-secondary" onclick="filtrarProveedores()">🔍</button>
+                                <button class="btn btn-secondary" onclick="limpiarBusquedaProveedores()">Limpiar</button>
+                            </div>
+                        </div>
+                        <div style="padding: 1rem;">
+                            <div class="table-container">
+                                <table id="proveedoresTable" class="sticky-header-table">
+                                    <thead><tr><th style="width:35%;max-width:250px">Nombre</th><th>Servicio</th><th style="width:35%;max-width:250px">Contacto</th><th>Teléfono</th><th>Email</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div id="proveedoresFacturasPagadasView" class="hidden">
@@ -247,31 +257,57 @@
                     </div>
                 </div>
             </div>
-
             <!-- Admin Page -->
             <div id="adminPage" class="page">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title" id="adminTitulo">Administración</h2>
+                <!-- Vista inicial con botones -->
+                <div id="adminMenuView">
+                    <div class="admin-menu-grid">
+                        <button class="admin-menu-btn" onclick="showAdminView('usuarios')">
+                            <span class="admin-menu-icon">👤</span>
+                            <span>Usuarios</span>
+                        </button>
+                        <button class="admin-menu-btn" onclick="showAdminView('bancos')">
+                            <span class="admin-menu-icon">🏦</span>
+                            <span>Bancos</span>
+                        </button>
+                        <button class="admin-menu-btn" onclick="showPageFromMenu('bitacora')">
+                            <span class="admin-menu-icon">📋</span>
+                            <span>Bitácora</span>
+                        </button>
+                        <button class="admin-menu-btn" onclick="showPageFromMenu('estacionamiento')">
+                            <span class="admin-menu-icon">🚗</span>
+                            <span>Estacionamiento</span>
+                        </button>
+                        <button class="admin-menu-btn" onclick="showPageFromMenu('home')">
+                            <span class="admin-menu-icon">🏠</span>
+                            <span>Home</span>
+                        </button>
                     </div>
-                    <div id="adminUsuariosView" class="hidden">
+                </div>
+                
+                <!-- Vistas de contenido (sin títulos debajo del header) -->
+                <div id="adminUsuariosView" class="hidden">
+                    <div class="card">
                         <div style="padding: 1rem;">
                             <div class="table-container">
-                                <table id="usuariosTable">
+                                <table id="usuariosTable" class="sticky-header-table">
                                     <thead><tr><th>Usuario</th><th>Password</th><th>Estado</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
-                    <div id="adminBancosView" class="hidden">
+                </div>
+                
+                <div id="adminBancosView" class="hidden">
+                    <div class="card">
                         <div style="padding: 1rem;">
                             <div style="margin-bottom: 1rem;">
                                 <button class="btn btn-success" onclick="showAddBancoModal()">Agregar Documento</button>
                             </div>
                             <div class="table-container">
-                                <table id="bancosTable">
-                                    <thead><tr><th style="width: 70%;">Documento</th><th style="width: 30%;">Fecha</th></tr></thead>
+                                <table id="bancosTable" class="sticky-header-table">
+                                    <thead><tr><th style="width: 70%;">Nombre del Archivo</th><th style="width: 30%;">Fecha</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -279,19 +315,17 @@
                     </div>
                 </div>
             </div>
+
             <!-- Estacionamiento Page -->
             <div id="estacionamientoPage" class="page">
                 <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Estacionamiento</h2>
-                    </div>
                     <div style="padding: 1rem;">
                         <div class="table-container">
-                            <table id="estacionamientoTable" class="estacionamiento-table">
+                            <table id="estacionamientoTable" class="estacionamiento-table sticky-header-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 20%;">Espacio</th>
-                                        <th style="width: 50%;">Inquilino</th>
+                                        <th style="width: 20%; cursor: pointer;" onclick="sortEstacionamiento('espacio')">Espacio ↕</th>
+                                        <th style="width: 50%; cursor: pointer;" onclick="sortEstacionamiento('inquilino')">Inquilino ↕</th>
                                         <th style="width: 30%;">No. Despacho</th>
                                     </tr>
                                 </thead>
@@ -335,12 +369,15 @@
             <!-- Bitácora Semanal Page -->
             <div id="bitacoraPage" class="page">
                 <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Bitácora Semanal</h2>
-                    </div>
                     <div style="padding: 1rem;">
+                        <!-- Barra de búsqueda -->
+                        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="text" id="bitacoraBusqueda" placeholder="Buscar en notas..." style="flex: 1; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;">
+                            <button class="btn btn-secondary" onclick="filtrarBitacora()">🔍 Buscar</button>
+                            <button class="btn btn-secondary" onclick="limpiarBusquedaBitacora()">Limpiar</button>
+                        </div>
                         <div class="table-container">
-                            <table id="bitacoraTable">
+                            <table id="bitacoraTable" class="sticky-header-table">
                                 <thead>
                                     <tr>
                                         <th style="width: 25%;">Semana</th>
@@ -434,7 +471,6 @@
                     </form>
                 </div>
             </div>
-
             <!-- Inquilino Detail Modal -->
             <div id="inquilinoDetailModal" class="modal">
                 <div class="modal-content">
@@ -558,6 +594,7 @@
                     </form>
                 </div>
             </div>
+
             <!-- Add Proveedor Modal -->
             <div id="addProveedorModal" class="modal">
                 <div class="modal-content">
@@ -618,7 +655,7 @@
             <!-- Proveedor Detail Modal -->
             <div id="proveedorDetailModal" class="modal">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header modal-header-sticky">
                         <div class="modal-header-left">
                             <div class="dropdown">
                                 <button class="dropdown-toggle" onclick="toggleDropdown('proveedorDetailDropdown')" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
@@ -632,7 +669,7 @@
                         <h2 class="modal-title" id="proveedorDetailNombre"></h2>
                         <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
                     </div>
-                    <div style="padding: 1.5rem;">
+                    <div style="padding: 1.5rem; padding-top: 5rem;">
                         <div class="info-grid">
                             <div class="info-item"><div class="info-label">Servicio</div><div class="info-value" id="detailServicio"></div></div>
                         </div>
@@ -664,7 +701,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Factura Detail Modal -->
             <div id="facturaDetailModal" class="modal">
                 <div class="modal-content">
