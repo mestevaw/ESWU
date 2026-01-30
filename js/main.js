@@ -82,6 +82,7 @@ async function saveInquilino(event) {
             clabe: document.getElementById('inquilinoClabe').value,
             rfc: document.getElementById('inquilinoRFC').value,
             m2: document.getElementById('inquilinoM2').value,
+            numero_despacho: document.getElementById('inquilinoDespacho').value,
             renta: parseFloat(document.getElementById('inquilinoRenta').value),
             fecha_inicio: document.getElementById('inquilinoFechaInicio').value,
             fecha_vencimiento: document.getElementById('inquilinoFechaVenc').value,
@@ -121,6 +122,7 @@ function editInquilino() {
     document.getElementById('inquilinoClabe').value = inq.clabe || '';
     document.getElementById('inquilinoRFC').value = inq.rfc || '';
     document.getElementById('inquilinoM2').value = inq.m2 || '';
+    document.getElementById('inquilinoDespacho').value = inq.numeroDespacho || '';
     document.getElementById('inquilinoRenta').value = inq.renta;
     document.getElementById('inquilinoFechaInicio').value = inq.fechaInicio;
     document.getElementById('inquilinoFechaVenc').value = inq.fechaVencimiento;
@@ -694,6 +696,47 @@ async function saveDocumentoAdicional(event) {
     } catch (error) {
         console.error('Error:', error);
         alert('Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// ESTACIONAMIENTO Y BITÁCORA
+// ============================================
+
+let currentEstacionamientoId = null;
+let currentBitacoraId = null;
+
+async function saveEstacionamiento() {
+    showLoading();
+    try {
+        const inquilinoNombre = document.getElementById('editEspacioInquilino').value;
+        
+        await updateEstacionamiento(currentEstacionamientoId, inquilinoNombre);
+        await loadEstacionamiento();
+        renderEstacionamientoTable();
+        closeModal('editEstacionamientoModal');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function saveBitacora() {
+    showLoading();
+    try {
+        const notas = document.getElementById('editBitacoraNotas').value;
+        
+        await updateBitacoraSemanal(currentBitacoraId, notas);
+        await loadBitacoraSemanal();
+        renderBitacoraTable();
+        closeModal('editBitacoraModal');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar: ' + error.message);
     } finally {
         hideLoading();
     }
