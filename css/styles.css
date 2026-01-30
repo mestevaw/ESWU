@@ -870,6 +870,64 @@ tr.banco-clickable:hover {
     color: white;
 }
 
+/* Admin Menu Grid */
+.admin-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    padding: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.admin-menu-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.admin-menu-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.admin-menu-icon {
+    font-size: 3rem;
+}
+
+.admin-menu-btn span:last-child {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Modal Header Sticky */
+.modal-header-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Factura Box */
+.factura-box {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.factura-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     body.logged-in {
@@ -966,33 +1024,49 @@ tr.banco-clickable:hover {
         justify-content: flex-start;
     }
     
-    /* Tabs tipo folder en móvil */
-    .tabs {
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
+    /* Tabs verticales en móvil para fichas */
+    #inquilinoDetailModal .tabs,
+    #proveedorDetailModal .tabs {
+        flex-direction: column;
         border-bottom: none;
+        border-right: 2px solid var(--border);
+        width: 100%;
     }
     
-    .tab {
+    #inquilinoDetailModal .tab,
+    #proveedorDetailModal .tab {
         border: 1px solid var(--border);
-        border-bottom: none;
-        border-radius: 6px 6px 0 0;
-        margin-right: 2px;
-        background: white;
-    }
-    
-    .tab.active {
-        background: var(--bg);
-        border-bottom-color: transparent;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .tab-content {
-        border: 1px solid var(--border);
-        border-radius: 0 6px 6px 6px;
+        border-right: none;
+        border-radius: 6px 0 0 6px;
+        margin-bottom: 2px;
+        text-align: left;
         padding: 1rem;
+    }
+    
+    #inquilinoDetailModal .tab.active,
+    #proveedorDetailModal .tab.active {
         background: var(--bg);
+        border-right-color: transparent;
+    }
+    
+    #inquilinoDetailModal .tabs-container,
+    #proveedorDetailModal .tabs-container {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Ajuste para admin menu en móvil */
+    .admin-menu-grid {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+        gap: 1rem;
+    }
+    
+    .admin-menu-btn {
+        padding: 1.5rem 1rem;
+    }
+    
+    .admin-menu-icon {
+        font-size: 2rem;
     }
 }
