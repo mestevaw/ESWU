@@ -27,7 +27,9 @@ async function loadAllData() {
             loadProveedores(),
             loadActivos(),
             loadUsuarios(),
-            loadBancosDocumentos()
+            loadBancosDocumentos(),
+            loadEstacionamiento(),
+            loadBitacoraSemanal()
         ]);
         console.log('✅ Datos cargados');
     } catch (error) {
@@ -61,6 +63,7 @@ async function loadInquilinos() {
             fechaInicio: inq.fecha_inicio,
             fechaVencimiento: inq.fecha_vencimiento,
             notas: inq.notas,
+            numeroDespacho: inq.numero_despacho,
             contratoFile: inq.contrato_file,
             contratoFileName: inq.contrato_filename,
             contactos: inq.inquilinos_contactos ? inq.inquilinos_contactos.map(c => ({
@@ -447,6 +450,144 @@ async function saveBancoDocumento(bancoData) {
         .from('bancos_documentos')
         .insert([bancoData]);
     if (error) throw error;
+}
+
+// ============================================
+// ESTACIONAMIENTO
+// ============================================
+
+async function loadEstacionamiento() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('estacionamiento')
+            .select('*')
+            .order('numero_espacio');
+        
+        if (error) throw error;
+        
+        estacionamiento = data.map(e => ({
+            id: e.id,
+            numeroEspacio: e.numero_espacio,
+            inquilinoNombre: e.inquilino_nombre,
+            numeroDespacho: e.numero_despacho,
+            colorAsignado: e.color_asignado
+        }));
+    } catch (error) {
+        console.error('Error loading estacionamiento:', error);
+        throw error;
+    }
+}
+
+async function updateEstacionamiento(espacioId, inquilinoNombre) {
+    try {
+        // Buscar el inquilino para obtener su número de despacho
+        const { data: inquilinoData } = await supabaseClient
+            .from('inquilinos')
+            .select('numero_despacho')
+            .eq('nombre', inquilinoNombre)
+            .single();
+        
+        const numeroDespacho = inquilinoData?.numero_despacho || null;
+        
+        const { error } = await supabaseClient
+            .from('estacionamiento')
+            .update({
+                inquilino_nombre: inquilinoNombre,
+                numero_despacho: numeroDespacho
+            })
+            .eq('id', espacioId);
+        
+        if (error) throw error;
+    } catch (error) {
+        console.error('Error updating estacionamiento:', error);
+        throw error;
+    }
+}
+
+// ============================================
+// BITÁCORA SEMANAL
+// ============================================
+
+async function loadBitacoraSemanal() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('bitacora_semanal')
+            .select('*')
+            .order('semana_inicio', { ascending: false });
+        
+        if (error) throw error;
+        
+        bitacoraSemanal = data.map(b => ({
+            id: b.id,
+            semanaInicio: b.semana_inicio,
+            semanaFin: b.semana_fin,
+            semanaTexto: b.semana_texto,
+            notas: b.notas,
+            usuarioModifico: b.usuario_modifico,
+            fechaModificacion: b.fecha_modificacion
+        }));
+    } catch (error) {
+        console.error('Error loading bitacora:', error);
+        throw error;
+    }
+}
+
+async function updateBitacoraSemanal(bitacoraId, notas) {
+    try {
+        const { error } = await supabaseClient
+            .from('bitacora_semanal')
+            .update({
+                notas: notas,
+                usuario_modifico: currentUser,
+                fecha_modificacion: new Date().toISOString()
+            })
+            .eq('id', bitacoraId);
+        
+        if (error) throw error;
+    } catch (error) {
+        console.error('Error updating bitacora:', error);
+        throw error;
+    }
+}
+
+async function createNextWeekBitacora() {
+    try {
+        // Obtener la última semana registrada
+        const { data: lastWeek } = await supabaseClient
+            .from('bitacora_semanal')
+            .select('semana_inicio, semana_fin')
+            .order('semana_inicio', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (lastWeek) {
+            // Calcular la siguiente semana
+            const nextInicio = new Date(lastWeek.semana_fin);
+            nextInicio.setDate(nextInicio.getDate() + 1); // Día después del último sábado
+            
+            const nextFin = new Date(nextInicio);
+            nextFin.setDate(nextFin.getDate() + 6); // 6 días después = sábado
+            
+            // Formato de texto
+            const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                          'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+            const textoSemana = `${nextInicio.getDate()} al ${nextFin.getDate()} ${meses[nextFin.getMonth()]} ${nextFin.getFullYear()}`;
+            
+            const { error } = await supabaseClient
+                .from('bitacora_semanal')
+                .insert([{
+                    semana_inicio: nextInicio.toISOString().split('T')[0],
+                    semana_fin: nextFin.toISOString().split('T')[0],
+                    semana_texto: textoSemana,
+                    notas: ''
+                }]);
+            
+            if (error) throw error;
+        }
+    } catch (error) {
+        console.error('Error creating next week:', error);
+        throw error;
+    }
 }
 
 // ============================================
