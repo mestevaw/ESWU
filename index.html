@@ -127,7 +127,7 @@
                     <div id="inquilinosListView">
                         <div class="table-container">
                             <table id="inquilinosTable">
-                                <thead><tr><th>Empresa</th><th style="text-align:right">Renta Mensual</th><th>Vencimiento Contrato</th><th>Contrato</th></tr></thead>
+                                <thead><tr><th>Empresa</th><th style="text-align:right">Renta Mensual</th><th>Vencimiento Contrato</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -199,7 +199,7 @@
                                 </select>
                             </div>
                             <div class="table-container">
-                                <table id="proveedoresFacturasPagadasTable">
+                                <table id="proveedoresFacturasPagadasTable" class="sticky-header-table">
                                     <thead><tr><th style="width:35%;max-width:250px">Proveedor</th><th>Factura</th><th style="text-align:right">Monto</th><th>Fecha Pago</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
@@ -223,8 +223,8 @@
                                 </select>
                             </div>
                             <div class="table-container">
-                                <table id="proveedoresFacturasPorPagarTable">
-                                    <thead><tr><th style="width:35%;max-width:250px">Proveedor</th><th>Factura</th><th style="text-align:right">Monto</th><th>Vencimiento</th><th>PDF</th></tr></thead>
+                                <table id="proveedoresFacturasPorPagarTable" class="sticky-header-table">
+                                    <thead><tr><th style="width:35%;max-width:250px">Proveedor</th><th>Factura</th><th style="text-align:right">Monto</th><th>Vencimiento</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -279,6 +279,103 @@
                     </div>
                 </div>
             </div>
+            <!-- Estacionamiento Page -->
+            <div id="estacionamientoPage" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Estacionamiento</h2>
+                    </div>
+                    <div style="padding: 1rem;">
+                        <div class="table-container">
+                            <table id="estacionamientoTable" class="estacionamiento-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 20%;">Espacio</th>
+                                        <th style="width: 50%;">Inquilino</th>
+                                        <th style="width: 30%;">No. Despacho</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Editar Estacionamiento -->
+            <div id="editEstacionamientoModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Editar Espacio de Estacionamiento</h2>
+                        <button class="close-modal" onclick="closeModal('editEstacionamientoModal')">×</button>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <div class="form-group">
+                            <label>Espacio No. <span id="editEspacioNumero"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label>Inquilino *</label>
+                            <select id="editEspacioInquilino" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;">
+                                <option value="">-- Seleccione --</option>
+                                <option value="VISITAS">VISITAS</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>No. Despacho (se asigna automáticamente)</label>
+                            <input type="text" id="editEspacioDespacho" disabled style="background: var(--bg); width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;">
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('editEstacionamientoModal')">Cancelar</button>
+                        <button type="button" class="btn btn-success" onclick="saveEstacionamiento()">Guardar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bitácora Semanal Page -->
+            <div id="bitacoraPage" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Bitácora Semanal</h2>
+                    </div>
+                    <div style="padding: 1rem;">
+                        <div class="table-container">
+                            <table id="bitacoraTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 25%;">Semana</th>
+                                        <th style="width: 75%;">Notas</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Editar Bitácora -->
+            <div id="editBitacoraModal" class="modal">
+                <div class="modal-content" style="max-width: 800px;">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Editar Bitácora Semanal</h2>
+                        <button class="close-modal" onclick="closeModal('editBitacoraModal')">×</button>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <div class="form-group">
+                            <label>Semana: <strong id="editBitacoraSemana"></strong></label>
+                        </div>
+                        <div class="form-group">
+                            <label>Notas de la Semana</label>
+                            <textarea id="editBitacoraNotas" rows="15" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px; font-family: inherit;"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('editBitacoraModal')">Cancelar</button>
+                        <button type="button" class="btn btn-success" onclick="saveBitacora()">Guardar</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- MODALS -->
             <!-- Add Inquilino Modal -->
@@ -298,6 +395,7 @@
                         <div class="form-group"><label>CLABE</label><input type="text" id="inquilinoClabe" autocomplete="off"></div>
                         <div class="form-group"><label>RFC</label><input type="text" id="inquilinoRFC" autocomplete="off"></div>
                         <div class="form-group"><label>M²</label><input type="text" id="inquilinoM2" autocomplete="off"></div>
+                        <div class="form-group"><label>No. Despacho</label><input type="text" id="inquilinoDespacho" autocomplete="off"></div>
                         <div class="form-group"><label>Renta Mensual *</label><input type="number" id="inquilinoRenta" step="0.01" required autocomplete="off"></div>
                         <div class="form-group"><label>Fecha Inicio Contrato *</label><input type="date" id="inquilinoFechaInicio" required></div>
                         <div class="form-group"><label>Fecha Vencimiento Contrato *</label><input type="date" id="inquilinoFechaVenc" required></div>
@@ -373,9 +471,10 @@
                                 <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
                             </div>
                             <div id="inquilinoRentaTab" class="tab-content active">
-                                <div class="info-grid">
+                                <div class="info-grid" style="grid-template-columns: 1fr 1fr 1fr;">
                                     <div class="info-item" style="grid-column: 1;"><div class="info-label">Renta Mensual</div><div class="info-value currency" id="detailRenta"></div></div>
                                     <div class="info-item"><div class="info-label">M²</div><div class="info-value" id="detailM2"></div></div>
+                                    <div class="info-item"><div class="info-label">No. Despacho</div><div class="info-value" id="detailDespacho"></div></div>
                                     <div class="info-item"><div class="info-label">Inicio Rentando en:</div><div class="info-value" id="detailFechaInicio"></div></div>
                                     <div class="info-item"><div class="info-label">Contrato actual vence en</div><div class="info-value" id="detailFechaVenc"></div></div>
                                 </div>
@@ -387,10 +486,10 @@
                                 <div id="contratoOriginalSection"></div>
                             </div>
                             <div id="inquilinoDocsTab" class="tab-content">
-                                <div id="documentosAdicionales"></div>
-                                <div style="margin-top: 2rem; padding-top: 1rem; border-top: 2px solid var(--border);">
+                                <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
                                     <button class="btn btn-success" onclick="showAgregarDocumentoModal()">Agregar Documento</button>
                                 </div>
+                                <div id="documentosAdicionales"></div>
                             </div>
                             <div id="inquilinoNotasTab" class="tab-content">
                                 <div id="notasInquilino" style="padding: 1rem; background: var(--bg); border-radius: 6px; min-height: 150px; white-space: pre-wrap;"></div>
@@ -459,7 +558,6 @@
                     </form>
                 </div>
             </div>
-
             <!-- Add Proveedor Modal -->
             <div id="addProveedorModal" class="modal">
                 <div class="modal-content">
