@@ -78,7 +78,7 @@ function showPageFromMenu(pageName) {
     if (pageName === 'inquilinos') showInquilinosView('list');
     if (pageName === 'proveedores') showProveedoresView('list');
     if (pageName === 'activos') renderActivosTable();
-    if (pageName === 'admin') showAdminView('usuarios');
+    // Admin se queda en blanco hasta que seleccionen una opción del menú
     
     updateMainMenuForPage();
 }
@@ -415,9 +415,15 @@ function switchTab(type, tabName) {
         } else if (tabName === 'pagos') {
             document.querySelector('#inquilinoDetailModal .tab:nth-child(2)').classList.add('active');
             document.getElementById('inquilinoPagosTab').classList.add('active');
-        } else if (tabName === 'docs') {
+        } else if (tabName === 'contrato') {
             document.querySelector('#inquilinoDetailModal .tab:nth-child(3)').classList.add('active');
+            document.getElementById('inquilinoContratoTab').classList.add('active');
+        } else if (tabName === 'docs') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(4)').classList.add('active');
             document.getElementById('inquilinoDocsTab').classList.add('active');
+        } else if (tabName === 'notas') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(5)').classList.add('active');
+            document.getElementById('inquilinoNotasTab').classList.add('active');
         }
     } else if (type === 'proveedor') {
         document.querySelectorAll('#proveedorDetailModal .tab').forEach(t => t.classList.remove('active'));
@@ -788,10 +794,12 @@ function showInquilinoDetail(id) {
     document.getElementById('detailFechaInicio').textContent = formatDate(inq.fechaInicio);
     document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fechaVencimiento);
     
+    // Ajuste 4: Contrato como link simple
+    const contratoSection = document.getElementById('contratoOriginalSection');
     if (inq.contratoFile) {
-        document.getElementById('contratoSection').classList.remove('hidden');
+        contratoSection.innerHTML = '<a href="#" onclick="event.preventDefault(); viewContrato();" style="color:var(--primary);text-decoration:underline;">Contrato de Renta Original</a>';
     } else {
-        document.getElementById('contratoSection').classList.add('hidden');
+        contratoSection.innerHTML = '<p style="color:var(--text-light)">No hay contrato cargado</p>';
     }
     
     const historialDiv = document.getElementById('historialPagos');
@@ -806,19 +814,24 @@ function showInquilinoDetail(id) {
         historialDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay pagos</p>';
     }
     
+    // Ajuste 6: Agregar botón X para eliminar documentos
     const docsDiv = document.getElementById('documentosAdicionales');
     if (inq.documentos && inq.documentos.length > 0) {
-        docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th></tr></thead><tbody>' +
+        docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:50px;"></th></tr></thead><tbody>' +
             inq.documentos.map(d => `
-                <tr class="doc-item" onclick="viewDocumento('${d.archivo}')">
-                    <td>${d.nombre}</td>
-                    <td>${formatDate(d.fecha)}</td>
-                    <td>${d.usuario}</td>
+                <tr class="doc-item">
+                    <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${d.nombre}</td>
+                    <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${formatDate(d.fecha)}</td>
+                    <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${d.usuario}</td>
+                    <td><button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteDocumentoAdicional(${d.id})">×</button></td>
                 </tr>
             `).join('') + '</tbody></table>';
     } else {
         docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
     }
+    
+    // Ajuste 8: Mostrar notas
+    document.getElementById('notasInquilino').textContent = inq.notas || 'No hay notas para este inquilino.';
     
     document.getElementById('inquilinoDetailModal').classList.add('active');
     switchTab('inquilino', 'renta');
@@ -1184,13 +1197,13 @@ function renderBancosTable() {
     
     bancosDocumentos.forEach(b => {
         const row = tbody.insertRow();
-        const pdfLink = `<a href="#" class="pdf-link" onclick="event.preventDefault(); viewDocumento('${b.archivoPdf}')">Ver PDF</a>`;
-        const tipoAbreviado = b.tipo === 'Consulta de Movimientos' ? 'Mov' : 'EdeC';
-        row.innerHTML = `<td>${tipoAbreviado}</td><td>${formatDate(b.fechaSubida)}</td><td>${b.usuarioSubio}</td><td>${pdfLink}</td>`;
+        row.className = 'banco-clickable';
+        row.onclick = () => viewDocumento(b.archivoPdf);
+        row.innerHTML = `<td>${b.tipo}</td><td>${formatDate(b.fechaSubida)}</td>`;
     });
     
     if (bancosDocumentos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay documentos</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-light)">No hay documentos</td></tr>';
     }
 }
 
@@ -1209,4 +1222,37 @@ function showAddBancoModal() {
     document.getElementById('bancoForm').reset();
     document.getElementById('bancoDocumentoFileName').textContent = '';
     document.getElementById('addBancoModal').classList.add('active');
+}
+
+// ============================================
+// FUNCIONES ADICIONALES - AJUSTES
+// ============================================
+
+function showAgregarDocumentoModal() {
+    document.getElementById('nuevoDocNombre').value = '';
+    document.getElementById('nuevoDocPDF').value = '';
+    document.getElementById('nuevoDocPDFFileName').textContent = '';
+    document.getElementById('agregarDocumentoModal').classList.add('active');
+}
+
+async function deleteDocumentoAdicional(docId) {
+    if (!confirm('¿Eliminar este documento?')) return;
+    
+    showLoading();
+    try {
+        const { error } = await supabaseClient
+            .from('inquilinos_documentos')
+            .delete()
+            .eq('id', docId);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        showInquilinoDetail(currentInquilinoId);
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
 }
