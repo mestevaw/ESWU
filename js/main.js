@@ -93,18 +93,6 @@ async function saveInquilino(event) {
         const inquilinoId = await saveInquilinoData(inquilinoData, isEditMode, currentInquilinoId);
         await saveInquilinoContactos(inquilinoId, tempInquilinoContactos);
         
-        const docAdicionalInput = document.getElementById('inquilinoDocAdicional');
-        if (docAdicionalInput.files.length > 0) {
-            const nombreDoc = document.getElementById('inquilinoNombreDoc').value;
-            if (!nombreDoc) {
-                alert('Por favor ingrese un nombre para el documento');
-                hideLoading();
-                return;
-            }
-            const docData = await fileToBase64(docAdicionalInput.files[0]);
-            await saveInquilinoDocumento(inquilinoId, nombreDoc, docData);
-        }
-        
         await loadInquilinos();
         renderInquilinosTable();
         closeModal('addInquilinoModal');
@@ -658,6 +646,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    const nuevoDocPDF = document.getElementById('nuevoDocPDF');
+    if (nuevoDocPDF) {
+        nuevoDocPDF.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                document.getElementById('nuevoDocPDFFileName').textContent = e.target.files[0].name;
+            }
+        });
+    }
+    
     // Hide home icon initially
     document.getElementById('homeIcon').style.display = 'none';
 });
@@ -667,5 +664,37 @@ window.onclick = function(event) {
     if (!event.target.matches('.dropdown-toggle')) {
         document.querySelectorAll('.dropdown-content').forEach(dd => dd.classList.remove('show'));
         document.querySelectorAll('.main-menu-content').forEach(dd => dd.classList.remove('show'));
+    }
+}
+
+// ============================================
+// DOCUMENTOS ADICIONALES
+// ============================================
+
+async function saveDocumentoAdicional(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const nombreDoc = document.getElementById('nuevoDocNombre').value;
+        const docInput = document.getElementById('nuevoDocPDF');
+        
+        if (docInput.files.length === 0) {
+            alert('Por favor seleccione un archivo PDF');
+            hideLoading();
+            return;
+        }
+        
+        const docData = await fileToBase64(docInput.files[0]);
+        await saveInquilinoDocumento(currentInquilinoId, nombreDoc, docData);
+        
+        await loadInquilinos();
+        showInquilinoDetail(currentInquilinoId);
+        closeModal('agregarDocumentoModal');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
     }
 }
