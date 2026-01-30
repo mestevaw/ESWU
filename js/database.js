@@ -275,7 +275,6 @@ async function deleteProveedorFromDB(proveedorId) {
         .eq('id', proveedorId);
     if (error) throw error;
 }
-
 // ============================================
 // FACTURAS
 // ============================================
