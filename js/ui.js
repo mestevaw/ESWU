@@ -82,7 +82,12 @@ function showPageFromMenu(pageName) {
     if (pageName === 'activos') renderActivosTable();
     if (pageName === 'estacionamiento') renderEstacionamientoTable();
     if (pageName === 'bitacora') renderBitacoraTable();
-    // Admin se queda en blanco hasta que seleccionen una opción del menú
+    if (pageName === 'admin') {
+        // Mostrar vista inicial con botones
+        document.getElementById('adminMenuView').classList.remove('hidden');
+        document.getElementById('adminUsuariosView').classList.add('hidden');
+        document.getElementById('adminBancosView').classList.add('hidden');
+    }
     
     updateMainMenuForPage();
 }
@@ -145,13 +150,14 @@ function updateMainMenuForPage() {
             showAddActivoModal();
         };
         mainMenu.appendChild(a);
-    } else if (currentPageContext === 'admin') {
+    } else if (currentPageContext === 'admin' || currentPageContext === 'estacionamiento' || currentPageContext === 'bitacora') {
         mainMenu.classList.add('admin-menu');
         const links = [
             { text: 'Usuarios', action: () => showAdminView('usuarios') },
             { text: 'Bancos', action: () => showAdminView('bancos') },
             { text: 'Estacionamiento', action: () => showPageFromMenu('estacionamiento') },
-            { text: 'Bitácora Semanal', action: () => showPageFromMenu('bitacora') }
+            { text: 'Bitácora Semanal', action: () => showPageFromMenu('bitacora') },
+            { text: 'Home Admin', action: () => showPageFromMenu('admin') }
         ];
         links.forEach(link => {
             const a = document.createElement('a');
@@ -801,7 +807,6 @@ function showInquilinoDetail(id) {
     document.getElementById('detailFechaInicio').textContent = formatDate(inq.fechaInicio);
     document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fechaVencimiento);
     
-    // Ajuste 4: Contrato como link simple
     const contratoSection = document.getElementById('contratoOriginalSection');
     if (inq.contratoFile) {
         contratoSection.innerHTML = '<a href="#" onclick="event.preventDefault(); viewContrato();" style="color:var(--primary);text-decoration:underline;">Contrato de Renta Original</a>';
@@ -821,7 +826,6 @@ function showInquilinoDetail(id) {
         historialDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay pagos</p>';
     }
     
-    // Ajuste 6: Agregar botón X para eliminar documentos
     const docsDiv = document.getElementById('documentosAdicionales');
     if (inq.documentos && inq.documentos.length > 0) {
         docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:50px;"></th></tr></thead><tbody>' +
@@ -837,13 +841,11 @@ function showInquilinoDetail(id) {
         docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
     }
     
-    // Ajuste 8: Mostrar notas
     document.getElementById('notasInquilino').textContent = inq.notas || 'No hay notas para este inquilino.';
     
     document.getElementById('inquilinoDetailModal').classList.add('active');
     switchTab('inquilino', 'renta');
 }
-
 // ============================================
 // PROVEEDORES - VIEWS
 // ============================================
@@ -855,15 +857,17 @@ function showProveedoresView(view) {
     
     const titulo = document.getElementById('proveedoresTitulo');
     if (view === 'list') {
-        titulo.textContent = 'Proveedores - Listado';
+        titulo.style.display = 'none'; // Ocultar título en listado
         document.getElementById('proveedoresListView').classList.remove('hidden');
         renderProveedoresTable();
     } else if (view === 'facturasPagadas') {
-        titulo.textContent = 'Proveedores - Facturas Pagadas';
+        titulo.style.display = 'block';
+        titulo.textContent = 'Facturas Pagadas';
         document.getElementById('proveedoresFacturasPagadasView').classList.remove('hidden');
         renderProveedoresFacturasPagadas();
     } else if (view === 'facturasPorPagar') {
-        titulo.textContent = 'Proveedores - Facturas X Pagar';
+        titulo.style.display = 'block';
+        titulo.textContent = 'Facturas X Pagar';
         document.getElementById('proveedoresFacturasPorPagarView').classList.remove('hidden');
         renderProveedoresFacturasPorPagar();
     }
@@ -945,6 +949,7 @@ function renderProveedoresFacturasPagadas() {
         row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
     }
 }
+
 function renderProveedoresFacturasPorPagar() {
     const tbody = document.getElementById('proveedoresFacturasPorPagarTable').querySelector('tbody');
     tbody.innerHTML = '';
@@ -1062,19 +1067,22 @@ function showProveedorDetail(id) {
         if (isMobile) {
             facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
                 totalPorPagar += f.monto;
-                const verLink = f.documentoFile 
-                    ? `<button class="btn btn-sm btn-secondary" onclick="viewFacturaDoc('${f.documentoFile}')">Ver</button>` 
-                    : '';
+                const clickAction = f.documentoFile ? `onclick="viewFacturaDoc('${f.documentoFile}')"` : '';
+                const cursorStyle = f.documentoFile ? 'cursor:pointer;' : '';
                 return `
-                    <div class="payment-item">
-                        <div class="payment-item-content" style="width:100%">
-                            <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong>, vence el <strong>${formatDate(f.vencimiento)}</strong></div>
-                            <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap">
-                                ${verLink}
-                                <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
-                            </div>
-                            <div style="margin-top:0.5rem;text-align:right"><strong>${formatCurrency(f.monto)}</strong></div>
+                    <div class="factura-box" ${clickAction} style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white; ${cursorStyle}">
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong>
+                        </div>
+                        <div style="margin-bottom: 0.5rem;">
+                            Vence: <strong>${formatDate(f.vencimiento)}</strong>
+                        </div>
+                        <div style="text-align:right; font-size: 1.1rem; color: var(--primary);">
+                            <strong>${formatCurrency(f.monto)}</strong>
+                        </div>
+                        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;" onclick="event.stopPropagation()">
+                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
                         </div>
                     </div>
                 `;
@@ -1166,22 +1174,19 @@ function showActivoDetail(id) {
     
     document.getElementById('activoDetailModal').classList.add('active');
 }
-
 // ============================================
 // ADMIN
 // ============================================
 
 function showAdminView(view) {
+    document.getElementById('adminMenuView').classList.add('hidden');
     document.getElementById('adminUsuariosView').classList.add('hidden');
     document.getElementById('adminBancosView').classList.add('hidden');
     
-    const titulo = document.getElementById('adminTitulo');
     if (view === 'usuarios') {
-        titulo.textContent = 'Administración - Usuarios';
         document.getElementById('adminUsuariosView').classList.remove('hidden');
         renderUsuariosTable();
     } else if (view === 'bancos') {
-        titulo.textContent = 'Administración - Bancos';
         document.getElementById('adminBancosView').classList.remove('hidden');
         renderBancosTable();
     }
@@ -1329,6 +1334,7 @@ function renderBitacoraTable() {
     const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
     tbody.innerHTML = '';
     
+    // Ya viene ordenado descendente de la BD, solo renderizamos
     bitacoraSemanal.forEach(sem => {
         const row = tbody.insertRow();
         row.onclick = () => showEditBitacoraModal(sem.id);
@@ -1347,4 +1353,142 @@ function showEditBitacoraModal(bitacoraId) {
     document.getElementById('editBitacoraNotas').value = bitacora.notas || '';
     
     document.getElementById('editBitacoraModal').classList.add('active');
+}
+
+// ============================================
+// BÚSQUEDA Y FILTROS
+// ============================================
+
+let bitacoraDataOriginal = [];
+let proveedoresDataOriginal = [];
+let estacionamientoSortOrder = { espacio: 'asc', inquilino: 'asc' };
+
+function filtrarBitacora() {
+    const busqueda = document.getElementById('bitacoraBusqueda').value.toLowerCase().trim();
+    const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    if (!busqueda) {
+        renderBitacoraTable();
+        return;
+    }
+    
+    const filtradas = bitacoraSemanal.filter(sem => {
+        const notas = (sem.notas || '').toLowerCase();
+        return notas.includes(busqueda);
+    });
+    
+    filtradas.forEach(sem => {
+        const row = tbody.insertRow();
+        row.onclick = () => showEditBitacoraModal(sem.id);
+        row.style.cursor = 'pointer';
+        
+        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
+        row.innerHTML = `<td><strong>${sem.semanaTexto}</strong></td><td>${notasPreview}</td>`;
+    });
+    
+    if (filtradas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron resultados</td></tr>';
+    }
+}
+
+function limpiarBusquedaBitacora() {
+    document.getElementById('bitacoraBusqueda').value = '';
+    renderBitacoraTable();
+}
+
+function filtrarProveedores() {
+    const busqueda = document.getElementById('proveedorBusqueda').value.toLowerCase().trim();
+    const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    if (!busqueda) {
+        renderProveedoresTable();
+        return;
+    }
+    
+    const filtrados = proveedores.filter(prov => {
+        const nombre = prov.nombre.toLowerCase();
+        return nombre.includes(busqueda);
+    });
+    
+    filtrados.forEach(prov => {
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';
+        row.onclick = () => showProveedorDetail(prov.id);
+        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
+        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td><td>${prov.servicio}</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td><td>${primerContacto.telefono || '-'}</td><td>${primerContacto.email || '-'}</td>`;
+    });
+    
+    if (filtrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron proveedores</td></tr>';
+    }
+}
+
+function limpiarBusquedaProveedores() {
+    document.getElementById('proveedorBusqueda').value = '';
+    renderProveedoresTable();
+}
+
+function sortEstacionamiento(columna) {
+    const tbody = document.getElementById('estacionamientoTable').querySelector('tbody');
+    
+    let sortedData = [...estacionamiento];
+    
+    if (columna === 'espacio') {
+        sortedData.sort((a, b) => {
+            const numA = parseInt(a.numeroEspacio);
+            const numB = parseInt(b.numeroEspacio);
+            return estacionamientoSortOrder.espacio === 'asc' ? numA - numB : numB - numA;
+        });
+        estacionamientoSortOrder.espacio = estacionamientoSortOrder.espacio === 'asc' ? 'desc' : 'asc';
+    } else if (columna === 'inquilino') {
+        sortedData.sort((a, b) => {
+            const nameA = (a.inquilinoNombre || '').toLowerCase();
+            const nameB = (b.inquilinoNombre || '').toLowerCase();
+            if (estacionamientoSortOrder.inquilino === 'asc') {
+                return nameA.localeCompare(nameB);
+            } else {
+                return nameB.localeCompare(nameA);
+            }
+        });
+        estacionamientoSortOrder.inquilino = estacionamientoSortOrder.inquilino === 'asc' ? 'desc' : 'asc';
+    }
+    
+    tbody.innerHTML = '';
+    sortedData.forEach(esp => {
+        const row = tbody.insertRow();
+        row.onclick = () => showEditEstacionamientoModal(esp.id);
+        row.style.cursor = 'pointer';
+        
+        const espacioCell = `<span class="estacionamiento-espacio" style="background: ${esp.colorAsignado}">${esp.numeroEspacio}</span>`;
+        const inquilinoText = esp.inquilinoNombre || '-';
+        const despachoText = esp.numeroDespacho || '-';
+        
+        row.innerHTML = `<td>${espacioCell}</td><td>${inquilinoText}</td><td>${despachoText}</td>`;
+    });
+}
+// ============================================
+// LOADING FUNCTIONS
+// ============================================
+
+function showLoading() {
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
+// ============================================
+// FILE CONVERSION
+// ============================================
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
