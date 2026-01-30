@@ -239,6 +239,15 @@ body.logged-in {
 /* Tables */
 .table-container {
     overflow-x: auto;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.sticky-header-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
 }
 
 table {
@@ -843,6 +852,24 @@ tr.banco-clickable:hover {
     display: block;
 }
 
+/* Estacionamiento Table */
+.estacionamiento-table tbody tr {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.estacionamiento-table tbody tr:hover {
+    opacity: 0.8;
+}
+
+.estacionamiento-espacio {
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    display: inline-block;
+    color: white;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     body.logged-in {
@@ -937,5 +964,35 @@ tr.banco-clickable:hover {
     .payment-item-actions {
         width: 100%;
         justify-content: flex-start;
+    }
+    
+    /* Tabs tipo folder en móvil */
+    .tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        border-bottom: none;
+    }
+    
+    .tab {
+        border: 1px solid var(--border);
+        border-bottom: none;
+        border-radius: 6px 6px 0 0;
+        margin-right: 2px;
+        background: white;
+    }
+    
+    .tab.active {
+        background: var(--bg);
+        border-bottom-color: transparent;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .tab-content {
+        border: 1px solid var(--border);
+        border-radius: 0 6px 6px 6px;
+        padding: 1rem;
+        background: var(--bg);
     }
 }
