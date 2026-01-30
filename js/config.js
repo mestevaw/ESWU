@@ -16,6 +16,8 @@ let proveedores = [];
 let activos = [];
 let usuarios = [];
 let bancosDocumentos = [];
+let estacionamiento = [];
+let bitacoraSemanal = [];
 
 // Variables de contexto
 let currentInquilinoId = null;
