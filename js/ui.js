@@ -67,7 +67,9 @@ function showPageFromMenu(pageName) {
         'inquilinos': 'ESWU - Inquilinos',
         'proveedores': 'ESWU - Proveedores',
         'activos': 'ESWU - Activos',
-        'admin': 'ESWU - Administración'
+        'admin': 'ESWU - Administración',
+        'estacionamiento': 'ESWU - Estacionamiento',
+        'bitacora': 'ESWU - Bitácora Semanal'
     };
     document.getElementById('headerTitle').textContent = titleMap[pageName];
     
@@ -78,6 +80,8 @@ function showPageFromMenu(pageName) {
     if (pageName === 'inquilinos') showInquilinosView('list');
     if (pageName === 'proveedores') showProveedoresView('list');
     if (pageName === 'activos') renderActivosTable();
+    if (pageName === 'estacionamiento') renderEstacionamientoTable();
+    if (pageName === 'bitacora') renderBitacoraTable();
     // Admin se queda en blanco hasta que seleccionen una opción del menú
     
     updateMainMenuForPage();
@@ -145,7 +149,9 @@ function updateMainMenuForPage() {
         mainMenu.classList.add('admin-menu');
         const links = [
             { text: 'Usuarios', action: () => showAdminView('usuarios') },
-            { text: 'Bancos', action: () => showAdminView('bancos') }
+            { text: 'Bancos', action: () => showAdminView('bancos') },
+            { text: 'Estacionamiento', action: () => showPageFromMenu('estacionamiento') },
+            { text: 'Bitácora Semanal', action: () => showPageFromMenu('bitacora') }
         ];
         links.forEach(link => {
             const a = document.createElement('a');
@@ -441,7 +447,6 @@ function switchTab(type, tabName) {
         }
     }
 }
-
 // ============================================
 // CONTACTOS RENDERING
 // ============================================
@@ -655,14 +660,15 @@ function renderInquilinosTable() {
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
         row.onclick = () => showInquilinoDetail(inq.id);
-        const contratoBtn = inq.contratoFile 
-            ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); viewContratoDirect(${inq.id})">PDF</button>` 
-            : '-';
-        row.innerHTML = `<td>${inq.nombre}</td><td class="currency">${formatCurrency(inq.renta)}</td><td>${formatDateVencimiento(inq.fechaVencimiento)}</td><td>${contratoBtn}</td>`;
+        
+        // Limitar nombre a 25 caracteres
+        const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
+        
+        row.innerHTML = `<td style="font-size:0.9rem">${nombreCorto}</td><td class="currency">${formatCurrency(inq.renta)}</td><td>${formatDateVencimiento(inq.fechaVencimiento)}</td>`;
     });
     
     if (inquilinos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay inquilinos</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay inquilinos</td></tr>';
     }
 }
 
@@ -791,6 +797,7 @@ function showInquilinoDetail(id) {
     document.getElementById('detailClabe').textContent = inq.clabe || '-';
     document.getElementById('detailRenta').textContent = formatCurrency(inq.renta);
     document.getElementById('detailM2').textContent = inq.m2 || '-';
+    document.getElementById('detailDespacho').textContent = inq.numeroDespacho || '-';
     document.getElementById('detailFechaInicio').textContent = formatDate(inq.fechaInicio);
     document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fechaVencimiento);
     
@@ -856,7 +863,7 @@ function showProveedoresView(view) {
         document.getElementById('proveedoresFacturasPagadasView').classList.remove('hidden');
         renderProveedoresFacturasPagadas();
     } else if (view === 'facturasPorPagar') {
-        titulo.textContent = 'Proveedores - Facturas Por Pagar';
+        titulo.textContent = 'Proveedores - Facturas X Pagar';
         document.getElementById('proveedoresFacturasPorPagarView').classList.remove('hidden');
         renderProveedoresFacturasPorPagar();
     }
@@ -907,7 +914,9 @@ function renderProveedoresFacturasPagadas() {
                             proveedor: prov.nombre,
                             numero: f.numero || 'S/N',
                             monto: f.monto,
-                            fecha: f.fechaPago
+                            fecha: f.fechaPago,
+                            documentoFile: f.documentoFile,
+                            pagoFile: f.pagoFile
                         });
                         totalPagadas += f.monto;
                     }
@@ -919,7 +928,13 @@ function renderProveedoresFacturasPagadas() {
     pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     pagadas.forEach(f => {
         const row = tbody.insertRow();
-        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDate(f.fecha)}</td>`;
+        const facturaCell = f.documentoFile 
+            ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" onclick="viewFacturaDoc('${f.documentoFile}')">${f.numero}</td>`
+            : `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.numero}</td>`;
+        const fechaCell = f.pagoFile
+            ? `<td style="cursor:pointer;color:var(--primary)" onclick="viewFacturaDoc('${f.pagoFile}')">${formatDate(f.fecha)}</td>`
+            : `<td>${formatDate(f.fecha)}</td>`;
+        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
     });
     
     if (pagadas.length === 0) {
@@ -930,7 +945,6 @@ function renderProveedoresFacturasPagadas() {
         row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
     }
 }
-
 function renderProveedoresFacturasPorPagar() {
     const tbody = document.getElementById('proveedoresFacturasPorPagarTable').querySelector('tbody');
     tbody.innerHTML = '';
@@ -974,18 +988,19 @@ function renderProveedoresFacturasPorPagar() {
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     porPagar.forEach(f => {
         const row = tbody.insertRow();
-        const pdfLink = f.documentoFile 
-            ? `<a href="#" class="pdf-link" onclick="event.preventDefault(); viewFacturaDoc('${f.documentoFile}')">PDF</a>` 
-            : '-';
-        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td><td>${pdfLink}</td>`;
+        row.style.cursor = 'pointer';
+        if (f.documentoFile) {
+            row.onclick = () => viewFacturaDoc(f.documentoFile);
+        }
+        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
     });
     
     if (porPagar.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
     } else {
         const row = tbody.insertRow();
         row.className = 'total-row';
-        row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td colspan="2"></td>`;
+        row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
     }
 }
 
@@ -1255,4 +1270,81 @@ async function deleteDocumentoAdicional(docId) {
     } finally {
         hideLoading();
     }
+}
+
+// ============================================
+// ESTACIONAMIENTO
+// ============================================
+
+function renderEstacionamientoTable() {
+    const tbody = document.getElementById('estacionamientoTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    estacionamiento.forEach(esp => {
+        const row = tbody.insertRow();
+        row.onclick = () => showEditEstacionamientoModal(esp.id);
+        row.style.cursor = 'pointer';
+        
+        const espacioCell = `<span class="estacionamiento-espacio" style="background: ${esp.colorAsignado}">${esp.numeroEspacio}</span>`;
+        const inquilinoText = esp.inquilinoNombre || '-';
+        const despachoText = esp.numeroDespacho || '-';
+        
+        row.innerHTML = `<td>${espacioCell}</td><td>${inquilinoText}</td><td>${despachoText}</td>`;
+    });
+}
+
+function showEditEstacionamientoModal(espacioId) {
+    const espacio = estacionamiento.find(e => e.id === espacioId);
+    currentEstacionamientoId = espacioId;
+    
+    document.getElementById('editEspacioNumero').textContent = espacio.numeroEspacio;
+    
+    // Poblar dropdown con inquilinos
+    const select = document.getElementById('editEspacioInquilino');
+    select.innerHTML = '<option value="">-- Seleccione --</option><option value="VISITAS">VISITAS</option>';
+    inquilinos.forEach(inq => {
+        const option = document.createElement('option');
+        option.value = inq.nombre;
+        option.textContent = inq.nombre;
+        if (inq.nombre === espacio.inquilinoNombre) option.selected = true;
+        select.appendChild(option);
+    });
+    
+    document.getElementById('editEspacioDespacho').value = espacio.numeroDespacho || '';
+    
+    // Actualizar despacho al cambiar inquilino
+    select.onchange = function() {
+        const selectedInquilino = inquilinos.find(i => i.nombre === this.value);
+        document.getElementById('editEspacioDespacho').value = selectedInquilino?.numeroDespacho || '';
+    };
+    
+    document.getElementById('editEstacionamientoModal').classList.add('active');
+}
+
+// ============================================
+// BITÁCORA SEMANAL
+// ============================================
+
+function renderBitacoraTable() {
+    const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    bitacoraSemanal.forEach(sem => {
+        const row = tbody.insertRow();
+        row.onclick = () => showEditBitacoraModal(sem.id);
+        row.style.cursor = 'pointer';
+        
+        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
+        row.innerHTML = `<td><strong>${sem.semanaTexto}</strong></td><td>${notasPreview}</td>`;
+    });
+}
+
+function showEditBitacoraModal(bitacoraId) {
+    const bitacora = bitacoraSemanal.find(b => b.id === bitacoraId);
+    currentBitacoraId = bitacoraId;
+    
+    document.getElementById('editBitacoraSemana').textContent = bitacora.semanaTexto;
+    document.getElementById('editBitacoraNotas').value = bitacora.notas || '';
+    
+    document.getElementById('editBitacoraModal').classList.add('active');
 }
