@@ -261,7 +261,7 @@ async function loadBitacoraSemanal() {
         const { data, error } = await supabaseClient
             .from('bitacora_semanal')
             .select('*')
-            .order('semana_inicio', { ascending: false });
+            .order('semana_inicio', { ascending: true });
         
         if (error) throw error;
         
