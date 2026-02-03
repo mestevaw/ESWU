@@ -95,6 +95,8 @@ function handleRegresa() {
         currentSearchContext = null;
         document.getElementById('btnRegresa').classList.add('hidden');
         document.getElementById('btnSearch').classList.add('hidden');
+       // Mostrar menú principal de nuevo
+        document.getElementById('menuSidebar').classList.remove('hidden');
         
         // Ajustar content-area
         document.getElementById('contentArea').classList.remove('fullwidth');
@@ -127,6 +129,7 @@ function showPageFromMenu(pageName) {
     
     // Content-area a pantalla completa
     document.getElementById('contentArea').classList.remove('with-submenu');
+   document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.add('fullwidth');
     
     // Cargar contenido
@@ -254,6 +257,7 @@ function showInquilinosView(view) {
     }
     
     document.getElementById('contentArea').classList.remove('with-submenu');
+   document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.add('fullwidth');
     
     if (view === 'list') {
@@ -504,6 +508,7 @@ function showProveedoresView(view) {
     }
     
     document.getElementById('contentArea').classList.remove('with-submenu');
+   document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.add('fullwidth');
     
     if (view === 'list') {
@@ -905,6 +910,7 @@ function showAdminView(view) {
     document.getElementById('btnSearch').classList.add('hidden');
     
     document.getElementById('contentArea').classList.remove('with-submenu');
+   document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.add('fullwidth');
     
     if (view === 'usuarios') {
@@ -927,6 +933,7 @@ function showActivosPage() {
     document.getElementById('btnSearch').classList.add('hidden');
     
     document.getElementById('contentArea').classList.remove('with-submenu');
+   document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.add('fullwidth');
     
     renderActivosTable();
@@ -943,6 +950,7 @@ function showNumerosPage() {
     document.getElementById('btnSearch').classList.add('hidden');
     
     document.getElementById('contentArea').classList.remove('with-submenu');
+   document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.add('fullwidth');
     
     updateHomeView();
