@@ -99,7 +99,7 @@ async function initializeApp() {
             loadProveedores(),
             loadActivos(),
             loadUsuarios(),
-            loadBancos(),
+            loadBancosDocumentos(),
             loadEstacionamiento(),
             loadBitacora()
         ]);
