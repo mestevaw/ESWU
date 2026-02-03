@@ -15,19 +15,18 @@ bitacoraSemanal = [];
 usuarios = [];
 bancosDocumentos = [];
 
-let currentInquilinoId = null;
-let currentProveedorId = null;
-let currentActivoId = null;
-let currentUsuarioId = null;
-let currentEstacionamientoId = null;
-let currentBitacoraId = null;
-let currentFacturaId = null;
+currentInquilinoId = null;
+currentProveedorId = null;
+currentActivoId = null;
+currentUsuarioId = null;
+currentEstacionamientoId = null;
+currentBitacoraId = null;
+currentFacturaId = null;
 
-let isEditMode = false;
-let tempInquilinoContactos = [];
-let tempProveedorContactos = [];
-
-let currentUser = null;
+isEditMode = false;
+tempInquilinoContactos = [];
+tempProveedorContactos = [];
+currentUser = null;
 
 // ============================================
 // LOGIN AND AUTHENTICATION
