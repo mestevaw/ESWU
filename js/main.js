@@ -261,21 +261,21 @@ async function loadBitacoraSemanal() {
         const { data, error } = await supabaseClient
             .from('bitacora_semanal')
             .select('*')
-            .order('semana', { ascending: false });
+            .order('semana_inicio', { ascending: false });
         
         if (error) throw error;
         
         bitacoraSemanal = data.map(b => {
-            const fecha = new Date(b.semana + 'T00:00:00');
+            const fecha = new Date(b.semana_inicio + 'T00:00:00');
             const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
             const semanaTexto = `Semana del ${fecha.getDate()} ${months[fecha.getMonth()]} ${fecha.getFullYear()}`;
             
-            return {
-                id: b.id,
-                semana: b.semana,
-                semanaTexto: semanaTexto,
-                notas: b.notas
-            };
+           return {
+    id: b.id,
+    semana: b.semana_inicio,
+    semanaTexto: semanaTexto,
+    notas: b.notas
+};
         });
         
     } catch (error) {
