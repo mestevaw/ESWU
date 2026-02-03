@@ -1,722 +1,530 @@
 /* ========================================
-   ESWU - MAIN APP
-   Initialization and event handlers
+   ESWU - MAIN APPLICATION
+   Database operations and app initialization
    ======================================== */
 
 // ============================================
-// LOGIN & LOGOUT
+// GLOBAL STATE VARIABLES
 // ============================================
 
-function login(username) {
-    if (!username || username === '') return;
+let inquilinos = [];
+let proveedores = [];
+let activos = [];
+let estacionamiento = [];
+let bitacoraSemanal = [];
+let usuarios = [];
+let bancosDocumentos = [];
+
+let currentInquilinoId = null;
+let currentProveedorId = null;
+let currentActivoId = null;
+let currentUsuarioId = null;
+let currentEstacionamientoId = null;
+let currentBitacoraId = null;
+let currentFacturaId = null;
+
+let isEditMode = false;
+let tempInquilinoContactos = [];
+let tempProveedorContactos = [];
+
+let currentUser = null;
+
+// ============================================
+// LOGIN AND AUTHENTICATION
+// ============================================
+
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
     
-    currentUser = username;
-    document.getElementById('loginContainer').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'block';
-    document.getElementById('appContainer').classList.add('active');
-    document.body.classList.add('logged-in');
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
     
-    updateMainMenuForPage();
-    setTimeout(() => {
-        loadAllData().then(() => {
-            populateYearSelect();
-            populateInquilinosYearSelects();
-            populateProveedoresYearSelects();
-            updateHomeView();
+    showLoading();
+    
+    try {
+        // Buscar usuario en Supabase
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .select('*')
+            .eq('nombre', username)
+            .eq('password', password)
+            .eq('activo', true)
+            .single();
+        
+        if (error || !data) {
+            throw new Error('Usuario o contraseña incorrectos');
+        }
+        
+        currentUser = data;
+        
+        // Guardar usuario en localStorage para recordarlo
+        localStorage.setItem('eswu_remembered_user', username);
+        
+        // Ocultar login, mostrar app
+        document.getElementById('loginContainer').classList.add('hidden');
+        document.getElementById('appContainer').classList.add('active');
+        document.body.classList.add('logged-in');
+        
+        // Cargar datos
+        await initializeApp();
+        
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        hideLoading();
+    }
+});
+
+// ============================================
+// CHECK FOR REMEMBERED USER ON LOAD
+// ============================================
+
+window.addEventListener('DOMContentLoaded', function() {
+    const rememberedUser = localStorage.getItem('eswu_remembered_user');
+    
+    if (rememberedUser) {
+        // Si hay usuario recordado, pre-seleccionarlo y solo pedir password
+        document.getElementById('username').value = rememberedUser;
+        document.getElementById('password').focus();
+    }
+});
+
+// ============================================
+// APP INITIALIZATION
+// ============================================
+
+async function initializeApp() {
+    showLoading();
+    try {
+        await Promise.all([
+            loadInquilinos(),
+            loadProveedores(),
+            loadActivos(),
+            loadEstacionamiento(),
+            loadBitacoraSemanal(),
+            loadUsuarios(),
+            loadBancosDocumentos()
+        ]);
+        
+        // Populate year selects
+        populateYearSelect();
+        populateInquilinosYearSelects();
+        populateProveedoresYearSelects();
+        
+        // Show main menu
+        document.getElementById('mainMenuPage').classList.add('active');
+        
+    } catch (error) {
+        console.error('Error inicializando app:', error);
+        alert('Error cargando datos: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// DATA LOADING FUNCTIONS
+// ============================================
+
+async function loadInquilinos() {
+    try {
+        const { data: inquilinosData, error: inquilinosError } = await supabaseClient
+            .from('inquilinos')
+            .select('*')
+            .order('nombre');
+        
+        if (inquilinosError) throw inquilinosError;
+        
+        const { data: contactosData, error: contactosError } = await supabaseClient
+            .from('inquilinos_contactos')
+            .select('*');
+        
+        if (contactosError) throw contactosError;
+        
+        const { data: pagosData, error: pagosError } = await supabaseClient
+            .from('pagos_inquilinos')
+            .select('*')
+            .order('fecha', { ascending: false });
+        
+        if (pagosError) throw pagosError;
+        
+        const { data: docsData, error: docsError } = await supabaseClient
+            .from('inquilinos_documentos')
+            .select('*');
+        
+        if (docsError) throw docsError;
+        
+        inquilinos = inquilinosData.map(inq => ({
+            ...inq,
+            contactos: contactosData.filter(c => c.inquilino_id === inq.id),
+            pagos: pagosData.filter(p => p.inquilino_id === inq.id),
+            documentos: docsData.filter(d => d.inquilino_id === inq.id)
+        }));
+        
+    } catch (error) {
+        console.error('Error loading inquilinos:', error);
+        throw error;
+    }
+}
+
+async function loadProveedores() {
+    try {
+        const { data: proveedoresData, error: proveedoresError } = await supabaseClient
+            .from('proveedores')
+            .select('*')
+            .order('nombre');
+        
+        if (proveedoresError) throw proveedoresError;
+        
+        const { data: contactosData, error: contactosError } = await supabaseClient
+            .from('proveedores_contactos')
+            .select('*');
+        
+        if (contactosError) throw contactosError;
+        
+        const { data: facturasData, error: facturasError } = await supabaseClient
+            .from('facturas')
+            .select('*')
+            .order('fecha', { ascending: false });
+        
+        if (facturasError) throw facturasError;
+        
+        const { data: docsData, error: docsError } = await supabaseClient
+            .from('proveedores_documentos')
+            .select('*');
+        
+        if (docsError) throw docsError;
+        
+        proveedores = proveedoresData.map(prov => ({
+            ...prov,
+            contactos: contactosData.filter(c => c.proveedor_id === prov.id),
+            facturas: facturasData.filter(f => f.proveedor_id === prov.id),
+            documentos: docsData.filter(d => d.proveedor_id === prov.id)
+        }));
+        
+    } catch (error) {
+        console.error('Error loading proveedores:', error);
+        throw error;
+    }
+}
+
+async function loadActivos() {
+    try {
+        const { data: activosData, error: activosError } = await supabaseClient
+            .from('activos')
+            .select('*')
+            .order('nombre');
+        
+        if (activosError) throw activosError;
+        
+        const { data: fotosData, error: fotosError } = await supabaseClient
+            .from('activos_fotos')
+            .select('*');
+        
+        if (fotosError) throw fotosError;
+        
+        activos = activosData.map(act => ({
+            ...act,
+            fotos: fotosData.filter(f => f.activo_id === act.id)
+        }));
+        
+    } catch (error) {
+        console.error('Error loading activos:', error);
+        throw error;
+    }
+}
+
+async function loadEstacionamiento() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('estacionamiento')
+            .select('*')
+            .order('numero_espacio');
+        
+        if (error) throw error;
+        
+        estacionamiento = data.map(e => ({
+            id: e.id,
+            numeroEspacio: e.numero_espacio,
+            inquilinoNombre: e.inquilino_nombre,
+            numeroDespacho: e.numero_despacho,
+            colorAsignado: e.color_asignado
+        }));
+        
+    } catch (error) {
+        console.error('Error loading estacionamiento:', error);
+        throw error;
+    }
+}
+
+async function loadBitacoraSemanal() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('bitacora_semanal')
+            .select('*')
+            .order('semana', { ascending: false });
+        
+        if (error) throw error;
+        
+        bitacoraSemanal = data.map(b => {
+            const fecha = new Date(b.semana + 'T00:00:00');
+            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            const semanaTexto = `Semana del ${fecha.getDate()} ${months[fecha.getMonth()]} ${fecha.getFullYear()}`;
+            
+            return {
+                id: b.id,
+                semana: b.semana,
+                semanaTexto: semanaTexto,
+                notas: b.notas
+            };
         });
-    }, 100);
+        
+    } catch (error) {
+        console.error('Error loading bitacora:', error);
+        throw error;
+    }
 }
 
-function logout() {
-    if (!confirm('¿Cerrar sesión?')) return;
-    
-    currentUser = '';
-    document.getElementById('username').value = '';
-    document.getElementById('loginContainer').style.display = 'flex';
-    document.getElementById('appContainer').style.display = 'none';
-    document.getElementById('appContainer').classList.remove('active');
-    document.body.classList.remove('logged-in');
+async function loadUsuarios() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .select('*')
+            .order('nombre');
+        
+        if (error) throw error;
+        
+        usuarios = data;
+        
+    } catch (error) {
+        console.error('Error loading usuarios:', error);
+        throw error;
+    }
 }
 
+async function loadBancosDocumentos() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('bancos_documentos')
+            .select('*')
+            .order('fecha_subida', { ascending: false });
+        
+        if (error) throw error;
+        
+        bancosDocumentos = data.map(b => ({
+            id: b.id,
+            tipo: b.tipo,
+            archivoPdf: b.archivo_pdf,
+            fechaSubida: b.fecha_subida
+        }));
+        
+    } catch (error) {
+        console.error('Error loading bancos:', error);
+        throw error;
+    }
+}
 // ============================================
-// INQUILINOS - MODALS & ACTIONS
+// SAVE FUNCTIONS
 // ============================================
-
-function showAddInquilinoModal() {
-    isEditMode = false;
-    currentInquilinoId = null;
-    currentContratoFile = null;
-    currentDocAdicionalFile = null;
-    tempInquilinoContactos = [];
-    
-    document.getElementById('addInquilinoTitle').textContent = 'Agregar Inquilino';
-    document.getElementById('inquilinoForm').reset();
-    document.getElementById('contratoFileName').textContent = '';
-    document.getElementById('docAdicionalFileName').textContent = '';
-    document.getElementById('nombreDocGroup').classList.add('hidden');
-    renderContactosList([], 'inquilinoContactosList', 'deleteInquilinoContacto');
-    document.getElementById('addInquilinoModal').classList.add('active');
-}
 
 async function saveInquilino(event) {
     event.preventDefault();
-    
-    if (tempInquilinoContactos.length === 0) {
-        alert('Debes agregar al menos un contacto');
-        return;
-    }
-    
     showLoading();
+    
     try {
-        let contratoData = currentContratoFile;
-        let contratoName = null;
-        const contratoInput = document.getElementById('inquilinoContrato');
+        const contratoFile = document.getElementById('inquilinoContrato').files[0];
+        let contratoURL = null;
         
-        if (contratoInput.files.length > 0) {
-            contratoData = await fileToBase64(contratoInput.files[0]);
-            contratoName = contratoInput.files[0].name;
+        if (contratoFile) {
+            const contratoBase64 = await fileToBase64(contratoFile);
+            contratoURL = contratoBase64;
         }
         
         const inquilinoData = {
             nombre: document.getElementById('inquilinoNombre').value,
-            clabe: document.getElementById('inquilinoClabe').value,
-            rfc: document.getElementById('inquilinoRFC').value,
-            m2: document.getElementById('inquilinoM2').value,
-            numero_despacho: document.getElementById('inquilinoDespacho').value,
+            clabe: document.getElementById('inquilinoClabe').value || null,
+            rfc: document.getElementById('inquilinoRFC').value || null,
+            m2: document.getElementById('inquilinoM2').value || null,
+            numero_despacho: document.getElementById('inquilinoDespacho').value || null,
             renta: parseFloat(document.getElementById('inquilinoRenta').value),
             fecha_inicio: document.getElementById('inquilinoFechaInicio').value,
             fecha_vencimiento: document.getElementById('inquilinoFechaVenc').value,
-            notas: document.getElementById('inquilinoNotas').value,
-            contrato_file: contratoData,
-            contrato_filename: contratoName
+            contrato_file: contratoURL,
+            notas: document.getElementById('inquilinoNotas').value || null
         };
         
-        const inquilinoId = await saveInquilinoData(inquilinoData, isEditMode, currentInquilinoId);
-        await saveInquilinoContactos(inquilinoId, tempInquilinoContactos);
+        let inquilinoId;
+        
+        if (isEditMode && currentInquilinoId) {
+            if (!contratoURL && inquilinos.find(i => i.id === currentInquilinoId).contratoFile) {
+                delete inquilinoData.contrato_file;
+            }
+            
+            const { error } = await supabaseClient
+                .from('inquilinos')
+                .update(inquilinoData)
+                .eq('id', currentInquilinoId);
+            
+            if (error) throw error;
+            
+            await supabaseClient
+                .from('inquilinos_contactos')
+                .delete()
+                .eq('inquilino_id', currentInquilinoId);
+            
+            inquilinoId = currentInquilinoId;
+        } else {
+            const { data, error } = await supabaseClient
+                .from('inquilinos')
+                .insert([inquilinoData])
+                .select();
+            
+            if (error) throw error;
+            inquilinoId = data[0].id;
+        }
+        
+        if (tempInquilinoContactos.length > 0) {
+            const contactosToInsert = tempInquilinoContactos.map(c => ({
+                inquilino_id: inquilinoId,
+                nombre: c.nombre,
+                telefono: c.telefono || null,
+                email: c.email || null
+            }));
+            
+            const { error: contactosError } = await supabaseClient
+                .from('inquilinos_contactos')
+                .insert(contactosToInsert);
+            
+            if (contactosError) throw contactosError;
+        }
         
         await loadInquilinos();
-        renderInquilinosTable();
         closeModal('addInquilinoModal');
         
-        isEditMode = false;
-        currentInquilinoId = null;
-        currentContratoFile = null;
-        currentDocAdicionalFile = null;
-        tempInquilinoContactos = [];
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al guardar: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-function editInquilino() {
-    const inq = inquilinos.find(i => i.id === currentInquilinoId);
-    isEditMode = true;
-    currentContratoFile = inq.contratoFile;
-    tempInquilinoContactos = [...inq.contactos];
-    
-    document.getElementById('addInquilinoTitle').textContent = 'Editar Inquilino';
-    document.getElementById('inquilinoNombre').value = inq.nombre;
-    document.getElementById('inquilinoClabe').value = inq.clabe || '';
-    document.getElementById('inquilinoRFC').value = inq.rfc || '';
-    document.getElementById('inquilinoM2').value = inq.m2 || '';
-    document.getElementById('inquilinoDespacho').value = inq.numeroDespacho || '';
-    document.getElementById('inquilinoRenta').value = inq.renta;
-    document.getElementById('inquilinoFechaInicio').value = inq.fechaInicio;
-    document.getElementById('inquilinoFechaVenc').value = inq.fechaVencimiento;
-    document.getElementById('inquilinoNotas').value = inq.notas || '';
-    
-    if (inq.contratoFileName) {
-        document.getElementById('contratoFileName').textContent = inq.contratoFileName;
-    }
-    
-    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
-    closeModal('inquilinoDetailModal');
-    document.getElementById('addInquilinoModal').classList.add('active');
-}
-
-async function deleteInquilino() {
-    if (!confirm('¿Eliminar este inquilino?')) return;
-    
-    showLoading();
-    try {
-        await deleteInquilinoFromDB(currentInquilinoId);
-        await loadInquilinos();
-        renderInquilinosTable();
-        closeModal('inquilinoDetailModal');
-    } catch (error) {
-        console.error('Error:', error);
-    } finally {
-        hideLoading();
-    }
-}
-
-function showRegistrarPagoModal() {
-    const inq = inquilinos.find(i => i.id === currentInquilinoId);
-    document.getElementById('pagoMonto').value = inq.renta;
-    document.getElementById('pagoFecha').value = new Date().toISOString().split('T')[0];
-    document.getElementById('pagoCompleto').value = 'si';
-    document.getElementById('pagoMontoGroup').classList.add('hidden');
-    document.getElementById('registrarPagoModal').classList.add('active');
-}
-
-async function savePagoRenta(event) {
-    event.preventDefault();
-    showLoading();
-    
-    try {
-        const inq = inquilinos.find(i => i.id === currentInquilinoId);
-        const completo = document.getElementById('pagoCompleto').value === 'si';
-        const monto = completo ? inq.renta : parseFloat(document.getElementById('pagoMonto').value);
+        if (currentSubContext === 'inquilinos-list') {
+            renderInquilinosTable();
+        }
         
-        const pagoData = {
-            inquilino_id: currentInquilinoId,
-            fecha: document.getElementById('pagoFecha').value,
-            monto: monto,
-            completo: completo
-        };
-        
-        await savePagoInquilino(pagoData);
-        await loadInquilinos();
-        showInquilinoDetail(currentInquilinoId);
-        closeModal('registrarPagoModal');
     } catch (error) {
         console.error('Error:', error);
+        alert('Error al guardar inquilino: ' + error.message);
     } finally {
         hideLoading();
     }
-}
-
-// ============================================
-// PROVEEDORES - MODALS & ACTIONS
-// ============================================
-
-function showAddProveedorModal() {
-    isEditMode = false;
-    currentProveedorId = null;
-    currentProvDocAdicionalFile = null;
-    tempProveedorContactos = [];
-    
-    document.getElementById('addProveedorTitle').textContent = 'Agregar Proveedor';
-    document.getElementById('proveedorForm').reset();
-    document.getElementById('provDocAdicionalFileName').textContent = '';
-    document.getElementById('nombreProvDocGroup').classList.add('hidden');
-    renderContactosList([], 'proveedorContactosList', 'deleteProveedorContacto');
-    document.getElementById('addProveedorModal').classList.add('active');
 }
 
 async function saveProveedor(event) {
     event.preventDefault();
-    
-    if (tempProveedorContactos.length === 0) {
-        alert('Debes agregar al menos un contacto');
-        return;
-    }
-    
     showLoading();
+    
     try {
-        const provData = {
+        const docFile = document.getElementById('proveedorDocAdicional').files[0];
+        let docURL = null;
+        let docNombre = null;
+        
+        if (docFile) {
+            docURL = await fileToBase64(docFile);
+            docNombre = document.getElementById('proveedorNombreDoc').value;
+        }
+        
+        const proveedorData = {
             nombre: document.getElementById('proveedorNombre').value,
             servicio: document.getElementById('proveedorServicio').value,
-            clabe: document.getElementById('proveedorClabe').value,
-            rfc: document.getElementById('proveedorRFC').value,
-            notas: document.getElementById('proveedorNotas').value
+            clabe: document.getElementById('proveedorClabe').value || null,
+            rfc: document.getElementById('proveedorRFC').value || null,
+            notas: document.getElementById('proveedorNotas').value || null
         };
         
-        const proveedorId = await saveProveedorData(provData, isEditMode, currentProveedorId);
-        await saveProveedorContactos(proveedorId, tempProveedorContactos);
+        let proveedorId;
         
-        const docAdicionalInput = document.getElementById('proveedorDocAdicional');
-        if (docAdicionalInput.files.length > 0) {
-            const nombreDoc = document.getElementById('proveedorNombreDoc').value;
-            if (!nombreDoc) {
-                alert('Por favor ingrese un nombre para el documento');
-                hideLoading();
-                return;
-            }
-            const docData = await fileToBase64(docAdicionalInput.files[0]);
-            await saveProveedorDocumento(proveedorId, nombreDoc, docData);
+        if (isEditMode && currentProveedorId) {
+            const { error } = await supabaseClient
+                .from('proveedores')
+                .update(proveedorData)
+                .eq('id', currentProveedorId);
+            
+            if (error) throw error;
+            
+            await supabaseClient
+                .from('proveedores_contactos')
+                .delete()
+                .eq('proveedor_id', currentProveedorId);
+            
+            proveedorId = currentProveedorId;
+        } else {
+            const { data, error } = await supabaseClient
+                .from('proveedores')
+                .insert([proveedorData])
+                .select();
+            
+            if (error) throw error;
+            proveedorId = data[0].id;
+        }
+        
+        if (tempProveedorContactos.length > 0) {
+            const contactosToInsert = tempProveedorContactos.map(c => ({
+                proveedor_id: proveedorId,
+                nombre: c.nombre,
+                telefono: c.telefono || null,
+                email: c.email || null
+            }));
+            
+            const { error: contactosError } = await supabaseClient
+                .from('proveedores_contactos')
+                .insert(contactosToInsert);
+            
+            if (contactosError) throw contactosError;
+        }
+        
+        if (docURL && docNombre) {
+            const { error: docError } = await supabaseClient
+                .from('proveedores_documentos')
+                .insert([{
+                    proveedor_id: proveedorId,
+                    nombre: docNombre,
+                    archivo: docURL,
+                    fecha: new Date().toISOString().split('T')[0],
+                    usuario: currentUser.nombre
+                }]);
+            
+            if (docError) throw docError;
         }
         
         await loadProveedores();
-        renderProveedoresTable();
         closeModal('addProveedorModal');
         
-        isEditMode = false;
-        currentProveedorId = null;
-        currentProvDocAdicionalFile = null;
-        tempProveedorContactos = [];
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al guardar: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-function editProveedor() {
-    const prov = proveedores.find(p => p.id === currentProveedorId);
-    isEditMode = true;
-    tempProveedorContactos = [...prov.contactos];
-    
-    document.getElementById('addProveedorTitle').textContent = 'Editar Proveedor';
-    document.getElementById('proveedorNombre').value = prov.nombre;
-    document.getElementById('proveedorServicio').value = prov.servicio;
-    document.getElementById('proveedorClabe').value = prov.clabe || '';
-    document.getElementById('proveedorRFC').value = prov.rfc || '';
-    document.getElementById('proveedorNotas').value = prov.notas || '';
-    
-    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
-    closeModal('proveedorDetailModal');
-    document.getElementById('addProveedorModal').classList.add('active');
-}
-
-async function deleteProveedor() {
-    if (!confirm('¿Eliminar este proveedor?')) return;
-    
-    showLoading();
-    try {
-        await deleteProveedorFromDB(currentProveedorId);
-        await loadProveedores();
-        renderProveedoresTable();
-        closeModal('proveedorDetailModal');
-    } catch (error) {
-        console.error('Error:', error);
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// FACTURAS - MODALS & ACTIONS
-// ============================================
-
-function showRegistrarFacturaModal() {
-    currentFacturaDocFile = null;
-    document.getElementById('facturaNumero').value = '';
-    document.getElementById('facturaFecha').value = new Date().toISOString().split('T')[0];
-    document.getElementById('facturaVencimiento').value = '';
-    document.getElementById('facturaMonto').value = '';
-    document.getElementById('facturaIVA').value = '';
-    document.getElementById('facturaDocumentoFileName').textContent = '';
-    document.getElementById('registrarFacturaModal').classList.add('active');
-}
-
-async function saveFactura(event) {
-    event.preventDefault();
-    showLoading();
-    
-    try {
-        let docData = null;
-        let docName = null;
-        const docInput = document.getElementById('facturaDocumento');
-        
-        if (docInput.files.length > 0) {
-            docData = await fileToBase64(docInput.files[0]);
-            docName = docInput.files[0].name;
+        if (currentSubContext === 'proveedores-list') {
+            renderProveedoresTable();
         }
         
-        const facturaData = {
-            proveedor_id: currentProveedorId,
-            numero: document.getElementById('facturaNumero').value,
-            fecha: document.getElementById('facturaFecha').value,
-            vencimiento: document.getElementById('facturaVencimiento').value,
-            monto: parseFloat(document.getElementById('facturaMonto').value),
-            iva: parseFloat(document.getElementById('facturaIVA').value || 0),
-            documento_file: docData,
-            documento_filename: docName
-        };
-        
-        await saveFacturaData(facturaData);
-        await loadProveedores();
-        showProveedorDetail(currentProveedorId);
-        closeModal('registrarFacturaModal');
     } catch (error) {
         console.error('Error:', error);
-        alert('Error al guardar factura: ' + error.message);
+        alert('Error al guardar proveedor: ' + error.message);
     } finally {
         hideLoading();
     }
 }
-
-function showPagarFacturaModal(facturaId) {
-    currentFacturaId = facturaId;
-    currentPagoFacturaFile = null;
-    document.getElementById('fechaPagoFactura').value = new Date().toISOString().split('T')[0];
-    document.getElementById('pagoPDFFacturaFileName').textContent = '';
-    document.getElementById('pagarFacturaModal').classList.add('active');
-}
-
-function showPagarFacturaModalFromDetail() {
-    closeModal('facturaDetailModal');
-    currentPagoFacturaFile = null;
-    document.getElementById('fechaPagoFactura').value = new Date().toISOString().split('T')[0];
-    document.getElementById('pagoPDFFacturaFileName').textContent = '';
-    document.getElementById('pagarFacturaModal').classList.add('active');
-}
-
-async function savePagoFactura(event) {
-    event.preventDefault();
-    showLoading();
-    
-    try {
-        let pagoData = null;
-        let pagoName = null;
-        const pagoInput = document.getElementById('pagoPDFFactura');
-        
-        if (pagoInput.files.length > 0) {
-            pagoData = await fileToBase64(pagoInput.files[0]);
-            pagoName = pagoInput.files[0].name;
-        }
-        
-        await updateFacturaPago(
-            currentFacturaId,
-            document.getElementById('fechaPagoFactura').value,
-            pagoData,
-            pagoName
-        );
-        
-        await loadProveedores();
-        
-        if (currentProveedorId) {
-            showProveedorDetail(currentProveedorId);
-        } else {
-            renderProveedoresFacturasPorPagar();
-        }
-        
-        closeModal('pagarFacturaModal');
-    } catch (error) {
-        console.error('Error:', error);
-    } finally {
-        hideLoading();
-    }
-}
-
-async function deleteFactura(facturaId) {
-    if (!confirm('¿Estás seguro que deseas eliminar esta factura?')) return;
-    
-    showLoading();
-    try {
-        await deleteFacturaFromDB(facturaId);
-        await loadProveedores();
-        showProveedorDetail(currentProveedorId);
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al eliminar factura: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// ACTIVOS - MODALS & ACTIONS
-// ============================================
-
-function showAddActivoModal() {
-    isEditMode = false;
-    currentActivoId = null;
-    currentActivoFotos = [];
-    
-    document.getElementById('addActivoTitle').textContent = 'Agregar Activo';
-    document.getElementById('activoForm').reset();
-    document.getElementById('activoFotosFileName').textContent = '';
-    populateProveedoresDropdown();
-    document.getElementById('addActivoModal').classList.add('active');
-}
-
-async function saveActivo(event) {
-    event.preventDefault();
-    showLoading();
-    
-    try {
-        const actData = {
-            nombre: document.getElementById('activoNombre').value,
-            ultimo_mant: document.getElementById('activoUltimoMant').value,
-            proximo_mant: document.getElementById('activoProximoMant').value,
-            proveedor: document.getElementById('activoProveedor').value,
-            notas: document.getElementById('activoNotas').value
-        };
-        
-        const activoId = await saveActivoData(actData, isEditMode, currentActivoId);
-        
-        const fotosInput = document.getElementById('activoFotos');
-        if (fotosInput.files.length > 0) {
-            const fotos = [];
-            for (const file of fotosInput.files) {
-                const fotoData = await fileToBase64(file);
-                fotos.push({ data: fotoData, name: file.name });
-            }
-            await saveActivoFotos(activoId, fotos);
-        }
-        
-        await loadActivos();
-        renderActivosTable();
-        closeModal('addActivoModal');
-        
-        isEditMode = false;
-        currentActivoId = null;
-        currentActivoFotos = [];
-    } catch (error) {
-        console.error('Error:', error);
-    } finally {
-        hideLoading();
-    }
-}
-
-function editActivo() {
-    const act = activos.find(a => a.id === currentActivoId);
-    isEditMode = true;
-    currentActivoFotos = act.fotos;
-    
-    document.getElementById('addActivoTitle').textContent = 'Editar Activo';
-    document.getElementById('activoNombre').value = act.nombre;
-    document.getElementById('activoUltimoMant').value = act.ultimoMant || '';
-    document.getElementById('activoProximoMant').value = act.proximoMant || '';
-    populateProveedoresDropdown();
-    document.getElementById('activoProveedor').value = act.proveedor || '';
-    document.getElementById('activoNotas').value = act.notas || '';
-    
-    closeModal('activoDetailModal');
-    document.getElementById('addActivoModal').classList.add('active');
-}
-
-async function deleteActivo() {
-    if (!confirm('¿Eliminar este activo?')) return;
-    
-    showLoading();
-    try {
-        await deleteActivoFromDB(currentActivoId);
-        await loadActivos();
-        renderActivosTable();
-        closeModal('activoDetailModal');
-    } catch (error) {
-        console.error('Error:', error);
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// ADMIN - USUARIOS & BANCOS
-// ============================================
-
-async function saveUsuario(event) {
-    event.preventDefault();
-    showLoading();
-    
-    try {
-        const usuarioData = {
-            nombre: document.getElementById('usuarioNombre').value,
-            password: document.getElementById('usuarioPassword').value,
-            activo: true
-        };
-        
-        await saveUsuarioData(usuarioData, isEditMode, currentUsuarioId);
-        await loadUsuarios();
-        renderUsuariosTable();
-        closeModal('addUsuarioModal');
-        
-        isEditMode = false;
-        currentUsuarioId = null;
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al guardar usuario: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-async function saveBancoDoc(event) {
-    event.preventDefault();
-    showLoading();
-    
-    try {
-        const docInput = document.getElementById('bancoDocumento');
-        if (docInput.files.length === 0) {
-            alert('Por favor seleccione un documento PDF');
-            hideLoading();
-            return;
-        }
-        
-        const docData = await fileToBase64(docInput.files[0]);
-        
-        const bancoData = {
-            tipo: document.getElementById('bancoTipo').value,
-            archivo_pdf: docData,
-            usuario_subio: currentUser,
-            fecha_subida: new Date().toISOString().split('T')[0]
-        };
-        
-        await saveBancoDocumento(bancoData);
-        await loadBancosDocumentos();
-        renderBancosTable();
-        closeModal('addBancoModal');
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al guardar documento: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// EVENT LISTENERS & INITIALIZATION
-// ============================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 ESWU iniciado');
-    
-    // Login form
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            if (username) login(username);
-        });
-    }
-    
-    // File input handlers
-    const inquilinoContrato = document.getElementById('inquilinoContrato');
-    if (inquilinoContrato) {
-        inquilinoContrato.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                document.getElementById('contratoFileName').textContent = e.target.files[0].name;
-            }
-        });
-    }
-    
-    const inquilinoDocAdicional = document.getElementById('inquilinoDocAdicional');
-    if (inquilinoDocAdicional) {
-        inquilinoDocAdicional.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                document.getElementById('docAdicionalFileName').textContent = e.target.files[0].name;
-                document.getElementById('nombreDocGroup').classList.remove('hidden');
-            } else {
-                document.getElementById('nombreDocGroup').classList.add('hidden');
-            }
-        });
-    }
-    
-    const proveedorDocAdicional = document.getElementById('proveedorDocAdicional');
-    if (proveedorDocAdicional) {
-        proveedorDocAdicional.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                document.getElementById('provDocAdicionalFileName').textContent = e.target.files[0].name;
-                document.getElementById('nombreProvDocGroup').classList.remove('hidden');
-            } else {
-                document.getElementById('nombreProvDocGroup').classList.add('hidden');
-            }
-        });
-    }
-    
-    const facturaDocumento = document.getElementById('facturaDocumento');
-    if (facturaDocumento) {
-        facturaDocumento.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                document.getElementById('facturaDocumentoFileName').textContent = e.target.files[0].name;
-            }
-        });
-    }
-    
-    const pagoPDFFactura = document.getElementById('pagoPDFFactura');
-    if (pagoPDFFactura) {
-        pagoPDFFactura.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                document.getElementById('pagoPDFFacturaFileName').textContent = e.target.files[0].name;
-            }
-        });
-    }
-    
-    const activoFotos = document.getElementById('activoFotos');
-    if (activoFotos) {
-        activoFotos.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                document.getElementById('activoFotosFileName').textContent = `${e.target.files.length} foto(s) seleccionada(s)`;
-            }
-        });
-    }
-    
-    const bancoDocumento = document.getElementById('bancoDocumento');
-    if (bancoDocumento) {
-        bancoDocumento.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                document.getElementById('bancoDocumentoFileName').textContent = e.target.files[0].name;
-            }
-        });
-    }
-    
-    const nuevoDocPDF = document.getElementById('nuevoDocPDF');
-    if (nuevoDocPDF) {
-        nuevoDocPDF.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                document.getElementById('nuevoDocPDFFileName').textContent = e.target.files[0].name;
-            }
-        });
-    }
-    
-    // Hide home icon initially
-    document.getElementById('homeIcon').style.display = 'none';
-});
-
-// Close dropdowns when clicking outside
-window.onclick = function(event) {
-    if (!event.target.matches('.dropdown-toggle')) {
-        document.querySelectorAll('.dropdown-content').forEach(dd => dd.classList.remove('show'));
-        document.querySelectorAll('.main-menu-content').forEach(dd => dd.classList.remove('show'));
-    }
-}
-
-// ============================================
-// DOCUMENTOS ADICIONALES
-// ============================================
-
-async function saveDocumentoAdicional(event) {
-    event.preventDefault();
-    showLoading();
-    
-    try {
-        const nombreDoc = document.getElementById('nuevoDocNombre').value;
-        const docInput = document.getElementById('nuevoDocPDF');
-        
-        if (docInput.files.length === 0) {
-            alert('Por favor seleccione un archivo PDF');
-            hideLoading();
-            return;
-        }
-        
-        const docData = await fileToBase64(docInput.files[0]);
-        await saveInquilinoDocumento(currentInquilinoId, nombreDoc, docData);
-        
-        await loadInquilinos();
-        showInquilinoDetail(currentInquilinoId);
-        closeModal('agregarDocumentoModal');
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al guardar documento: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// ESTACIONAMIENTO Y BITÁCORA
-// ============================================
-
-let currentEstacionamientoId = null;
-let currentBitacoraId = null;
 
 async function saveEstacionamiento() {
     showLoading();
     try {
-        const inquilinoNombre = document.getElementById('editEspacioInquilino').value;
+        const inquilinoSeleccionado = document.getElementById('editEspacioInquilino').value;
+        const despacho = document.getElementById('editEspacioDespacho').value;
         
-        await updateEstacionamiento(currentEstacionamientoId, inquilinoNombre);
+        const { error } = await supabaseClient
+            .from('estacionamiento')
+            .update({
+                inquilino_nombre: inquilinoSeleccionado || null,
+                numero_despacho: despacho || null
+            })
+            .eq('id', currentEstacionamientoId);
+        
+        if (error) throw error;
+        
         await loadEstacionamiento();
         renderEstacionamientoTable();
         closeModal('editEstacionamientoModal');
+        
     } catch (error) {
         console.error('Error:', error);
         alert('Error al guardar: ' + error.message);
@@ -728,16 +536,143 @@ async function saveEstacionamiento() {
 async function saveBitacora() {
     showLoading();
     try {
+        const fecha = document.getElementById('editBitacoraFecha').value;
         const notas = document.getElementById('editBitacoraNotas').value;
         
-        await updateBitacoraSemanal(currentBitacoraId, notas);
+        const { error } = await supabaseClient
+            .from('bitacora_semanal')
+            .update({
+                semana: fecha,
+                notas: notas
+            })
+            .eq('id', currentBitacoraId);
+        
+        if (error) throw error;
+        
         await loadBitacoraSemanal();
         renderBitacoraTable();
         closeModal('editBitacoraModal');
+        
     } catch (error) {
         console.error('Error:', error);
-        alert('Error al guardar: ' + error.message);
+        alert('Error al guardar bitácora: ' + error.message);
     } finally {
         hideLoading();
     }
+}
+
+async function saveBancoDoc(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const tipo = document.getElementById('bancoTipo').value;
+        const file = document.getElementById('bancoDocumento').files[0];
+        
+        if (!file) {
+            throw new Error('Seleccione un archivo PDF');
+        }
+        
+        const pdfBase64 = await fileToBase64(file);
+        
+        const { error } = await supabaseClient
+            .from('bancos_documentos')
+            .insert([{
+                tipo: tipo,
+                archivo_pdf: pdfBase64,
+                fecha_subida: new Date().toISOString().split('T')[0]
+            }]);
+        
+        if (error) throw error;
+        
+        await loadBancosDocumentos();
+        renderBancosTable();
+        closeModal('addBancoModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// ADDITIONAL PLACEHOLDER FUNCTIONS
+// ============================================
+
+async function saveActivo(event) {
+    event.preventDefault();
+    alert('Función saveActivo - pendiente de implementar');
+}
+
+async function saveUsuario(event) {
+    event.preventDefault();
+    alert('Función saveUsuario - pendiente de implementar');
+}
+
+async function saveFactura(event) {
+    event.preventDefault();
+    alert('Función saveFactura - pendiente de implementar');
+}
+
+async function savePagoRenta(event) {
+    event.preventDefault();
+    alert('Función savePagoRenta - pendiente de implementar');
+}
+
+async function savePagoFactura(event) {
+    event.preventDefault();
+    alert('Función savePagoFactura - pendiente de implementar');
+}
+
+async function saveDocumentoAdicional(event) {
+    event.preventDefault();
+    alert('Función saveDocumentoAdicional - pendiente de implementar');
+}
+
+function showRegistrarPagoModal() {
+    document.getElementById('registrarPagoModal').classList.add('active');
+}
+
+function showRegistrarFacturaModal() {
+    document.getElementById('registrarFacturaModal').classList.add('active');
+}
+
+function showPagarFacturaModal(facturaId) {
+    currentFacturaId = facturaId;
+    document.getElementById('pagarFacturaModal').classList.add('active');
+}
+
+function showPagarFacturaModalFromDetail() {
+    closeModal('facturaDetailModal');
+    showPagarFacturaModal(currentFacturaId);
+}
+
+function editInquilino() {
+    alert('Función editInquilino - pendiente de implementar');
+}
+
+function deleteInquilino() {
+    alert('Función deleteInquilino - pendiente de implementar');
+}
+
+function editProveedor() {
+    alert('Función editProveedor - pendiente de implementar');
+}
+
+function deleteProveedor() {
+    alert('Función deleteProveedor - pendiente de implementar');
+}
+
+function editActivo() {
+    alert('Función editActivo - pendiente de implementar');
+}
+
+function deleteActivo() {
+    alert('Función deleteActivo - pendiente de implementar');
+}
+
+function deleteFactura(facturaId) {
+    alert('Función deleteFactura - pendiente de implementar para factura ID: ' + facturaId);
 }
