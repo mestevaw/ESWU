@@ -195,7 +195,7 @@ function renderInquilinosTable() {
         
         const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
         
-        row.innerHTML = `<td style="font-size:0.9rem">${nombreCorto}</td><td class="currency">${formatCurrency(inq.renta)}</td><td>${formatDateVencimiento(inq.fechaVencimiento)}</td>`;
+        row.innerHTML = `<td style="font-size:0.9rem">${nombreCorto}</td><td class="currency">${formatCurrency(inq.renta)}</td><td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>`;
     });
     
     if (inquilinos.length === 0) {
@@ -281,7 +281,7 @@ function renderInquilinosVencimientoContratos() {
     today.setHours(0, 0, 0, 0);
     
     inquilinos.forEach(inq => {
-        const venc = new Date(inq.fechaVencimiento + 'T00:00:00');
+        const venc = new Date(inq.fecha_vencimiento + 'T00:00:00');
         const diffDays = Math.ceil((venc - today) / (1000 * 60 * 60 * 24));
         let estado = '';
         let badgeClass = '';
@@ -298,7 +298,7 @@ function renderInquilinosVencimientoContratos() {
         }
         
         const row = tbody.insertRow();
-        row.innerHTML = `<td>${inq.nombre}</td><td>${formatDate(inq.fechaInicio)}</td><td>${formatDateVencimiento(inq.fechaVencimiento)}</td><td>${diffDays}</td><td><span class="badge ${badgeClass}">${estado}</span></td>`;
+        row.innerHTML = `<td>${inq.nombre}</td><td>${formatDate(inq.fecha_inicio)}</td><td>${formatDateVencimiento(inq.fecha_vencimiento)}</td><td>${diffDays}</td><td><span class="badge ${badgeClass}">${estado}</span></td>`;
     });
     
     if (inquilinos.length === 0) {
@@ -327,12 +327,12 @@ function showInquilinoDetail(id) {
     document.getElementById('detailClabe').textContent = inq.clabe || '-';
     document.getElementById('detailRenta').textContent = formatCurrency(inq.renta);
     document.getElementById('detailM2').textContent = inq.m2 || '-';
-    document.getElementById('detailDespacho').textContent = inq.numeroDespacho || '-';
-    document.getElementById('detailFechaInicio').textContent = formatDate(inq.fechaInicio);
-    document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fechaVencimiento);
+    document.getElementById('detailDespacho').textContent = inq.numero_despacho || '-';
+    document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
+    document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
     
     const contratoSection = document.getElementById('contratoOriginalSection');
-    if (inq.contratoFile) {
+    if (inq.contrato_file) {
         contratoSection.innerHTML = '<a href="#" onclick="event.preventDefault(); viewContrato();" style="color:var(--primary);text-decoration:underline;">Contrato de Renta Original</a>';
     } else {
         contratoSection.innerHTML = '<p style="color:var(--text-light)">No hay contrato cargado</p>';
@@ -445,16 +445,16 @@ function renderProveedoresFacturasPagadas() {
     proveedores.forEach(prov => {
         if (prov.facturas) {
             prov.facturas.forEach(f => {
-                if (f.fechaPago) {
-                    const pd = new Date(f.fechaPago + 'T00:00:00');
+                if (f.fecha_pago) {
+                    const pd = new Date(f.fecha_pago + 'T00:00:00');
                     if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
                         pagadas.push({
                             proveedor: prov.nombre,
                             numero: f.numero || 'S/N',
                             monto: f.monto,
-                            fecha: f.fechaPago,
-                            documentoFile: f.documentoFile,
-                            pagoFile: f.pagoFile
+                            fecha: f.fecha_pago,
+                            documento_file: f.documento_file,
+                            pago_file: f.pago_file
                         });
                         totalPagadas += f.monto;
                     }
@@ -466,11 +466,11 @@ function renderProveedoresFacturasPagadas() {
     pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     pagadas.forEach(f => {
         const row = tbody.insertRow();
-        const facturaCell = f.documentoFile 
-            ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" onclick="viewFacturaDoc('${f.documentoFile}')">${f.numero}</td>`
+        const facturaCell = f.documento_file 
+            ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" onclick="viewFacturaDoc('${f.documento_file}')">${f.numero}</td>`
             : `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.numero}</td>`;
-        const fechaCell = f.pagoFile
-            ? `<td style="cursor:pointer;color:var(--primary)" onclick="viewFacturaDoc('${f.pagoFile}')">${formatDate(f.fecha)}</td>`
+        const fechaCell = f.pago_file
+            ? `<td style="cursor:pointer;color:var(--primary)" onclick="viewFacturaDoc('${f.pago_file}')">${formatDate(f.fecha)}</td>`
             : `<td>${formatDate(f.fecha)}</td>`;
         row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
     });
@@ -505,7 +505,7 @@ function renderProveedoresFacturasPorPagar() {
     proveedores.forEach(prov => {
         if (prov.facturas) {
             prov.facturas.forEach(f => {
-                if (!f.fechaPago) {
+                if (!f.fecha_pago) {
                     const vd = new Date(f.vencimiento + 'T00:00:00');
                     if (vd.getFullYear() === year && (month === null || month === vd.getMonth())) {
                         porPagar.push({
@@ -515,7 +515,7 @@ function renderProveedoresFacturasPorPagar() {
                             numero: f.numero || 'S/N',
                             monto: f.monto,
                             vencimiento: f.vencimiento,
-                            documentoFile: f.documentoFile
+                            documento_file: f.documento_file
                         });
                         totalPorPagar += f.monto;
                     }
@@ -528,8 +528,8 @@ function renderProveedoresFacturasPorPagar() {
     porPagar.forEach(f => {
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
-        if (f.documentoFile) {
-            row.onclick = () => viewFacturaDoc(f.documentoFile);
+        if (f.documento_file) {
+            row.onclick = () => viewFacturaDoc(f.documento_file);
         }
         row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
     });
@@ -565,22 +565,22 @@ function showProveedorDetail(id) {
     document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
     
     const facturasPagadasDiv = document.getElementById('facturasPagadas');
-    const facturasPagadas = prov.facturas.filter(f => f.fechaPago);
+    const facturasPagadas = prov.facturas.filter(f => f.fecha_pago);
     let totalPagadas = 0;
     
     if (facturasPagadas.length > 0) {
         facturasPagadasDiv.innerHTML = facturasPagadas.map(f => {
             totalPagadas += f.monto;
-            const facturaLink = f.documentoFile 
-                ? `<a href="#" class="pdf-link" onclick="event.preventDefault(); viewFacturaDoc('${f.documentoFile}')">Factura</a>` 
+            const facturaLink = f.documento_file 
+                ? `<a href="#" class="pdf-link" onclick="event.preventDefault(); viewFacturaDoc('${f.documento_file}')">Factura</a>` 
                 : '';
-            const pagoLink = f.pagoFile 
-                ? `<a href="#" class="pdf-link" onclick="event.preventDefault(); viewFacturaDoc('${f.pagoFile}')">Pago</a>` 
+            const pagoLink = f.pago_file 
+                ? `<a href="#" class="pdf-link" onclick="event.preventDefault(); viewFacturaDoc('${f.pago_file}')">Pago</a>` 
                 : '';
             return `
                 <div class="payment-item">
                     <div class="payment-item-content">
-                        <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong> pagada el <strong>${formatDate(f.fechaPago)}</strong></div>
+                        <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong> pagada el <strong>${formatDate(f.fecha_pago)}</strong></div>
                         <div style="margin-top:0.5rem">${facturaLink} ${pagoLink}</div>
                     </div>
                     <div style="text-align:right"><strong>${formatCurrency(f.monto)}</strong></div>
@@ -592,7 +592,7 @@ function showProveedorDetail(id) {
     }
     
     const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
-    const facturasPorPagar = prov.facturas.filter(f => !f.fechaPago);
+    const facturasPorPagar = prov.facturas.filter(f => !f.fecha_pago);
     let totalPorPagar = 0;
     const isMobile = window.innerWidth <= 768;
     
@@ -600,8 +600,8 @@ function showProveedorDetail(id) {
         if (isMobile) {
             facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
                 totalPorPagar += f.monto;
-                const clickAction = f.documentoFile ? `onclick="viewFacturaDoc('${f.documentoFile}')"` : '';
-                const cursorStyle = f.documentoFile ? 'cursor:pointer;' : '';
+                const clickAction = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
+                const cursorStyle = f.documento_file ? 'cursor:pointer;' : '';
                 return `
                     <div class="factura-box" ${clickAction} style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white; ${cursorStyle}">
                         <div style="margin-bottom: 0.5rem;">
@@ -623,8 +623,8 @@ function showProveedorDetail(id) {
         } else {
             facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
                 totalPorPagar += f.monto;
-                const verLink = f.documentoFile 
-                    ? `<button class="btn btn-sm btn-secondary" onclick="viewFacturaDoc('${f.documentoFile}')">Ver</button>` 
+                const verLink = f.documento_file 
+                    ? `<button class="btn btn-sm btn-secondary" onclick="viewFacturaDoc('${f.documento_file}')">Ver</button>` 
                     : '';
                 return `
                     <div class="payment-item">
@@ -751,8 +751,8 @@ function renderBancosTable() {
     bancosDocumentos.forEach(b => {
         const row = tbody.insertRow();
         row.className = 'banco-clickable';
-        row.onclick = () => viewDocumento(b.archivoPdf);
-        row.innerHTML = `<td>${b.tipo}</td><td>${formatDate(b.fechaSubida)}</td>`;
+        row.onclick = () => viewDocumento(b.archivo_pdf);
+        row.innerHTML = `<td>${b.tipo}</td><td>${formatDate(b.fecha_subida)}</td>`;
     });
     
     if (bancosDocumentos.length === 0) {
@@ -789,7 +789,7 @@ function renderActivosTable() {
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
         row.onclick = () => showActivoDetail(act.id);
-        row.innerHTML = `<td>${act.nombre}</td><td>${formatDate(act.ultimoMant)}</td><td>${formatDate(act.proximoMant)}</td><td>${act.proveedor || '-'}</td>`;
+        row.innerHTML = `<td>${act.nombre}</td><td>${formatDate(act.ultimo_mant)}</td><td>${formatDate(act.proximo_mant)}</td><td>${act.proveedor || '-'}</td>`;
     });
     
     if (activos.length === 0) {
@@ -802,8 +802,8 @@ function showActivoDetail(id) {
     currentActivoId = id;
     
     document.getElementById('activoDetailNombre').textContent = act.nombre;
-    document.getElementById('detailUltimoMant').textContent = formatDate(act.ultimoMant);
-    document.getElementById('detailProximoMant').textContent = formatDate(act.proximoMant);
+    document.getElementById('detailUltimoMant').textContent = formatDate(act.ultimo_mant);
+    document.getElementById('detailProximoMant').textContent = formatDate(act.proximo_mant);
     document.getElementById('detailActivoProveedor').textContent = act.proveedor || '-';
     document.getElementById('detailActivoNotas').textContent = act.notas || '-';
     
@@ -833,9 +833,9 @@ function renderEstacionamientoTable() {
         row.onclick = () => showEditEstacionamientoModal(esp.id);
         row.style.cursor = 'pointer';
         
-        const espacioCell = `<span class="estacionamiento-espacio" style="background: ${esp.colorAsignado}">${esp.numeroEspacio}</span>`;
-        const inquilinoText = esp.inquilinoNombre || '-';
-        const despachoText = esp.numeroDespacho || '-';
+        const espacioCell = `<span class="estacionamiento-espacio" style="background: ${esp.color_asignado}">${esp.numero_espacio}</span>`;
+        const inquilinoText = esp.inquilino_nombre || '-';
+        const despachoText = esp.numero_despacho || '-';
         
         row.innerHTML = `<td>${espacioCell}</td><td>${inquilinoText}</td><td>${despachoText}</td>`;
     });
@@ -845,7 +845,7 @@ function showEditEstacionamientoModal(espacioId) {
     const espacio = estacionamiento.find(e => e.id === espacioId);
     currentEstacionamientoId = espacioId;
     
-    document.getElementById('editEspacioNumero').textContent = espacio.numeroEspacio;
+    document.getElementById('editEspacioNumero').textContent = espacio.numero_espacio;
     
     // Poblar dropdown con inquilinos
     const select = document.getElementById('editEspacioInquilino');
@@ -854,16 +854,16 @@ function showEditEstacionamientoModal(espacioId) {
         const option = document.createElement('option');
         option.value = inq.nombre;
         option.textContent = inq.nombre;
-        if (inq.nombre === espacio.inquilinoNombre) option.selected = true;
+        if (inq.nombre === espacio.inquilino_nombre) option.selected = true;
         select.appendChild(option);
     });
     
-    document.getElementById('editEspacioDespacho').value = espacio.numeroDespacho || '';
+    document.getElementById('editEspacioDespacho').value = espacio.numero_despacho || '';
     
     // Actualizar despacho al cambiar inquilino
     select.onchange = function() {
         const selectedInquilino = inquilinos.find(i => i.nombre === this.value);
-        document.getElementById('editEspacioDespacho').value = selectedInquilino?.numeroDespacho || '';
+        document.getElementById('editEspacioDespacho').value = selectedInquilino?.numero_despacho || '';
     };
     
     document.getElementById('editEstacionamientoModal').classList.add('active');
@@ -877,7 +877,7 @@ function renderBitacoraTable() {
     const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
     tbody.innerHTML = '';
     
-    // Ya viene ordenado descendente de la BD, solo renderizamos
+    // Ya viene ordenado de la BD, solo renderizamos
     bitacoraSemanal.forEach(sem => {
         const row = tbody.insertRow();
         row.onclick = () => showEditBitacoraModal(sem.id);
@@ -887,7 +887,7 @@ function renderBitacoraTable() {
         const notasCompletas = sem.notas || 'Sin notas';
         
         // Agregar atributo data para hover (desktop)
-        row.innerHTML = `<td><strong>${sem.semanaTexto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
+        row.innerHTML = `<td><strong>${sem.semana_texto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
     });
 }
 
@@ -895,13 +895,13 @@ function showEditBitacoraModal(bitacoraId) {
     const bitacora = bitacoraSemanal.find(b => b.id === bitacoraId);
     currentBitacoraId = bitacoraId;
     
-    // Convertir semanaTexto a fecha (formato: "Semana del DD MMM YYYY")
+    // Convertir semana_texto a fecha (formato: "Semana del DD MMM YYYY")
     let fechaBitacora = '';
     if (bitacora.semana) {
         fechaBitacora = bitacora.semana;
-    } else if (bitacora.semanaTexto) {
+    } else if (bitacora.semana_texto) {
         // Extraer fecha del texto "Semana del 15 Ene 2024"
-        const match = bitacora.semanaTexto.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
+        const match = bitacora.semana_texto.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
         if (match) {
             const meses = {
                 'Ene': '01', 'Feb': '02', 'Mar': '03', 'Abr': '04', 'May': '05', 'Jun': '06',
@@ -948,7 +948,7 @@ function filtrarBitacora() {
         
         const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
         const notasCompletas = sem.notas || 'Sin notas';
-        row.innerHTML = `<td><strong>${sem.semanaTexto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
+        row.innerHTML = `<td><strong>${sem.semana_texto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
     });
     
     if (filtradas.length === 0) {
@@ -1001,15 +1001,15 @@ function sortEstacionamiento(columna) {
     
     if (columna === 'espacio') {
         sortedData.sort((a, b) => {
-            const numA = parseInt(a.numeroEspacio);
-            const numB = parseInt(b.numeroEspacio);
+            const numA = parseInt(a.numero_espacio);
+            const numB = parseInt(b.numero_espacio);
             return estacionamientoSortOrder.espacio === 'asc' ? numA - numB : numB - numA;
         });
         estacionamientoSortOrder.espacio = estacionamientoSortOrder.espacio === 'asc' ? 'desc' : 'asc';
     } else if (columna === 'inquilino') {
         sortedData.sort((a, b) => {
-            const nameA = (a.inquilinoNombre || '').toLowerCase();
-            const nameB = (b.inquilinoNombre || '').toLowerCase();
+            const nameA = (a.inquilino_nombre || '').toLowerCase();
+            const nameB = (b.inquilino_nombre || '').toLowerCase();
             if (estacionamientoSortOrder.inquilino === 'asc') {
                 return nameA.localeCompare(nameB);
             } else {
@@ -1025,9 +1025,9 @@ function sortEstacionamiento(columna) {
         row.onclick = () => showEditEstacionamientoModal(esp.id);
         row.style.cursor = 'pointer';
         
-        const espacioCell = `<span class="estacionamiento-espacio" style="background: ${esp.colorAsignado}">${esp.numeroEspacio}</span>`;
-        const inquilinoText = esp.inquilinoNombre || '-';
-        const despachoText = esp.numeroDespacho || '-';
+        const espacioCell = `<span class="estacionamiento-espacio" style="background: ${esp.color_asignado}">${esp.numero_espacio}</span>`;
+        const inquilinoText = esp.inquilino_nombre || '-';
+        const despachoText = esp.numero_despacho || '-';
         
         row.innerHTML = `<td>${espacioCell}</td><td>${inquilinoText}</td><td>${despachoText}</td>`;
     });
@@ -1050,7 +1050,6 @@ function populateYearSelect() {
         yearSelect.appendChild(option);
     }
 }
-
 
 function toggleHomeTable(tableName) {
     const ingresosContainer = document.getElementById('homeIngresosContainer');
@@ -1103,8 +1102,8 @@ function updateHomeView() {
     proveedores.forEach(prov => {
         if (prov.facturas) {
             prov.facturas.forEach(fact => {
-                if (fact.fechaPago) {
-                    const pd = new Date(fact.fechaPago + 'T00:00:00');
+                if (fact.fecha_pago) {
+                    const pd = new Date(fact.fecha_pago + 'T00:00:00');
                     if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
                         totalGastos += fact.monto;
                     }
@@ -1187,7 +1186,7 @@ function renderHomePagosDetalle() {
     proveedores.forEach(prov => {
         if (prov.facturas) {
             prov.facturas.forEach(f => {
-                if (!f.fechaPago) {
+                if (!f.fecha_pago) {
                     porPagar.push({
                         proveedor: prov.nombre,
                         proveedorId: prov.id,
@@ -1196,13 +1195,13 @@ function renderHomePagosDetalle() {
                     });
                     totalPorPagar += f.monto;
                 } else {
-                    const pd = new Date(f.fechaPago + 'T00:00:00');
+                    const pd = new Date(f.fecha_pago + 'T00:00:00');
                     if (pd.getMonth() === currentMonth && pd.getFullYear() === currentYear) {
                         pagadas.push({
                             proveedor: prov.nombre,
                             proveedorId: prov.id,
                             monto: f.monto,
-                            fecha: f.fechaPago
+                            fecha: f.fecha_pago
                         });
                         totalPagadas += f.monto;
                     }
@@ -1351,17 +1350,17 @@ function populateProveedoresYearSelects() {
 
 function viewContrato() {
     const inq = inquilinos.find(i => i.id === currentInquilinoId);
-    if (inq.contratoFile) {
+    if (inq.contrato_file) {
         const newWindow = window.open();
-        newWindow.document.write(`<iframe width='100%' height='100%' src='${inq.contratoFile}'></iframe>`);
+        newWindow.document.write(`<iframe width='100%' height='100%' src='${inq.contrato_file}'></iframe>`);
     }
 }
 
 function viewContratoDirect(id) {
     const inq = inquilinos.find(i => i.id === id);
-    if (inq.contratoFile) {
+    if (inq.contrato_file) {
         const newWindow = window.open();
-        newWindow.document.write(`<iframe width='100%' height='100%' src='${inq.contratoFile}'></iframe>`);
+        newWindow.document.write(`<iframe width='100%' height='100%' src='${inq.contrato_file}'></iframe>`);
     }
 }
 
