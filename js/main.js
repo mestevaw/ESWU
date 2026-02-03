@@ -238,13 +238,7 @@ async function loadEstacionamiento() {
         
         if (error) throw error;
         
-        estacionamiento = data.map(e => ({
-            id: e.id,
-            numeroEspacio: e.numero_espacio,
-            inquilinoNombre: e.inquilino_nombre,
-            numeroDespacho: e.numero_despacho,
-            colorAsignado: e.color_asignado
-        }));
+        estacionamiento = data;
         
     } catch (error) {
         console.error('Error loading estacionamiento:', error);
@@ -257,22 +251,11 @@ async function loadBitacoraSemanal() {
         const { data, error } = await supabaseClient
             .from('bitacora_semanal')
             .select('*')
-            .order('semana_inicio', { ascending: true });
+            .order('semana_inicio', { ascending: false });
         
         if (error) throw error;
         
-        bitacoraSemanal = data.map(b => {
-            const fecha = new Date(b.semana_inicio + 'T00:00:00');
-            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-            const semanaTexto = `Semana del ${fecha.getDate()} ${months[fecha.getMonth()]} ${fecha.getFullYear()}`;
-            
-           return {
-    id: b.id,
-    semana: b.semana_inicio,
-    semanaTexto: semanaTexto,
-    notas: b.notas
-};
-        });
+        bitacoraSemanal = data;
         
     } catch (error) {
         console.error('Error loading bitacora:', error);
@@ -306,12 +289,7 @@ async function loadBancosDocumentos() {
         
         if (error) throw error;
         
-        bancosDocumentos = data.map(b => ({
-            id: b.id,
-            tipo: b.tipo,
-            archivoPdf: b.archivo_pdf,
-            fechaSubida: b.fecha_subida
-        }));
+        bancosDocumentos = data;
         
     } catch (error) {
         console.error('Error loading bancos:', error);
