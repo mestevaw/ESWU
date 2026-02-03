@@ -132,6 +132,7 @@ body.logged-in {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--primary);
+    padding-left: 1rem;
 }
 
 .header-actions {
@@ -222,7 +223,7 @@ body.logged-in {
 /* Submenu Derecha */
 .submenu-container {
     position: fixed;
-    right: 0;
+    right: 200;
     top: 70px;
     bottom: 0;
     width: 250px;
