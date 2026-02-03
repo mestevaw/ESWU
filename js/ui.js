@@ -1,5 +1,5 @@
 /* ========================================
-   ESWU - UI FUNCTIONS
+   ESWU - UI FUNCTIONS (REDISEÑADO)
    All user interface and rendering functions
    ======================================== */
 
@@ -7,17 +7,16 @@
 // GLOBAL NAVIGATION STATE
 // ============================================
 
-let currentMenuContext = 'main'; // 'main', 'inquilinos', 'proveedores', 'admin'
-let currentSubContext = null; // Para rastrear qué vista secundaria está activa
+let currentMenuContext = 'main';
+let currentSubContext = null;
+let currentSearchContext = null; // 'inquilinos', 'proveedores', 'bitacora'
+let bitacoraSortOrder = 'desc'; // 'asc' o 'desc'
 
 // ============================================
 // NAVIGATION FUNCTIONS
 // ============================================
 
 function showSubMenu(menu) {
-    // NO ocultar menú principal - mantenerlo visible
-    // El menú principal permanece en pantalla
-    
     // Quitar clase active de todos los botones del menú
     document.getElementById('menuInquilinos').classList.remove('active');
     document.getElementById('menuProveedores').classList.remove('active');
@@ -43,8 +42,12 @@ function showSubMenu(menu) {
         currentMenuContext = 'admin';
     }
     
-    // Ocultar botón Regresa en header
+    // Ocultar botón Regresa y búsqueda
     document.getElementById('btnRegresa').classList.add('hidden');
+    document.getElementById('btnSearch').classList.add('hidden');
+    
+    // Ajustar content-area
+    document.getElementById('contentArea').classList.add('with-submenu');
 }
 
 function regresaMainMenu() {
@@ -56,9 +59,6 @@ function regresaMainMenu() {
     // Ocultar todas las páginas de contenido
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
-    // Mostrar menú principal
-    document.getElementById('mainMenuPage').classList.add('active');
-    
     // Quitar clase active de todos los botones
     document.getElementById('menuInquilinos').classList.remove('active');
     document.getElementById('menuProveedores').classList.remove('active');
@@ -66,13 +66,18 @@ function regresaMainMenu() {
     
     currentMenuContext = 'main';
     currentSubContext = null;
+    currentSearchContext = null;
     
-    // Ocultar botón Regresa
+    // Ocultar botones header
     document.getElementById('btnRegresa').classList.add('hidden');
+    document.getElementById('btnSearch').classList.add('hidden');
+    
+    // Ajustar content-area
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.remove('fullwidth');
 }
 
 function handleRegresa() {
-    // Si estamos en una vista de contenido, regresar al submenú correspondiente
     if (currentSubContext) {
         // Ocultar todas las páginas
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -86,16 +91,19 @@ function handleRegresa() {
             document.getElementById('adminSubMenu').classList.add('active');
         }
         
-        // Mantener el menú principal visible
-        document.getElementById('mainMenuPage').classList.add('active');
-        
         currentSubContext = null;
+        currentSearchContext = null;
         document.getElementById('btnRegresa').classList.add('hidden');
+        document.getElementById('btnSearch').classList.add('hidden');
+        
+        // Ajustar content-area
+        document.getElementById('contentArea').classList.remove('fullwidth');
+        document.getElementById('contentArea').classList.add('with-submenu');
     }
 }
 
 function showPageFromMenu(pageName) {
-    // Ocultar submenú
+    // Ocultar submenús
     document.getElementById('inquilinosSubMenu').classList.remove('active');
     document.getElementById('proveedoresSubMenu').classList.remove('active');
     document.getElementById('adminSubMenu').classList.remove('active');
@@ -103,20 +111,72 @@ function showPageFromMenu(pageName) {
     // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
-    // Mantener menú principal visible
-    document.getElementById('mainMenuPage').classList.add('active');
-    
     // Mostrar página solicitada
     document.getElementById(pageName + 'Page').classList.add('active');
     
     currentSubContext = pageName;
     
-    // Mostrar botón Regresa
+    // Mostrar botones header
     document.getElementById('btnRegresa').classList.remove('hidden');
     
-    // Cargar contenido según la página
+    // Mostrar búsqueda solo en páginas que la necesitan
+    if (pageName === 'bitacora') {
+        document.getElementById('btnSearch').classList.remove('hidden');
+        currentSearchContext = 'bitacora';
+    }
+    
+    // Content-area a pantalla completa
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
+    
+    // Cargar contenido
     if (pageName === 'estacionamiento') renderEstacionamientoTable();
     if (pageName === 'bitacora') renderBitacoraTable();
+}
+
+// ============================================
+// SEARCH FUNCTIONS
+// ============================================
+
+function toggleSearch() {
+    const modal = document.getElementById('searchModal');
+    modal.classList.toggle('active');
+    if (modal.classList.contains('active')) {
+        document.getElementById('searchInput').focus();
+    }
+}
+
+function executeSearch() {
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    
+    if (!query) {
+        alert('Por favor ingresa un término de búsqueda');
+        return;
+    }
+    
+    if (currentSearchContext === 'bitacora') {
+        filtrarBitacora(query);
+    } else if (currentSearchContext === 'proveedores') {
+        filtrarProveedores(query);
+    } else if (currentSearchContext === 'inquilinos') {
+        filtrarInquilinos(query);
+    }
+    
+    toggleSearch();
+}
+
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    
+    if (currentSearchContext === 'bitacora') {
+        renderBitacoraTable();
+    } else if (currentSearchContext === 'proveedores') {
+        renderProveedoresTable();
+    } else if (currentSearchContext === 'inquilinos') {
+        renderInquilinosTable();
+    }
+    
+    toggleSearch();
 }
 
 // ============================================
@@ -172,27 +232,29 @@ function toggleDropdown(dropdownId) {
 // ============================================
 
 function showInquilinosView(view) {
-    // Ocultar submenú inquilinos
     document.getElementById('inquilinosSubMenu').classList.remove('active');
-    
-    // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    // Mantener menú principal visible
-    document.getElementById('mainMenuPage').classList.add('active');
-    
-    // Mostrar página de inquilinos
     document.getElementById('inquilinosPage').classList.add('active');
     
-    // Ocultar todas las vistas de inquilinos
     document.getElementById('inquilinosListView').classList.add('hidden');
     document.getElementById('inquilinosRentasRecibidasView').classList.add('hidden');
     document.getElementById('inquilinosVencimientoContratosView').classList.add('hidden');
     
     currentSubContext = 'inquilinos-' + view;
     
-    // Mostrar botón Regresa
     document.getElementById('btnRegresa').classList.remove('hidden');
+    
+    // Mostrar búsqueda solo en listado
+    if (view === 'list') {
+        document.getElementById('btnSearch').classList.remove('hidden');
+        currentSearchContext = 'inquilinos';
+    } else {
+        document.getElementById('btnSearch').classList.add('hidden');
+        currentSearchContext = null;
+    }
+    
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
     
     if (view === 'list') {
         document.getElementById('inquilinosListView').classList.remove('hidden');
@@ -222,6 +284,27 @@ function renderInquilinosTable() {
     
     if (inquilinos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay inquilinos</td></tr>';
+    }
+}
+
+function filtrarInquilinos(query) {
+    const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    const filtrados = inquilinos.filter(inq => inq.nombre.toLowerCase().includes(query));
+    
+    filtrados.forEach(inq => {
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';
+        row.onclick = () => showInquilinoDetail(inq.id);
+        
+        const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
+        
+        row.innerHTML = `<td style="font-size:0.9rem">${nombreCorto}</td><td class="currency">${formatCurrency(inq.renta)}</td><td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>`;
+    });
+    
+    if (filtrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron resultados</td></tr>';
     }
 }
 
@@ -327,6 +410,7 @@ function renderInquilinosVencimientoContratos() {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay contratos</td></tr>';
     }
 }
+
 function showInquilinoDetail(id) {
     const inq = inquilinos.find(i => i.id === id);
     currentInquilinoId = id;
@@ -398,27 +482,29 @@ function showInquilinoDetail(id) {
 // ============================================
 
 function showProveedoresView(view) {
-    // Ocultar submenú proveedores
     document.getElementById('proveedoresSubMenu').classList.remove('active');
-    
-    // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    // Mantener menú principal visible
-    document.getElementById('mainMenuPage').classList.add('active');
-    
-    // Mostrar página de proveedores
     document.getElementById('proveedoresPage').classList.add('active');
     
-    // Ocultar todas las vistas de proveedores
     document.getElementById('proveedoresListView').classList.add('hidden');
     document.getElementById('proveedoresFacturasPagadasView').classList.add('hidden');
     document.getElementById('proveedoresFacturasPorPagarView').classList.add('hidden');
     
     currentSubContext = 'proveedores-' + view;
     
-    // Mostrar botón Regresa
     document.getElementById('btnRegresa').classList.remove('hidden');
+    
+    // Mostrar búsqueda solo en listado
+    if (view === 'list') {
+        document.getElementById('btnSearch').classList.remove('hidden');
+        currentSearchContext = 'proveedores';
+    } else {
+        document.getElementById('btnSearch').classList.add('hidden');
+        currentSearchContext = null;
+    }
+    
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
     
     if (view === 'list') {
         document.getElementById('proveedoresListView').classList.remove('hidden');
@@ -446,6 +532,25 @@ function renderProveedoresTable() {
     
     if (proveedores.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay proveedores</td></tr>';
+    }
+}
+
+function filtrarProveedores(query) {
+    const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    const filtrados = proveedores.filter(prov => prov.nombre.toLowerCase().includes(query));
+    
+    filtrados.forEach(prov => {
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';
+        row.onclick = () => showProveedorDetail(prov.id);
+        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
+        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td><td>${prov.servicio}</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td><td>${primerContacto.telefono || '-'}</td><td>${primerContacto.email || '-'}</td>`;
+    });
+    
+    if (filtrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron proveedores</td></tr>';
     }
 }
 
@@ -567,6 +672,7 @@ function renderProveedoresFacturasPorPagar() {
         row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
     }
 }
+
 function showProveedorDetail(id) {
     const prov = proveedores.find(p => p.id === id);
     currentProveedorId = id;
@@ -690,23 +796,116 @@ function showProveedorDetail(id) {
 }
 
 // ============================================
+// BITÁCORA SEMANAL CON ORDENAMIENTO
+// ============================================
+
+function renderBitacoraTable() {
+    const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    // Ordenar según bitacoraSortOrder
+    const sorted = [...bitacoraSemanal].sort((a, b) => {
+        const dateA = new Date(a.semana_inicio);
+        const dateB = new Date(b.semana_inicio);
+        return bitacoraSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    
+    sorted.forEach(sem => {
+        const row = tbody.insertRow();
+        row.onclick = () => showEditBitacoraModal(sem.id);
+        row.style.cursor = 'pointer';
+        
+        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
+        const notasCompletas = sem.notas || 'Sin notas';
+        
+        row.innerHTML = `<td><strong>${sem.semana_texto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
+    });
+    
+    // Actualizar indicador de ordenamiento
+    const th = document.querySelector('#bitacoraTable th.sortable');
+    th.classList.remove('sorted-asc', 'sorted-desc');
+    th.classList.add(bitacoraSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
+}
+
+function sortBitacora() {
+    // Alternar orden
+    bitacoraSortOrder = bitacoraSortOrder === 'asc' ? 'desc' : 'asc';
+    renderBitacoraTable();
+}
+
+function filtrarBitacora(query) {
+    const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    const filtradas = bitacoraSemanal.filter(sem => {
+        const notas = (sem.notas || '').toLowerCase();
+        return notas.includes(query);
+    });
+    
+    // Aplicar el orden actual
+    const sorted = [...filtradas].sort((a, b) => {
+        const dateA = new Date(a.semana_inicio);
+        const dateB = new Date(b.semana_inicio);
+        return bitacoraSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    
+    sorted.forEach(sem => {
+        const row = tbody.insertRow();
+        row.onclick = () => showEditBitacoraModal(sem.id);
+        row.style.cursor = 'pointer';
+        
+        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
+        const notasCompletas = sem.notas || 'Sin notas';
+        row.innerHTML = `<td><strong>${sem.semana_texto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
+    });
+    
+    if (sorted.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron resultados</td></tr>';
+    }
+}
+
+function showEditBitacoraModal(bitacoraId) {
+    const bitacora = bitacoraSemanal.find(b => b.id === bitacoraId);
+    currentBitacoraId = bitacoraId;
+    
+    let fechaBitacora = '';
+    if (bitacora.semana_inicio) {
+        fechaBitacora = bitacora.semana_inicio;
+    } else if (bitacora.semana_texto) {
+        const match = bitacora.semana_texto.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
+        if (match) {
+            const meses = {
+                'Ene': '01', 'Feb': '02', 'Mar': '03', 'Abr': '04', 'May': '05', 'Jun': '06',
+                'Jul': '07', 'Ago': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dic': '12'
+            };
+            const dia = match[1].padStart(2, '0');
+            const mes = meses[match[2]];
+            const anio = match[3];
+            fechaBitacora = `${anio}-${mes}-${dia}`;
+        }
+    }
+    
+    document.getElementById('editBitacoraFecha').value = fechaBitacora;
+    document.getElementById('editBitacoraNotas').value = bitacora.notas || '';
+    
+    document.getElementById('editBitacoraModal').classList.add('active');
+}
+
+// ============================================
 // ADMIN - VIEWS
 // ============================================
 
 function showAdminView(view) {
-    // Ocultar submenú admin
     document.getElementById('adminSubMenu').classList.remove('active');
-    
-    // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    // Mantener menú principal visible
-    document.getElementById('mainMenuPage').classList.add('active');
     
     currentSubContext = 'admin-' + view;
     
-    // Mostrar botón Regresa
     document.getElementById('btnRegresa').classList.remove('hidden');
+    document.getElementById('btnSearch').classList.add('hidden');
+    
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
     
     if (view === 'usuarios') {
         document.getElementById('adminUsuariosPage').classList.add('active');
@@ -718,43 +917,33 @@ function showAdminView(view) {
 }
 
 function showActivosPage() {
-    // Ocultar submenú admin
     document.getElementById('adminSubMenu').classList.remove('active');
-    
-    // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    // Mantener menú principal visible
-    document.getElementById('mainMenuPage').classList.add('active');
-    
-    // Mostrar página de activos
     document.getElementById('activosPage').classList.add('active');
     
     currentSubContext = 'admin-activos';
     
-    // Mostrar botón Regresa
     document.getElementById('btnRegresa').classList.remove('hidden');
+    document.getElementById('btnSearch').classList.add('hidden');
+    
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
     
     renderActivosTable();
 }
 
 function showNumerosPage() {
-    // Ocultar submenú admin
     document.getElementById('adminSubMenu').classList.remove('active');
-    
-    // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    // Mantener menú principal visible
-    document.getElementById('mainMenuPage').classList.add('active');
-    
-    // Mostrar página de números
     document.getElementById('numerosPage').classList.add('active');
     
     currentSubContext = 'admin-numeros';
     
-    // Mostrar botón Regresa
     document.getElementById('btnRegresa').classList.remove('hidden');
+    document.getElementById('btnSearch').classList.add('hidden');
+    
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
     
     updateHomeView();
 }
@@ -786,7 +975,18 @@ function renderBancosTable() {
         const row = tbody.insertRow();
         row.className = 'banco-clickable';
         row.onclick = () => viewDocumento(b.archivo_pdf);
-        row.innerHTML = `<td>${b.tipo}</td><td>${formatDate(b.fecha_subida)}</td>`;
+        
+        // Extraer nombre del archivo desde la URL
+        let nombreArchivo = b.tipo || 'Documento';
+        if (b.archivo_pdf) {
+            const urlParts = b.archivo_pdf.split('/');
+            const archivoConParams = urlParts[urlParts.length - 1];
+            nombreArchivo = archivoConParams.split('?')[0];
+            // Decodificar URL encoding
+            nombreArchivo = decodeURIComponent(nombreArchivo);
+        }
+        
+        row.innerHTML = `<td>${nombreArchivo}</td><td>${formatDate(b.fecha_subida)}</td>`;
     });
     
     if (bancosDocumentos.length === 0) {
@@ -854,6 +1054,7 @@ function showActivoDetail(id) {
     
     document.getElementById('activoDetailModal').classList.add('active');
 }
+
 // ============================================
 // ESTACIONAMIENTO
 // ============================================
@@ -881,7 +1082,6 @@ function showEditEstacionamientoModal(espacioId) {
     
     document.getElementById('editEspacioNumero').textContent = espacio.numero_espacio;
     
-    // Poblar dropdown con inquilinos
     const select = document.getElementById('editEspacioInquilino');
     select.innerHTML = '<option value="">-- Seleccione --</option><option value="VISITAS">VISITAS</option>';
     inquilinos.forEach(inq => {
@@ -894,7 +1094,6 @@ function showEditEstacionamientoModal(espacioId) {
     
     document.getElementById('editEspacioDespacho').value = espacio.numero_despacho || '';
     
-    // Actualizar despacho al cambiar inquilino
     select.onchange = function() {
         const selectedInquilino = inquilinos.find(i => i.nombre === this.value);
         document.getElementById('editEspacioDespacho').value = selectedInquilino?.numero_despacho || '';
@@ -903,130 +1102,7 @@ function showEditEstacionamientoModal(espacioId) {
     document.getElementById('editEstacionamientoModal').classList.add('active');
 }
 
-// ============================================
-// BITÁCORA SEMANAL
-// ============================================
-
-function renderBitacoraTable() {
-    const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    // Ya viene ordenado de la BD, solo renderizamos
-    bitacoraSemanal.forEach(sem => {
-        const row = tbody.insertRow();
-        row.onclick = () => showEditBitacoraModal(sem.id);
-        row.style.cursor = 'pointer';
-        
-        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
-        const notasCompletas = sem.notas || 'Sin notas';
-        
-        // Agregar atributo data para hover (desktop)
-        row.innerHTML = `<td><strong>${sem.semana_texto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
-    });
-}
-
-function showEditBitacoraModal(bitacoraId) {
-    const bitacora = bitacoraSemanal.find(b => b.id === bitacoraId);
-    currentBitacoraId = bitacoraId;
-    
-    // Convertir semana_texto a fecha (formato: "Semana del DD MMM YYYY")
-    let fechaBitacora = '';
-    if (bitacora.semana) {
-        fechaBitacora = bitacora.semana;
-    } else if (bitacora.semana_texto) {
-        // Extraer fecha del texto "Semana del 15 Ene 2024"
-        const match = bitacora.semana_texto.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
-        if (match) {
-            const meses = {
-                'Ene': '01', 'Feb': '02', 'Mar': '03', 'Abr': '04', 'May': '05', 'Jun': '06',
-                'Jul': '07', 'Ago': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dic': '12'
-            };
-            const dia = match[1].padStart(2, '0');
-            const mes = meses[match[2]];
-            const anio = match[3];
-            fechaBitacora = `${anio}-${mes}-${dia}`;
-        }
-    }
-    
-    document.getElementById('editBitacoraFecha').value = fechaBitacora;
-    document.getElementById('editBitacoraNotas').value = bitacora.notas || '';
-    
-    document.getElementById('editBitacoraModal').classList.add('active');
-}
-
-// ============================================
-// BÚSQUEDA Y FILTROS
-// ============================================
-
 let estacionamientoSortOrder = { espacio: 'asc', inquilino: 'asc' };
-
-function filtrarBitacora() {
-    const busqueda = document.getElementById('bitacoraBusqueda').value.toLowerCase().trim();
-    const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    if (!busqueda) {
-        renderBitacoraTable();
-        return;
-    }
-    
-    const filtradas = bitacoraSemanal.filter(sem => {
-        const notas = (sem.notas || '').toLowerCase();
-        return notas.includes(busqueda);
-    });
-    
-    filtradas.forEach(sem => {
-        const row = tbody.insertRow();
-        row.onclick = () => showEditBitacoraModal(sem.id);
-        row.style.cursor = 'pointer';
-        
-        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
-        const notasCompletas = sem.notas || 'Sin notas';
-        row.innerHTML = `<td><strong>${sem.semana_texto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
-    });
-    
-    if (filtradas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron resultados</td></tr>';
-    }
-}
-
-function limpiarBusquedaBitacora() {
-    document.getElementById('bitacoraBusqueda').value = '';
-    renderBitacoraTable();
-}
-
-function filtrarProveedores() {
-    const busqueda = document.getElementById('proveedorBusqueda').value.toLowerCase().trim();
-    const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    if (!busqueda) {
-        renderProveedoresTable();
-        return;
-    }
-    
-    const filtrados = proveedores.filter(prov => {
-        const nombre = prov.nombre.toLowerCase();
-        return nombre.includes(busqueda);
-    });
-    
-    filtrados.forEach(prov => {
-        const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.onclick = () => showProveedorDetail(prov.id);
-        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
-        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td><td>${prov.servicio}</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td><td>${primerContacto.telefono || '-'}</td><td>${primerContacto.email || '-'}</td>`;
-    });
-    
-    if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron proveedores</td></tr>';
-    }
-}
-
-function limpiarBusquedaProveedores() {
-    document.getElementById('proveedorBusqueda').value = '';
-    renderProveedoresTable();
-}
 
 function sortEstacionamiento(columna) {
     const tbody = document.getElementById('estacionamientoTable').querySelector('tbody');
@@ -1068,7 +1144,7 @@ function sortEstacionamiento(columna) {
 }
 
 // ============================================
-// NÚMEROS PAGE (antigua Home)
+// NÚMEROS PAGE
 // ============================================
 
 function populateYearSelect() {
@@ -1084,7 +1160,6 @@ function populateYearSelect() {
         yearSelect.appendChild(option);
     }
 }
-
 
 function toggleHomeTable(tableName) {
     const ingresosContainer = document.getElementById('homeIngresosContainer');
@@ -1280,6 +1355,7 @@ function renderHomePagosDetalle() {
         row.innerHTML = `<td style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
     }
 }
+
 // ============================================
 // TAB SWITCHING
 // ============================================
@@ -1612,12 +1688,12 @@ function fileToBase64(file) {
         reader.readAsDataURL(file);
     });
 }
+
 // ============================================
 // FILE INPUT LISTENERS
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Inquilino Contrato
     const inquilinoContrato = document.getElementById('inquilinoContrato');
     if (inquilinoContrato) {
         inquilinoContrato.addEventListener('change', function() {
@@ -1626,7 +1702,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Nuevo Doc PDF
     const nuevoDocPDF = document.getElementById('nuevoDocPDF');
     if (nuevoDocPDF) {
         nuevoDocPDF.addEventListener('change', function() {
@@ -1635,7 +1710,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Proveedor Doc Adicional
     const proveedorDocAdicional = document.getElementById('proveedorDocAdicional');
     if (proveedorDocAdicional) {
         proveedorDocAdicional.addEventListener('change', function() {
@@ -1653,7 +1727,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Factura Documento
     const facturaDocumento = document.getElementById('facturaDocumento');
     if (facturaDocumento) {
         facturaDocumento.addEventListener('change', function() {
@@ -1662,7 +1735,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Pago PDF Factura
     const pagoPDFFactura = document.getElementById('pagoPDFFactura');
     if (pagoPDFFactura) {
         pagoPDFFactura.addEventListener('change', function() {
@@ -1671,7 +1743,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Activo Fotos
     const activoFotos = document.getElementById('activoFotos');
     if (activoFotos) {
         activoFotos.addEventListener('change', function() {
@@ -1680,7 +1751,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Banco Documento
     const bancoDocumento = document.getElementById('bancoDocumento');
     if (bancoDocumento) {
         bancoDocumento.addEventListener('change', function() {
@@ -1708,12 +1778,10 @@ window.addEventListener('click', function(e) {
 
 function logout() {
     if (confirm('¿Cerrar sesión?')) {
-        // No borrar el usuario recordado, solo cerrar sesión
         document.getElementById('appContainer').classList.remove('active');
         document.getElementById('loginContainer').classList.remove('hidden');
         document.body.classList.remove('logged-in');
         
-        // Resetear al menú principal
         regresaMainMenu();
     }
 }
