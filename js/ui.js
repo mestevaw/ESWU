@@ -1085,7 +1085,6 @@ function populateYearSelect() {
     }
 }
 
-let currentHomeTable = null;
 
 function toggleHomeTable(tableName) {
     const ingresosContainer = document.getElementById('homeIngresosContainer');
