@@ -1,310 +1,251 @@
-/* ========================================
-   ESWU - UI FUNCTIONS
-   All user interface and rendering functions
-   ======================================== */
+<!-- Proveedor Detail Modal -->
+            <div id="proveedorDetailModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header modal-header-sticky">
+                        <div class="modal-header-left">
+                            <div class="dropdown">
+                                <button class="dropdown-toggle" onclick="toggleDropdown('proveedorDetailDropdown')" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
+                                <div id="proveedorDetailDropdown" class="dropdown-content">
+                                    <a href="#" onclick="event.preventDefault(); showRegistrarFacturaModal();">Registrar Factura</a>
+                                    <a href="#" onclick="event.preventDefault(); editProveedor();">Modificar Datos</a>
+                                    <a href="#" onclick="event.preventDefault(); deleteProveedor();">Eliminar</a>
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="modal-title" id="proveedorDetailNombre"></h2>
+                        <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
+                    </div>
+                    <div style="padding: 1.5rem; padding-top: 5rem;">
+                        <div class="info-grid">
+                            <div class="info-item"><div class="info-label">Servicio</div><div class="info-value" id="detailServicio"></div></div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-box-title">CONTACTOS</div>
+                            <div id="detailProvContactosList"></div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-box-content">
+                                <strong>RFC:</strong> <span id="detailProvRFC"></span> &nbsp;&nbsp;&nbsp; <strong>CLABE:</strong> <span id="detailProvClabe"></span>
+                            </div>
+                        </div>
+                        <div class="tabs-container">
+                            <div class="tabs">
+                                <button class="tab active" onclick="switchTab('proveedor', 'pagadas')">Facturas Pagadas</button>
+                                <button class="tab" onclick="switchTab('proveedor', 'porpagar')">Facturas X Pagar</button>
+                                <button class="tab" onclick="switchTab('proveedor', 'docs')">Documentos Adicionales</button>
+                            </div>
+                            <div id="proveedorPagadasTab" class="tab-content active">
+                                <div id="facturasPagadas"></div>
+                            </div>
+                            <div id="proveedorPorPagarTab" class="tab-content">
+                                <div id="facturasPorPagar"></div>
+                            </div>
+                            <div id="proveedorDocsTab" class="tab-content">
+                                <div id="proveedorDocumentosAdicionales"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-// ============================================
-// GLOBAL NAVIGATION STATE
-// ============================================
+            <!-- Factura Detail Modal -->
+            <div id="facturaDetailModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Detalle de Factura</h2>
+                        <button class="close-modal" onclick="closeModal('facturaDetailModal')">×</button>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <div class="info-grid">
+                            <div class="info-item"><div class="info-label">Proveedor</div><div class="info-value" id="factDetailProveedor"></div></div>
+                            <div class="info-item"><div class="info-label">Número</div><div class="info-value" id="factDetailNumero"></div></div>
+                            <div class="info-item"><div class="info-label">Fecha</div><div class="info-value" id="factDetailFecha"></div></div>
+                            <div class="info-item"><div class="info-label">Vencimiento</div><div class="info-value" id="factDetailVencimiento"></div></div>
+                            <div class="info-item"><div class="info-label">Monto</div><div class="info-value currency" id="factDetailMonto"></div></div>
+                            <div class="info-item"><div class="info-label">IVA</div><div class="info-value currency" id="factDetailIVA"></div></div>
+                        </div>
+                        <div style="margin-top: 1.5rem; text-align: center;">
+                            <button class="btn btn-success" onclick="showPagarFacturaModalFromDetail()">Dar X Pagada</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-let currentMenuContext = 'main'; // 'main', 'inquilinos', 'proveedores', 'admin'
-let currentSubContext = null; // Para rastrear qué vista secundaria está activa
+            <!-- Registrar Factura Modal -->
+            <div id="registrarFacturaModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Registrar Factura</h2>
+                        <button class="close-modal" onclick="closeModal('registrarFacturaModal')">×</button>
+                    </div>
+                    <form onsubmit="saveFactura(event)">
+                        <div style="padding: 1.5rem;">
+                            <div class="form-group"><label>Número de Factura</label><input type="text" id="facturaNumero" autocomplete="off"></div>
+                            <div class="form-group"><label>Fecha Factura *</label><input type="date" id="facturaFecha" required></div>
+                            <div class="form-group"><label>Vencimiento *</label><input type="date" id="facturaVencimiento" required></div>
+                            <div class="form-group"><label>Monto *</label><input type="number" id="facturaMonto" step="0.01" required autocomplete="off" onchange="calculateIVA()"></div>
+                            <div class="form-group"><label>IVA</label><input type="number" id="facturaIVA" step="0.01" autocomplete="off"></div>
+                            <div class="form-group">
+                                <label>Factura (PDF)</label>
+                                <div class="file-upload" onclick="document.getElementById('facturaDocumento').click()">
+                                    <input type="file" id="facturaDocumento" accept=".pdf">
+                                    <p>Click para seleccionar PDF de la factura</p>
+                                    <p id="facturaDocumentoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('registrarFacturaModal')">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-// ============================================
-// NAVIGATION FUNCTIONS
-// ============================================
+            <!-- Pagar Factura Modal -->
+            <div id="pagarFacturaModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Dar Factura X Pagada</h2>
+                        <button class="close-modal" onclick="closeModal('pagarFacturaModal')">×</button>
+                    </div>
+                    <form onsubmit="savePagoFactura(event)">
+                        <div style="padding: 1.5rem;">
+                            <div class="form-group"><label>Fecha de Pago *</label><input type="date" id="fechaPagoFactura" required></div>
+                            <div class="form-group">
+                                <label>Comprobante de Pago (PDF)</label>
+                                <div class="file-upload" onclick="document.getElementById('pagoPDFFactura').click()">
+                                    <input type="file" id="pagoPDFFactura" accept=".pdf">
+                                    <p>Click para seleccionar PDF del comprobante</p>
+                                    <p id="pagoPDFFacturaFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('pagarFacturaModal')">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Guardar Pago</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-function showSubMenu(menu) {
-    // Ocultar menú principal
-    document.getElementById('mainMenuPage').classList.remove('active');
-    
-    // Ocultar todos los submenús
-    document.getElementById('inquilinosSubMenu').classList.remove('active');
-    document.getElementById('proveedoresSubMenu').classList.remove('active');
-    document.getElementById('adminSubMenu').classList.remove('active');
-    
-    // Mostrar submenú correspondiente
-    if (menu === 'inquilinos') {
-        document.getElementById('inquilinosSubMenu').classList.add('active');
-        currentMenuContext = 'inquilinos';
-    } else if (menu === 'proveedores') {
-        document.getElementById('proveedoresSubMenu').classList.add('active');
-        currentMenuContext = 'proveedores';
-    } else if (menu === 'admin') {
-        document.getElementById('adminSubMenu').classList.add('active');
-        currentMenuContext = 'admin';
-    }
-    
-    // Ocultar botón Regresa en header
-    document.getElementById('btnRegresa').classList.add('hidden');
-}
+            <!-- Add Activo Modal -->
+            <div id="addActivoModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title" id="addActivoTitle">Agregar Activo</h2>
+                        <button class="close-modal" onclick="closeModal('addActivoModal')">×</button>
+                    </div>
+                    <form id="activoForm" onsubmit="saveActivo(event)">
+                        <div class="form-group"><label>Nombre *</label><input type="text" id="activoNombre" required autocomplete="off"></div>
+                        <div class="form-group"><label>Último Mantenimiento</label><input type="date" id="activoUltimoMant"></div>
+                        <div class="form-group"><label>Próximo Mantenimiento</label><input type="date" id="activoProximoMant"></div>
+                        <div class="form-group">
+                            <label>Proveedor</label>
+                            <select id="activoProveedor">
+                                <option value="">-- Seleccione un proveedor --</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Notas</label><textarea id="activoNotas"></textarea></div>
+                        <div class="form-group">
+                            <label>Fotos</label>
+                            <div class="file-upload" onclick="document.getElementById('activoFotos').click()">
+                                <input type="file" id="activoFotos" accept="image/*" multiple>
+                                <p>Click para seleccionar fotos</p>
+                                <p id="activoFotosFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('addActivoModal')">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-function regresaMainMenu() {
-    // Ocultar todos los submenús
-    document.getElementById('inquilinosSubMenu').classList.remove('active');
-    document.getElementById('proveedoresSubMenu').classList.remove('active');
-    document.getElementById('adminSubMenu').classList.remove('active');
-    
-    // Ocultar todas las páginas de contenido
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    // Mostrar menú principal
-    document.getElementById('mainMenuPage').classList.add('active');
-    
-    currentMenuContext = 'main';
-    currentSubContext = null;
-    
-    // Ocultar botón Regresa
-    document.getElementById('btnRegresa').classList.add('hidden');
-}
+            <!-- Activo Detail Modal -->
+            <div id="activoDetailModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title" id="activoDetailNombre"></h2>
+                        <button class="close-modal" onclick="closeModal('activoDetailModal')">×</button>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <div class="info-grid">
+                            <div class="info-item"><div class="info-label">Último Mantenimiento</div><div class="info-value" id="detailUltimoMant"></div></div>
+                            <div class="info-item"><div class="info-label">Próximo Mantenimiento</div><div class="info-value" id="detailProximoMant"></div></div>
+                            <div class="info-item"><div class="info-label">Proveedor</div><div class="info-value" id="detailActivoProveedor"></div></div>
+                        </div>
+                        <div class="info-item" style="margin-top: 1rem;"><div class="info-label">Notas</div><div class="info-value" id="detailActivoNotas"></div></div>
+                        <h3 style="margin: 1.5rem 0 1rem 0;">Fotos</h3>
+                        <div id="photoGallery" class="photo-gallery"></div>
+                        <div class="modal-actions" style="margin-top: 1.5rem;">
+                            <button class="btn btn-primary" onclick="editActivo()">Editar</button>
+                            <button class="btn btn-danger" onclick="deleteActivo()">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-function handleRegresa() {
-    // Si estamos en una vista de contenido, regresar al submenú correspondiente
-    if (currentSubContext) {
-        // Ocultar todas las páginas
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        
-        // Mostrar el submenú correspondiente
-        if (currentMenuContext === 'inquilinos') {
-            document.getElementById('inquilinosSubMenu').classList.add('active');
-        } else if (currentMenuContext === 'proveedores') {
-            document.getElementById('proveedoresSubMenu').classList.add('active');
-        } else if (currentMenuContext === 'admin') {
-            document.getElementById('adminSubMenu').classList.add('active');
-        }
-        
-        currentSubContext = null;
-        document.getElementById('btnRegresa').classList.add('hidden');
-    }
-}
+            <!-- Add Usuario Modal -->
+            <div id="addUsuarioModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title" id="addUsuarioTitle">Agregar Usuario</h2>
+                        <button class="close-modal" onclick="closeModal('addUsuarioModal')">×</button>
+                    </div>
+                    <form id="usuarioForm" onsubmit="saveUsuario(event)">
+                        <div class="form-group"><label>Nombre *</label><input type="text" id="usuarioNombre" required autocomplete="off"></div>
+                        <div class="form-group"><label>Password *</label><input type="password" id="usuarioPassword" required autocomplete="new-password"></div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('addUsuarioModal')">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-function showPageFromMenu(pageName) {
-    // Ocultar submenú
-    document.getElementById('inquilinosSubMenu').classList.remove('active');
-    document.getElementById('proveedoresSubMenu').classList.remove('active');
-    document.getElementById('adminSubMenu').classList.remove('active');
-    
-    // Ocultar todas las páginas
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    // Mostrar página solicitada
-    document.getElementById(pageName + 'Page').classList.add('active');
-    
-    currentSubContext = pageName;
-    
-    // Mostrar botón Regresa
-    document.getElementById('btnRegresa').classList.remove('hidden');
-    
-    // Cargar contenido según la página
-    if (pageName === 'estacionamiento') renderEstacionamientoTable();
-    if (pageName === 'bitacora') renderBitacoraTable();
-}
+            <!-- Add Banco Modal -->
+            <div id="addBancoModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Subir Documento Banco</h2>
+                        <button class="close-modal" onclick="closeModal('addBancoModal')">×</button>
+                    </div>
+                    <form id="bancoForm" onsubmit="saveBancoDoc(event)">
+                        <div class="form-group">
+                            <label>Tipo de Documento *</label>
+                            <select id="bancoTipo" required>
+                                <option value="">-- Seleccione --</option>
+                                <option value="Estado de Cuenta">Estado de Cuenta</option>
+                                <option value="Consulta de Movimientos">Consulta de Movimientos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Documento (PDF) *</label>
+                            <div class="file-upload" onclick="document.getElementById('bancoDocumento').click()">
+                                <input type="file" id="bancoDocumento" accept=".pdf" required>
+                                <p>Click para seleccionar PDF</p>
+                                <p id="bancoDocumentoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('addBancoModal')">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-// ============================================
-// FORMAT FUNCTIONS
-// ============================================
-
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('es-MX', { 
-        style: 'currency', 
-        currency: 'MXN' 
-    }).format(amount);
-}
-
-function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString + 'T00:00:00');
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-}
-
-function formatDateVencimiento(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
-    const formatted = formatDate(dateString);
-    
-    if (diffDays <= 7 && diffDays >= 0) {
-        return `<span class="vencimiento-proximo">${formatted}</span>`;
-    }
-    return formatted;
-}
-
-// ============================================
-// MODAL FUNCTIONS
-// ============================================
-
-function closeModal(modalId) {
-    document.getElementById(modalId).classList.remove('active');
-}
-
-function toggleDropdown(dropdownId) {
-    const dropdown = document.getElementById(dropdownId);
-    document.querySelectorAll('.dropdown-content').forEach(dd => {
-        if (dd.id !== dropdownId) dd.classList.remove('show');
-    });
-    dropdown.classList.toggle('show');
-}
-
-// ============================================
-// INQUILINOS - VIEWS
-// ============================================
-
-function showInquilinosView(view) {
-    // Ocultar submenú inquilinos
-    document.getElementById('inquilinosSubMenu').classList.remove('active');
-    
-    // Ocultar todas las páginas
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    // Mostrar página de inquilinos
-    document.getElementById('inquilinosPage').classList.add('active');
-    
-    // Ocultar todas las vistas de inquilinos
-    document.getElementById('inquilinosListView').classList.add('hidden');
-    document.getElementById('inquilinosRentasRecibidasView').classList.add('hidden');
-    document.getElementById('inquilinosVencimientoContratosView').classList.add('hidden');
-    
-    currentSubContext = 'inquilinos-' + view;
-    
-    // Mostrar botón Regresa
-    document.getElementById('btnRegresa').classList.remove('hidden');
-    
-    if (view === 'list') {
-        document.getElementById('inquilinosListView').classList.remove('hidden');
-        renderInquilinosTable();
-    } else if (view === 'rentasRecibidas') {
-        document.getElementById('inquilinosRentasRecibidasView').classList.remove('hidden');
-        renderInquilinosRentasRecibidas();
-    } else if (view === 'vencimientoContratos') {
-        document.getElementById('inquilinosVencimientoContratosView').classList.remove('hidden');
-        renderInquilinosVencimientoContratos();
-    }
-}
-
-function renderInquilinosTable() {
-    const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    inquilinos.forEach(inq => {
-        const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.onclick = () => showInquilinoDetail(inq.id);
-        
-        const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
-        
-        row.innerHTML = `<td style="font-size:0.9rem">${nombreCorto}</td><td class="currency">${formatCurrency(inq.renta)}</td><td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>`;
-    });
-    
-    if (inquilinos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay inquilinos</td></tr>';
-    }
-}
-
-function renderInquilinosRentasRecibidas() {
-    const tbody = document.getElementById('inquilinosRentasRecibidasTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    const filterType = document.getElementById('inquilinosRentasFilter').value;
-    const year = parseInt(document.getElementById('inquilinosRentasYear').value);
-    const monthSelect = document.getElementById('inquilinosRentasMonth');
-    
-    if (filterType === 'mensual') {
-        monthSelect.classList.remove('hidden');
-    } else {
-        monthSelect.classList.add('hidden');
-    }
-    
-    const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
-    const rentas = [];
-    let totalPeriodo = 0;
-    
-    inquilinos.forEach(inq => {
-        if (inq.pagos) {
-            inq.pagos.forEach(pago => {
-                const pd = new Date(pago.fecha + 'T00:00:00');
-                if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
-                    rentas.push({
-                        empresa: inq.nombre,
-                        monto: pago.monto,
-                        fecha: pago.fecha
-                    });
-                    totalPeriodo += pago.monto;
-                }
-            });
-        }
-    });
-    
-    rentas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    rentas.forEach(r => {
-        const row = tbody.insertRow();
-        row.innerHTML = `<td>${r.empresa}</td><td class="currency">${formatCurrency(r.monto)}</td><td>${formatDate(r.fecha)}</td>`;
-    });
-    
-    if (rentas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay rentas</td></tr>';
-    } else {
-        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        if (filterType === 'mensual') {
-            const row = tbody.insertRow();
-            row.style.fontWeight = 'bold';
-            row.style.backgroundColor = '#e6f2ff';
-            row.innerHTML = `<td style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${monthNames[month].toUpperCase()} ${year}:</td><td class="currency" style="color:var(--primary);font-size:1.2rem">${formatCurrency(totalPeriodo)}</td><td></td>`;
-        }
-        
-        let totalAnual = 0;
-        inquilinos.forEach(inq => {
-            if (inq.pagos) {
-                inq.pagos.forEach(pago => {
-                    const pd = new Date(pago.fecha + 'T00:00:00');
-                    if (pd.getFullYear() === year) {
-                        totalAnual += pago.monto;
-                    }
-                });
-            }
-        });
-        
-        const rowAnual = tbody.insertRow();
-        rowAnual.style.fontWeight = 'bold';
-        rowAnual.style.backgroundColor = '#d4edda';
-        rowAnual.innerHTML = `<td style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${year}:</td><td class="currency" style="color:var(--success);font-size:1.2rem">${formatCurrency(totalAnual)}</td><td></td>`;
-    }
-}
-
-function renderInquilinosVencimientoContratos() {
-    const tbody = document.getElementById('inquilinosVencimientoContratosTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    inquilinos.forEach(inq => {
-        const venc = new Date(inq.fecha_vencimiento + 'T00:00:00');
-        const diffDays = Math.ceil((venc - today) / (1000 * 60 * 60 * 24));
-        let estado = '';
-        let badgeClass = '';
-        
-        if (diffDays < 0) {
-            estado = 'Vencido';
-            badgeClass = 'badge-danger';
-        } else if (diffDays <= 30) {
-            estado = 'Próximo a vencer';
-            badgeClass = 'badge-warning';
-        } else {
-            estado = 'Vigente';
-            badgeClass = 'badge-success';
-        }
-        
-        const row = tbody.insertRow();
-        row.innerHTML = `<td>${inq.nombre}</td><td>${formatDate(inq.fecha_inicio)}</td><td>${formatDateVencimiento(inq.fecha_vencimiento)}</td><td>${diffDays}</td><td><span class="badge ${badgeClass}">${estado}</span></td>`;
-    });
-    
-    if (inquilinos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay contratos</td></tr>';
-    }
-}
+    <!-- JavaScript Files -->
+    <script src="js/config.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
 function showInquilinoDetail(id) {
     const inq = inquilinos.find(i => i.id === id);
     currentInquilinoId = id;
@@ -381,6 +322,9 @@ function showProveedoresView(view) {
     
     // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    
+    // Mantener menú principal visible
+    document.getElementById('mainMenuPage').classList.add('active');
     
     // Mostrar página de proveedores
     document.getElementById('proveedoresPage').classList.add('active');
@@ -675,6 +619,9 @@ function showAdminView(view) {
     // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
+    // Mantener menú principal visible
+    document.getElementById('mainMenuPage').classList.add('active');
+    
     currentSubContext = 'admin-' + view;
     
     // Mostrar botón Regresa
@@ -696,6 +643,9 @@ function showActivosPage() {
     // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
+    // Mantener menú principal visible
+    document.getElementById('mainMenuPage').classList.add('active');
+    
     // Mostrar página de activos
     document.getElementById('activosPage').classList.add('active');
     
@@ -713,6 +663,9 @@ function showNumerosPage() {
     
     // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    
+    // Mantener menú principal visible
+    document.getElementById('mainMenuPage').classList.add('active');
     
     // Mostrar página de números
     document.getElementById('numerosPage').classList.add('active');
@@ -1050,6 +1003,8 @@ function populateYearSelect() {
         yearSelect.appendChild(option);
     }
 }
+
+let currentHomeTable = null;
 
 function toggleHomeTable(tableName) {
     const ingresosContainer = document.getElementById('homeIngresosContainer');
@@ -1542,6 +1497,15 @@ function showAddInquilinoModal() {
     document.getElementById('contratoFileName').textContent = '';
     
     document.getElementById('addInquilinoModal').classList.add('active');
+}
+
+function showAddUsuarioModal() {
+    isEditMode = false;
+    currentUsuarioId = null;
+    
+    document.getElementById('addUsuarioTitle').textContent = 'Agregar Usuario';
+    document.getElementById('usuarioForm').reset();
+    document.getElementById('addUsuarioModal').classList.add('active');
 }
 
 // ============================================
