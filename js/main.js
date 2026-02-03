@@ -101,7 +101,7 @@ async function initializeApp() {
             loadUsuarios(),
             loadBancosDocumentos(),
             loadEstacionamiento(),
-            loadBitacora()
+            loadBitacoraSemanal()
         ]);
         
         populateYearSelect();
