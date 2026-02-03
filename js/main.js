@@ -7,13 +7,13 @@
 // GLOBAL STATE VARIABLES
 // ============================================
 
-let inquilinos = [];
-let proveedores = [];
-let activos = [];
-let estacionamiento = [];
-let bitacoraSemanal = [];
-let usuarios = [];
-let bancosDocumentos = [];
+inquilinos = [];
+proveedores = [];
+activos = [];
+estacionamiento = [];
+bitacoraSemanal = [];
+usuarios = [];
+bancosDocumentos = [];
 
 let currentInquilinoId = null;
 let currentProveedorId = null;
