@@ -93,31 +93,27 @@ window.addEventListener('DOMContentLoaded', function() {
 // ============================================
 
 async function initializeApp() {
-    showLoading();
     try {
         await Promise.all([
             loadInquilinos(),
             loadProveedores(),
             loadActivos(),
-            loadEstacionamiento(),
-            loadBitacoraSemanal(),
             loadUsuarios(),
-            loadBancosDocumentos()
+            loadBancos(),
+            loadEstacionamiento(),
+            loadBitacora()
         ]);
         
-        // Populate year selects
         populateYearSelect();
         populateInquilinosYearSelects();
         populateProveedoresYearSelects();
         
-        // Show main menu
-        document.getElementById('mainMenuPage').classList.add('active');
+        // Mostrar menú lateral (ya está visible por defecto)
+        // No hacer nada más, el usuario elegirá desde el menú
         
     } catch (error) {
         console.error('Error inicializando app:', error);
         alert('Error cargando datos: ' + error.message);
-    } finally {
-        hideLoading();
     }
 }
 
