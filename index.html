@@ -30,6 +30,9 @@
                         <option value="Miguel">Miguel</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;">
+                </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Iniciar Sesión</button>
             </form>
         </div>
@@ -39,22 +42,68 @@
     <div id="appContainer" class="app-container">
         <!-- Header -->
         <div class="header">
-            <div class="header-left">
-                <div class="main-menu-dropdown">
-                    <button class="dropdown-toggle" onclick="toggleMainMenu()">☰</button>
-                    <div id="mainMenuDropdown" class="main-menu-content"></div>
-                </div>
-                <a href="#" class="header-icon" id="homeIcon" onclick="event.preventDefault(); showPageFromMenu('home');" title="Home">⌂</a>
-                <a href="#" class="header-icon" id="chatIcon" onclick="event.preventDefault(); alert('Chat próximamente');" title="Chat">💬</a>
-            </div>
             <div class="header-title" id="headerTitle">ESWU</div>
-            <div class="header-right"></div>
+            <button id="btnRegresa" class="btn-regresa hidden" onclick="handleRegresa()">Regresa</button>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Home Page -->
-            <div id="homePage" class="page active">
+            <!-- Main Menu (Pantalla 1) -->
+            <div id="mainMenuPage" class="page active">
+                <div class="menu-container">
+                    <button class="menu-btn" onclick="showSubMenu('inquilinos')">Inquilinos</button>
+                    <button class="menu-btn" onclick="showSubMenu('proveedores')">Proveedores</button>
+                    <button class="menu-btn" onclick="showSubMenu('admin')">Admin</button>
+                    <button class="menu-btn menu-btn-secondary" onclick="logout()">Salir</button>
+                </div>
+            </div>
+
+            <!-- Inquilinos SubMenu (Pantalla 2) -->
+            <div id="inquilinosSubMenu" class="page">
+                <div class="submenu-container">
+                    <button class="submenu-main-btn">Inquilinos</button>
+                    <div class="submenu-options">
+                        <button class="menu-btn" onclick="showInquilinosView('list')">Listado</button>
+                        <button class="menu-btn" onclick="showAddInquilinoModal()">Dar de Alta</button>
+                        <button class="menu-btn" onclick="showInquilinosView('rentasRecibidas')">Rentas</button>
+                        <button class="menu-btn" onclick="showInquilinosView('vencimientoContratos')">Contratos</button>
+                        <button class="menu-btn menu-btn-secondary" onclick="regresaMainMenu()">Regresa</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proveedores SubMenu -->
+            <div id="proveedoresSubMenu" class="page">
+                <div class="submenu-container">
+                    <button class="submenu-main-btn">Proveedores</button>
+                    <div class="submenu-options">
+                        <button class="menu-btn" onclick="showProveedoresView('list')">Listado</button>
+                        <button class="menu-btn" onclick="showAddProveedorModal()">Dar de Alta</button>
+                        <button class="menu-btn" onclick="showProveedoresView('facturasPagadas')">Facturas Pagadas</button>
+                        <button class="menu-btn" onclick="showProveedoresView('facturasPorPagar')">Facturas X Pagar</button>
+                        <button class="menu-btn menu-btn-secondary" onclick="regresaMainMenu()">Regresa</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin SubMenu -->
+            <div id="adminSubMenu" class="page">
+                <div class="submenu-container">
+                    <button class="submenu-main-btn">Admin</button>
+                    <div class="submenu-options">
+                        <button class="menu-btn" onclick="showActivosPage()">Activos</button>
+                        <button class="menu-btn" onclick="showAdminView('bancos')">Bancos</button>
+                        <button class="menu-btn" onclick="showPageFromMenu('bitacora')">Bitácora</button>
+                        <button class="menu-btn" onclick="showPageFromMenu('estacionamiento')">Estacionamiento</button>
+                        <button class="menu-btn" onclick="showNumerosPage()">Números</button>
+                        <button class="menu-btn" onclick="showAdminView('usuarios')">Usuarios</button>
+                        <button class="menu-btn menu-btn-secondary" onclick="regresaMainMenu()">Regresa</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Números Page (antigua Home) -->
+            <div id="numerosPage" class="page">
                 <div class="summary-grid">
                     <div class="summary-card" onclick="toggleHomeTable('ingresos')">
                         <div class="summary-label">Ingresos</div>
@@ -121,12 +170,9 @@
             <!-- Inquilinos Page -->
             <div id="inquilinosPage" class="page">
                 <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title" id="inquilinosTitulo">Inquilinos - Listado</h2>
-                    </div>
                     <div id="inquilinosListView">
                         <div class="table-container">
-                            <table id="inquilinosTable">
+                            <table id="inquilinosTable" class="sticky-header-table">
                                 <thead><tr><th>Empresa</th><th style="text-align:right">Renta Mensual</th><th>Vencimiento Contrato</th></tr></thead>
                                 <tbody></tbody>
                             </table>
@@ -148,7 +194,7 @@
                                 </select>
                             </div>
                             <div class="table-container">
-                                <table id="inquilinosRentasRecibidasTable">
+                                <table id="inquilinosRentasRecibidasTable" class="sticky-header-table">
                                     <thead><tr><th>Empresa</th><th>Renta Recibida</th><th>Fecha de Pago</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
@@ -158,7 +204,7 @@
                     <div id="inquilinosVencimientoContratosView" class="hidden">
                         <div style="padding: 1rem;">
                             <div class="table-container">
-                                <table id="inquilinosVencimientoContratosTable">
+                                <table id="inquilinosVencimientoContratosTable" class="sticky-header-table">
                                     <thead><tr><th>Inquilino</th><th>Fecha Inicio</th><th>Fecha Vencimiento</th><th>Días Restantes</th><th>Estado</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
@@ -167,13 +213,9 @@
                     </div>
                 </div>
             </div>
-
             <!-- Proveedores Page -->
             <div id="proveedoresPage" class="page">
                 <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title" id="proveedoresTitulo">Proveedores - Listado</h2>
-                    </div>
                     <div id="proveedoresListView">
                         <!-- Barra de búsqueda -->
                         <div style="padding: 1rem; padding-bottom: 0;">
@@ -246,71 +288,46 @@
             <!-- Activos Page -->
             <div id="activosPage" class="page">
                 <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Activos</h2>
-                    </div>
-                    <div class="table-container">
-                        <table id="activosTable">
-                            <thead><tr><th>Nombre</th><th>Último Mantenimiento</th><th>Próximo Mantenimiento</th><th>Proveedor</th></tr></thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <!-- Admin Page -->
-            <div id="adminPage" class="page">
-                <!-- Vista inicial con botones -->
-                <div id="adminMenuView">
-                    <div class="admin-menu-grid">
-                        <button class="admin-menu-btn" onclick="showAdminView('usuarios')">
-                            <span class="admin-menu-icon">👤</span>
-                            <span>Usuarios</span>
-                        </button>
-                        <button class="admin-menu-btn" onclick="showAdminView('bancos')">
-                            <span class="admin-menu-icon">🏦</span>
-                            <span>Bancos</span>
-                        </button>
-                        <button class="admin-menu-btn" onclick="showPageFromMenu('bitacora')">
-                            <span class="admin-menu-icon">📋</span>
-                            <span>Bitácora</span>
-                        </button>
-                        <button class="admin-menu-btn" onclick="showPageFromMenu('estacionamiento')">
-                            <span class="admin-menu-icon">🚗</span>
-                            <span>Estacionamiento</span>
-                        </button>
-                        <button class="admin-menu-btn" onclick="showPageFromMenu('home')">
-                            <span class="admin-menu-icon">🏠</span>
-                            <span>Home</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Vistas de contenido (sin títulos debajo del header) -->
-                <div id="adminUsuariosView" class="hidden">
-                    <div class="card">
-                        <div style="padding: 1rem;">
-                            <div class="table-container">
-                                <table id="usuariosTable" class="sticky-header-table">
-                                    <thead><tr><th>Usuario</th><th>Password</th><th>Estado</th></tr></thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
+                    <div style="padding: 1rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <button class="btn btn-success" onclick="showAddActivoModal()">Agregar Activo</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="activosTable" class="sticky-header-table">
+                                <thead><tr><th>Nombre</th><th>Último Mantenimiento</th><th>Próximo Mantenimiento</th><th>Proveedor</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-                
-                <div id="adminBancosView" class="hidden">
-                    <div class="card">
-                        <div style="padding: 1rem;">
-                            <div style="margin-bottom: 1rem;">
-                                <button class="btn btn-success" onclick="showAddBancoModal()">Agregar Documento</button>
-                            </div>
-                            <div class="table-container">
-                                <table id="bancosTable" class="sticky-header-table">
-                                    <thead><tr><th style="width: 70%;">Nombre del Archivo</th><th style="width: 30%;">Fecha</th></tr></thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
+            </div>
+
+            <!-- Admin Usuarios View -->
+            <div id="adminUsuariosPage" class="page">
+                <div class="card">
+                    <div style="padding: 1rem;">
+                        <div class="table-container">
+                            <table id="usuariosTable" class="sticky-header-table">
+                                <thead><tr><th>Usuario</th><th>Password</th><th>Estado</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Bancos View -->
+            <div id="adminBancosPage" class="page">
+                <div class="card">
+                    <div style="padding: 1rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <button class="btn btn-success" onclick="showAddBancoModal()">Agregar Documento</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="bancosTable" class="sticky-header-table">
+                                <thead><tr><th style="width: 70%;">Nombre del Archivo</th><th style="width: 30%;">Fecha</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -355,7 +372,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>No. Despacho (se asigna automáticamente)</label>
+                            <label>No. Despacho</label>
                             <input type="text" id="editEspacioDespacho" disabled style="background: var(--bg); width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;">
                         </div>
                     </div>
@@ -377,7 +394,7 @@
                             <button class="btn btn-secondary" onclick="limpiarBusquedaBitacora()">Limpiar</button>
                         </div>
                         <div class="table-container">
-                            <table id="bitacoraTable" class="sticky-header-table">
+                            <table id="bitacoraTable" class="sticky-header-table bitacora-hover-table">
                                 <thead>
                                     <tr>
                                         <th style="width: 25%;">Semana</th>
@@ -400,7 +417,8 @@
                     </div>
                     <div style="padding: 1.5rem;">
                         <div class="form-group">
-                            <label>Semana: <strong id="editBitacoraSemana"></strong></label>
+                            <label>Fecha de la Semana *</label>
+                            <input type="date" id="editBitacoraFecha" required style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;">
                         </div>
                         <div class="form-group">
                             <label>Notas de la Semana</label>
@@ -452,7 +470,6 @@
                     </form>
                 </div>
             </div>
-
             <!-- Add Contacto Inquilino Modal -->
             <div id="addContactoInquilinoModal" class="modal">
                 <div class="modal-content">
@@ -471,6 +488,7 @@
                     </form>
                 </div>
             </div>
+
             <!-- Inquilino Detail Modal -->
             <div id="inquilinoDetailModal" class="modal">
                 <div class="modal-content">
@@ -651,7 +669,6 @@
                     </form>
                 </div>
             </div>
-
             <!-- Proveedor Detail Modal -->
             <div id="proveedorDetailModal" class="modal">
                 <div class="modal-content">
@@ -701,6 +718,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Factura Detail Modal -->
             <div id="facturaDetailModal" class="modal">
                 <div class="modal-content">
