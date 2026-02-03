@@ -38,66 +38,63 @@
     <!-- App Container -->
     <div id="appContainer" class="app-container">
         <!-- Header -->
-        <header class="header">
-            <h1 class="header-title">ESWU</h1>
-            <button id="btnRegresa" class="btn-regresa hidden" onclick="handleRegresa()">Regresa</button>
-        </header>
+       <header class="header">
+    <h1 class="header-title">ESWU</h1>
+    <div class="header-actions">
+        <button id="btnSearch" class="btn-search hidden" onclick="toggleSearch()">🔍</button>
+        <button id="btnRegresa" class="btn-regresa hidden" onclick="handleRegresa()">Regresa</button>
+    </div>
+</header>
+
+        <!-- Search Modal -->
+<div id="searchModal" class="search-modal">
+    <input type="text" id="searchInput" placeholder="Buscar...">
+    <button class="btn btn-primary" onclick="executeSearch()">Buscar</button>
+    <button class="btn btn-secondary" onclick="clearSearch()">Limpiar</button>
+    <button class="btn btn-danger" onclick="toggleSearch()">Cerrar</button>
+</div>
 
         <!-- Main Content -->
-        <div class="main-content">
-            <!-- Main Menu Page -->
-            <div id="mainMenuPage" class="page active">
-                <div class="menu-container">
-                    <button id="menuInquilinos" class="menu-btn" onclick="showSubMenu('inquilinos')">Inquilinos</button>
-                    <button id="menuProveedores" class="menu-btn" onclick="showSubMenu('proveedores')">Proveedores</button>
-                    <button id="menuAdmin" class="menu-btn" onclick="showSubMenu('admin')">Admin</button>
-                    <button class="menu-btn menu-btn-secondary" onclick="logout()">Salir</button>
-                </div>
-            </div>
+     <div class="main-content">
+    <!-- Menu Sidebar -->
+    <div class="menu-sidebar" id="menuSidebar">
+        <button id="menuInquilinos" class="menu-btn" onclick="showSubMenu('inquilinos')">Inquilinos</button>
+        <button id="menuProveedores" class="menu-btn" onclick="showSubMenu('proveedores')">Proveedores</button>
+        <button id="menuAdmin" class="menu-btn" onclick="showSubMenu('admin')">Admin</button>
+        <button class="menu-btn menu-btn-secondary" onclick="logout()">Salir</button>
+    </div>
 
             <!-- Inquilinos SubMenu -->
-            <div id="inquilinosSubMenu" class="page">
-                <div class="submenu-container">
-                    <button class="submenu-main-btn">Inquilinos</button>
-                    <div class="submenu-options">
-                        <button class="menu-btn" onclick="showInquilinosView('list')">Listado</button>
-                        <button class="menu-btn" onclick="showAddInquilinoModal()">Dar de Alta</button>
-                        <button class="menu-btn" onclick="showInquilinosView('rentasRecibidas')">Rentas</button>
-                        <button class="menu-btn" onclick="showInquilinosView('vencimientoContratos')">Contratos</button>
-                        <button class="menu-btn menu-btn-secondary" onclick="regresaMainMenu()">Regresa</button>
-                    </div>
-                </div>
-            </div>
+       <!-- Inquilinos Submenu -->
+<div id="inquilinosSubMenu" class="submenu-container">
+    <div class="submenu-title">Inquilinos</div>
+    <button class="submenu-btn" onclick="showInquilinosView('list')">Listado</button>
+    <button class="submenu-btn" onclick="showAddInquilinoModal()">Dar de Alta</button>
+    <button class="submenu-btn" onclick="showInquilinosView('rentasRecibidas')">Rentas</button>
+    <button class="submenu-btn" onclick="showInquilinosView('vencimientoContratos')">Contratos</button>
+</div>
 
-            <!-- Proveedores SubMenu -->
-            <div id="proveedoresSubMenu" class="page">
-                <div class="submenu-container">
-                    <button class="submenu-main-btn">Proveedores</button>
-                    <div class="submenu-options">
-                        <button class="menu-btn" onclick="showProveedoresView('list')">Listado</button>
-                        <button class="menu-btn" onclick="showAddProveedorModal()">Dar de Alta</button>
-                        <button class="menu-btn" onclick="showProveedoresView('facturasPagadas')">Facturas Pagadas</button>
-                        <button class="menu-btn" onclick="showProveedoresView('facturasPorPagar')">Facturas X Pagar</button>
-                        <button class="menu-btn menu-btn-secondary" onclick="regresaMainMenu()">Regresa</button>
-                    </div>
-                </div>
-            </div>
+           <!-- Proveedores Submenu -->
+<div id="proveedoresSubMenu" class="submenu-container">
+    <div class="submenu-title">Proveedores</div>
+    <button class="submenu-btn" onclick="showProveedoresView('list')">Listado</button>
+    <button class="submenu-btn" onclick="showAddProveedorModal()">Dar de Alta</button>
+    <button class="submenu-btn" onclick="showProveedoresView('facturasPagadas')">Facturas Pagadas</button>
+    <button class="submenu-btn" onclick="showProveedoresView('facturasPorPagar')">Facturas X Pagar</button>
+</div>
 
             <!-- Admin SubMenu -->
-            <div id="adminSubMenu" class="page">
-                <div class="submenu-container">
-                    <button class="submenu-main-btn">Admin</button>
-                    <div class="submenu-options">
-                        <button class="menu-btn" onclick="showActivosPage()">Activos</button>
-                        <button class="menu-btn" onclick="showAdminView('bancos')">Bancos</button>
-                        <button class="menu-btn" onclick="showPageFromMenu('bitacora')">Bitácora</button>
-                        <button class="menu-btn" onclick="showPageFromMenu('estacionamiento')">Estacionamiento</button>
-                        <button class="menu-btn" onclick="showNumerosPage()">Números</button>
-                        <button class="menu-btn" onclick="showAdminView('usuarios')">Usuarios</button>
-                        <button class="menu-btn menu-btn-secondary" onclick="regresaMainMenu()">Regresa</button>
-                    </div>
-                </div>
-            </div>
+<div id="adminSubMenu" class="submenu-container">
+    <div class="submenu-title">Admin</div>
+    <button class="submenu-btn" onclick="showActivosPage()">Activos</button>
+    <button class="submenu-btn" onclick="showAdminView('bancos')">Bancos</button>
+    <button class="submenu-btn" onclick="showPageFromMenu('bitacora')">Bitácora</button>
+    <button class="submenu-btn" onclick="showPageFromMenu('estacionamiento')">Estacionamiento</button>
+    <button class="submenu-btn" onclick="showNumerosPage()">Números</button>
+    <button class="submenu-btn" onclick="showAdminView('usuarios')">Usuarios</button>
+</div>
+         <!-- Content Area -->
+<div id="contentArea" class="content-area">
 
             <!-- Números Page (antigua Home) -->
             <div id="numerosPage" class="page">
@@ -248,15 +245,10 @@
                 <!-- Listado de Proveedores -->
                 <div id="proveedoresListView" class="hidden">
                     <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Listado de Proveedores</h2>
-                            <div style="display:flex;gap:1rem;align-items:center">
-                                <input type="text" id="proveedorBusqueda" placeholder="Buscar proveedor..." style="padding:0.5rem;border:2px solid var(--border);border-radius:4px">
-                                <button class="btn btn-sm btn-primary" onclick="filtrarProveedores()">Buscar</button>
-                                <button class="btn btn-sm btn-secondary" onclick="limpiarBusquedaProveedores()">Limpiar</button>
-                                <button class="btn btn-primary" onclick="showAddProveedorModal()">+ Agregar</button>
-                            </div>
-                        </div>
+                       <div class="card-header">
+    <h2 class="card-title">Listado de Proveedores</h2>
+    <button class="btn btn-primary" onclick="showAddProveedorModal()">+ Agregar</button>
+</div>
                         <div class="table-container">
                             <table id="proveedoresTable" class="sticky-header-table">
                                 <thead><tr><th>Proveedor</th><th>Servicio</th><th>Contacto</th><th>Teléfono</th><th>Email</th></tr></thead>
@@ -371,8 +363,8 @@
                         <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
                     </div>
                     <div class="table-container">
-                        <table id="bancosTable" class="sticky-header-table">
-                            <thead><tr><th>Tipo</th><th>Fecha</th></tr></thead>
+                   <table id="bancosTable" class="sticky-header-table">
+    <thead><tr><th>Nombre del Archivo</th><th>Fecha</th></tr></thead>
                             <tbody></tbody>
                         </table>
                     </div>
@@ -404,16 +396,11 @@
             <div id="bitacoraPage" class="page">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Bitácora Semanal</h2>
-                        <div style="display:flex;gap:1rem;align-items:center">
-                            <input type="text" id="bitacoraBusqueda" placeholder="Buscar en notas..." style="padding:0.5rem;border:2px solid var(--border);border-radius:4px;min-width:250px">
-                            <button class="btn btn-sm btn-primary" onclick="filtrarBitacora()">Buscar</button>
-                            <button class="btn btn-sm btn-secondary" onclick="limpiarBusquedaBitacora()">Limpiar</button>
-                        </div>
-                    </div>
+    <h2 class="card-title">Bitácora Semanal</h2>
+</div>
                     <div class="table-container">
-                        <table id="bitacoraTable" class="bitacora-hover-table sticky-header-table">
-                            <thead><tr><th style="width:200px">Semana</th><th>Notas</th></tr></thead>
+                     <table id="bitacoraTable" class="bitacora-hover-table sticky-header-table">
+    <thead><tr><th style="width:200px" class="sortable" onclick="sortBitacora()">Semana</th><th>Notas</th></tr></thead>
                             <tbody></tbody>
                         </table>
                     </div>
@@ -935,8 +922,10 @@
             </div>
         </div>
     </div>
-
-   <!-- Supabase Library -->
+            </div> <!-- Cierre de content-area -->
+         </div> <!-- Cierre de main-content -->
+    
+ <!-- Supabase Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- JavaScript Files -->
