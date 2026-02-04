@@ -690,8 +690,10 @@ function editInquilino() {
     document.getElementById('inquilinoFechaVenc').value = inq.fecha_vencimiento;
     document.getElementById('inquilinoNotas').value = inq.notas || '';
     
-    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
-    
+   // En editInquilino():
+renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto', 'showEditContactoInquilinoModal');
+
+ 
     closeModal('inquilinoDetailModal');
     document.getElementById('addInquilinoModal').classList.add('active');
 }
@@ -714,8 +716,8 @@ function editProveedor() {
     document.getElementById('proveedorRFC').value = prov.rfc || '';
     document.getElementById('proveedorNotas').value = prov.notas || '';
     
-    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
-    
+  / En editProveedor():
+renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');  
     closeModal('proveedorDetailModal');
     document.getElementById('addProveedorModal').classList.add('active');
 }
