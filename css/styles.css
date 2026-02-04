@@ -1369,4 +1369,16 @@ tr.banco-clickable:hover {
         font-size: 1.25rem;
         padding: 0.25rem;
     }
+   /* Bitácora sticky headers */
+    .bitacora-hover-table thead th {
+        position: sticky;
+        top: 0;
+        background: var(--bg);
+        z-index: 10;
+    }
+    
+    .bitacora-hover-table td {
+        font-size: 0.85rem;
+        padding: 0.75rem;
+    }
 }
