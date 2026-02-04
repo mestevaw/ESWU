@@ -287,17 +287,16 @@ function renderInquilinosTable() {
     tbody.innerHTML = '';
     
     inquilinos.forEach(inq => {
-        const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.onclick = () => showInquilinoDetail(inq.id);
-        
         const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
         
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';
+        row.setAttribute('onclick', `showInquilinoDetail(${inq.id})`);
         row.innerHTML = `<td style="font-size:0.9rem">${nombreCorto}</td><td class="currency">${formatCurrency(inq.renta)}</td><td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>`;
     });
     
     if (inquilinos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay inquilinos</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No hay inquilinos</td></tr>';
     }
 }
 
