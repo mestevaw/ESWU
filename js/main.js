@@ -635,7 +635,7 @@ async function saveDocumentoAdicional(event) {
             .insert([{
                 inquilino_id: currentInquilinoId,
                 nombre: nombre,
-                archivo: pdfBase64,
+                archivo_pdf: pdfBase64,
                 fecha: new Date().toISOString().split('T')[0],
                 usuario: currentUser.nombre
             }]);
