@@ -256,16 +256,18 @@ async function loadBitacoraSemanal() {
     try {
         const { data, error } = await supabaseClient
             .from('bitacora_semanal')
-            .select('*')
-            .order('semana_inicio', { ascending: false });
+            .select('id, semana_inicio, semana_texto, notas')
+            .order('semana_inicio', { ascending: false })
+            .limit(100);
         
         if (error) throw error;
         
-        bitacoraSemanal = data;
+        bitacoraSemanal = data || [];
         
     } catch (error) {
         console.error('Error loading bitacora:', error);
-        throw error;
+        // No lanzar el error, solo continuar con array vacío
+        bitacoraSemanal = [];
     }
 }
 
@@ -290,18 +292,20 @@ async function loadBancosDocumentos() {
     try {
         const { data, error } = await supabaseClient
             .from('bancos_documentos')
-            .select('*')
-            .order('fecha_subida', { ascending: false });
+            .select('id, tipo, archivo_pdf, fecha_subida')
+            .order('fecha_subida', { ascending: false })
+            .limit(100);
         
         if (error) throw error;
         
-        bancosDocumentos = data;
+        bancosDocumentos = data || [];
         
     } catch (error) {
         console.error('Error loading bancos:', error);
-        throw error;
+        bancosDocumentos = [];
     }
 }
+
 // ============================================
 // SAVE FUNCTIONS
 // ============================================
