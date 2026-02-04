@@ -53,6 +53,18 @@ body {
     padding: 2rem;
 }
 
+.modal-content {
+    background: white !important;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    z-index: 1001;
+}
+
 body.logged-in {
     padding-top: 70px;
 }
@@ -1117,5 +1129,20 @@ tr.banco-clickable:hover {
     
     .main-content {
         flex-direction: column;
+    }
+    
+    /* Búsqueda en móvil */
+    .header-search-bar {
+        margin: 0 0.5rem;
+    }
+    
+    .header-search-bar input {
+        font-size: 0.875rem;
+        padding: 0.5rem;
+    }
+    
+    .header-search-bar .btn-icon {
+        font-size: 1.25rem;
+        padding: 0.25rem;
     }
 }
