@@ -40,19 +40,16 @@
         <!-- Header -->
        <header class="header">
     <h1 class="header-title">ESWU</h1>
+    <div id="headerSearchBar" class="header-search-bar hidden">
+        <input type="text" id="searchInput" placeholder="Buscar..." onkeypress="if(event.key==='Enter') executeSearch()">
+        <button class="btn-icon search" onclick="executeSearch()" title="Buscar">🔍</button>
+        <button class="btn-icon clear" onclick="clearSearch()" title="Limpiar">🧹</button>
+    </div>
     <div class="header-actions">
         <button id="btnSearch" class="btn-search hidden" onclick="toggleSearch()">🔍</button>
         <button id="btnRegresa" class="btn-regresa hidden" onclick="handleRegresa()">Regresa</button>
     </div>
 </header>
-
-<!-- Search Modal -->
-<div id="searchModal" class="search-modal">
-    <input type="text" id="searchInput" placeholder="Buscar..." onkeypress="if(event.key==='Enter') executeSearch()">
-    <button class="btn-icon search" onclick="executeSearch()" title="Buscar">🔍</button>
-    <button class="btn-icon clear" onclick="clearSearch()" title="Limpiar">🧹</button>
-    <button class="btn-icon close" onclick="toggleSearch()" title="Cerrar">✖️</button>
-</div>
 
         <!-- Main Content -->
      <div class="main-content">
@@ -67,7 +64,6 @@
             <!-- Inquilinos SubMenu -->
        <!-- Inquilinos Submenu -->
 <div id="inquilinosSubMenu" class="submenu-container">
-    <div class="submenu-title">Inquilinos</div>
     <button class="submenu-btn" onclick="showInquilinosView('list')">Listado</button>
    <button class="submenu-btn" onclick="alert('Click en Dar de Alta'); showAddInquilinoModal()">Dar de Alta</button>
     <button class="submenu-btn" onclick="showInquilinosView('rentasRecibidas')">Rentas</button>
@@ -76,7 +72,6 @@
 
            <!-- Proveedores Submenu -->
 <div id="proveedoresSubMenu" class="submenu-container">
-    <div class="submenu-title">Proveedores</div>
     <button class="submenu-btn" onclick="showProveedoresView('list')">Listado</button>
     <button class="submenu-btn" onclick="showAddProveedorModal()">Dar de Alta</button>
     <button class="submenu-btn" onclick="showProveedoresView('facturasPagadas')">Facturas Pagadas</button>
@@ -85,7 +80,6 @@
 
             <!-- Admin SubMenu -->
 <div id="adminSubMenu" class="submenu-container">
-    <div class="submenu-title">Admin</div>
     <button class="submenu-btn" onclick="showActivosPage()">Activos</button>
     <button class="submenu-btn" onclick="showAdminView('bancos')">Bancos</button>
     <button class="submenu-btn" onclick="showPageFromMenu('bitacora')">Bitácora</button>
