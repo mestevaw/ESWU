@@ -638,18 +638,37 @@ tr.banco-clickable:hover {
     font-size: 1rem;
 }
 
-/* Search Modal */
-.search-modal {
+.header-search-bar {
     display: none;
-    position: fixed;
-    top: 70px;
-    left: 0;
-    right: 0;
-    background: white;
-    border-bottom: 2px solid var(--border);
-    padding: 1rem 2rem;
-    z-index: 900;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    flex: 1;
+    margin: 0 2rem;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.header-search-bar.active {
+    display: flex;
+}
+
+.header-search-bar input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.header-search-bar input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.header-search-bar .btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.25rem;
 }
 
 .search-modal.active {
