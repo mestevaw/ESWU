@@ -347,10 +347,12 @@ function renderInquilinosRentasRecibidas() {
     });
     
     rentas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    rentas.forEach(r => {
-        const row = tbody.insertRow();
-        row.innerHTML = `<td>${r.empresa}</td><td class="currency">${formatCurrency(r.monto)}</td><td>${formatDate(r.fecha)}</td>`;
-    });
+   rentas.forEach(r => {
+    const row = tbody.insertRow();
+    row.className = 'clickable';
+    row.onclick = () => showInquilinoDetail(r.inquilinoId);
+    row.innerHTML = `<td>${r.empresa}</td><td class="currency">${formatCurrency(r.monto)}</td><td>${formatDate(r.fecha)}</td>`;
+});
     
     if (rentas.length === 0) {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay rentas</td></tr>';
@@ -389,28 +391,30 @@ function renderInquilinosVencimientoContratos() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    inquilinos.forEach(inq => {
-        const venc = new Date(inq.fecha_vencimiento + 'T00:00:00');
-        const diffDays = Math.ceil((venc - today) / (1000 * 60 * 60 * 24));
-        let estado = '';
-        let badgeClass = '';
-        
-        if (diffDays < 0) {
-            estado = 'Vencido';
-            badgeClass = 'badge-danger';
-        } else if (diffDays <= 30) {
-            estado = 'Próximo a vencer';
-            badgeClass = 'badge-warning';
-        } else {
-            estado = 'Vigente';
-            badgeClass = 'badge-success';
-        }
-        
-        const row = tbody.insertRow();
-        row.innerHTML = `<td>${inq.nombre}</td><td>${formatDate(inq.fecha_inicio)}</td><td>${formatDateVencimiento(inq.fecha_vencimiento)}</td><td>${diffDays}</td><td><span class="badge ${badgeClass}">${estado}</span></td>`;
-    });
+ inquilinos.forEach(inq => {
+    const venc = new Date(inq.fecha_vencimiento + 'T00:00:00');
+    const diffDays = Math.ceil((venc - today) / (1000 * 60 * 60 * 24));
+    let estado = '';
+    let badgeClass = '';
     
-    if (inquilinos.length === 0) {
+    if (diffDays < 0) {
+        estado = 'Vencido';
+        badgeClass = 'badge-danger';
+    } else if (diffDays <= 30) {
+        estado = 'Próximo a vencer';
+        badgeClass = 'badge-warning';
+    } else {
+        estado = 'Vigente';
+        badgeClass = 'badge-success';
+    }
+    
+    const row = tbody.insertRow();
+    row.className = 'clickable';
+    row.onclick = () => showInquilinoDetail(inq.id);
+    row.innerHTML = `<td>${inq.nombre}</td><td>${formatDate(inq.fecha_inicio)}</td><td>${formatDateVencimiento(inq.fecha_vencimiento)}</td><td>${diffDays}</td><td><span class="badge ${badgeClass}">${estado}</span></td>`;
+});
+
+   if (inquilinos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay contratos</td></tr>';
     }
 }
