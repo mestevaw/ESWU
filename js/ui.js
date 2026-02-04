@@ -1417,12 +1417,6 @@ function switchTab(type, tabName) {
 // CONTACTOS RENDERING
 // ============================================
 
-function renderContactosList(contactos, containerId, deleteCallback) {
-    const container = document.getElementById(containerId);
-    if (!contactos || contactos.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-light);font-size:0.875rem">No hay contactos agregados</p>';
-        return;
-    }
 
 function renderContactosList(contactos, containerId, deleteCallback, editCallback) {
     const container = document.getElementById(containerId);
@@ -1431,19 +1425,7 @@ function renderContactosList(contactos, containerId, deleteCallback, editCallbac
         return;
     }
     
-    container.innerHTML = contactos.map((c, idx) => `
-        <div class="contacto-item">
-            <div class="contacto-info">
-                <strong>${c.nombre}</strong><br>
-                <small>Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}</small>
-            </div>
-            <div style="display: flex; gap: 0.5rem;">
-                <button type="button" class="btn btn-sm btn-primary" onclick="${editCallback}(${idx})" title="Editar">✏️</button>
-                <button type="button" class="btn btn-sm btn-danger" onclick="${deleteCallback}(${idx})" title="Eliminar">🗑️</button>
-            </div>
-        </div>
-    `).join('');
-}
+
 
 // ← AQUÍ AGREGAS LAS NUEVAS FUNCIONES
 
