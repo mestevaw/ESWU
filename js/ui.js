@@ -828,7 +828,10 @@ function renderBitacoraTable() {
         const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
         const notasCompletas = sem.notas || 'Sin notas';
         
-        row.innerHTML = `<td><strong>${sem.semana_texto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
+        // Cambiar "Semana del" por "al"
+        const semanaTexto = sem.semana_texto ? sem.semana_texto.replace('Semana del', 'al') : '';
+        
+        row.innerHTML = `<td><strong>${semanaTexto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
     });
     
     // Actualizar indicador de ordenamiento
