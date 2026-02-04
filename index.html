@@ -402,14 +402,15 @@
             </div>
 
             <!-- Add Inquilino Modal -->
-            <div id="addInquilinoModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title" id="addInquilinoTitle">Agregar Inquilino</h2>
-                        <button class="close-modal" onclick="closeModal('addInquilinoModal')">×</button>
-                    </div>
-                    <form id="inquilinoForm" onsubmit="saveInquilino(event)">
-                        <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="inquilinoNombre" required autocomplete="off"></div>
+      <div id="addInquilinoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header modal-header-sticky">
+            <h2 class="modal-title" id="addInquilinoTitle">Agregar Inquilino</h2>
+            <button class="close-modal" onclick="closeModal('addInquilinoModal')">×</button>
+        </div>
+        <div style="padding: 1.5rem;">
+            <form id="inquilinoForm" onsubmit="saveInquilino(event)">
+                <div class="form-group"><label>Nombre / Empresa *</label>
                         <div class="form-group"><label>CLABE</label><input type="text" id="inquilinoClabe" autocomplete="off"></div>
                         <div class="form-group"><label>RFC</label><input type="text" id="inquilinoRFC" autocomplete="off"></div>
                         <div class="form-group"><label>M²</label><input type="number" id="inquilinoM2" step="0.01" autocomplete="off"></div>
@@ -432,11 +433,11 @@
                         <div class="modal-actions">
                             <button type="button" class="btn btn-secondary" onclick="closeModal('addInquilinoModal')">Cancelar</button>
                             <button type="submit" class="btn btn-success">Guardar</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
+             </form>
+            </div> <!-- Cierre del div con padding -->
+        </div> <!-- Cierre de modal-content -->
+    </div> <!-- Cierre de modal -->
+        
             <!-- Add Contacto Inquilino Modal -->
             <div id="addContactoInquilinoModal" class="modal">
                 <div class="modal-content">
@@ -575,10 +576,10 @@
             </div>
 
             <!-- Add Proveedor Modal -->
-            <div id="addProveedorModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title" id="addProveedorTitle">Agregar Proveedor</h2>
+         <div id="addProveedorModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header modal-header-sticky">
+            <h2 class="modal-title" id="addProveedorTitle">Agregar Proveedor</h2>
                         <button class="close-modal" onclick="closeModal('addProveedorModal')">×</button>
                     </div>
                     <form id="proveedorForm" onsubmit="saveProveedor(event)">
