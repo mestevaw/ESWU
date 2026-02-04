@@ -46,12 +46,12 @@
     </div>
 </header>
 
-        <!-- Search Modal -->
+<!-- Search Modal -->
 <div id="searchModal" class="search-modal">
-    <input type="text" id="searchInput" placeholder="Buscar...">
-    <button class="btn btn-primary" onclick="executeSearch()">Buscar</button>
-    <button class="btn btn-secondary" onclick="clearSearch()">Limpiar</button>
-    <button class="btn btn-danger" onclick="toggleSearch()">Cerrar</button>
+    <input type="text" id="searchInput" placeholder="Buscar..." onkeypress="if(event.key==='Enter') executeSearch()">
+    <button class="btn-icon search" onclick="executeSearch()" title="Buscar">🔍</button>
+    <button class="btn-icon clear" onclick="clearSearch()" title="Limpiar">🧹</button>
+    <button class="btn-icon close" onclick="toggleSearch()" title="Cerrar">✖️</button>
 </div>
 
         <!-- Main Content -->
@@ -363,10 +363,10 @@
                         <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
                     </div>
                     <div class="table-container">
-                   <table id="bancosTable" class="sticky-header-table">
-    <thead><tr><th>Nombre del Archivo</th><th>Fecha</th></tr></thead>
-                            <tbody></tbody>
-                        </table>
+                  <table id="bancosTable" class="sticky-header-table">
+    <thead><tr><th>Tipo</th><th>Fecha</th></tr></thead>
+    <tbody></tbody>
+</table>
                     </div>
                 </div>
             </div>
