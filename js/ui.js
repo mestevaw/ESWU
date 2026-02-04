@@ -143,9 +143,15 @@ function showPageFromMenu(pageName) {
 
 function toggleSearch() {
     const searchBar = document.getElementById('headerSearchBar');
+    const btnSearch = document.getElementById('btnSearch');
+    
     searchBar.classList.toggle('active');
+    
     if (searchBar.classList.contains('active')) {
+        btnSearch.classList.add('hidden');
         document.getElementById('searchInput').focus();
+    } else {
+        btnSearch.classList.remove('hidden');
     }
 }
 
@@ -165,7 +171,9 @@ function executeSearch() {
         filtrarInquilinos(query);
     }
     
-    toggleSearch();
+    // Ocultar barra de búsqueda después de buscar
+    document.getElementById('headerSearchBar').classList.remove('active');
+    document.getElementById('btnSearch').classList.remove('hidden');
 }
 
 function clearSearch() {
@@ -179,7 +187,9 @@ function clearSearch() {
         renderInquilinosTable();
     }
     
-    toggleSearch();
+    // Ocultar barra de búsqueda
+    document.getElementById('headerSearchBar').classList.remove('active');
+    document.getElementById('btnSearch').classList.remove('hidden');
 }
 
 // ============================================
