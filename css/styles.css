@@ -81,6 +81,10 @@ body {
     background: white !important;
 }
 
+.modal-header-sticky + div {
+    padding-top: 1rem !important;
+}
+
 .modal-title {
     font-size: 1.5rem;
     font-weight: 700;
