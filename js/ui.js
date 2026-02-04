@@ -984,17 +984,7 @@ function renderBancosTable() {
         row.className = 'banco-clickable';
         row.onclick = () => viewDocumento(b.archivo_pdf);
         
-        // Extraer nombre del archivo desde la URL
-        let nombreArchivo = b.tipo || 'Documento';
-        if (b.archivo_pdf) {
-            const urlParts = b.archivo_pdf.split('/');
-            const archivoConParams = urlParts[urlParts.length - 1];
-            nombreArchivo = archivoConParams.split('?')[0];
-            // Decodificar URL encoding
-            nombreArchivo = decodeURIComponent(nombreArchivo);
-        }
-        
-        row.innerHTML = `<td>${nombreArchivo}</td><td>${formatDate(b.fecha_subida)}</td>`;
+        row.innerHTML = `<td>${b.tipo || 'Documento'}</td><td>${formatDate(b.fecha_subida)}</td>`;
     });
     
     if (bancosDocumentos.length === 0) {
