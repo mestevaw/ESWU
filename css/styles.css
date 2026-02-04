@@ -243,7 +243,7 @@ body.logged-in {
 /* Submenu Derecha */
 .submenu-container {
     position: fixed;
-    left: 200;
+    left: 200px;
     top: 70px;
     bottom: 0;
     width: 250px;
