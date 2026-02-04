@@ -532,7 +532,7 @@ async function saveBitacora() {
         const { error } = await supabaseClient
             .from('bitacora_semanal')
             .update({
-                semana: fecha,
+                semana_inicio: fecha,
                 notas: notas
             })
             .eq('id', currentBitacoraId);
@@ -640,7 +640,27 @@ function showPagarFacturaModalFromDetail() {
 }
 
 function editInquilino() {
-    alert('Función editInquilino - pendiente de implementar');
+    const inq = inquilinos.find(i => i.id === currentInquilinoId);
+    if (!inq) return;
+    
+    isEditMode = true;
+    tempInquilinoContactos = [...(inq.contactos || [])];
+    
+    document.getElementById('addInquilinoTitle').textContent = 'Editar Inquilino';
+    document.getElementById('inquilinoNombre').value = inq.nombre;
+    document.getElementById('inquilinoClabe').value = inq.clabe || '';
+    document.getElementById('inquilinoRFC').value = inq.rfc || '';
+    document.getElementById('inquilinoM2').value = inq.m2 || '';
+    document.getElementById('inquilinoDespacho').value = inq.numero_despacho || '';
+    document.getElementById('inquilinoRenta').value = inq.renta;
+    document.getElementById('inquilinoFechaInicio').value = inq.fecha_inicio;
+    document.getElementById('inquilinoFechaVenc').value = inq.fecha_vencimiento;
+    document.getElementById('inquilinoNotas').value = inq.notas || '';
+    
+    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
+    
+    closeModal('inquilinoDetailModal');
+    document.getElementById('addInquilinoModal').classList.add('active');
 }
 
 function deleteInquilino() {
@@ -648,7 +668,23 @@ function deleteInquilino() {
 }
 
 function editProveedor() {
-    alert('Función editProveedor - pendiente de implementar');
+    const prov = proveedores.find(p => p.id === currentProveedorId);
+    if (!prov) return;
+    
+    isEditMode = true;
+    tempProveedorContactos = [...(prov.contactos || [])];
+    
+    document.getElementById('addProveedorTitle').textContent = 'Editar Proveedor';
+    document.getElementById('proveedorNombre').value = prov.nombre;
+    document.getElementById('proveedorServicio').value = prov.servicio;
+    document.getElementById('proveedorClabe').value = prov.clabe || '';
+    document.getElementById('proveedorRFC').value = prov.rfc || '';
+    document.getElementById('proveedorNotas').value = prov.notas || '';
+    
+    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
+    
+    closeModal('proveedorDetailModal');
+    document.getElementById('addProveedorModal').classList.add('active');
 }
 
 function deleteProveedor() {
