@@ -86,6 +86,12 @@ window.addEventListener('DOMContentLoaded', function() {
         document.getElementById('username').value = rememberedUser;
         document.getElementById('password').focus();
     }
+    
+    // Asegurar que todas las páginas estén ocultas al inicio
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    
+    // Asegurar que todos los modales estén cerrados
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
 });
 
 // ============================================
@@ -649,8 +655,4 @@ function deleteActivo() {
 function deleteFactura(facturaId) {
     alert('Función deleteFactura - pendiente de implementar para factura ID: ' + facturaId);
 }
-// Prevenir que las páginas se muestren automáticamente
-document.addEventListener('DOMContentLoaded', function() {
-    // Ocultar todas las páginas al cargar
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-});
+
