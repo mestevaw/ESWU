@@ -211,7 +211,9 @@ body.logged-in {
 .menu-btn {
     background: white;
     color: var(--text);
-    border: none;
+    border: 1px solid var(--border);
+    margin: 0.5rem 1rem;
+    border-radius: 4px;
     border-radius: 0;
     padding: 0.75rem 1rem;
     font-size: 1rem;
@@ -646,7 +648,7 @@ tr.banco-clickable:hover {
     background: white;
     border-bottom: 2px solid var(--border);
     padding: 1rem 2rem;
-    z-index: 998;
+    z-index: 900;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
@@ -1067,4 +1069,34 @@ tr.banco-clickable:hover {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 2rem;
+}
+/* ========================================
+   RESPONSIVE - MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .menu-sidebar {
+        width: 100%;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .submenu-container {
+        position: relative;
+        left: 0;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .content-area {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 1rem;
+    }
+    
+    .main-content {
+        flex-direction: column;
+    }
 }
