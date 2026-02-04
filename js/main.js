@@ -649,3 +649,8 @@ function deleteActivo() {
 function deleteFactura(facturaId) {
     alert('Función deleteFactura - pendiente de implementar para factura ID: ' + facturaId);
 }
+// Prevenir que las páginas se muestren automáticamente
+document.addEventListener('DOMContentLoaded', function() {
+    // Ocultar todas las páginas al cargar
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+});
