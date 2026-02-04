@@ -668,6 +668,31 @@ tr.banco-clickable:hover {
     outline: none;
     border-color: var(--primary);
 }
+.search-modal .btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.search-modal .btn-icon:hover {
+    background: var(--bg);
+}
+
+.search-modal .btn-icon.search {
+    color: var(--primary);
+}
+
+.search-modal .btn-icon.clear {
+    color: var(--text-light);
+}
+
+.search-modal .btn-icon.close {
+    color: var(--danger);
+}
 
 /* Utility Classes */
 .hidden {
