@@ -328,23 +328,24 @@ function renderInquilinosRentasRecibidas() {
     
     const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
     const rentas = [];
-    let totalPeriodo = 0;
-    
-    inquilinos.forEach(inq => {
-        if (inq.pagos) {
-            inq.pagos.forEach(pago => {
-                const pd = new Date(pago.fecha + 'T00:00:00');
-                if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
-                    rentas.push({
-                        empresa: inq.nombre,
-                        monto: pago.monto,
-                        fecha: pago.fecha
-                    });
-                    totalPeriodo += pago.monto;
-                }
-            });
-        }
-    });
+let totalPeriodo = 0;
+
+inquilinos.forEach(inq => {
+    if (inq.pagos) {
+        inq.pagos.forEach(pago => {
+            const pd = new Date(pago.fecha + 'T00:00:00');
+            if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
+                rentas.push({
+                    empresa: inq.nombre,
+                    monto: pago.monto,
+                    fecha: pago.fecha,
+                    inquilinoId: inq.id
+                });
+                totalPeriodo += pago.monto;
+            }
+        });
+    }
+});
     
     rentas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
    rentas.forEach(r => {
