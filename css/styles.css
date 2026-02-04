@@ -240,18 +240,18 @@ body.logged-in {
     margin-top: 2rem;
 }
 
-/* Submenu Derecha */
 .submenu-container {
     position: fixed;
-    right: 0px;
+    left: 200px;
     top: 70px;
     bottom: 0;
     width: 250px;
     background: white;
-    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
     padding: 1rem;
     overflow-y: auto;
     display: none;
+    z-index: 10;
 }
 
 .submenu-container.active {
@@ -298,7 +298,8 @@ body.logged-in {
 }
 
 .content-area.with-submenu {
-    margin-right: 250px;
+    margin-left: 450px;
+    margin-right: 0;
 }
 
 .content-area.fullwidth {
