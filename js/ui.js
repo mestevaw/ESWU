@@ -1600,13 +1600,25 @@ function showAddContactoInquilinoModal() {
 
 function saveContactoInquilino(event) {
     event.preventDefault();
+    
     const contacto = {
         nombre: document.getElementById('contactoInquilinoNombre').value,
         telefono: document.getElementById('contactoInquilinoTelefono').value,
         email: document.getElementById('contactoInquilinoEmail').value
     };
-    tempInquilinoContactos.push(contacto);
-    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
+    
+    if (window.editingContactoIndex !== undefined) {
+        // Modo edición
+        tempInquilinoContactos[window.editingContactoIndex] = contacto;
+        delete window.editingContactoIndex;
+    } else {
+        // Modo agregar
+        tempInquilinoContactos.push(contacto);
+    }
+    
+    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto', 'showEditContactoInquilinoModal');
+    
+    document.getElementById('contactoInquilinoForm').reset();
     closeModal('addContactoInquilinoModal');
 }
 
@@ -1626,13 +1638,25 @@ function showAddContactoProveedorModal() {
 
 function saveContactoProveedor(event) {
     event.preventDefault();
+    
     const contacto = {
         nombre: document.getElementById('contactoProveedorNombre').value,
         telefono: document.getElementById('contactoProveedorTelefono').value,
         email: document.getElementById('contactoProveedorEmail').value
     };
-    tempProveedorContactos.push(contacto);
-    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
+    
+    if (window.editingContactoProveedorIndex !== undefined) {
+        // Modo edición
+        tempProveedorContactos[window.editingContactoProveedorIndex] = contacto;
+        delete window.editingContactoProveedorIndex;
+    } else {
+        // Modo agregar
+        tempProveedorContactos.push(contacto);
+    }
+    
+    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');
+    
+    document.getElementById('contactoProveedorForm').reset();
     closeModal('addContactoProveedorModal');
 }
 
