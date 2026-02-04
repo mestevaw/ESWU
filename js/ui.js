@@ -1651,6 +1651,7 @@ function showAddActivoModal() {
 }
 
 function showAddInquilinoModal() {
+   console.trace('showAddInquilinoModal fue llamada desde:');
     isEditMode = false;
     currentInquilinoId = null;
     tempInquilinoContactos = [];
