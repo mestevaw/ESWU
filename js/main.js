@@ -618,7 +618,40 @@ async function savePagoFactura(event) {
 
 async function saveDocumentoAdicional(event) {
     event.preventDefault();
-    alert('Función saveDocumentoAdicional - pendiente de implementar');
+    showLoading();
+    
+    try {
+        const nombre = document.getElementById('nuevoDocNombre').value;
+        const file = document.getElementById('nuevoDocPDF').files[0];
+        
+        if (!file) {
+            throw new Error('Seleccione un archivo PDF');
+        }
+        
+        const pdfBase64 = await fileToBase64(file);
+        
+        const { error } = await supabaseClient
+            .from('inquilinos_documentos')
+            .insert([{
+                inquilino_id: currentInquilinoId,
+                nombre: nombre,
+                archivo: pdfBase64,
+                fecha: new Date().toISOString().split('T')[0],
+                usuario: currentUser.nombre
+            }]);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        showInquilinoDetail(currentInquilinoId);
+        closeModal('agregarDocumentoModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
 }
 
 function showRegistrarPagoModal() {
