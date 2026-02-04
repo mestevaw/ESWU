@@ -142,9 +142,9 @@ function showPageFromMenu(pageName) {
 // ============================================
 
 function toggleSearch() {
-    const modal = document.getElementById('searchModal');
-    modal.classList.toggle('active');
-    if (modal.classList.contains('active')) {
+    const searchBar = document.getElementById('headerSearchBar');
+    searchBar.classList.toggle('active');
+    if (searchBar.classList.contains('active')) {
         document.getElementById('searchInput').focus();
     }
 }
