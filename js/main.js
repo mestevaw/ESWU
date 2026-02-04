@@ -716,7 +716,7 @@ function editProveedor() {
     document.getElementById('proveedorRFC').value = prov.rfc || '';
     document.getElementById('proveedorNotas').value = prov.notas || '';
     
-  / En editProveedor():
+  // En editProveedor():
 renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');  
     closeModal('proveedorDetailModal');
     document.getElementById('addProveedorModal').classList.add('active');
