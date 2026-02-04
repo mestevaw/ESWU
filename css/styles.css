@@ -1247,18 +1247,34 @@ tr.banco-clickable:hover {
 
 @media (max-width: 768px) {
     .menu-sidebar {
-        width: 100%;
-        position: relative;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
+        width: 40%;
+        min-width: 150px;
+        position: fixed;
+        left: 0;
+        border-right: 1px solid var(--border);
+        padding: 0.5rem 0;
+    }
+    
+    .menu-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        margin: 0.25rem 0.5rem;
     }
     
     .submenu-container {
-        position: relative;
-        left: 0;
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
+        position: fixed;
+        left: 40%;
+        width: 60%;
+        top: 70px;
+        bottom: 0;
+        border-left: 1px solid var(--border);
+        padding: 0.5rem;
+    }
+    
+    .submenu-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
     }
     
     .content-area {
