@@ -440,13 +440,14 @@
 </div>
         
             <!-- Add Contacto Inquilino Modal -->
-            <div id="addContactoInquilinoModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title">Agregar Contacto</h2>
-                        <button class="close-modal" onclick="closeModal('addContactoInquilinoModal')">×</button>
-                    </div>
-                    <form id="contactoInquilinoForm" onsubmit="saveContactoInquilino(event)">
+           <div id="addContactoInquilinoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Agregar Contacto</h2>
+            <button class="close-modal" onclick="closeModal('addContactoInquilinoModal')">×</button>
+        </div>
+        <div style="padding: 1.5rem;">
+            <form id="contactoInquilinoForm" onsubmit="saveContactoInquilino(event)">
                         <div class="form-group"><label>Nombre *</label><input type="text" id="contactoInquilinoNombre" required autocomplete="off"></div>
                         <div class="form-group"><label>Teléfono</label><input type="tel" id="contactoInquilinoTelefono" autocomplete="off"></div>
                         <div class="form-group"><label>Email</label><input type="email" id="contactoInquilinoEmail" autocomplete="off"></div>
