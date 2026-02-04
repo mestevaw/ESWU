@@ -247,14 +247,14 @@ function showInquilinosView(view) {
     
     document.getElementById('btnRegresa').classList.remove('hidden');
     
-    // Mostrar búsqueda solo en listado
-    if (view === 'list') {
-        document.getElementById('btnSearch').classList.remove('hidden');
-        currentSearchContext = 'inquilinos';
-    } else {
-        document.getElementById('btnSearch').classList.add('hidden');
-        currentSearchContext = null;
-    }
+   // Mostrar búsqueda solo en listado
+if (view === 'list') {
+    document.getElementById('btnSearch').classList.remove('hidden');
+    currentSearchContext = 'inquilinos';
+} else {
+    document.getElementById('btnSearch').classList.add('hidden');
+    currentSearchContext = null;
+}
     
     document.getElementById('contentArea').classList.remove('with-submenu');
    document.getElementById('menuSidebar').classList.add('hidden');
