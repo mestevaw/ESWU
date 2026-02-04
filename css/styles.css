@@ -33,6 +33,26 @@ body {
     line-height: 1.6;
 }
 
+/* Modals - MUST be hidden by default */
+.modal {
+    display: none !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.modal.active {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
 body.logged-in {
     padding-top: 70px;
 }
