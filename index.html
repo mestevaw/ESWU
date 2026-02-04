@@ -409,31 +409,21 @@
             <button class="close-modal" onclick="closeModal('addInquilinoModal')">×</button>
         </div>
         <div style="padding: 1.5rem;">
+            <!-- BOTONES MOVIDOS AQUÍ ARRIBA -->
+            <div class="modal-actions-top">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addInquilinoModal')" title="Cancelar">✖️ Cancelar</button>
+                <button type="submit" form="inquilinoForm" class="btn btn-success" title="Guardar">✔️ Guardar</button>
+            </div>
+            
             <form id="inquilinoForm" onsubmit="saveInquilino(event)">
                 <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="inquilinoNombre" required autocomplete="off"></div>
-                <div class="form-group"><label>CLABE</label><input type="text" id="inquilinoClabe" autocomplete="off"></div>
-                <div class="form-group"><label>RFC</label><input type="text" id="inquilinoRFC" autocomplete="off"></div>
-                <div class="form-group"><label>M²</label><input type="number" id="inquilinoM2" step="0.01" autocomplete="off"></div>
-                <div class="form-group"><label>Número de Despacho</label><input type="text" id="inquilinoDespacho" autocomplete="off"></div>
-                <div class="form-group"><label>Renta Mensual *</label><input type="number" id="inquilinoRenta" step="0.01" required autocomplete="off"></div>
-                <div class="form-group"><label>Fecha Inicio Contrato *</label><input type="date" id="inquilinoFechaInicio" required></div>
-                <div class="form-group"><label>Fecha Vencimiento Contrato *</label><input type="date" id="inquilinoFechaVenc" required></div>
-                <div class="form-group">
-                    <label>Contrato (PDF)</label>
-                    <div class="file-upload" onclick="document.getElementById('inquilinoContrato').click()">
-                        <input type="file" id="inquilinoContrato" accept=".pdf">
-                        <p>Click para seleccionar PDF del contrato</p>
-                        <p id="contratoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
-                    </div>
-                </div>
-                <div class="form-group"><label>Notas</label><textarea id="inquilinoNotas"></textarea></div>
-                <h3 style="margin: 1.5rem 0 1rem 0;">Contactos</h3>
-                <div id="inquilinoContactosList" style="margin-bottom: 1rem;"></div>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="showAddContactoInquilinoModal()">+ Agregar Contacto</button>
-                <div class="modal-actions">
+                <!-- ...más campos... -->
+                
+                <!-- ELIMINA ESTE BLOQUE COMPLETO: -->
+                <!-- <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('addInquilinoModal')">Cancelar</button>
                     <button type="submit" class="btn btn-success">Guardar</button>
-                </div>
+                </div> -->
             </form>
         </div>
     </div>
@@ -585,6 +575,12 @@
             <button class="close-modal" onclick="closeModal('addProveedorModal')">×</button>
         </div>
         <div style="padding: 1.5rem;">
+            <!-- BOTONES ARRIBA -->
+            <div class="modal-actions-top">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addProveedorModal')" title="Cancelar">✖️ Cancelar</button>
+                <button type="submit" form="proveedorForm" class="btn btn-success" title="Guardar">✔️ Guardar</button>
+            </div>
+            
             <form id="proveedorForm" onsubmit="saveProveedor(event)">
                 <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="proveedorNombre" required autocomplete="off"></div>
                 <div class="form-group"><label>Servicio *</label><input type="text" id="proveedorServicio" required autocomplete="off"></div>
@@ -606,15 +602,10 @@
                     <label>Nombre del Documento *</label>
                     <input type="text" id="proveedorNombreDoc" autocomplete="off">
                 </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addProveedorModal')">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                </div>
             </form>
         </div>
     </div>
-</div>
-    
+</div>    
             <!-- Add Contacto Proveedor Modal -->
             <div id="addContactoProveedorModal" class="modal">
                 <div class="modal-content">
