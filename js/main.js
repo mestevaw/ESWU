@@ -56,8 +56,9 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         
         currentUser = data;
         
-        // Guardar usuario en localStorage para recordarlo
+        // Guardar usuario Y password en localStorage
         localStorage.setItem('eswu_remembered_user', username);
+        localStorage.setItem('eswu_remembered_pass', password);
         
         // Ocultar login, mostrar app
         document.getElementById('loginContainer').classList.add('hidden');
@@ -80,9 +81,15 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
 window.addEventListener('DOMContentLoaded', function() {
     const rememberedUser = localStorage.getItem('eswu_remembered_user');
+    const rememberedPass = localStorage.getItem('eswu_remembered_pass');
     
-    if (rememberedUser) {
-        // Si hay usuario recordado, pre-seleccionarlo y solo pedir password
+    if (rememberedUser && rememberedPass) {
+        // Auto-login si hay usuario y password guardados
+        document.getElementById('username').value = rememberedUser;
+        document.getElementById('password').value = rememberedPass;
+        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+    } else if (rememberedUser) {
+        // Si solo hay usuario, pre-seleccionarlo
         document.getElementById('username').value = rememberedUser;
         document.getElementById('password').focus();
     }
