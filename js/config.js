@@ -1,7 +1,4 @@
-/* ========================================
-   ESWU - CONFIGURATION
-   Supabase client and global variables
-   ======================================== */
+/* ESWU - CONFIGURATION */
 
 // Supabase configuration
 const SUPABASE_URL = 'https://tzuvoceilkqurnujrraq.supabase.co';
@@ -10,7 +7,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Initialize Supabase client
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Variables globales
+// Global variables
 let currentUser = null;
 let inquilinos = [];
 let proveedores = [];
@@ -20,17 +17,14 @@ let bancosDocumentos = [];
 let estacionamiento = [];
 let bitacoraSemanal = [];
 
-// Variables de contexto
 let currentInquilinoId = null;
 let currentProveedorId = null;
 let currentActivoId = null;
 let currentFacturaId = null;
 let currentUsuarioId = null;
-let currentEstacionamientoId = null;
-let currentBitacoraId = null;
+
 let isEditMode = false;
 let tempInquilinoContactos = [];
 let tempProveedorContactos = [];
-let currentHomeTable = null;
 
-console.log('✅ Config.js cargado');
+console.log('✅ Config.js cargado correctamente');
