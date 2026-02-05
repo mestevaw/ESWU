@@ -1,8 +1,10 @@
-/* ESWU - UI FUNCTIONS COMPLETO */
+/* ESWU - UI FUNCTIONS CON DETALLES */
 
 let currentMenuContext = 'main';
 let currentSubContext = null;
 let currentSearchContext = null;
+let currentInquilinoId = null;
+let currentProveedorId = null;
 
 // ============================================
 // LOADING FUNCTIONS
@@ -39,17 +41,14 @@ function formatDate(dateString) {
 // ============================================
 
 function showSubMenu(menu) {
-    // Quitar active de todos los botones
     document.getElementById('menuInquilinos').classList.remove('active');
     document.getElementById('menuProveedores').classList.remove('active');
     document.getElementById('menuAdmin').classList.remove('active');
     
-    // Ocultar todos los submenús
     document.getElementById('inquilinosSubMenu').classList.remove('active');
     document.getElementById('proveedoresSubMenu').classList.remove('active');
     document.getElementById('adminSubMenu').classList.remove('active');
     
-    // Mostrar submenú correspondiente
     if (menu === 'inquilinos') {
         document.getElementById('inquilinosSubMenu').classList.add('active');
         document.getElementById('menuInquilinos').classList.add('active');
@@ -64,16 +63,13 @@ function showSubMenu(menu) {
         currentMenuContext = 'admin';
     }
     
-    // Ajustar content-area
     document.getElementById('contentArea').classList.add('with-submenu');
     document.getElementById('btnRegresa').classList.add('hidden');
 }
 
 function handleRegresa() {
-    // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
-    // Mostrar submenú correspondiente
     if (currentMenuContext === 'inquilinos') {
         document.getElementById('inquilinosSubMenu').classList.add('active');
     } else if (currentMenuContext === 'proveedores') {
@@ -97,31 +93,21 @@ function handleRegresa() {
 function showInquilinosView(view) {
     console.log('📋 Mostrando vista de inquilinos:', view);
     
-    // Ocultar submenú
     document.getElementById('inquilinosSubMenu').classList.remove('active');
-    
-    // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    // Mostrar página de inquilinos
     document.getElementById('inquilinosPage').classList.add('active');
     
-    // Ocultar todas las vistas de inquilinos
     document.getElementById('inquilinosListView').classList.add('hidden');
     document.getElementById('inquilinosRentasRecibidasView').classList.add('hidden');
     document.getElementById('inquilinosVencimientoContratosView').classList.add('hidden');
     
-    // Mostrar botón regresa
     document.getElementById('btnRegresa').classList.remove('hidden');
-    
-    // Ocultar menú lateral y ajustar contenido
     document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.remove('with-submenu');
     document.getElementById('contentArea').classList.add('fullwidth');
     
     currentSubContext = 'inquilinos-' + view;
     
-    // Mostrar vista específica
     if (view === 'list') {
         document.getElementById('inquilinosListView').classList.remove('hidden');
         document.getElementById('btnSearch').classList.remove('hidden');
@@ -149,7 +135,7 @@ function renderInquilinosTable() {
     inquilinos.forEach(inq => {
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
-        row.onclick = () => alert('Ver detalle de: ' + inq.nombre);
+        row.onclick = () => showInquilinoDetail(inq.id);
         
         row.innerHTML = `
             <td>${inq.nombre}</td>
@@ -159,6 +145,39 @@ function renderInquilinosTable() {
     });
     
     console.log('✅ Tabla renderizada con', inquilinos.length, 'inquilinos');
+}
+
+function showInquilinoDetail(id) {
+    const inq = inquilinos.find(i => i.id === id);
+    
+    if (!inq) {
+        alert('ERROR: Inquilino no encontrado');
+        return;
+    }
+    
+    currentInquilinoId = id;
+    
+    // Por ahora, mostrar alert con los datos
+    let detalle = `
+📋 DETALLE DE INQUILINO
+
+Nombre: ${inq.nombre}
+Renta: ${formatCurrency(inq.renta || 0)}
+M²: ${inq.m2 || 'N/A'}
+Despacho: ${inq.numero_despacho || 'N/A'}
+RFC: ${inq.rfc || 'N/A'}
+CLABE: ${inq.clabe || 'N/A'}
+Fecha Inicio: ${formatDate(inq.fecha_inicio)}
+Vencimiento: ${formatDate(inq.fecha_vencimiento)}
+
+Contactos: ${inq.contactos && inq.contactos.length > 0 ? inq.contactos.length + ' contacto(s)' : 'Sin contactos'}
+Pagos: ${inq.pagos && inq.pagos.length > 0 ? inq.pagos.length + ' pago(s)' : 'Sin pagos'}
+
+Notas: ${inq.notas || 'Sin notas'}
+    `;
+    
+    alert(detalle);
+    console.log('👤 Detalle de inquilino:', inq);
 }
 
 // ============================================
@@ -210,7 +229,7 @@ function renderProveedoresTable() {
     proveedores.forEach(prov => {
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
-        row.onclick = () => alert('Ver detalle de: ' + prov.nombre);
+        row.onclick = () => showProveedorDetail(prov.id);
         
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
         
@@ -224,6 +243,43 @@ function renderProveedoresTable() {
     });
     
     console.log('✅ Tabla renderizada con', proveedores.length, 'proveedores');
+}
+
+function showProveedorDetail(id) {
+    const prov = proveedores.find(p => p.id === id);
+    
+    if (!prov) {
+        alert('ERROR: Proveedor no encontrado');
+        return;
+    }
+    
+    currentProveedorId = id;
+    
+    let contactosTexto = 'Sin contactos';
+    if (prov.contactos && prov.contactos.length > 0) {
+        contactosTexto = prov.contactos.map(c => 
+            `  • ${c.nombre} - ${c.telefono || 'Sin tel'} - ${c.email || 'Sin email'}`
+        ).join('\n');
+    }
+    
+    let detalle = `
+📋 DETALLE DE PROVEEDOR
+
+Nombre: ${prov.nombre}
+Servicio: ${prov.servicio || 'N/A'}
+RFC: ${prov.rfc || 'N/A'}
+CLABE: ${prov.clabe || 'N/A'}
+
+Contactos:
+${contactosTexto}
+
+Facturas: ${prov.facturas && prov.facturas.length > 0 ? prov.facturas.length + ' factura(s)' : 'Sin facturas'}
+
+Notas: ${prov.notas || 'Sin notas'}
+    `;
+    
+    alert(detalle);
+    console.log('🏢 Detalle de proveedor:', prov);
 }
 
 // ============================================
@@ -349,7 +405,6 @@ function logout() {
         localStorage.removeItem('eswu_remembered_user');
         localStorage.removeItem('eswu_remembered_pass');
         
-        // Reset estado
         currentMenuContext = 'main';
         currentSubContext = null;
         
@@ -357,4 +412,4 @@ function logout() {
     }
 }
 
-console.log('✅ UI.js COMPLETO cargado correctamente');
+console.log('✅ UI.js CON DETALLES cargado correctamente');
