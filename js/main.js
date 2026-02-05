@@ -99,6 +99,12 @@ window.addEventListener('DOMContentLoaded', function() {
     
     // Asegurar que todos los modales estén cerrados
     document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    
+    // ← AGREGA ESTO:
+    // Forzar cierre de modales después de 1 segundo (por si auto-login los abre)
+    setTimeout(() => {
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    }, 1000);
 });
 
 // ============================================
