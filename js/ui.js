@@ -1,15 +1,45 @@
-/* ========================================
-   ESWU - UI FUNCTIONS
-   ======================================== */
+/* ESWU - UI FUNCTIONS COMPLETO */
+
+let currentMenuContext = 'main';
+let currentSubContext = null;
+let currentSearchContext = null;
 
 // ============================================
-// NAVIGATION
+// LOADING FUNCTIONS
+// ============================================
+
+function showLoading() {
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
+// ============================================
+// FORMAT FUNCTIONS
+// ============================================
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('es-MX', { 
+        style: 'currency', 
+        currency: 'MXN' 
+    }).format(amount);
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString + 'T00:00:00');
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+// ============================================
+// NAVIGATION FUNCTIONS
 // ============================================
 
 function showSubMenu(menu) {
-    console.log('Mostrando submenú:', menu);
-    
-    // Remover active de todos los botones
+    // Quitar active de todos los botones
     document.getElementById('menuInquilinos').classList.remove('active');
     document.getElementById('menuProveedores').classList.remove('active');
     document.getElementById('menuAdmin').classList.remove('active');
@@ -19,48 +49,44 @@ function showSubMenu(menu) {
     document.getElementById('proveedoresSubMenu').classList.remove('active');
     document.getElementById('adminSubMenu').classList.remove('active');
     
-    // Mostrar el submenú correcto
+    // Mostrar submenú correspondiente
     if (menu === 'inquilinos') {
         document.getElementById('inquilinosSubMenu').classList.add('active');
         document.getElementById('menuInquilinos').classList.add('active');
+        currentMenuContext = 'inquilinos';
     } else if (menu === 'proveedores') {
         document.getElementById('proveedoresSubMenu').classList.add('active');
         document.getElementById('menuProveedores').classList.add('active');
+        currentMenuContext = 'proveedores';
     } else if (menu === 'admin') {
         document.getElementById('adminSubMenu').classList.add('active');
         document.getElementById('menuAdmin').classList.add('active');
+        currentMenuContext = 'admin';
     }
     
-    // Ocultar botón regresa
-    document.getElementById('btnRegresa').classList.add('hidden');
-    
-    // Ajustar content area
+    // Ajustar content-area
     document.getElementById('contentArea').classList.add('with-submenu');
+    document.getElementById('btnRegresa').classList.add('hidden');
 }
 
 function handleRegresa() {
-    console.log('Regresando...');
-    
     // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
-    // Mostrar el submenú que estaba activo
-    const inquilinosActive = document.getElementById('menuInquilinos').classList.contains('active');
-    const proveedoresActive = document.getElementById('menuProveedores').classList.contains('active');
-    const adminActive = document.getElementById('menuAdmin').classList.contains('active');
-    
-    if (inquilinosActive) {
+    // Mostrar submenú correspondiente
+    if (currentMenuContext === 'inquilinos') {
         document.getElementById('inquilinosSubMenu').classList.add('active');
-    } else if (proveedoresActive) {
+    } else if (currentMenuContext === 'proveedores') {
         document.getElementById('proveedoresSubMenu').classList.add('active');
-    } else if (adminActive) {
+    } else if (currentMenuContext === 'admin') {
         document.getElementById('adminSubMenu').classList.add('active');
     }
     
-    // Ocultar botón regresa
+    currentSubContext = null;
     document.getElementById('btnRegresa').classList.add('hidden');
-    
-    // Ajustar content area
+    document.getElementById('btnSearch').classList.add('hidden');
+    document.getElementById('menuSidebar').classList.remove('hidden');
+    document.getElementById('contentArea').classList.remove('fullwidth');
     document.getElementById('contentArea').classList.add('with-submenu');
 }
 
@@ -69,7 +95,7 @@ function handleRegresa() {
 // ============================================
 
 function showInquilinosView(view) {
-    console.log('Mostrando vista inquilinos:', view);
+    console.log('📋 Mostrando vista de inquilinos:', view);
     
     // Ocultar submenú
     document.getElementById('inquilinosSubMenu').classList.remove('active');
@@ -80,57 +106,59 @@ function showInquilinosView(view) {
     // Mostrar página de inquilinos
     document.getElementById('inquilinosPage').classList.add('active');
     
+    // Ocultar todas las vistas de inquilinos
+    document.getElementById('inquilinosListView').classList.add('hidden');
+    document.getElementById('inquilinosRentasRecibidasView').classList.add('hidden');
+    document.getElementById('inquilinosVencimientoContratosView').classList.add('hidden');
+    
     // Mostrar botón regresa
     document.getElementById('btnRegresa').classList.remove('hidden');
     
-    // Ajustar content area
+    // Ocultar menú lateral y ajustar contenido
+    document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
     
-    // Cambiar título según la vista
+    currentSubContext = 'inquilinos-' + view;
+    
+    // Mostrar vista específica
     if (view === 'list') {
-        document.getElementById('inquilinosTitle').textContent = 'Listado de Inquilinos';
+        document.getElementById('inquilinosListView').classList.remove('hidden');
+        document.getElementById('btnSearch').classList.remove('hidden');
         renderInquilinosTable();
-    } else if (view === 'rentas') {
-        document.getElementById('inquilinosTitle').textContent = 'Rentas Recibidas';
-        renderInquilinosRentas();
-    } else if (view === 'contratos') {
-        document.getElementById('inquilinosTitle').textContent = 'Vencimiento de Contratos';
-        renderInquilinosContratos();
+    } else if (view === 'rentasRecibidas') {
+        document.getElementById('inquilinosRentasRecibidasView').classList.remove('hidden');
+        console.log('📊 Vista de rentas recibidas');
+    } else if (view === 'vencimientoContratos') {
+        document.getElementById('inquilinosVencimientoContratosView').classList.remove('hidden');
+        console.log('📅 Vista de vencimiento de contratos');
     }
 }
 
 function renderInquilinosTable() {
+    console.log('🔄 Renderizando tabla de inquilinos...');
     const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
     tbody.innerHTML = '';
     
     if (inquilinos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem;color:var(--text-light)">No hay inquilinos registrados</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem;color:#718096">No hay inquilinos registrados</td></tr>';
+        console.log('⚠️ No hay inquilinos');
         return;
     }
     
     inquilinos.forEach(inq => {
         const row = tbody.insertRow();
-        row.className = 'clickable';
-        row.onclick = () => alert('Click en: ' + inq.nombre);
+        row.style.cursor = 'pointer';
+        row.onclick = () => alert('Ver detalle de: ' + inq.nombre);
         
         row.innerHTML = `
             <td>${inq.nombre}</td>
-            <td class="currency">$${Number(inq.renta || 0).toLocaleString('es-MX')}</td>
+            <td class="currency">${formatCurrency(inq.renta || 0)}</td>
             <td>${formatDate(inq.fecha_vencimiento)}</td>
         `;
     });
     
-    console.log('✅ Tabla inquilinos renderizada');
-}
-
-function renderInquilinosRentas() {
-    const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem">Vista de Rentas - Por implementar</td></tr>';
-}
-
-function renderInquilinosContratos() {
-    const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem">Vista de Contratos - Por implementar</td></tr>';
+    console.log('✅ Tabla renderizada con', inquilinos.length, 'inquilinos');
 }
 
 // ============================================
@@ -138,169 +166,195 @@ function renderInquilinosContratos() {
 // ============================================
 
 function showProveedoresView(view) {
-    console.log('Mostrando vista proveedores:', view);
+    console.log('📋 Mostrando vista de proveedores:', view);
     
-    // Ocultar submenú
     document.getElementById('proveedoresSubMenu').classList.remove('active');
-    
-    // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    // Mostrar página de proveedores
     document.getElementById('proveedoresPage').classList.add('active');
     
-    // Mostrar botón regresa
+    document.getElementById('proveedoresListView').classList.add('hidden');
+    document.getElementById('proveedoresFacturasPagadasView').classList.add('hidden');
+    document.getElementById('proveedoresFacturasPorPagarView').classList.add('hidden');
+    
     document.getElementById('btnRegresa').classList.remove('hidden');
-    
-    // Ajustar content area
+    document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
     
-    // Cambiar título según la vista
+    currentSubContext = 'proveedores-' + view;
+    
     if (view === 'list') {
-        document.getElementById('proveedoresTitle').textContent = 'Listado de Proveedores';
+        document.getElementById('proveedoresListView').classList.remove('hidden');
+        document.getElementById('btnSearch').classList.remove('hidden');
         renderProveedoresTable();
-    } else if (view === 'pagadas') {
-        document.getElementById('proveedoresTitle').textContent = 'Facturas Pagadas';
-        renderProveedoresPagadas();
-    } else if (view === 'porpagar') {
-        document.getElementById('proveedoresTitle').textContent = 'Facturas Por Pagar';
-        renderProveedoresPorPagar();
+    } else if (view === 'facturasPagadas') {
+        document.getElementById('proveedoresFacturasPagadasView').classList.remove('hidden');
+        console.log('💰 Vista de facturas pagadas');
+    } else if (view === 'facturasPorPagar') {
+        document.getElementById('proveedoresFacturasPorPagarView').classList.remove('hidden');
+        console.log('📄 Vista de facturas por pagar');
     }
 }
 
 function renderProveedoresTable() {
+    console.log('🔄 Renderizando tabla de proveedores...');
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
     tbody.innerHTML = '';
     
     if (proveedores.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem;color:var(--text-light)">No hay proveedores registrados</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#718096">No hay proveedores registrados</td></tr>';
+        console.log('⚠️ No hay proveedores');
         return;
     }
     
     proveedores.forEach(prov => {
         const row = tbody.insertRow();
-        row.className = 'clickable';
-        row.onclick = () => alert('Click en: ' + prov.nombre);
+        row.style.cursor = 'pointer';
+        row.onclick = () => alert('Ver detalle de: ' + prov.nombre);
+        
+        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
         
         row.innerHTML = `
             <td>${prov.nombre}</td>
             <td>${prov.servicio || '-'}</td>
-            <td>-</td>
+            <td>${primerContacto.nombre || '-'}</td>
+            <td>${primerContacto.telefono || '-'}</td>
+            <td>${primerContacto.email || '-'}</td>
         `;
     });
     
-    console.log('✅ Tabla proveedores renderizada');
-}
-
-function renderProveedoresPagadas() {
-    const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem">Vista de Facturas Pagadas - Por implementar</td></tr>';
-}
-
-function renderProveedoresPorPagar() {
-    const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem">Vista de Facturas Por Pagar - Por implementar</td></tr>';
+    console.log('✅ Tabla renderizada con', proveedores.length, 'proveedores');
 }
 
 // ============================================
 // ADMIN VIEWS
 // ============================================
 
-function showAdminView(section) {
-    console.log('Mostrando vista admin:', section);
+function showAdminView(view) {
+    console.log('⚙️ Mostrando vista admin:', view);
     
-    // Ocultar submenú
     document.getElementById('adminSubMenu').classList.remove('active');
-    
-    // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
-    // Mostrar página de admin
-    document.getElementById('adminPage').classList.add('active');
-    
-    // Mostrar botón regresa
     document.getElementById('btnRegresa').classList.remove('hidden');
-    
-    // Ajustar content area
+    document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
     
-    // Renderizar según sección
-    if (section === 'activos') {
-        document.getElementById('adminTitle').textContent = 'Activos';
-        renderActivos();
-    } else if (section === 'bancos') {
-        document.getElementById('adminTitle').textContent = 'Bancos';
-        renderBancos();
-    } else if (section === 'bitacora') {
-        document.getElementById('adminTitle').textContent = 'Bitácora';
-        renderBitacora();
-    } else if (section === 'estacionamiento') {
-        document.getElementById('adminTitle').textContent = 'Estacionamiento';
-        renderEstacionamiento();
-    } else if (section === 'numeros') {
-        document.getElementById('adminTitle').textContent = 'Números';
-        renderNumeros();
-    } else if (section === 'usuarios') {
-        document.getElementById('adminTitle').textContent = 'Usuarios';
-        renderUsuarios();
+    currentSubContext = 'admin-' + view;
+    
+    if (view === 'usuarios') {
+        document.getElementById('adminUsuariosPage').classList.add('active');
+        console.log('👥 Vista de usuarios');
+    } else if (view === 'bancos') {
+        document.getElementById('adminBancosPage').classList.add('active');
+        console.log('🏦 Vista de bancos');
     }
 }
 
-function renderActivos() {
-    const tbody = document.getElementById('adminTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td style="text-align:center;padding:2rem">Vista Activos - Por implementar</td></tr>';
-}
-
-function renderBancos() {
-    const tbody = document.getElementById('adminTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td style="text-align:center;padding:2rem">Vista Bancos - Por implementar</td></tr>';
-}
-
-function renderBitacora() {
-    const tbody = document.getElementById('adminTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td style="text-align:center;padding:2rem">Vista Bitácora - Por implementar</td></tr>';
-}
-
-function renderEstacionamiento() {
-    const tbody = document.getElementById('adminTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td style="text-align:center;padding:2rem">Vista Estacionamiento - Por implementar</td></tr>';
-}
-
-function renderNumeros() {
-    const tbody = document.getElementById('adminTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td style="text-align:center;padding:2rem">Vista Números - Por implementar</td></tr>';
-}
-
-function renderUsuarios() {
-    const tbody = document.getElementById('adminTable').querySelector('tbody');
-    const thead = document.getElementById('adminTableHeader');
+function showActivosPage() {
+    console.log('📦 Mostrando página de activos');
     
-    thead.innerHTML = '<th>Nombre</th><th>Estado</th>';
-    tbody.innerHTML = '';
+    document.getElementById('adminSubMenu').classList.remove('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('activosPage').classList.add('active');
     
-    if (usuarios.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:2rem;color:var(--text-light)">No hay usuarios</td></tr>';
-        return;
+    document.getElementById('btnRegresa').classList.remove('hidden');
+    document.getElementById('menuSidebar').classList.add('hidden');
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
+    
+    currentSubContext = 'admin-activos';
+}
+
+function showNumerosPage() {
+    console.log('🔢 Mostrando página de números');
+    
+    document.getElementById('adminSubMenu').classList.remove('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('numerosPage').classList.add('active');
+    
+    document.getElementById('btnRegresa').classList.remove('hidden');
+    document.getElementById('menuSidebar').classList.add('hidden');
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
+    
+    currentSubContext = 'admin-numeros';
+}
+
+function showPageFromMenu(page) {
+    console.log('📄 Mostrando página:', page);
+    
+    document.getElementById('adminSubMenu').classList.remove('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(page + 'Page').classList.add('active');
+    
+    document.getElementById('btnRegresa').classList.remove('hidden');
+    document.getElementById('menuSidebar').classList.add('hidden');
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
+    
+    currentSubContext = page;
+}
+
+// ============================================
+// MODAL FUNCTIONS (temporales)
+// ============================================
+
+function showAddInquilinoModal() {
+    alert('Modal de agregar inquilino - En desarrollo');
+}
+
+function showAddProveedorModal() {
+    alert('Modal de agregar proveedor - En desarrollo');
+}
+
+function showAddActivoModal() {
+    alert('Modal de agregar activo - En desarrollo');
+}
+
+function showAddUsuarioModal() {
+    alert('Modal de agregar usuario - En desarrollo');
+}
+
+function showAddBancoModal() {
+    alert('Modal de subir documento banco - En desarrollo');
+}
+
+// ============================================
+// SEARCH FUNCTIONS
+// ============================================
+
+function toggleSearch() {
+    alert('Búsqueda - En desarrollo');
+}
+
+function executeSearch() {
+    alert('Ejecutar búsqueda - En desarrollo');
+}
+
+function clearSearch() {
+    alert('Limpiar búsqueda - En desarrollo');
+}
+
+// ============================================
+// LOGOUT
+// ============================================
+
+function logout() {
+    if (confirm('¿Cerrar sesión?')) {
+        document.getElementById('appContainer').classList.remove('active');
+        document.getElementById('loginContainer').classList.remove('hidden');
+        document.body.classList.remove('logged-in');
+        localStorage.removeItem('eswu_remembered_user');
+        localStorage.removeItem('eswu_remembered_pass');
+        
+        // Reset estado
+        currentMenuContext = 'main';
+        currentSubContext = null;
+        
+        console.log('👋 Sesión cerrada');
     }
-    
-    usuarios.forEach(u => {
-        const row = tbody.insertRow();
-        const badge = u.activo ? '<span style="color:var(--success)">✓ Activo</span>' : '<span style="color:var(--danger)">✗ Inactivo</span>';
-        row.innerHTML = `<td>${u.nombre}</td><td>${badge}</td>`;
-    });
-    
-    console.log('✅ Tabla usuarios renderizada');
 }
 
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
-
-function formatDate(dateString) {
-    if (!dateString) return '-';
-    const date = new Date(dateString + 'T00:00:00');
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-}
-
-console.log('✅ UI.js cargado');
+console.log('✅ UI.js COMPLETO cargado correctamente');
