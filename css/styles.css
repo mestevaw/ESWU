@@ -1,4 +1,4 @@
-/* ESWU - CSS STYLES ARREGLADO */
+/* ESWU - CSS STYLES */
 
 :root {
     --primary: #1a365d;
@@ -164,7 +164,7 @@ body.logged-in {
     min-height: calc(100vh - 70px);
 }
 
-/* Menu Sidebar - ARREGLADO CON Z-INDEX */
+/* Menu Sidebar */
 .menu-sidebar {
     width: 200px;
     background: white;
@@ -213,7 +213,7 @@ body.logged-in {
     margin-top: 2rem;
 }
 
-/* Submenu Container - ARREGLADO CON Z-INDEX */
+/* Submenu Container */
 .submenu-container {
     position: fixed;
     left: 200px;
@@ -252,7 +252,7 @@ body.logged-in {
     border-color: var(--primary);
 }
 
-/* Content Area - ARREGLADO */
+/* Content Area */
 .content-area {
     margin-left: 200px;
     padding: 2rem;
