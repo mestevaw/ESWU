@@ -1,4 +1,10 @@
-/* ESWU - MAIN APPLICATION (SIN AUTO-LOGIN) */
+/* ========================================
+   ESWU - MAIN APPLICATION
+   ======================================== */
+
+// ============================================
+// LOGIN
+// ============================================
 
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -6,13 +12,11 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     
-    console.log('🔐 Intentando login con:', username);
+    console.log('🔐 Intentando login...');
     
     showLoading();
     
     try {
-        console.log('📡 Consultando Supabase...');
-        
         const { data, error } = await supabaseClient
             .from('usuarios')
             .select('*')
@@ -21,43 +25,38 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             .eq('activo', true)
             .single();
         
-        console.log('📊 Respuesta Supabase:', { data, error });
-        
         if (error || !data) {
             throw new Error('Usuario o contraseña incorrectos');
         }
         
         currentUser = data;
+        console.log('✅ Login exitoso:', currentUser.nombre);
         
-        // Guardar credenciales
         localStorage.setItem('eswu_remembered_user', username);
         localStorage.setItem('eswu_remembered_pass', password);
         
-        console.log('✅ Credenciales correctas, cambiando vista...');
-        
-        // Ocultar login y mostrar app
         document.getElementById('loginContainer').classList.add('hidden');
         document.getElementById('appContainer').classList.add('active');
         document.body.classList.add('logged-in');
         
-        console.log('🔄 Inicializando aplicación...');
-        
         await initializeApp();
-        
-        console.log('✅ Login completado exitosamente');
         
     } catch (error) {
         console.error('❌ Error en login:', error);
-        alert('Error: ' + error.message);
+        alert(error.message);
     } finally {
         hideLoading();
     }
 });
 
+// ============================================
+// APP INITIALIZATION
+// ============================================
+
 async function initializeApp() {
+    console.log('🚀 Iniciando aplicación...');
+    
     try {
-        console.log('📥 Cargando datos desde Supabase...');
-        
         await Promise.all([
             loadInquilinos(),
             loadProveedores(),
@@ -68,12 +67,11 @@ async function initializeApp() {
             loadBitacoraSemanal()
         ]);
         
-        console.log('✅ Aplicación inicializada correctamente');
-        console.log('📊 Resumen de datos cargados:');
-        console.log('   - Inquilinos:', inquilinos.length);
-        console.log('   - Proveedores:', proveedores.length);
-        console.log('   - Activos:', activos.length);
-        console.log('   - Usuarios:', usuarios.length);
+        populateYearSelect();
+        populateInquilinosYearSelects();
+        populateProveedoresYearSelects();
+        
+        console.log('✅ Aplicación iniciada correctamente');
         
     } catch (error) {
         console.error('❌ Error inicializando app:', error);
@@ -81,24 +79,133 @@ async function initializeApp() {
     }
 }
 
-window.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Página cargada, inicializando...');
+// ============================================
+// YEAR SELECTS
+// ============================================
+
+function populateYearSelect() {
+    const currentYear = new Date().getFullYear();
+    const yearSelect = document.getElementById('homeYear');
+    if (!yearSelect) return;
     
-    // DESACTIVADO: Auto-login automático
-    // const rememberedUser = localStorage.getItem('eswu_remembered_user');
-    // const rememberedPass = localStorage.getItem('eswu_remembered_pass');
-    
-    // Pre-seleccionar último usuario (opcional)
-    const rememberedUser = localStorage.getItem('eswu_remembered_user');
-    if (rememberedUser) {
-        document.getElementById('username').value = rememberedUser;
-        console.log('ℹ️ Usuario recordado:', rememberedUser);
+    yearSelect.innerHTML = '';
+    for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) option.selected = true;
+        yearSelect.appendChild(option);
     }
+}
+
+function populateProveedoresYearSelects() {
+    const currentYear = new Date().getFullYear();
+    ['provFactPagYear', 'provFactPorPagYear'].forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+            select.innerHTML = '';
+            for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) option.selected = true;
+                select.appendChild(option);
+            }
+        }
+    });
+}
+
+// ============================================
+// CONTACTOS - INQUILINOS
+// ============================================
+
+function showAddContactoInquilinoModal() {
+    document.getElementById('contactoInquilinoForm').reset();
+    document.getElementById('addContactoInquilinoModal').classList.add('active');
+}
+
+function saveContactoInquilino(event) {
+    event.preventDefault();
     
-    // Asegurar que todas las páginas estén ocultas al inicio
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const contacto = {
+        nombre: document.getElementById('contactoInquilinoNombre').value,
+        telefono: document.getElementById('contactoInquilinoTelefono').value || '',
+        email: document.getElementById('contactoInquilinoEmail').value || ''
+    };
     
-    console.log('✅ Listo para iniciar sesión');
-});
+    tempInquilinoContactos.push(contacto);
+    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
+    
+    document.getElementById('contactoInquilinoForm').reset();
+    closeModal('addContactoInquilinoModal');
+    
+    console.log('✅ Contacto agregado:', contacto);
+}
+
+function deleteInquilinoContacto(index) {
+    tempInquilinoContactos.splice(index, 1);
+    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
+}
+
+// ============================================
+// CONTACTOS - PROVEEDORES
+// ============================================
+
+function showAddContactoProveedorModal() {
+    document.getElementById('contactoProveedorForm').reset();
+    document.getElementById('addContactoProveedorModal').classList.add('active');
+}
+
+function saveContactoProveedor(event) {
+    event.preventDefault();
+    
+    const contacto = {
+        nombre: document.getElementById('contactoProveedorNombre').value,
+        telefono: document.getElementById('contactoProveedorTelefono').value || '',
+        email: document.getElementById('contactoProveedorEmail').value || ''
+    };
+    
+    tempProveedorContactos.push(contacto);
+    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
+    
+    document.getElementById('contactoProveedorForm').reset();
+    closeModal('addContactoProveedorModal');
+    
+    console.log('✅ Contacto proveedor agregado:', contacto);
+}
+
+function deleteProveedorContacto(index) {
+    tempProveedorContactos.splice(index, 1);
+    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
+}
+
+// ============================================
+// SAVE INQUILINO (pendiente implementación completa)
+// ============================================
+
+async function saveInquilino(event) {
+    event.preventDefault();
+    alert('Guardado de inquilino - En desarrollo completo');
+}
+
+// ============================================
+// SAVE PROVEEDOR (pendiente implementación completa)
+// ============================================
+
+async function saveProveedor(event) {
+    event.preventDefault();
+    alert('Guardado de proveedor - En desarrollo completo');
+}
+
+// ============================================
+// MODAL CLOSE
+// ============================================
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
 
 console.log('✅ Main.js cargado correctamente');
