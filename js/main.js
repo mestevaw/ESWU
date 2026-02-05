@@ -743,4 +743,54 @@ function deleteActivo() {
 function deleteFactura(facturaId) {
     alert('Función deleteFactura - pendiente de implementar para factura ID: ' + facturaId);
 }
+// ============================================
+// YEAR SELECT POPULATION FUNCTIONS
+// ============================================
+
+function populateYearSelect() {
+    const currentYear = new Date().getFullYear();
+    const yearSelect = document.getElementById('homeYear');
+    if (!yearSelect) return;
+    yearSelect.innerHTML = '';
+    
+    for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) option.selected = true;
+        yearSelect.appendChild(option);
+    }
+}
+
+function populateInquilinosYearSelects() {
+    const currentYear = new Date().getFullYear();
+    const select = document.getElementById('inquilinosRentasYear');
+    if (!select) return;
+    select.innerHTML = '';
+    
+    for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) option.selected = true;
+        select.appendChild(option);
+    }
+}
+
+function populateProveedoresYearSelects() {
+    const currentYear = new Date().getFullYear();
+    ['provFactPagYear', 'provFactPorPagYear'].forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+            select.innerHTML = '';
+            for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) option.selected = true;
+                select.appendChild(option);
+            }
+        }
+    });
+}
 
