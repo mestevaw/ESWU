@@ -1,21 +1,26 @@
-/* ESWU - UI FUNCTIONS CON DETALLES */
+/* ESWU - UI FUNCTIONS */
 
+// Variables de estado local
 let currentMenuContext = 'main';
 let currentSubContext = null;
 let currentSearchContext = null;
-let currentInquilinoId = null;
-let currentProveedorId = null;
 
 // ============================================
 // LOADING FUNCTIONS
 // ============================================
 
 function showLoading() {
-    document.getElementById('loadingOverlay').classList.remove('hidden');
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.classList.remove('hidden');
+    }
 }
 
 function hideLoading() {
-    document.getElementById('loadingOverlay').classList.add('hidden');
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
 }
 
 // ============================================
@@ -26,7 +31,7 @@ function formatCurrency(amount) {
     return new Intl.NumberFormat('es-MX', { 
         style: 'currency', 
         currency: 'MXN' 
-    }).format(amount);
+    }).format(amount || 0);
 }
 
 function formatDate(dateString) {
@@ -41,6 +46,8 @@ function formatDate(dateString) {
 // ============================================
 
 function showSubMenu(menu) {
+    console.log('📂 Mostrando submenú:', menu);
+    
     document.getElementById('menuInquilinos').classList.remove('active');
     document.getElementById('menuProveedores').classList.remove('active');
     document.getElementById('menuAdmin').classList.remove('active');
@@ -68,6 +75,8 @@ function showSubMenu(menu) {
 }
 
 function handleRegresa() {
+    console.log('⬅️ Regresando al menú');
+    
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
     if (currentMenuContext === 'inquilinos') {
@@ -114,21 +123,19 @@ function showInquilinosView(view) {
         renderInquilinosTable();
     } else if (view === 'rentasRecibidas') {
         document.getElementById('inquilinosRentasRecibidasView').classList.remove('hidden');
-        console.log('📊 Vista de rentas recibidas');
     } else if (view === 'vencimientoContratos') {
         document.getElementById('inquilinosVencimientoContratosView').classList.remove('hidden');
-        console.log('📅 Vista de vencimiento de contratos');
     }
 }
 
 function renderInquilinosTable() {
-    console.log('🔄 Renderizando tabla de inquilinos...');
+    console.log('🔄 Renderizando tabla de inquilinos...', inquilinos.length, 'registros');
+    
     const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
     tbody.innerHTML = '';
     
-    if (inquilinos.length === 0) {
+    if (!inquilinos || inquilinos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem;color:#718096">No hay inquilinos registrados</td></tr>';
-        console.log('⚠️ No hay inquilinos');
         return;
     }
     
@@ -139,12 +146,12 @@ function renderInquilinosTable() {
         
         row.innerHTML = `
             <td>${inq.nombre}</td>
-            <td class="currency">${formatCurrency(inq.renta || 0)}</td>
+            <td class="currency">${formatCurrency(inq.renta)}</td>
             <td>${formatDate(inq.fecha_vencimiento)}</td>
         `;
     });
     
-    console.log('✅ Tabla renderizada con', inquilinos.length, 'inquilinos');
+    console.log('✅ Tabla de inquilinos renderizada');
 }
 
 function showInquilinoDetail(id) {
@@ -155,14 +162,10 @@ function showInquilinoDetail(id) {
         return;
     }
     
-    currentInquilinoId = id;
-    
-    // Por ahora, mostrar alert con los datos
-    let detalle = `
-📋 DETALLE DE INQUILINO
+    let detalle = `📋 DETALLE DE INQUILINO
 
 Nombre: ${inq.nombre}
-Renta: ${formatCurrency(inq.renta || 0)}
+Renta: ${formatCurrency(inq.renta)}
 M²: ${inq.m2 || 'N/A'}
 Despacho: ${inq.numero_despacho || 'N/A'}
 RFC: ${inq.rfc || 'N/A'}
@@ -173,8 +176,7 @@ Vencimiento: ${formatDate(inq.fecha_vencimiento)}
 Contactos: ${inq.contactos && inq.contactos.length > 0 ? inq.contactos.length + ' contacto(s)' : 'Sin contactos'}
 Pagos: ${inq.pagos && inq.pagos.length > 0 ? inq.pagos.length + ' pago(s)' : 'Sin pagos'}
 
-Notas: ${inq.notas || 'Sin notas'}
-    `;
+Notas: ${inq.notas || 'Sin notas'}`;
     
     alert(detalle);
     console.log('👤 Detalle de inquilino:', inq);
@@ -208,21 +210,19 @@ function showProveedoresView(view) {
         renderProveedoresTable();
     } else if (view === 'facturasPagadas') {
         document.getElementById('proveedoresFacturasPagadasView').classList.remove('hidden');
-        console.log('💰 Vista de facturas pagadas');
     } else if (view === 'facturasPorPagar') {
         document.getElementById('proveedoresFacturasPorPagarView').classList.remove('hidden');
-        console.log('📄 Vista de facturas por pagar');
     }
 }
 
 function renderProveedoresTable() {
-    console.log('🔄 Renderizando tabla de proveedores...');
+    console.log('🔄 Renderizando tabla de proveedores...', proveedores.length, 'registros');
+    
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
     tbody.innerHTML = '';
     
-    if (proveedores.length === 0) {
+    if (!proveedores || proveedores.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#718096">No hay proveedores registrados</td></tr>';
-        console.log('⚠️ No hay proveedores');
         return;
     }
     
@@ -242,7 +242,7 @@ function renderProveedoresTable() {
         `;
     });
     
-    console.log('✅ Tabla renderizada con', proveedores.length, 'proveedores');
+    console.log('✅ Tabla de proveedores renderizada');
 }
 
 function showProveedorDetail(id) {
@@ -253,8 +253,6 @@ function showProveedorDetail(id) {
         return;
     }
     
-    currentProveedorId = id;
-    
     let contactosTexto = 'Sin contactos';
     if (prov.contactos && prov.contactos.length > 0) {
         contactosTexto = prov.contactos.map(c => 
@@ -262,8 +260,7 @@ function showProveedorDetail(id) {
         ).join('\n');
     }
     
-    let detalle = `
-📋 DETALLE DE PROVEEDOR
+    let detalle = `📋 DETALLE DE PROVEEDOR
 
 Nombre: ${prov.nombre}
 Servicio: ${prov.servicio || 'N/A'}
@@ -275,8 +272,7 @@ ${contactosTexto}
 
 Facturas: ${prov.facturas && prov.facturas.length > 0 ? prov.facturas.length + ' factura(s)' : 'Sin facturas'}
 
-Notas: ${prov.notas || 'Sin notas'}
-    `;
+Notas: ${prov.notas || 'Sin notas'}`;
     
     alert(detalle);
     console.log('🏢 Detalle de proveedor:', prov);
@@ -301,10 +297,8 @@ function showAdminView(view) {
     
     if (view === 'usuarios') {
         document.getElementById('adminUsuariosPage').classList.add('active');
-        console.log('👥 Vista de usuarios');
     } else if (view === 'bancos') {
         document.getElementById('adminBancosPage').classList.add('active');
-        console.log('🏦 Vista de bancos');
     }
 }
 
@@ -412,4 +406,4 @@ function logout() {
     }
 }
 
-console.log('✅ UI.js CON DETALLES cargado correctamente');
+console.log('✅ UI.js cargado correctamente');
