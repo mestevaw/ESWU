@@ -97,54 +97,103 @@
                     </div>
                 </div>
 
-                <!-- Inquilinos Page -->
-                <div id="inquilinosPage" class="page">
-                    <!-- Listado de Inquilinos -->
-                    <div id="inquilinosListView" class="hidden">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Listado de Inquilinos</h2>
-                                <button class="btn btn-primary" onclick="showAddInquilinoModal()">+ Agregar</button>
-                            </div>
-                            <div class="table-container">
-                                <table id="inquilinosTable" class="sticky-header-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Empresa</th>
-                                            <th>Renta Mensual</th>
-                                            <th>Vencimiento Contrato</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+<!-- INQUILINOS - SECCIÓN COMPLETA PARA AGREGAR AL INDEX.HTML -->
 
-                    <!-- Rentas Recibidas -->
-                    <div id="inquilinosRentasRecibidasView" class="hidden">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Rentas Recibidas</h2>
-                            </div>
-                            <div style="padding: 1.5rem;">
-                                <p style="color: #718096;">Vista de rentas - En desarrollo</p>
-                            </div>
-                        </div>
-                    </div>
+<!-- Esta sección va dentro de <div id="contentArea" class="content-area"> -->
 
-                    <!-- Vencimiento Contratos -->
-                    <div id="inquilinosVencimientoContratosView" class="hidden">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Vencimiento de Contratos</h2>
-                            </div>
-                            <div style="padding: 1.5rem;">
-                                <p style="color: #718096;">Vista de contratos - En desarrollo</p>
-                            </div>
-                        </div>
-                    </div>
+<!-- Inquilinos Page -->
+<div id="inquilinosPage" class="page">
+    <!-- Listado de Inquilinos -->
+    <div id="inquilinosListView" class="hidden">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Listado de Inquilinos</h2>
+                <button class="btn btn-primary" onclick="showAddInquilinoModal()">+ Agregar</button>
+            </div>
+            <div class="table-container">
+                <table id="inquilinosTable" class="sticky-header-table">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Renta Mensual</th>
+                            <th>Vencimiento Contrato</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rentas Recibidas -->
+    <div id="inquilinosRentasRecibidasView" class="hidden">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Rentas Recibidas</h2>
+            </div>
+            <div style="padding: 1.5rem;">
+                <div class="filter-section">
+                    <label>Filtro:</label>
+                    <select id="inquilinosRentasFilter" onchange="renderInquilinosRentasRecibidas()">
+                        <option value="anual">Anual</option>
+                        <option value="mensual">Mensual</option>
+                    </select>
+                    <label>Año:</label>
+                    <select id="inquilinosRentasYear" onchange="renderInquilinosRentasRecibidas()"></select>
+                    <select id="inquilinosRentasMonth" class="hidden" onchange="renderInquilinosRentasRecibidas()">
+                        <option value="0">Enero</option>
+                        <option value="1">Febrero</option>
+                        <option value="2">Marzo</option>
+                        <option value="3">Abril</option>
+                        <option value="4">Mayo</option>
+                        <option value="5">Junio</option>
+                        <option value="6">Julio</option>
+                        <option value="7">Agosto</option>
+                        <option value="8">Septiembre</option>
+                        <option value="9">Octubre</option>
+                        <option value="10">Noviembre</option>
+                        <option value="11">Diciembre</option>
+                    </select>
                 </div>
+                <div class="table-container">
+                    <table id="inquilinosRentasRecibidasTable">
+                        <thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Monto</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vencimiento de Contratos -->
+    <div id="inquilinosVencimientoContratosView" class="hidden">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Vencimiento de Contratos</h2>
+            </div>
+            <div class="table-container">
+                <table id="inquilinosVencimientoContratosTable" class="sticky-header-table">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Inicio</th>
+                            <th>Vencimiento</th>
+                            <th>Días Restantes</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
                 <!-- Proveedores Page -->
                 <div id="proveedoresPage" class="page">
