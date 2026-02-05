@@ -420,3 +420,60 @@ tr[style*="cursor: pointer"] {
 .currency {
     text-align: right;
 }
+
+/* ESTILOS ADICIONALES PARA INQUILINOS */
+/* Agregar estos estilos al final de tu styles.css */
+
+/* Filter Section */
+.filter-section {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-section label {
+    font-weight: 500;
+}
+
+.filter-section select {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+/* Badges para estados */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Fila de totales en tablas */
+tr.total-row {
+    background: #e6f2ff;
+    font-weight: bold;
+}
+
+tr.total-row td {
+    border-top: 2px solid var(--primary);
+}
