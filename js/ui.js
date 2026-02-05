@@ -1456,9 +1456,20 @@ function renderContactosList(contactos, containerId, deleteCallback, editCallbac
         return;
     }
     
+    container.innerHTML = contactos.map((c, idx) => `
+        <div class="contacto-item">
+            <div class="contacto-info">
+                <strong>${c.nombre}</strong><br>
+                <small>Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}</small>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="${editCallback}(${idx})" title="Editar">✏️</button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="${deleteCallback}(${idx})" title="Eliminar">×</button>
+            </div>
+        </div>
+    `).join('');
+}
 
-
-// ← AQUÍ AGREGAS LAS NUEVAS FUNCIONES
 
 function showEditContactoInquilinoModal(index) {
     const contacto = tempInquilinoContactos[index];
@@ -1606,6 +1617,9 @@ function populateProveedoresDropdown() {
 // ============================================
 
 function showAddContactoInquilinoModal() {
+    // Clear editing mode
+    delete window.editingContactoIndex;
+    
     document.getElementById('contactoInquilinoForm').reset();
     document.getElementById('addContactoInquilinoModal').classList.add('active');
 }
@@ -1636,7 +1650,7 @@ function saveContactoInquilino(event) {
 
 function deleteInquilinoContacto(index) {
     tempInquilinoContactos.splice(index, 1);
-    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
+    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto', 'showEditContactoInquilinoModal');
 }
 
 // ============================================
@@ -1644,6 +1658,9 @@ function deleteInquilinoContacto(index) {
 // ============================================
 
 function showAddContactoProveedorModal() {
+    // Clear editing mode
+    delete window.editingContactoProveedorIndex;
+    
     document.getElementById('contactoProveedorForm').reset();
     document.getElementById('addContactoProveedorModal').classList.add('active');
 }
@@ -1674,9 +1691,8 @@ function saveContactoProveedor(event) {
 
 function deleteProveedorContacto(index) {
     tempProveedorContactos.splice(index, 1);
-    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
+    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');
 }
-
 // ============================================
 // ADICIONALES
 // ============================================
