@@ -1,4 +1,4 @@
-/* ESWU - MAIN APPLICATION */
+/* ESWU - MAIN APPLICATION (SIN AUTO-LOGIN) */
 
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -6,9 +6,13 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     
+    console.log('🔐 Intentando login con:', username);
+    
     showLoading();
     
     try {
+        console.log('📡 Consultando Supabase...');
+        
         const { data, error } = await supabaseClient
             .from('usuarios')
             .select('*')
@@ -17,26 +21,34 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             .eq('activo', true)
             .single();
         
+        console.log('📊 Respuesta Supabase:', { data, error });
+        
         if (error || !data) {
             throw new Error('Usuario o contraseña incorrectos');
         }
         
         currentUser = data;
         
+        // Guardar credenciales
         localStorage.setItem('eswu_remembered_user', username);
         localStorage.setItem('eswu_remembered_pass', password);
         
+        console.log('✅ Credenciales correctas, cambiando vista...');
+        
+        // Ocultar login y mostrar app
         document.getElementById('loginContainer').classList.add('hidden');
         document.getElementById('appContainer').classList.add('active');
         document.body.classList.add('logged-in');
         
+        console.log('🔄 Inicializando aplicación...');
+        
         await initializeApp();
         
-        console.log('✅ Login exitoso:', username);
+        console.log('✅ Login completado exitosamente');
         
     } catch (error) {
-        alert(error.message);
         console.error('❌ Error en login:', error);
+        alert('Error: ' + error.message);
     } finally {
         hideLoading();
     }
@@ -44,7 +56,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
 async function initializeApp() {
     try {
-        console.log('🔄 Cargando datos...');
+        console.log('📥 Cargando datos desde Supabase...');
         
         await Promise.all([
             loadInquilinos(),
@@ -56,11 +68,12 @@ async function initializeApp() {
             loadBitacoraSemanal()
         ]);
         
-        console.log('✅ Aplicación inicializada');
-        console.log('📊 Datos cargados:');
+        console.log('✅ Aplicación inicializada correctamente');
+        console.log('📊 Resumen de datos cargados:');
         console.log('   - Inquilinos:', inquilinos.length);
         console.log('   - Proveedores:', proveedores.length);
         console.log('   - Activos:', activos.length);
+        console.log('   - Usuarios:', usuarios.length);
         
     } catch (error) {
         console.error('❌ Error inicializando app:', error);
@@ -69,17 +82,23 @@ async function initializeApp() {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-    const rememberedUser = localStorage.getItem('eswu_remembered_user');
-    const rememberedPass = localStorage.getItem('eswu_remembered_pass');
+    console.log('🚀 Página cargada, inicializando...');
     
-    if (rememberedUser && rememberedPass) {
+    // DESACTIVADO: Auto-login automático
+    // const rememberedUser = localStorage.getItem('eswu_remembered_user');
+    // const rememberedPass = localStorage.getItem('eswu_remembered_pass');
+    
+    // Pre-seleccionar último usuario (opcional)
+    const rememberedUser = localStorage.getItem('eswu_remembered_user');
+    if (rememberedUser) {
         document.getElementById('username').value = rememberedUser;
-        document.getElementById('password').value = rememberedPass;
-        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        console.log('ℹ️ Usuario recordado:', rememberedUser);
     }
     
+    // Asegurar que todas las páginas estén ocultas al inicio
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    
+    console.log('✅ Listo para iniciar sesión');
 });
 
 console.log('✅ Main.js cargado correctamente');
