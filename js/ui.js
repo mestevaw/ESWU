@@ -430,7 +430,19 @@ function renderInquilinosVencimientoContratos() {
 }
 
 function showInquilinoDetail(id) {
+    console.log('showInquilinoDetail llamada con ID:', id);
+    console.log('inquilinos array:', inquilinos);
+    
     const inq = inquilinos.find(i => i.id === id);
+    
+    if (!inq) {
+        console.error('Inquilino no encontrado con ID:', id);
+        alert('Error: No se encontró el inquilino');
+        return;
+    }
+    
+    console.log('Inquilino encontrado:', inq);
+    
     currentInquilinoId = id;
     
     document.getElementById('inquilinoDetailNombre').textContent = inq.nombre;
