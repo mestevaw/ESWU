@@ -435,81 +435,97 @@ function renderInquilinosVencimientoContratos() {
 }
 
 function showInquilinoDetail(id) {
-    console.log('showInquilinoDetail llamada con ID:', id);
+    console.log('=== INICIO showInquilinoDetail ===');
+    console.log('ID recibido:', id);
     console.log('inquilinos array:', inquilinos);
     
     const inq = inquilinos.find(i => i.id === id);
+    console.log('Inquilino encontrado:', inq);
     
     if (!inq) {
-        console.error('Inquilino no encontrado con ID:', id);
-        alert('Error: No se encontró el inquilino');
+        alert('ERROR: Inquilino no encontrado con ID ' + id);
         return;
     }
     
-    console.log('Inquilino encontrado:', inq);
-    
     currentInquilinoId = id;
     
-    document.getElementById('inquilinoDetailNombre').textContent = inq.nombre;
-    
-    const contactosList = document.getElementById('detailContactosList');
-    if (inq.contactos && inq.contactos.length > 0) {
-        contactosList.innerHTML = inq.contactos.map(c => `
-            <div style="margin-bottom:0.5rem;padding:0.5rem;background:white;border-radius:4px">
-                <strong>${c.nombre}</strong><br>
-                <small><strong>Tel:</strong> ${c.telefono || '-'} | <strong>Email:</strong> ${c.email || '-'}</small>
-            </div>
-        `).join('');
-    } else {
-        contactosList.innerHTML = '<p style="color:var(--text-light)">No hay contactos</p>';
+    try {
+        document.getElementById('inquilinoDetailNombre').textContent = inq.nombre;
+        console.log('Nombre asignado OK');
+        
+        const contactosList = document.getElementById('detailContactosList');
+        if (inq.contactos && inq.contactos.length > 0) {
+            contactosList.innerHTML = inq.contactos.map(c => `
+                <div style="margin-bottom:0.5rem;padding:0.5rem;background:white;border-radius:4px">
+                    <strong>${c.nombre}</strong><br>
+                    <small><strong>Tel:</strong> ${c.telefono || '-'} | <strong>Email:</strong> ${c.email || '-'}</small>
+                </div>
+            `).join('');
+        } else {
+            contactosList.innerHTML = '<p style="color:var(--text-light)">No hay contactos</p>';
+        }
+        console.log('Contactos OK');
+        
+        document.getElementById('detailRFC').textContent = inq.rfc || '-';
+        document.getElementById('detailClabe').textContent = inq.clabe || '-';
+        document.getElementById('detailRenta').textContent = formatCurrency(inq.renta);
+        document.getElementById('detailM2').textContent = inq.m2 || '-';
+        document.getElementById('detailDespacho').textContent = inq.numero_despacho || '-';
+        document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
+        document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
+        console.log('Datos básicos OK');
+        
+        const contratoSection = document.getElementById('contratoOriginalSection');
+        if (inq.contrato_file) {
+            contratoSection.innerHTML = '<a href="#" onclick="event.preventDefault(); viewContrato();" style="color:var(--primary);text-decoration:underline;">Contrato de Renta Original</a>';
+        } else {
+            contratoSection.innerHTML = '<p style="color:var(--text-light)">No hay contrato cargado</p>';
+        }
+        console.log('Contrato OK');
+        
+        const historialDiv = document.getElementById('historialPagos');
+        if (inq.pagos && inq.pagos.length > 0) {
+            historialDiv.innerHTML = inq.pagos.map(p => `
+                <div class="payment-item">
+                    <div><strong>${formatDate(p.fecha)}</strong><br>${formatCurrency(p.monto)}</div>
+                    <div><span class="badge badge-success">Pagado</span><br><small style="color:var(--text-light)">${formatDate(p.fecha)}</small></div>
+                </div>
+            `).join('');
+        } else {
+            historialDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay pagos</p>';
+        }
+        console.log('Pagos OK');
+        
+        const docsDiv = document.getElementById('documentosAdicionales');
+        if (inq.documentos && inq.documentos.length > 0) {
+            docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:50px;"></th></tr></thead><tbody>' +
+                inq.documentos.map(d => `
+                    <tr class="doc-item">
+                        <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${d.nombre}</td>
+                        <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${formatDate(d.fecha)}</td>
+                        <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${d.usuario}</td>
+                        <td><button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteDocumentoAdicional(${d.id})">×</button></td>
+                    </tr>
+                `).join('') + '</tbody></table>';
+        } else {
+            docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
+        }
+        console.log('Documentos OK');
+        
+        document.getElementById('notasInquilino').textContent = inq.notas || 'No hay notas para este inquilino.';
+        console.log('Notas OK');
+        
+        console.log('Abriendo modal...');
+        document.getElementById('inquilinoDetailModal').classList.add('active');
+        console.log('Modal abierto');
+        
+        switchTab('inquilino', 'renta');
+        console.log('=== FIN showInquilinoDetail ===');
+        
+    } catch (error) {
+        console.error('ERROR en showInquilinoDetail:', error);
+        alert('Error: ' + error.message);
     }
-    
-    document.getElementById('detailRFC').textContent = inq.rfc || '-';
-    document.getElementById('detailClabe').textContent = inq.clabe || '-';
-    document.getElementById('detailRenta').textContent = formatCurrency(inq.renta);
-    document.getElementById('detailM2').textContent = inq.m2 || '-';
-    document.getElementById('detailDespacho').textContent = inq.numero_despacho || '-';
-    document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
-    document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
-    
-    const contratoSection = document.getElementById('contratoOriginalSection');
-    if (inq.contrato_file) {
-        contratoSection.innerHTML = '<a href="#" onclick="event.preventDefault(); viewContrato();" style="color:var(--primary);text-decoration:underline;">Contrato de Renta Original</a>';
-    } else {
-        contratoSection.innerHTML = '<p style="color:var(--text-light)">No hay contrato cargado</p>';
-    }
-    
-    const historialDiv = document.getElementById('historialPagos');
-    if (inq.pagos && inq.pagos.length > 0) {
-        historialDiv.innerHTML = inq.pagos.map(p => `
-            <div class="payment-item">
-                <div><strong>${formatDate(p.fecha)}</strong><br>${formatCurrency(p.monto)}</div>
-                <div><span class="badge badge-success">Pagado</span><br><small style="color:var(--text-light)">${formatDate(p.fecha)}</small></div>
-            </div>
-        `).join('');
-    } else {
-        historialDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay pagos</p>';
-    }
-    
-    const docsDiv = document.getElementById('documentosAdicionales');
-    if (inq.documentos && inq.documentos.length > 0) {
-        docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:50px;"></th></tr></thead><tbody>' +
-            inq.documentos.map(d => `
-                <tr class="doc-item">
-                    <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${d.nombre}</td>
-                    <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${formatDate(d.fecha)}</td>
-                    <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${d.usuario}</td>
-                    <td><button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteDocumentoAdicional(${d.id})">×</button></td>
-                </tr>
-            `).join('') + '</tbody></table>';
-    } else {
-        docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
-    }
-    
-    document.getElementById('notasInquilino').textContent = inq.notas || 'No hay notas para este inquilino.';
-    
-    document.getElementById('inquilinoDetailModal').classList.add('active');
-    switchTab('inquilino', 'renta');
 }
 
 // ============================================
