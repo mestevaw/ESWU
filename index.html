@@ -40,6 +40,11 @@
         <!-- Header -->
         <header class="header">
             <h1 class="header-title">ESWU</h1>
+            <div id="headerSearchBar" class="header-search-bar">
+                <input type="text" id="searchInput" placeholder="Buscar..." onkeypress="if(event.key==='Enter') executeSearch()">
+                <button class="btn-icon search" onclick="executeSearch()" title="Buscar">🔍</button>
+                <button class="btn-icon clear" onclick="clearSearch()" title="Limpiar">🧹</button>
+            </div>
             <div class="header-actions">
                 <button id="btnSearch" class="btn-search hidden" onclick="toggleSearch()">🔍</button>
                 <button id="btnRegresa" class="btn-regresa hidden" onclick="handleRegresa()">✖</button>
@@ -85,115 +90,99 @@
             <!-- Content Area -->
             <div id="contentArea" class="content-area">
                 
-                <!-- Números Page -->
-                <div id="numerosPage" class="page">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Resumen Financiero</h2>
+                <!-- Inquilinos Page -->
+                <div id="inquilinosPage" class="page">
+                    <!-- Listado de Inquilinos -->
+                    <div id="inquilinosListView" class="hidden">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Listado de Inquilinos</h2>
+                                <button class="btn btn-primary" onclick="showAddInquilinoModal()">+ Agregar</button>
+                            </div>
+                            <div class="table-container">
+                                <table id="inquilinosTable" class="sticky-header-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Empresa</th>
+                                            <th>Renta Mensual</th>
+                                            <th>Vencimiento Contrato</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
-                        <div style="padding: 1.5rem;">
-                            <p style="color: #718096;">Página de números - En desarrollo</p>
+                    </div>
+
+                    <!-- Rentas Recibidas -->
+                    <div id="inquilinosRentasRecibidasView" class="hidden">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Rentas Recibidas</h2>
+                            </div>
+                            <div style="padding: 1.5rem;">
+                                <div class="filter-section">
+                                    <label>Filtro:</label>
+                                    <select id="inquilinosRentasFilter" onchange="renderInquilinosRentasRecibidas()">
+                                        <option value="anual">Anual</option>
+                                        <option value="mensual">Mensual</option>
+                                    </select>
+                                    <label>Año:</label>
+                                    <select id="inquilinosRentasYear" onchange="renderInquilinosRentasRecibidas()"></select>
+                                    <select id="inquilinosRentasMonth" class="hidden" onchange="renderInquilinosRentasRecibidas()">
+                                        <option value="0">Enero</option>
+                                        <option value="1">Febrero</option>
+                                        <option value="2">Marzo</option>
+                                        <option value="3">Abril</option>
+                                        <option value="4">Mayo</option>
+                                        <option value="5">Junio</option>
+                                        <option value="6">Julio</option>
+                                        <option value="7">Agosto</option>
+                                        <option value="8">Septiembre</option>
+                                        <option value="9">Octubre</option>
+                                        <option value="10">Noviembre</option>
+                                        <option value="11">Diciembre</option>
+                                    </select>
+                                </div>
+                                <div class="table-container">
+                                    <table id="inquilinosRentasRecibidasTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Empresa</th>
+                                                <th>Monto</th>
+                                                <th>Fecha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vencimiento de Contratos -->
+                    <div id="inquilinosVencimientoContratosView" class="hidden">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Vencimiento de Contratos</h2>
+                            </div>
+                            <div class="table-container">
+                                <table id="inquilinosVencimientoContratosTable" class="sticky-header-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Empresa</th>
+                                            <th>Inicio</th>
+                                            <th>Vencimiento</th>
+                                            <th>Días Restantes</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-<!-- INQUILINOS - SECCIÓN COMPLETA PARA AGREGAR AL INDEX.HTML -->
-
-<!-- Esta sección va dentro de <div id="contentArea" class="content-area"> -->
-
-<!-- Inquilinos Page -->
-<div id="inquilinosPage" class="page">
-    <!-- Listado de Inquilinos -->
-    <div id="inquilinosListView" class="hidden">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Listado de Inquilinos</h2>
-                <button class="btn btn-primary" onclick="showAddInquilinoModal()">+ Agregar</button>
-            </div>
-            <div class="table-container">
-                <table id="inquilinosTable" class="sticky-header-table">
-                    <thead>
-                        <tr>
-                            <th>Empresa</th>
-                            <th>Renta Mensual</th>
-                            <th>Vencimiento Contrato</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Rentas Recibidas -->
-    <div id="inquilinosRentasRecibidasView" class="hidden">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Rentas Recibidas</h2>
-            </div>
-            <div style="padding: 1.5rem;">
-                <div class="filter-section">
-                    <label>Filtro:</label>
-                    <select id="inquilinosRentasFilter" onchange="renderInquilinosRentasRecibidas()">
-                        <option value="anual">Anual</option>
-                        <option value="mensual">Mensual</option>
-                    </select>
-                    <label>Año:</label>
-                    <select id="inquilinosRentasYear" onchange="renderInquilinosRentasRecibidas()"></select>
-                    <select id="inquilinosRentasMonth" class="hidden" onchange="renderInquilinosRentasRecibidas()">
-                        <option value="0">Enero</option>
-                        <option value="1">Febrero</option>
-                        <option value="2">Marzo</option>
-                        <option value="3">Abril</option>
-                        <option value="4">Mayo</option>
-                        <option value="5">Junio</option>
-                        <option value="6">Julio</option>
-                        <option value="7">Agosto</option>
-                        <option value="8">Septiembre</option>
-                        <option value="9">Octubre</option>
-                        <option value="10">Noviembre</option>
-                        <option value="11">Diciembre</option>
-                    </select>
-                </div>
-                <div class="table-container">
-                    <table id="inquilinosRentasRecibidasTable">
-                        <thead>
-                            <tr>
-                                <th>Empresa</th>
-                                <th>Monto</th>
-                                <th>Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Vencimiento de Contratos -->
-    <div id="inquilinosVencimientoContratosView" class="hidden">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Vencimiento de Contratos</h2>
-            </div>
-            <div class="table-container">
-                <table id="inquilinosVencimientoContratosTable" class="sticky-header-table">
-                    <thead>
-                        <tr>
-                            <th>Empresa</th>
-                            <th>Inicio</th>
-                            <th>Vencimiento</th>
-                            <th>Días Restantes</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
 
                 <!-- Proveedores Page -->
                 <div id="proveedoresPage" class="page">
@@ -228,7 +217,7 @@
                                 <h2 class="card-title">Facturas Pagadas</h2>
                             </div>
                             <div style="padding: 1.5rem;">
-                                <p style="color: #718096;">Vista de facturas pagadas - En desarrollo</p>
+                                <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
                             </div>
                         </div>
                     </div>
@@ -240,7 +229,7 @@
                                 <h2 class="card-title">Facturas Por Pagar</h2>
                             </div>
                             <div style="padding: 1.5rem;">
-                                <p style="color: #718096;">Vista de facturas por pagar - En desarrollo</p>
+                                <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
                             </div>
                         </div>
                     </div>
@@ -254,7 +243,7 @@
                             <button class="btn btn-primary" onclick="showAddActivoModal()">+ Agregar</button>
                         </div>
                         <div style="padding: 1.5rem;">
-                            <p style="color: #718096;">Página de activos - En desarrollo</p>
+                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
                         </div>
                     </div>
                 </div>
@@ -267,7 +256,7 @@
                             <button class="btn btn-primary" onclick="showAddUsuarioModal()">+ Agregar</button>
                         </div>
                         <div style="padding: 1.5rem;">
-                            <p style="color: #718096;">Página de usuarios - En desarrollo</p>
+                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
                         </div>
                     </div>
                 </div>
@@ -280,7 +269,7 @@
                             <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
                         </div>
                         <div style="padding: 1.5rem;">
-                            <p style="color: #718096;">Página de bancos - En desarrollo</p>
+                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
                         </div>
                     </div>
                 </div>
@@ -292,7 +281,7 @@
                             <h2 class="card-title">Estacionamiento</h2>
                         </div>
                         <div style="padding: 1.5rem;">
-                            <p style="color: #718096;">Página de estacionamiento - En desarrollo</p>
+                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
                         </div>
                     </div>
                 </div>
@@ -304,11 +293,263 @@
                             <h2 class="card-title">Bitácora Semanal</h2>
                         </div>
                         <div style="padding: 1.5rem;">
-                            <p style="color: #718096;">Página de bitácora - En desarrollo</p>
+                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
                         </div>
                     </div>
                 </div>
 
+                <!-- Números Page -->
+                <div id="numerosPage" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Resumen Financiero</h2>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALES -->
+
+    <!-- Modal Agregar Inquilino -->
+    <div id="addInquilinoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header modal-header-sticky">
+                <h2 class="modal-title" id="addInquilinoTitle">Agregar Inquilino</h2>
+                <button class="close-modal" onclick="closeModal('addInquilinoModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form id="inquilinoForm" onsubmit="saveInquilino(event)">
+                    <div class="form-group">
+                        <label>Nombre / Empresa *</label>
+                        <input type="text" id="inquilinoNombre" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>CLABE</label>
+                        <input type="text" id="inquilinoClabe" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>RFC</label>
+                        <input type="text" id="inquilinoRFC" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>M²</label>
+                        <input type="number" id="inquilinoM2" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>No. Despacho</label>
+                        <input type="text" id="inquilinoDespacho" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Renta Mensual *</label>
+                        <input type="number" id="inquilinoRenta" step="0.01" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha Inicio *</label>
+                        <input type="date" id="inquilinoFechaInicio" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Vencimiento Contrato *</label>
+                        <input type="date" id="inquilinoFechaVenc" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Notas</label>
+                        <textarea id="inquilinoNotas"></textarea>
+                    </div>
+                    
+                    <h3 style="margin: 1.5rem 0 1rem 0;">Contactos</h3>
+                    <div id="inquilinoContactosList" style="margin-bottom: 1rem;"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="showAddContactoInquilinoModal()">+ Agregar Contacto</button>
+                    
+                    <div class="form-group" style="margin-top: 1.5rem;">
+                        <label>Contrato Original (PDF Opcional)</label>
+                        <div class="file-upload" onclick="document.getElementById('inquilinoContrato').click()">
+                            <input type="file" id="inquilinoContrato" accept=".pdf">
+                            <p>Click para seleccionar PDF del contrato</p>
+                            <p id="contratoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addInquilinoModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Contacto Inquilino -->
+    <div id="addContactoInquilinoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar Contacto</h2>
+                <button class="close-modal" onclick="closeModal('addContactoInquilinoModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form id="contactoInquilinoForm" onsubmit="saveContactoInquilino(event)">
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" id="contactoInquilinoNombre" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" id="contactoInquilinoTelefono" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="contactoInquilinoEmail" autocomplete="off">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addContactoInquilinoModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Agregar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalle Inquilino CON TABS -->
+    <div id="inquilinoDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header modal-header-sticky">
+                <h2 class="modal-title" id="inquilinoDetailNombre"></h2>
+                <button class="close-modal" onclick="closeModal('inquilinoDetailModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem; padding-top: 5rem;">
+                <div class="info-box">
+                    <div class="info-box-title">CONTACTOS</div>
+                    <div id="detailContactosList"></div>
+                </div>
+                <div class="info-box">
+                    <div class="info-box-content">
+                        <strong>RFC:</strong> <span id="detailRFC"></span> &nbsp;&nbsp;&nbsp; 
+                        <strong>CLABE:</strong> <span id="detailClabe"></span>
+                    </div>
+                </div>
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button class="tab active" onclick="switchTab('inquilino', 'renta')">Datos de Renta</button>
+                        <button class="tab" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos</button>
+                        <button class="tab" onclick="switchTab('inquilino', 'contrato')">Contrato Original</button>
+                        <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos Adicionales</button>
+                        <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
+                    </div>
+                    <div id="inquilinoRentaTab" class="tab-content active">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Renta Mensual</div>
+                                <div class="info-value currency" id="detailRenta"></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">M²</div>
+                                <div class="info-value" id="detailM2"></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">No. Despacho</div>
+                                <div class="info-value" id="detailDespacho"></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Inicio Rentando</div>
+                                <div class="info-value" id="detailFechaInicio"></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Vencimiento Contrato</div>
+                                <div class="info-value" id="detailFechaVenc"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="inquilinoPagosTab" class="tab-content">
+                        <div id="historialPagos"></div>
+                    </div>
+                    <div id="inquilinoContratoTab" class="tab-content">
+                        <div id="contratoOriginalSection"></div>
+                    </div>
+                    <div id="inquilinoDocsTab" class="tab-content">
+                        <div id="documentosAdicionales"></div>
+                    </div>
+                    <div id="inquilinoNotasTab" class="tab-content">
+                        <p id="notasInquilino"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Proveedor -->
+    <div id="addProveedorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header modal-header-sticky">
+                <h2 class="modal-title" id="addProveedorTitle">Agregar Proveedor</h2>
+                <button class="close-modal" onclick="closeModal('addProveedorModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form id="proveedorForm" onsubmit="saveProveedor(event)">
+                    <div class="form-group">
+                        <label>Nombre / Empresa *</label>
+                        <input type="text" id="proveedorNombre" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Servicio *</label>
+                        <input type="text" id="proveedorServicio" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>CLABE</label>
+                        <input type="text" id="proveedorClabe" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>RFC</label>
+                        <input type="text" id="proveedorRFC" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Notas</label>
+                        <textarea id="proveedorNotas"></textarea>
+                    </div>
+                    
+                    <h3 style="margin: 1.5rem 0 1rem 0;">Contactos</h3>
+                    <div id="proveedorContactosList" style="margin-bottom: 1rem;"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="showAddContactoProveedorModal()">+ Agregar Contacto</button>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addProveedorModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Contacto Proveedor -->
+    <div id="addContactoProveedorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar Contacto</h2>
+                <button class="close-modal" onclick="closeModal('addContactoProveedorModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form id="contactoProveedorForm" onsubmit="saveContactoProveedor(event)">
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" id="contactoProveedorNombre" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" id="contactoProveedorTelefono" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="contactoProveedorEmail" autocomplete="off">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addContactoProveedorModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Agregar</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
