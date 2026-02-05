@@ -123,10 +123,14 @@ function showInquilinosView(view) {
         renderInquilinosTable();
     } else if (view === 'rentasRecibidas') {
         document.getElementById('inquilinosRentasRecibidasView').classList.remove('hidden');
+        populateInquilinosYearSelects();
+        renderInquilinosRentasRecibidas();
     } else if (view === 'vencimientoContratos') {
         document.getElementById('inquilinosVencimientoContratosView').classList.remove('hidden');
+        renderInquilinosVencimientoContratos();
     }
 }
+
 
 function renderInquilinosTable() {
     console.log('🔄 Renderizando tabla de inquilinos...', inquilinos.length, 'registros');
@@ -404,6 +408,177 @@ function logout() {
         
         console.log('👋 Sesión cerrada');
     }
+}
+
+// ============================================
+// INQUILINOS - FUNCIONES COMPLETAS
+// Agregar estas funciones a ui.js
+// ============================================
+
+// Ya tienes showInquilinosView() y renderInquilinosTable()
+// Estas son las funciones ADICIONALES que faltan:
+
+function renderInquilinosRentasRecibidas() {
+    console.log('💰 Renderizando rentas recibidas...');
+    
+    const tbody = document.getElementById('inquilinosRentasRecibidasTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    const filterType = document.getElementById('inquilinosRentasFilter').value;
+    const year = parseInt(document.getElementById('inquilinosRentasYear').value);
+    const monthSelect = document.getElementById('inquilinosRentasMonth');
+    
+    // Mostrar/ocultar selector de mes
+    if (filterType === 'mensual') {
+        monthSelect.classList.remove('hidden');
+    } else {
+        monthSelect.classList.add('hidden');
+    }
+    
+    const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+    
+    // Recopilar todas las rentas del periodo
+    const rentas = [];
+    let totalPeriodo = 0;
+    
+    inquilinos.forEach(inq => {
+        if (inq.pagos && inq.pagos.length > 0) {
+            inq.pagos.forEach(pago => {
+                const fechaPago = new Date(pago.fecha + 'T00:00:00');
+                if (fechaPago.getFullYear() === year && (month === null || fechaPago.getMonth() === month)) {
+                    rentas.push({
+                        empresa: inq.nombre,
+                        monto: pago.monto,
+                        fecha: pago.fecha,
+                        inquilinoId: inq.id
+                    });
+                    totalPeriodo += pago.monto;
+                }
+            });
+        }
+    });
+    
+    // Ordenar por fecha descendente
+    rentas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    
+    // Renderizar filas
+    rentas.forEach(r => {
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';
+        row.onclick = () => showInquilinoDetail(r.inquilinoId);
+        row.innerHTML = `
+            <td>${r.empresa}</td>
+            <td class="currency">${formatCurrency(r.monto)}</td>
+            <td>${formatDate(r.fecha)}</td>
+        `;
+    });
+    
+    if (rentas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No hay rentas en este periodo</td></tr>';
+    } else {
+        // Agregar fila de total
+        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        
+        if (filterType === 'mensual') {
+            const rowTotal = tbody.insertRow();
+            rowTotal.style.fontWeight = 'bold';
+            rowTotal.style.backgroundColor = '#e6f2ff';
+            rowTotal.innerHTML = `
+                <td style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${monthNames[month].toUpperCase()} ${year}:</td>
+                <td class="currency" style="color:var(--primary);font-size:1.2rem">${formatCurrency(totalPeriodo)}</td>
+                <td></td>
+            `;
+        }
+        
+        // Calcular total anual
+        let totalAnual = 0;
+        inquilinos.forEach(inq => {
+            if (inq.pagos) {
+                inq.pagos.forEach(pago => {
+                    const pd = new Date(pago.fecha + 'T00:00:00');
+                    if (pd.getFullYear() === year) {
+                        totalAnual += pago.monto;
+                    }
+                });
+            }
+        });
+        
+        const rowAnual = tbody.insertRow();
+        rowAnual.style.fontWeight = 'bold';
+        rowAnual.style.backgroundColor = '#d4edda';
+        rowAnual.innerHTML = `
+            <td style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${year}:</td>
+            <td class="currency" style="color:var(--success);font-size:1.2rem">${formatCurrency(totalAnual)}</td>
+            <td></td>
+        `;
+    }
+    
+    console.log('✅ Rentas renderizadas:', rentas.length);
+}
+
+function renderInquilinosVencimientoContratos() {
+    console.log('📅 Renderizando vencimiento de contratos...');
+    
+    const tbody = document.getElementById('inquilinosVencimientoContratosTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    inquilinos.forEach(inq => {
+        const venc = new Date(inq.fecha_vencimiento + 'T00:00:00');
+        const diffDays = Math.ceil((venc - today) / (1000 * 60 * 60 * 24));
+        
+        let estado = '';
+        let badgeClass = '';
+        
+        if (diffDays < 0) {
+            estado = 'Vencido';
+            badgeClass = 'badge-danger';
+        } else if (diffDays <= 30) {
+            estado = 'Próximo a vencer';
+            badgeClass = 'badge-warning';
+        } else {
+            estado = 'Vigente';
+            badgeClass = 'badge-success';
+        }
+        
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';
+        row.onclick = () => showInquilinoDetail(inq.id);
+        row.innerHTML = `
+            <td>${inq.nombre}</td>
+            <td>${formatDate(inq.fecha_inicio)}</td>
+            <td>${formatDate(inq.fecha_vencimiento)}</td>
+            <td style="text-align:center">${diffDays}</td>
+            <td><span class="badge ${badgeClass}">${estado}</span></td>
+        `;
+    });
+    
+    if (inquilinos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:2rem">No hay contratos</td></tr>';
+    }
+    
+    console.log('✅ Contratos renderizados:', inquilinos.length);
+}
+
+function populateInquilinosYearSelects() {
+    const currentYear = new Date().getFullYear();
+    const select = document.getElementById('inquilinosRentasYear');
+    
+    if (!select) return;
+    
+    select.innerHTML = '';
+    
+    for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) option.selected = true;
+        select.appendChild(option);
+    }
+    
+    console.log('✅ Selectores de año inicializados');
 }
 
 console.log('✅ UI.js cargado correctamente');
