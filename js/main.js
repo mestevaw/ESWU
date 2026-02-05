@@ -1,10 +1,4 @@
-/* ========================================
-   ESWU - MAIN APPLICATION
-   ======================================== */
-
-// ============================================
-// LOGIN
-// ============================================
+/* ESWU - MAIN APPLICATION */
 
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -29,25 +23,29 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         
         currentUser = data;
         
+        localStorage.setItem('eswu_remembered_user', username);
+        localStorage.setItem('eswu_remembered_pass', password);
+        
         document.getElementById('loginContainer').classList.add('hidden');
         document.getElementById('appContainer').classList.add('active');
         document.body.classList.add('logged-in');
         
         await initializeApp();
         
+        console.log('✅ Login exitoso:', username);
+        
     } catch (error) {
         alert(error.message);
+        console.error('❌ Error en login:', error);
     } finally {
         hideLoading();
     }
 });
 
-// ============================================
-// INITIALIZE APP
-// ============================================
-
 async function initializeApp() {
     try {
+        console.log('🔄 Cargando datos...');
+        
         await Promise.all([
             loadInquilinos(),
             loadProveedores(),
@@ -58,175 +56,30 @@ async function initializeApp() {
             loadBitacoraSemanal()
         ]);
         
-        console.log('✅ Datos cargados');
-        console.log('Inquilinos:', inquilinos.length);
-        console.log('Proveedores:', proveedores.length);
+        console.log('✅ Aplicación inicializada');
+        console.log('📊 Datos cargados:');
+        console.log('   - Inquilinos:', inquilinos.length);
+        console.log('   - Proveedores:', proveedores.length);
+        console.log('   - Activos:', activos.length);
         
     } catch (error) {
-        console.error('❌ Error:', error);
+        console.error('❌ Error inicializando app:', error);
         alert('Error cargando datos: ' + error.message);
     }
 }
 
-// ============================================
-// LOAD DATA FUNCTIONS
-// ============================================
-
-async function loadInquilinos() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('inquilinos')
-            .select('*')
-            .order('nombre');
-        
-        if (error) throw error;
-        
-        inquilinos = data || [];
-        console.log('✅ Inquilinos cargados:', inquilinos.length);
-        
-    } catch (error) {
-        console.error('Error loading inquilinos:', error);
-        throw error;
+window.addEventListener('DOMContentLoaded', function() {
+    const rememberedUser = localStorage.getItem('eswu_remembered_user');
+    const rememberedPass = localStorage.getItem('eswu_remembered_pass');
+    
+    if (rememberedUser && rememberedPass) {
+        document.getElementById('username').value = rememberedUser;
+        document.getElementById('password').value = rememberedPass;
+        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
     }
-}
+    
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+});
 
-async function loadProveedores() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('proveedores')
-            .select('*')
-            .order('nombre');
-        
-        if (error) throw error;
-        
-        proveedores = data || [];
-        console.log('✅ Proveedores cargados:', proveedores.length);
-        
-    } catch (error) {
-        console.error('Error loading proveedores:', error);
-        throw error;
-    }
-}
-
-async function loadActivos() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('activos')
-            .select('*')
-            .order('nombre');
-        
-        if (error) throw error;
-        
-        activos = data || [];
-        console.log('✅ Activos cargados:', activos.length);
-        
-    } catch (error) {
-        console.error('Error loading activos:', error);
-        activos = [];
-    }
-}
-
-async function loadUsuarios() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('usuarios')
-            .select('*')
-            .order('nombre');
-        
-        if (error) throw error;
-        
-        usuarios = data || [];
-        console.log('✅ Usuarios cargados:', usuarios.length);
-        
-    } catch (error) {
-        console.error('Error loading usuarios:', error);
-        throw error;
-    }
-}
-
-async function loadBancosDocumentos() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('bancos_documentos')
-            .select('*')
-            .order('fecha_subida', { ascending: false });
-        
-        if (error) throw error;
-        
-        bancosDocumentos = data || [];
-        console.log('✅ Bancos cargados:', bancosDocumentos.length);
-        
-    } catch (error) {
-        console.error('Error loading bancos:', error);
-        bancosDocumentos = [];
-    }
-}
-
-async function loadEstacionamiento() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('estacionamiento')
-            .select('*')
-            .order('numero_espacio');
-        
-        if (error) throw error;
-        
-        estacionamiento = data || [];
-        console.log('✅ Estacionamiento cargado:', estacionamiento.length);
-        
-    } catch (error) {
-        console.error('Error loading estacionamiento:', error);
-        estacionamiento = [];
-    }
-}
-
-async function loadBitacoraSemanal() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('bitacora_semanal')
-            .select('*')
-            .order('semana_inicio', { ascending: false })
-            .limit(100);
-        
-        if (error) throw error;
-        
-        bitacoraSemanal = data || [];
-        console.log('✅ Bitácora cargada:', bitacoraSemanal.length);
-        
-    } catch (error) {
-        console.error('Error loading bitacora:', error);
-        bitacoraSemanal = [];
-    }
-}
-
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
-
-function showLoading() {
-    document.getElementById('loadingOverlay').classList.remove('hidden');
-}
-
-function hideLoading() {
-    document.getElementById('loadingOverlay').classList.add('hidden');
-}
-
-function logout() {
-    if (confirm('¿Cerrar sesión?')) {
-        document.getElementById('appContainer').classList.remove('active');
-        document.getElementById('loginContainer').classList.remove('hidden');
-        document.body.classList.remove('logged-in');
-        
-        // Limpiar datos
-        currentUser = null;
-        inquilinos = [];
-        proveedores = [];
-        
-        // Reset UI
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.submenu-container').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
-    }
-}
-
-console.log('✅ Main.js cargado');
+console.log('✅ Main.js cargado correctamente');
