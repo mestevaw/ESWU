@@ -288,9 +288,8 @@ function renderInquilinosTable() {
     
     inquilinos.forEach(inq => {
         const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
-        
         tbody.innerHTML += `
-            <tr style="cursor: pointer;" onclick="alert('Click en ID: ${inq.id}'); showInquilinoDetail(${inq.id})">
+    <tr style="cursor: pointer;" onclick="showInquilinoDetail(${inq.id})">
                 <td style="font-size:0.9rem">${nombreCorto}</td>
                 <td class="currency">${formatCurrency(inq.renta)}</td>
                 <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
@@ -362,11 +361,14 @@ inquilinos.forEach(inq => {
 });
     
     rentas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-   rentas.forEach(r => {
-    const row = tbody.insertRow();
-    row.className = 'clickable';
-    row.onclick = () => showInquilinoDetail(r.inquilinoId);
-    row.innerHTML = `<td>${r.empresa}</td><td class="currency">${formatCurrency(r.monto)}</td><td>${formatDate(r.fecha)}</td>`;
+rentas.forEach(r => {
+    tbody.innerHTML += `
+        <tr class="clickable" style="cursor: pointer;" onclick="showInquilinoDetail(${r.inquilinoId})">
+            <td>${r.empresa}</td>
+            <td class="currency">${formatCurrency(r.monto)}</td>
+            <td>${formatDate(r.fecha)}</td>
+        </tr>
+    `;
 });
     
     if (rentas.length === 0) {
@@ -406,41 +408,41 @@ function renderInquilinosVencimientoContratos() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
- inquilinos.forEach(inq => {
-    const venc = new Date(inq.fecha_vencimiento + 'T00:00:00');
-    const diffDays = Math.ceil((venc - today) / (1000 * 60 * 60 * 24));
-    let estado = '';
-    let badgeClass = '';
-    
-    if (diffDays < 0) {
-        estado = 'Vencido';
-        badgeClass = 'badge-danger';
-    } else if (diffDays <= 30) {
-        estado = 'Próximo a vencer';
-        badgeClass = 'badge-warning';
-    } else {
-        estado = 'Vigente';
-        badgeClass = 'badge-success';
-    }
-    
-    const row = tbody.insertRow();
-    row.className = 'clickable';
-    row.onclick = () => showInquilinoDetail(inq.id);
-    row.innerHTML = `<td>${inq.nombre}</td><td>${formatDate(inq.fecha_inicio)}</td><td>${formatDateVencimiento(inq.fecha_vencimiento)}</td><td>${diffDays}</td><td><span class="badge ${badgeClass}">${estado}</span></td>`;
-});
+    inquilinos.forEach(inq => {
+        const venc = new Date(inq.fecha_vencimiento + 'T00:00:00');
+        const diffDays = Math.ceil((venc - today) / (1000 * 60 * 60 * 24));
+        let estado = '';
+        let badgeClass = '';
+        
+        if (diffDays < 0) {
+            estado = 'Vencido';
+            badgeClass = 'badge-danger';
+        } else if (diffDays <= 30) {
+            estado = 'Próximo a vencer';
+            badgeClass = 'badge-warning';
+        } else {
+            estado = 'Vigente';
+            badgeClass = 'badge-success';
+        }
+        
+        tbody.innerHTML += `
+            <tr class="clickable" style="cursor: pointer;" onclick="showInquilinoDetail(${inq.id})">
+                <td>${inq.nombre}</td>
+                <td>${formatDate(inq.fecha_inicio)}</td>
+                <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
+                <td>${diffDays}</td>
+                <td><span class="badge ${badgeClass}">${estado}</span></td>
+            </tr>
+        `;
+    });
 
-   if (inquilinos.length === 0) {
+    if (inquilinos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay contratos</td></tr>';
     }
 }
 
 function showInquilinoDetail(id) {
-    console.log('=== INICIO showInquilinoDetail ===');
-    console.log('ID recibido:', id);
-    console.log('inquilinos array:', inquilinos);
-    
     const inq = inquilinos.find(i => i.id === id);
-    console.log('Inquilino encontrado:', inq);
     
     if (!inq) {
         alert('ERROR: Inquilino no encontrado con ID ' + id);
@@ -451,7 +453,6 @@ function showInquilinoDetail(id) {
     
     try {
         document.getElementById('inquilinoDetailNombre').textContent = inq.nombre;
-        console.log('Nombre asignado OK');
         
         const contactosList = document.getElementById('detailContactosList');
         if (inq.contactos && inq.contactos.length > 0) {
@@ -464,7 +465,6 @@ function showInquilinoDetail(id) {
         } else {
             contactosList.innerHTML = '<p style="color:var(--text-light)">No hay contactos</p>';
         }
-        console.log('Contactos OK');
         
         document.getElementById('detailRFC').textContent = inq.rfc || '-';
         document.getElementById('detailClabe').textContent = inq.clabe || '-';
@@ -473,7 +473,6 @@ function showInquilinoDetail(id) {
         document.getElementById('detailDespacho').textContent = inq.numero_despacho || '-';
         document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
         document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
-        console.log('Datos básicos OK');
         
         const contratoSection = document.getElementById('contratoOriginalSection');
         if (inq.contrato_file) {
@@ -481,7 +480,6 @@ function showInquilinoDetail(id) {
         } else {
             contratoSection.innerHTML = '<p style="color:var(--text-light)">No hay contrato cargado</p>';
         }
-        console.log('Contrato OK');
         
         const historialDiv = document.getElementById('historialPagos');
         if (inq.pagos && inq.pagos.length > 0) {
@@ -494,7 +492,6 @@ function showInquilinoDetail(id) {
         } else {
             historialDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay pagos</p>';
         }
-        console.log('Pagos OK');
         
         const docsDiv = document.getElementById('documentosAdicionales');
         if (inq.documentos && inq.documentos.length > 0) {
@@ -510,17 +507,12 @@ function showInquilinoDetail(id) {
         } else {
             docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
         }
-        console.log('Documentos OK');
         
         document.getElementById('notasInquilino').textContent = inq.notas || 'No hay notas para este inquilino.';
-        console.log('Notas OK');
         
-        console.log('Abriendo modal...');
         document.getElementById('inquilinoDetailModal').classList.add('active');
-        console.log('Modal abierto');
         
         switchTab('inquilino', 'renta');
-        console.log('=== FIN showInquilinoDetail ===');
         
     } catch (error) {
         console.error('ERROR en showInquilinoDetail:', error);
@@ -575,11 +567,17 @@ function renderProveedoresTable() {
     tbody.innerHTML = '';
     
     proveedores.forEach(prov => {
-        const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.onclick = () => showProveedorDetail(prov.id);
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
-        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td><td>${prov.servicio}</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td><td>${primerContacto.telefono || '-'}</td><td>${primerContacto.email || '-'}</td>`;
+        
+        tbody.innerHTML += `
+            <tr style="cursor: pointer;" onclick="showProveedorDetail(${prov.id})">
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
+                <td>${prov.servicio}</td>
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
+                <td>${primerContacto.telefono || '-'}</td>
+                <td>${primerContacto.email || '-'}</td>
+            </tr>
+        `;
     });
     
     if (proveedores.length === 0) {
