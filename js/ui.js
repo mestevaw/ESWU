@@ -1494,17 +1494,7 @@ function showEditContactoProveedorModal(index) {
     
     document.getElementById('addContactoProveedorModal').classList.add('active');
 }
-   
-    container.innerHTML = contactos.map((c, idx) => `
-        <div class="contacto-item">
-            <div class="contacto-info">
-                <strong>${c.nombre}</strong><br>
-                <small>Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}</small>
-            </div>
-            <button type="button" class="btn btn-sm btn-danger" onclick="${deleteCallback}(${idx})">×</button>
-        </div>
-    `).join('');
-}
+
 
 // ============================================
 // YEAR SELECTS
