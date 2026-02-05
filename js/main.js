@@ -67,6 +67,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         
         // Cargar datos
         await initializeApp();
+        // Mostrar el menú lateral
+    document.getElementById('menuSidebar').classList.remove('hidden');
         
     } catch (error) {
         alert(error.message);
