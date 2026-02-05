@@ -1,6 +1,4 @@
-/* ========================================
-   ESWU - CSS STYLES
-   ======================================== */
+/* ESWU - CSS STYLES CORREGIDO */
 
 :root {
     --primary: #1a365d;
@@ -13,6 +11,7 @@
     --text: #2d3748;
     --text-light: #718096;
     --border: #e2e8f0;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -96,7 +95,6 @@ body.logged-in {
 /* App Container */
 .app-container {
     display: none;
-    min-height: 100vh;
 }
 
 .app-container.active {
@@ -106,7 +104,7 @@ body.logged-in {
 /* Header */
 .header {
     background: white;
-    padding: 1rem 2rem;
+    padding: 1rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-bottom: 2px solid var(--border);
     display: flex;
@@ -125,15 +123,34 @@ body.logged-in {
     color: var(--primary);
 }
 
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.btn-search {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--primary);
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.btn-search:hover {
+    opacity: 0.7;
+}
+
 .btn-regresa {
     background: none;
-    border: 2px solid var(--danger);
     color: var(--danger);
+    border: 2px solid var(--danger);
     padding: 0.5rem 1rem;
     border-radius: 4px;
     cursor: pointer;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .btn-regresa:hover {
@@ -147,7 +164,6 @@ body.logged-in {
     min-height: calc(100vh - 70px);
 }
 
-/* Menu Sidebar */
 .menu-sidebar {
     width: 200px;
     background: white;
@@ -160,19 +176,23 @@ body.logged-in {
     overflow-y: auto;
 }
 
+.menu-sidebar.hidden {
+    display: none;
+}
+
 .menu-btn {
     background: white;
     color: var(--text);
-    border: none;
-    border-left: 3px solid transparent;
+    border: 1px solid var(--border);
+    margin: 0.5rem 1rem;
     padding: 0.75rem 1rem;
     font-size: 1rem;
     cursor: pointer;
-    width: 100%;
+    transition: all 0.2s;
+    width: calc(100% - 2rem);
     text-align: left;
     display: block;
-    margin: 0.25rem 0;
-    transition: all 0.2s;
+    border-left: 3px solid transparent;
 }
 
 .menu-btn:hover {
@@ -191,7 +211,6 @@ body.logged-in {
     margin-top: 2rem;
 }
 
-/* Submenu */
 .submenu-container {
     position: fixed;
     left: 200px;
@@ -213,15 +232,15 @@ body.logged-in {
     background: white;
     color: var(--text);
     border: 1px solid var(--border);
-    border-radius: 4px;
     padding: 0.75rem 1rem;
     font-size: 0.95rem;
     cursor: pointer;
+    transition: all 0.2s;
     width: 100%;
     text-align: left;
     display: block;
     margin-bottom: 0.5rem;
-    transition: all 0.2s;
+    border-radius: 4px;
 }
 
 .submenu-btn:hover {
@@ -229,16 +248,22 @@ body.logged-in {
     border-color: var(--primary);
 }
 
-/* Content Area */
+/* Content Area - CORREGIDO */
 .content-area {
     margin-left: 200px;
     padding: 2rem;
     flex: 1;
-    transition: margin 0.3s;
+    width: calc(100% - 200px);
 }
 
 .content-area.with-submenu {
     margin-left: 450px;
+    width: calc(100% - 450px);
+}
+
+.content-area.fullwidth {
+    margin-left: 0 !important;
+    width: 100% !important;
 }
 
 /* Pages */
@@ -253,9 +278,10 @@ body.logged-in {
 /* Cards */
 .card {
     background: var(--card-bg);
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
     margin-bottom: 2rem;
+    overflow: hidden;
     border: 1px solid var(--border);
 }
 
@@ -276,8 +302,17 @@ body.logged-in {
 
 /* Tables */
 .table-container {
-    padding: 1.5rem;
     overflow-x: auto;
+    padding: 1rem;
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+}
+
+.sticky-header-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
 }
 
 table {
@@ -301,18 +336,19 @@ th {
 td {
     padding: 1rem;
     border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+tr {
+    transition: background 0.2s;
 }
 
 tr:hover {
     background: var(--bg);
 }
 
-tr.clickable {
+tr[style*="cursor: pointer"] {
     cursor: pointer;
-}
-
-.currency {
-    text-align: right;
 }
 
 /* Buttons */
@@ -335,19 +371,13 @@ tr.clickable {
     background: var(--primary-dark);
 }
 
-.btn-success {
-    background: var(--success);
-    color: white;
-}
-
 .btn-secondary {
     background: var(--text-light);
     color: white;
 }
 
-.btn-danger {
-    background: var(--danger);
-    color: white;
+.btn-secondary:hover {
+    filter: brightness(0.9);
 }
 
 /* Forms */
@@ -359,6 +389,7 @@ tr.clickable {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
+    color: var(--text);
 }
 
 .form-group input,
@@ -376,58 +407,10 @@ tr.clickable {
     border-color: var(--primary);
 }
 
-/* Modals */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-}
-
-.modal.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 8px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-.modal-header {
-    padding: 1.5rem;
-    border-bottom: 2px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--bg);
-}
-
-.modal-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary);
-}
-
-.close-modal {
-    background: none;
-    border: none;
-    font-size: 2rem;
-    color: var(--danger);
-    cursor: pointer;
-}
-
-/* Utility */
 .hidden {
     display: none !important;
+}
+
+.currency {
+    text-align: right;
 }
