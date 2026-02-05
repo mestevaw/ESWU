@@ -582,3 +582,67 @@ function populateInquilinosYearSelects() {
 }
 
 console.log('✅ UI.js cargado correctamente');
+
+// ============================================
+// RENDER CONTACTOS LIST
+// Agregar esta función al final de ui.js
+// ============================================
+
+function renderContactosList(contactos, containerId, deleteCallback) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    if (!contactos || contactos.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-light);font-size:0.875rem">No hay contactos agregados</p>';
+        return;
+    }
+    
+    container.innerHTML = contactos.map((c, idx) => `
+        <div class="contacto-item">
+            <div class="contacto-info">
+                <strong>${c.nombre}</strong><br>
+                <small>Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}</small>
+            </div>
+            <button type="button" class="btn btn-sm btn-danger" onclick="${deleteCallback}(${idx})">×</button>
+        </div>
+    `).join('');
+}
+
+// ============================================
+// MODAL - SHOW ADD INQUILINO
+// REEMPLAZA la función showAddInquilinoModal() actual
+// ============================================
+
+function showAddInquilinoModal() {
+    isEditMode = false;
+    currentInquilinoId = null;
+    tempInquilinoContactos = [];
+    
+    document.getElementById('addInquilinoTitle').textContent = 'Agregar Inquilino';
+    document.getElementById('inquilinoForm').reset();
+    document.getElementById('inquilinoContactosList').innerHTML = '<p style="color:var(--text-light);font-size:0.875rem">No hay contactos agregados</p>';
+    document.getElementById('contratoFileName').textContent = '';
+    
+    document.getElementById('addInquilinoModal').classList.add('active');
+    
+    console.log('📝 Modal de agregar inquilino abierto');
+}
+
+// ============================================
+// MODAL - SHOW ADD PROVEEDOR
+// REEMPLAZA la función showAddProveedorModal() actual
+// ============================================
+
+function showAddProveedorModal() {
+    isEditMode = false;
+    currentProveedorId = null;
+    tempProveedorContactos = [];
+    
+    document.getElementById('addProveedorTitle').textContent = 'Agregar Proveedor';
+    document.getElementById('proveedorForm').reset();
+    document.getElementById('proveedorContactosList').innerHTML = '<p style="color:var(--text-light);font-size:0.875rem">No hay contactos agregados</p>';
+    
+    document.getElementById('addProveedorModal').classList.add('active');
+    
+    console.log('📝 Modal de agregar proveedor abierto');
+}
