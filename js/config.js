@@ -10,8 +10,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Initialize Supabase client
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Variables globales de estado
-let currentUser = '';
+// Variables globales
+let currentUser = null;
 let inquilinos = [];
 let proveedores = [];
 let activos = [];
@@ -26,20 +26,11 @@ let currentProveedorId = null;
 let currentActivoId = null;
 let currentFacturaId = null;
 let currentUsuarioId = null;
-let currentPageContext = 'home';
-let currentHomeTable = null;
-
-// Variables de modo edición
+let currentEstacionamientoId = null;
+let currentBitacoraId = null;
 let isEditMode = false;
-
-// Variables temporales para archivos
-let currentContratoFile = null;
-let currentDocAdicionalFile = null;
-let currentProvDocAdicionalFile = null;
-let currentFacturaDocFile = null;
-let currentPagoFacturaFile = null;
-let currentActivoFotos = [];
-
-// Variables temporales para contactos
 let tempInquilinoContactos = [];
 let tempProveedorContactos = [];
+let currentHomeTable = null;
+
+console.log('✅ Config.js cargado');
