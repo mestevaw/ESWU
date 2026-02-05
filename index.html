@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESWU - Sistema de Administración</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -28,7 +28,7 @@
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" id="password" required>
+                    <input type="password" id="password" required autocomplete="current-password">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width:100%">Iniciar Sesión</button>
             </form>
@@ -40,7 +40,10 @@
         <!-- Header -->
         <header class="header">
             <h1 class="header-title">ESWU</h1>
-            <button id="btnRegresa" class="btn-regresa hidden" onclick="handleRegresa()">← Regresar</button>
+            <div class="header-actions">
+                <button id="btnSearch" class="btn-search hidden" onclick="toggleSearch()">🔍</button>
+                <button id="btnRegresa" class="btn-regresa hidden" onclick="handleRegresa()">✖</button>
+            </div>
         </header>
 
         <!-- Main Content -->
@@ -56,87 +59,203 @@
             <!-- Inquilinos Submenu -->
             <div id="inquilinosSubMenu" class="submenu-container">
                 <button class="submenu-btn" onclick="showInquilinosView('list')">Listado</button>
-                <button class="submenu-btn" onclick="showInquilinosView('rentas')">Rentas Recibidas</button>
-                <button class="submenu-btn" onclick="showInquilinosView('contratos')">Vencimiento Contratos</button>
+                <button class="submenu-btn" onclick="showAddInquilinoModal()">Dar de Alta</button>
+                <button class="submenu-btn" onclick="showInquilinosView('rentasRecibidas')">Rentas</button>
+                <button class="submenu-btn" onclick="showInquilinosView('vencimientoContratos')">Contratos</button>
             </div>
 
             <!-- Proveedores Submenu -->
             <div id="proveedoresSubMenu" class="submenu-container">
                 <button class="submenu-btn" onclick="showProveedoresView('list')">Listado</button>
-                <button class="submenu-btn" onclick="showProveedoresView('pagadas')">Facturas Pagadas</button>
-                <button class="submenu-btn" onclick="showProveedoresView('porpagar')">Facturas Por Pagar</button>
+                <button class="submenu-btn" onclick="showAddProveedorModal()">Dar de Alta</button>
+                <button class="submenu-btn" onclick="showProveedoresView('facturasPagadas')">Facturas Pagadas</button>
+                <button class="submenu-btn" onclick="showProveedoresView('facturasPorPagar')">Facturas X Pagar</button>
             </div>
 
             <!-- Admin Submenu -->
             <div id="adminSubMenu" class="submenu-container">
-                <button class="submenu-btn" onclick="showAdminView('activos')">Activos</button>
+                <button class="submenu-btn" onclick="showActivosPage()">Activos</button>
                 <button class="submenu-btn" onclick="showAdminView('bancos')">Bancos</button>
-                <button class="submenu-btn" onclick="showAdminView('bitacora')">Bitácora</button>
-                <button class="submenu-btn" onclick="showAdminView('estacionamiento')">Estacionamiento</button>
-                <button class="submenu-btn" onclick="showAdminView('numeros')">Números</button>
+                <button class="submenu-btn" onclick="showPageFromMenu('bitacora')">Bitácora</button>
+                <button class="submenu-btn" onclick="showPageFromMenu('estacionamiento')">Estacionamiento</button>
+                <button class="submenu-btn" onclick="showNumerosPage()">Números</button>
                 <button class="submenu-btn" onclick="showAdminView('usuarios')">Usuarios</button>
             </div>
 
             <!-- Content Area -->
             <div id="contentArea" class="content-area">
                 
-                <!-- Inquilinos Page -->
-                <div id="inquilinosPage" class="page">
+                <!-- Números Page -->
+                <div id="numerosPage" class="page">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title" id="inquilinosTitle">Inquilinos</h2>
-                            <button class="btn btn-primary">+ Agregar</button>
+                            <h2 class="card-title">Resumen Financiero</h2>
                         </div>
-                        <div class="table-container">
-                            <table id="inquilinosTable">
-                                <thead>
-                                    <tr>
-                                        <th>Empresa</th>
-                                        <th>Renta Mensual</th>
-                                        <th>Vencimiento Contrato</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                        <div style="padding: 1.5rem;">
+                            <p style="color: #718096;">Página de números - En desarrollo</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inquilinos Page -->
+                <div id="inquilinosPage" class="page">
+                    <!-- Listado de Inquilinos -->
+                    <div id="inquilinosListView" class="hidden">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Listado de Inquilinos</h2>
+                                <button class="btn btn-primary" onclick="showAddInquilinoModal()">+ Agregar</button>
+                            </div>
+                            <div class="table-container">
+                                <table id="inquilinosTable" class="sticky-header-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Empresa</th>
+                                            <th>Renta Mensual</th>
+                                            <th>Vencimiento Contrato</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rentas Recibidas -->
+                    <div id="inquilinosRentasRecibidasView" class="hidden">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Rentas Recibidas</h2>
+                            </div>
+                            <div style="padding: 1.5rem;">
+                                <p style="color: #718096;">Vista de rentas - En desarrollo</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vencimiento Contratos -->
+                    <div id="inquilinosVencimientoContratosView" class="hidden">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Vencimiento de Contratos</h2>
+                            </div>
+                            <div style="padding: 1.5rem;">
+                                <p style="color: #718096;">Vista de contratos - En desarrollo</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Proveedores Page -->
                 <div id="proveedoresPage" class="page">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title" id="proveedoresTitle">Proveedores</h2>
-                            <button class="btn btn-primary">+ Agregar</button>
+                    <!-- Listado de Proveedores -->
+                    <div id="proveedoresListView" class="hidden">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Listado de Proveedores</h2>
+                                <button class="btn btn-primary" onclick="showAddProveedorModal()">+ Agregar</button>
+                            </div>
+                            <div class="table-container">
+                                <table id="proveedoresTable" class="sticky-header-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Proveedor</th>
+                                            <th>Servicio</th>
+                                            <th>Contacto</th>
+                                            <th>Teléfono</th>
+                                            <th>Email</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
-                        <div class="table-container">
-                            <table id="proveedoresTable">
-                                <thead>
-                                    <tr>
-                                        <th>Proveedor</th>
-                                        <th>Servicio</th>
-                                        <th>Contacto</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                    </div>
+
+                    <!-- Facturas Pagadas -->
+                    <div id="proveedoresFacturasPagadasView" class="hidden">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Facturas Pagadas</h2>
+                            </div>
+                            <div style="padding: 1.5rem;">
+                                <p style="color: #718096;">Vista de facturas pagadas - En desarrollo</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Facturas Por Pagar -->
+                    <div id="proveedoresFacturasPorPagarView" class="hidden">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Facturas Por Pagar</h2>
+                            </div>
+                            <div style="padding: 1.5rem;">
+                                <p style="color: #718096;">Vista de facturas por pagar - En desarrollo</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Admin Page -->
-                <div id="adminPage" class="page">
+                <!-- Activos Page -->
+                <div id="activosPage" class="page">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title" id="adminTitle">Admin</h2>
+                            <h2 class="card-title">Activos</h2>
+                            <button class="btn btn-primary" onclick="showAddActivoModal()">+ Agregar</button>
                         </div>
-                        <div class="table-container">
-                            <table id="adminTable">
-                                <thead>
-                                    <tr id="adminTableHeader"></tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                        <div style="padding: 1.5rem;">
+                            <p style="color: #718096;">Página de activos - En desarrollo</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Usuarios Page -->
+                <div id="adminUsuariosPage" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Usuarios</h2>
+                            <button class="btn btn-primary" onclick="showAddUsuarioModal()">+ Agregar</button>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <p style="color: #718096;">Página de usuarios - En desarrollo</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Bancos Page -->
+                <div id="adminBancosPage" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Bancos - Documentos</h2>
+                            <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <p style="color: #718096;">Página de bancos - En desarrollo</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estacionamiento Page -->
+                <div id="estacionamientoPage" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Estacionamiento</h2>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <p style="color: #718096;">Página de estacionamiento - En desarrollo</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bitácora Page -->
+                <div id="bitacoraPage" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Bitácora Semanal</h2>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <p style="color: #718096;">Página de bitácora - En desarrollo</p>
                         </div>
                     </div>
                 </div>
@@ -145,7 +264,7 @@
         </div>
     </div>
 
-<!-- Supabase Library -->
+    <!-- Supabase Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- JavaScript Files -->
