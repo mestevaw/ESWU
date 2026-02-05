@@ -289,15 +289,20 @@ function renderInquilinosTable() {
     inquilinos.forEach(inq => {
         const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
         
-        const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.setAttribute('onclick', `showInquilinoDetail(${inq.id})`);
-        row.innerHTML = `<td style="font-size:0.9rem">${nombreCorto}</td><td class="currency">${formatCurrency(inq.renta)}</td><td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>`;
+        tbody.innerHTML += `
+            <tr style="cursor: pointer;" onclick="alert('Click en ID: ${inq.id}'); showInquilinoDetail(${inq.id})">
+                <td style="font-size:0.9rem">${nombreCorto}</td>
+                <td class="currency">${formatCurrency(inq.renta)}</td>
+                <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
+            </tr>
+        `;
     });
     
     if (inquilinos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No hay inquilinos</td></tr>';
     }
+    
+    console.log('Tabla renderizada con', inquilinos.length, 'inquilinos');
 }
 
 function filtrarInquilinos(query) {
