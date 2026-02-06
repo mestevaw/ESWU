@@ -313,14 +313,41 @@ async function saveDocumentoAdicional(event) {
         
         const pdfBase64 = await fileToBase64(file);
         
+        const inq = inquilinos.find(i => i.id === currentInquilinoId);
+        
+        // NUEVO: Verificar si NO tiene contrato original y preguntar
+        if (!inq.contrato_file) {
+            const esContratoOriginal = confirm('¿Este documento es el CONTRATO ORIGINAL?\n\nSi es así, se guardará como contrato y no necesitas poner nombre.');
+            
+            if (esContratoOriginal) {
+                // Guardar como contrato original en la tabla inquilinos
+                const { error: contratoError } = await supabaseClient
+                    .from('inquilinos')
+                    .update({
+                        contrato_file: pdfBase64
+                    })
+                    .eq('id', currentInquilinoId);
+                
+                if (contratoError) throw contratoError;
+                
+                await loadInquilinos();
+                closeModal('agregarDocumentoModal');
+                showInquilinoDetailModal(currentInquilinoId);
+                
+                alert('✅ Contrato Original guardado correctamente');
+                hideLoading();
+                return;
+            }
+        }
+        
         const { error } = await supabaseClient
             .from('inquilinos_documentos')
             .insert([{
                 inquilino_id: currentInquilinoId,
-                nombre: nombre,
-                archivo: pdfBase64,
-                fecha: new Date().toISOString().split('T')[0],
-                usuario: currentUser.nombre
+                nombre_documento: nombre,
+                archivo_pdf: pdfBase64,
+                fecha_guardado: new Date().toISOString().split('T')[0],
+                usuario_guardo: currentUser.nombre
             }]);
         
         if (error) throw error;
@@ -663,3 +690,49 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('✅ MAIN.JS COMPLETO cargado correctamente');
+
+// ============================================
+// ELIMINAR PROVEEDORES MIGRADOS
+// ============================================
+
+async function eliminarProveedoresMigrados() {
+    if (!confirm('¿Seguro que quieres eliminar TODOS los proveedores que dicen "migrado desde histórico"?\n\nEsta acción NO se puede deshacer.')) {
+        return;
+    }
+    
+    showLoading();
+    try {
+        const { data: proveedoresMigrados, error: searchError } = await supabaseClient
+            .from('proveedores')
+            .select('id')
+            .ilike('servicio', '%migrado desde histórico%');
+        
+        if (searchError) throw searchError;
+        
+        if (!proveedoresMigrados || proveedoresMigrados.length === 0) {
+            alert('No se encontraron proveedores con "migrado desde histórico"');
+            hideLoading();
+            return;
+        }
+        
+        const ids = proveedoresMigrados.map(p => p.id);
+        
+        const { error: deleteError } = await supabaseClient
+            .from('proveedores')
+            .delete()
+            .in('id', ids);
+        
+        if (deleteError) throw deleteError;
+        
+        await loadProveedores();
+        renderProveedoresTable();
+        
+        alert(`✅ Se eliminaron ${ids.length} proveedores migrados correctamente`);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar proveedores: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
