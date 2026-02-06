@@ -228,7 +228,8 @@ function filtrarBitacora(query) {
 // INQUILINOS - VIEWS
 // ============================================
 
-function showInquilinosView(view) {
+async function showInquilinosView(view) {
+    await ensureInquilinosFullLoaded();
     document.getElementById('inquilinosSubMenu').classList.remove('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('inquilinosPage').classList.add('active');
@@ -558,7 +559,8 @@ console.log('✅ UI.JS FINAL COMPLETO - Parte 1/3 cargada');
 // PROVEEDORES - VIEWS
 // ============================================
 
-function showProveedoresView(view) {
+async function showProveedoresView(view) {
+    await ensureProveedoresFullLoaded();
     document.getElementById('proveedoresSubMenu').classList.remove('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('proveedoresPage').classList.add('active');
@@ -857,31 +859,55 @@ console.log('✅ UI.JS FINAL COMPLETO - Parte 2/3 cargada');
 // ADMIN - PÁGINAS
 // ============================================
 
-function showPageFromMenu(pageName) {
+// ============================================
+// FUNCIÓN showPageFromMenu - VERSIÓN OPTIMIZADA
+// Reemplaza TODA la función en ui.js
+// ============================================
+
+async function showPageFromMenu(pageName) {
+    // Ocultar submenús
+    document.getElementById('inquilinosSubMenu').classList.remove('active');
+    document.getElementById('proveedoresSubMenu').classList.remove('active');
     document.getElementById('adminSubMenu').classList.remove('active');
+    
+    // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    
+    // Mostrar página solicitada
     document.getElementById(pageName + 'Page').classList.add('active');
     
     currentSubContext = pageName;
     
+    // Mostrar botones header
     document.getElementById('btnRegresa').classList.remove('hidden');
-    document.getElementById('menuSidebar').classList.add('hidden');
-    document.getElementById('contentArea').classList.remove('with-submenu');
-    document.getElementById('contentArea').classList.add('fullwidth');
     
+    // Mostrar búsqueda solo en páginas que la necesitan
     if (pageName === 'bitacora') {
-    document.getElementById('btnSearch').classList.remove('hidden');
-    currentSearchContext = 'bitacora';
-    renderBitacoraTable();
-    updateBitacoraMenu();  // ← LÍNEA NUEVA
-} else if (pageName === 'estacionamiento') {
+        document.getElementById('btnSearch').classList.remove('hidden');
+        currentSearchContext = 'bitacora';
+    } else {
         document.getElementById('btnSearch').classList.add('hidden');
         currentSearchContext = null;
+    }
+    
+    // Content-area a pantalla completa
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('menuSidebar').classList.add('hidden');
+    document.getElementById('contentArea').classList.add('fullwidth');
+    
+    // ⚡ CARGA LAZY: Cargar contenido solo cuando se necesita
+    if (pageName === 'estacionamiento') {
+        await ensureEstacionamientoLoaded();
         renderEstacionamientoTable();
+    }
+    
+    if (pageName === 'bitacora') {
+        await ensureBitacoraLoaded();
+        renderBitacoraTable();
     }
 }
 
-function showAdminView(view) {
+async function showAdminView(view) {
     document.getElementById('adminSubMenu').classList.remove('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
@@ -889,20 +915,24 @@ function showAdminView(view) {
     
     document.getElementById('btnRegresa').classList.remove('hidden');
     document.getElementById('btnSearch').classList.add('hidden');
-    document.getElementById('menuSidebar').classList.add('hidden');
+    
     document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.add('fullwidth');
     
     if (view === 'usuarios') {
+        await ensureUsuariosLoaded();
         document.getElementById('adminUsuariosPage').classList.add('active');
         renderUsuariosTable();
     } else if (view === 'bancos') {
+        await ensureBancosLoaded();
         document.getElementById('adminBancosPage').classList.add('active');
         renderBancosTable();
     }
 }
 
-function showActivosPage() {
+async function showActivosPage() {
+    await ensureActivosLoaded();
     document.getElementById('adminSubMenu').classList.remove('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('activosPage').classList.add('active');
@@ -917,29 +947,11 @@ function showActivosPage() {
     
     renderActivosTable();
 }
-function showNumerosPage() {
-    document.getElementById('adminSubMenu').classList.remove('active');
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('numerosPage').classList.add('active');
-    
-    currentSubContext = 'admin-numeros';
-    
-    document.getElementById('btnRegresa').classList.remove('hidden');
-    document.getElementById('btnSearch').classList.add('hidden');
-    document.getElementById('menuSidebar').classList.add('hidden');
-    document.getElementById('contentArea').classList.remove('with-submenu');
-    document.getElementById('contentArea').classList.add('fullwidth');
-    
-    populateYearSelect();
-    
-    // Configurar para mostrar MES ACTUAL por defecto
-    const hoy = new Date();
-    document.getElementById('homeFilter').value = 'mensual';
-    document.getElementById('homeMonth').value = hoy.getMonth();
-    document.getElementById('homeMonth').classList.remove('hidden');
-    
-    updateHomeView();
-}
+async function showNumerosPage() {
+    await Promise.all([
+        ensureInquilinosFullLoaded(),
+        ensureProveedoresFullLoaded()
+    ]);
 
 // ============================================
 // ADMIN - RENDERS
