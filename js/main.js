@@ -73,31 +73,31 @@ window.addEventListener('DOMContentLoaded', function() {
 // ============================================
 
 async function initializeApp() {
-    console.log('🚀 Inicializando app...');
-    
     try {
+        // SOLO cargar lo MÍNIMO para mostrar el menú
         await Promise.all([
-            loadInquilinos(),
-            loadProveedores(),
-            loadActivos(),
-            loadUsuarios(),
-            loadBancosDocumentos(),
-            loadEstacionamiento(),
-            loadBitacoraSemanal()
+            loadInquilinosBasico(),
+            loadProveedoresBasico()
         ]);
         
-        console.log('✅ Datos cargados:', {
-            inquilinos: inquilinos.length,
-            proveedores: proveedores.length,
-            activos: activos.length,
-            usuarios: usuarios.length
-        });
+        populateYearSelect();
+        populateInquilinosYearSelects();
+        populateProveedoresYearSelects();
         
     } catch (error) {
-        console.error('❌ Error inicializando app:', error);
+        console.error('Error inicializando app:', error);
         alert('Error cargando datos: ' + error.message);
     }
 }
+
+// Variables de control de carga
+let inquilinosFullLoaded = false;
+let proveedoresFullLoaded = false;
+let activosLoaded = false;
+let usuariosLoaded = false;
+let bancosLoaded = false;
+let estacionamientoLoaded = false;
+let bitacoraLoaded = false;
 
 // ============================================
 // INQUILINOS - SAVE
@@ -791,6 +791,141 @@ async function eliminarProveedoresMigrados() {
     } catch (error) {
         console.error('Error:', error);
         alert('Error al terminar contrato: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+   // ============================================
+// CARGA BÁSICA (RÁPIDA)
+// ============================================
+
+async function loadInquilinosBasico() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('inquilinos')
+            .select('id, nombre, renta, fecha_vencimiento, contrato_activo')
+            .order('nombre');
+        
+        if (error) throw error;
+        
+        inquilinos = data.map(inq => ({
+            id: inq.id,
+            nombre: inq.nombre,
+            renta: parseFloat(inq.renta || 0),
+            fecha_vencimiento: inq.fecha_vencimiento,
+            contrato_activo: inq.contrato_activo,
+            contactos: [],
+            pagos: [],
+            documentos: []
+        }));
+        
+    } catch (error) {
+        console.error('Error loading inquilinos básico:', error);
+        throw error;
+    }
+}
+
+async function loadProveedoresBasico() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('proveedores')
+            .select('id, nombre, servicio')
+            .order('nombre');
+        
+        if (error) throw error;
+        
+        proveedores = data.map(prov => ({
+            id: prov.id,
+            nombre: prov.nombre,
+            servicio: prov.servicio,
+            contactos: [],
+            facturas: [],
+            documentos: []
+        }));
+        
+    } catch (error) {
+        console.error('Error loading proveedores básico:', error);
+        throw error;
+    }
+}
+
+// ============================================
+// ENSURES (CARGA LAZY)
+// ============================================
+
+async function ensureInquilinosFullLoaded() {
+    if (inquilinosFullLoaded) return;
+    showLoading();
+    try {
+        await loadInquilinos();
+        inquilinosFullLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureProveedoresFullLoaded() {
+    if (proveedoresFullLoaded) return;
+    showLoading();
+    try {
+        await loadProveedores();
+        proveedoresFullLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureActivosLoaded() {
+    if (activosLoaded) return;
+    showLoading();
+    try {
+        await loadActivos();
+        populateProveedoresDropdown();
+        activosLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureUsuariosLoaded() {
+    if (usuariosLoaded) return;
+    showLoading();
+    try {
+        await loadUsuarios();
+        usuariosLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureBancosLoaded() {
+    if (bancosLoaded) return;
+    showLoading();
+    try {
+        await loadBancosDocumentos();
+        bancosLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureEstacionamientoLoaded() {
+    if (estacionamientoLoaded) return;
+    showLoading();
+    try {
+        await loadEstacionamiento();
+        estacionamientoLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureBitacoraLoaded() {
+    if (bitacoraLoaded) return;
+    showLoading();
+    try {
+        await loadBitacoraSemanal();
+        bitacoraLoaded = true;
     } finally {
         hideLoading();
     }
