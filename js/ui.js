@@ -310,7 +310,11 @@ function renderInquilinosRentasRecibidas() {
     const rentas = [];
     let totalPeriodo = 0;
     
+    // CAMBIO: Filtrar solo inquilinos con contrato activo
     inquilinos.forEach(inq => {
+        // Solo procesar inquilinos con contrato activo
+        if (inq.contrato_activo === false) return;
+        
         if (inq.pagos && inq.pagos.length > 0) {
             inq.pagos.forEach(pago => {
                 const fechaPago = new Date(pago.fecha + 'T00:00:00');
@@ -345,6 +349,9 @@ function renderInquilinosRentasRecibidas() {
     if (month !== null && month === mesActual && year === anioActual) {
         // Solo mostrar pendientes si estamos viendo el mes actual
         inquilinos.forEach(inq => {
+            // CAMBIO: Solo inquilinos con contrato activo
+            if (inq.contrato_activo === false) return;
+            
             const tienePagoMesActual = inq.pagos && inq.pagos.some(p => {
                 const fechaPago = new Date(p.fecha + 'T00:00:00');
                 return fechaPago.getMonth() === mesActual && fechaPago.getFullYear() === anioActual;
@@ -375,6 +382,9 @@ function renderInquilinosRentasRecibidas() {
         
         let totalAnual = 0;
         inquilinos.forEach(inq => {
+            // CAMBIO: Solo contar inquilinos activos en total anual
+            if (inq.contrato_activo === false) return;
+            
             if (inq.pagos) {
                 inq.pagos.forEach(pago => {
                     const pd = new Date(pago.fecha + 'T00:00:00');
