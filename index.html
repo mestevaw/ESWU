@@ -387,18 +387,15 @@
                 <!-- Bitácora Page -->
                 <div id="bitacoraPage" class="page">
                     <div class="card">
-                        <div class="card-header">
-       <div class="modal-header-left">
-           <div class="dropdown">
-               <button class="dropdown-toggle" onclick="toggleDropdown('bitacoraMenuDropdown'); updateBitacoraMenu();" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
-               <div id="bitacoraMenuDropdown" class="dropdown-content">
-                   <a href="#" id="bitacoraMenuAgregar" onclick="event.preventDefault(); agregarNuevaSemana(); toggleDropdown('bitacoraMenuDropdown');">Agregar Semana</a>
-                   <a href="#" onclick="event.preventDefault(); alert('Haz click en una de las 2 semanas más recientes para modificarla'); toggleDropdown('bitacoraMenuDropdown');">Modificar</a>
-               </div>
-           </div>
-       </div>
-       <h2 class="card-title">Bitácora Semanal</h2>
-   </div>
+     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <h2 class="card-title" style="margin: 0;">Bitácora Semanal</h2>
+    <div class="dropdown">
+        <button class="dropdown-toggle" onclick="toggleDropdown('bitacoraMenuDropdown'); updateBitacoraMenu();" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
+        <div id="bitacoraMenuDropdown" class="dropdown-content" style="right: 0; left: auto;">
+            <a href="#" id="bitacoraMenuAgregar" onclick="event.preventDefault(); agregarNuevaSemana(); toggleDropdown('bitacoraMenuDropdown');">Agregar Semana</a>
+        </div>
+    </div>
+</div>
                         <div class="table-container">
                             <table id="bitacoraTable" class="sticky-header-table">
                                 <thead><tr><th style="width:200px" class="sortable" onclick="sortBitacora()">Semana</th><th>Notas</th></tr></thead>
