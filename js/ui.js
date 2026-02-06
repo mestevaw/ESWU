@@ -317,6 +317,7 @@ function renderInquilinosRentasRecibidas() {
     
     rentas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     
+    // Primero agregar las rentas recibidas
     rentas.forEach(r => {
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
@@ -324,9 +325,33 @@ function renderInquilinosRentasRecibidas() {
         row.innerHTML = `<td>${r.empresa}</td><td class="currency">${formatCurrency(r.monto)}</td><td>${formatDate(r.fecha)}</td>`;
     });
     
-    if (rentas.length === 0) {
+    // Agregar rentas PENDIENTES del mes actual
+    const hoy = new Date();
+    const mesActual = hoy.getMonth();
+    const anioActual = hoy.getFullYear();
+    
+    if (month !== null && month === mesActual && year === anioActual) {
+        // Solo mostrar pendientes si estamos viendo el mes actual
+        inquilinos.forEach(inq => {
+            const tienePagoMesActual = inq.pagos && inq.pagos.some(p => {
+                const fechaPago = new Date(p.fecha + 'T00:00:00');
+                return fechaPago.getMonth() === mesActual && fechaPago.getFullYear() === anioActual;
+            });
+            
+            if (!tienePagoMesActual) {
+                const row = tbody.insertRow();
+                row.style.cursor = 'pointer';
+                row.onclick = () => showInquilinoDetailModal(inq.id);
+                row.style.backgroundColor = '#ffe6e6';
+                row.innerHTML = `<td>${inq.nombre}</td><td class="currency" style="color:var(--danger)">${formatCurrency(-inq.renta)}</td><td style="color:var(--danger);font-weight:bold">PENDIENTE</td>`;
+                totalPeriodo -= inq.renta; // Restar del total
+            }
+        });
+    }
+    
+    if (rentas.length === 0 && (month === null || month !== mesActual || year !== anioActual)) {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No hay rentas en este periodo</td></tr>';
-    } else {
+    } else if (rentas.length > 0 || (month === mesActual && year === anioActual)) {
         const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         
         if (filterType === 'mensual') {
@@ -438,7 +463,25 @@ function showInquilinoDetailModal(id) {
     
     document.getElementById('detailRFC').textContent = inq.rfc || '-';
     document.getElementById('detailClabe').textContent = inq.clabe || '-';
-    document.getElementById('detailRenta').textContent = formatCurrency(inq.renta);
+    // Calcular saldo (última renta pagada)
+const hoy = new Date();
+const mesActual = hoy.getMonth();
+const anioActual = hoy.getFullYear();
+
+// Buscar si hay pago del mes actual
+const pagoMesActual = inq.pagos && inq.pagos.find(p => {
+    const fechaPago = new Date(p.fecha + 'T00:00:00');
+    return fechaPago.getMonth() === mesActual && fechaPago.getFullYear() === anioActual;
+});
+
+// Mostrar renta con indicador de pago
+if (pagoMesActual) {
+    document.getElementById('detailRenta').innerHTML = formatCurrency(inq.renta) + ' <span style="color:var(--success);font-weight:bold;margin-left:0.5rem">✓ Pagado</span>';
+} else {
+    // Si no hay pago del mes, mostrar en rojo como pendiente
+    document.getElementById('detailRenta').innerHTML = formatCurrency(-inq.renta) + ' <span style="color:var(--danger);font-weight:bold;margin-left:0.5rem">⚠ PENDIENTE</span>';
+    document.getElementById('detailRenta').style.color = 'var(--danger)';
+}
     document.getElementById('detailM2').textContent = inq.m2 || '-';
     document.getElementById('detailDespacho').textContent = inq.numero_despacho || '-';
     document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
@@ -1859,6 +1902,14 @@ function updateSortIndicators(tableId, sortColumn, sortOrder) {
             th.classList.add(sortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
         }
     });
+function calculateIVA() {
+    const monto = parseFloat(document.getElementById('facturaMonto').value);
+    if (!isNaN(monto) && monto > 0) {
+        const iva = monto * 0.16 / 1.16;
+        document.getElementById('facturaIVA').value = iva.toFixed(2);
+    }
 }
+}
+
 
 console.log('✅ UI.JS FINAL COMPLETO - Todas las partes cargadas');
