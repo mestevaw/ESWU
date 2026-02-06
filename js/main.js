@@ -751,6 +751,7 @@ async function eliminarProveedoresMigrados() {
     } finally {
         hideLoading();
     }
+   }
    
    async function terminarContratoInquilino() {
     const fechaTerminacion = prompt('Ingresa la fecha de terminación del contrato (YYYY-MM-DD):');
