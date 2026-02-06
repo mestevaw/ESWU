@@ -1,18 +1,10 @@
 /* ========================================
-   ESWU - UI FUNCTIONS COMPLETO
+   ESWU - UI FUNCTIONS FINAL
    ======================================== */
-
-// ============================================
-// VARIABLES DE ESTADO
-// ============================================
 
 let currentMenuContext = 'main';
 let currentSubContext = null;
 let currentSearchContext = null;
-
-// ============================================
-// LOADING FUNCTIONS
-// ============================================
 
 function showLoading() {
     const overlay = document.getElementById('loadingOverlay');
@@ -27,10 +19,6 @@ function hideLoading() {
         overlay.classList.add('hidden');
     }
 }
-
-// ============================================
-// FORMAT FUNCTIONS
-// ============================================
 
 function formatCurrency(amount) {
     return new Intl.NumberFormat('es-MX', { 
@@ -61,7 +49,7 @@ function formatDateVencimiento(dateString) {
 }
 
 // ============================================
-// NAVIGATION FUNCTIONS
+// NAVIGATION
 // ============================================
 
 function showSubMenu(menu) {
@@ -193,7 +181,6 @@ function renderInquilinosRentasRecibidas() {
     }
     
     const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
-    
     const rentas = [];
     let totalPeriodo = 0;
     
@@ -220,11 +207,7 @@ function renderInquilinosRentasRecibidas() {
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
         row.onclick = () => showInquilinoDetailModal(r.inquilinoId);
-        row.innerHTML = `
-            <td>${r.empresa}</td>
-            <td class="currency">${formatCurrency(r.monto)}</td>
-            <td>${formatDate(r.fecha)}</td>
-        `;
+        row.innerHTML = `<td>${r.empresa}</td><td class="currency">${formatCurrency(r.monto)}</td><td>${formatDate(r.fecha)}</td>`;
     });
     
     if (rentas.length === 0) {
@@ -236,11 +219,7 @@ function renderInquilinosRentasRecibidas() {
             const rowTotal = tbody.insertRow();
             rowTotal.style.fontWeight = 'bold';
             rowTotal.style.backgroundColor = '#e6f2ff';
-            rowTotal.innerHTML = `
-                <td style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${monthNames[month].toUpperCase()} ${year}:</td>
-                <td class="currency" style="color:var(--primary);font-size:1.2rem">${formatCurrency(totalPeriodo)}</td>
-                <td></td>
-            `;
+            rowTotal.innerHTML = `<td style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${monthNames[month].toUpperCase()} ${year}:</td><td class="currency" style="color:var(--primary);font-size:1.2rem">${formatCurrency(totalPeriodo)}</td><td></td>`;
         }
         
         let totalAnual = 0;
@@ -258,11 +237,7 @@ function renderInquilinosRentasRecibidas() {
         const rowAnual = tbody.insertRow();
         rowAnual.style.fontWeight = 'bold';
         rowAnual.style.backgroundColor = '#d4edda';
-        rowAnual.innerHTML = `
-            <td style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${year}:</td>
-            <td class="currency" style="color:var(--success);font-size:1.2rem">${formatCurrency(totalAnual)}</td>
-            <td></td>
-        `;
+        rowAnual.innerHTML = `<td style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${year}:</td><td class="currency" style="color:var(--success);font-size:1.2rem">${formatCurrency(totalAnual)}</td><td></td>`;
     }
     
     console.log('✅ Rentas renderizadas:', rentas.length);
@@ -298,13 +273,7 @@ function renderInquilinosVencimientoContratos() {
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
         row.onclick = () => showInquilinoDetailModal(inq.id);
-        row.innerHTML = `
-            <td>${inq.nombre}</td>
-            <td>${formatDate(inq.fecha_inicio)}</td>
-            <td>${formatDate(inq.fecha_vencimiento)}</td>
-            <td style="text-align:center">${diffDays}</td>
-            <td><span class="badge ${badgeClass}">${estado}</span></td>
-        `;
+        row.innerHTML = `<td>${inq.nombre}</td><td>${formatDate(inq.fecha_inicio)}</td><td>${formatDate(inq.fecha_vencimiento)}</td><td style="text-align:center">${diffDays}</td><td><span class="badge ${badgeClass}">${estado}</span></td>`;
     });
     
     if (inquilinos.length === 0) {
@@ -334,7 +303,7 @@ function populateInquilinosYearSelects() {
 }
 
 // ============================================
-// INQUILINO DETAIL MODAL CON TABS
+// INQUILINO DETAIL MODAL
 // ============================================
 
 function showInquilinoDetailModal(id) {
@@ -347,10 +316,8 @@ function showInquilinoDetailModal(id) {
     
     currentInquilinoId = id;
     
-    // Llenar datos básicos
     document.getElementById('inquilinoDetailNombre').textContent = inq.nombre;
     
-    // Contactos
     const contactosList = document.getElementById('detailContactosList');
     if (inq.contactos && inq.contactos.length > 0) {
         contactosList.innerHTML = inq.contactos.map(c => `
@@ -363,18 +330,14 @@ function showInquilinoDetailModal(id) {
         contactosList.innerHTML = '<p style="color:var(--text-light)">No hay contactos</p>';
     }
     
-    // RFC y CLABE
     document.getElementById('detailRFC').textContent = inq.rfc || '-';
     document.getElementById('detailClabe').textContent = inq.clabe || '-';
-    
-    // Datos de renta
     document.getElementById('detailRenta').textContent = formatCurrency(inq.renta);
     document.getElementById('detailM2').textContent = inq.m2 || '-';
     document.getElementById('detailDespacho').textContent = inq.numero_despacho || '-';
     document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
     document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
     
-    // Historial de pagos
     const historialDiv = document.getElementById('historialPagos');
     if (inq.pagos && inq.pagos.length > 0) {
         historialDiv.innerHTML = inq.pagos.map(p => `
@@ -387,7 +350,6 @@ function showInquilinoDetailModal(id) {
         historialDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay pagos</p>';
     }
     
-    // Contrato original
     const contratoSection = document.getElementById('contratoOriginalSection');
     if (inq.contrato_file) {
         contratoSection.innerHTML = '<a href="#" onclick="event.preventDefault(); viewPDF(\'' + inq.contrato_file + '\');" class="btn btn-primary">📄 Ver Contrato</a>';
@@ -395,23 +357,20 @@ function showInquilinoDetailModal(id) {
         contratoSection.innerHTML = '<p style="color:var(--text-light)">No hay contrato cargado</p>';
     }
     
-    // Documentos adicionales
     const docsDiv = document.getElementById('documentosAdicionales');
     if (inq.documentos && inq.documentos.length > 0) {
         docsDiv.innerHTML = inq.documentos.map(d => `
-            <div class="doc-item">
-                <span onclick="viewPDF('${d.archivo}')" style="cursor:pointer;color:var(--primary)">${d.nombre}</span>
-                <small style="color:var(--text-light)">${formatDate(d.fecha)} - ${d.usuario}</small>
+            <div class="doc-item" onclick="viewPDF('${d.archivo}')">
+                <span>${d.nombre}</span>
+                <small style="color:var(--text-light);display:block">${formatDate(d.fecha)} - ${d.usuario}</small>
             </div>
         `).join('');
     } else {
         docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
     }
     
-    // Notas
     document.getElementById('notasInquilino').textContent = inq.notas || 'No hay notas para este inquilino.';
     
-    // Mostrar modal y activar primera tab
     document.getElementById('inquilinoDetailModal').classList.add('active');
     switchTab('inquilino', 'renta');
     
@@ -421,48 +380,6 @@ function showInquilinoDetailModal(id) {
 function viewPDF(base64Data) {
     const newWindow = window.open();
     newWindow.document.write(`<iframe width='100%' height='100%' src='${base64Data}'></iframe>`);
-}
-
-// ============================================
-// TAB SWITCHING
-// ============================================
-
-function switchTab(type, tabName) {
-    if (type === 'inquilino') {
-        document.querySelectorAll('#inquilinoDetailModal .tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('#inquilinoDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
-        
-        if (tabName === 'renta') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(1)').classList.add('active');
-            document.getElementById('inquilinoRentaTab').classList.add('active');
-        } else if (tabName === 'pagos') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(2)').classList.add('active');
-            document.getElementById('inquilinoPagosTab').classList.add('active');
-        } else if (tabName === 'contrato') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(3)').classList.add('active');
-            document.getElementById('inquilinoContratoTab').classList.add('active');
-        } else if (tabName === 'docs') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(4)').classList.add('active');
-            document.getElementById('inquilinoDocsTab').classList.add('active');
-        } else if (tabName === 'notas') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(5)').classList.add('active');
-            document.getElementById('inquilinoNotasTab').classList.add('active');
-        }
-    } else if (type === 'proveedor') {
-        document.querySelectorAll('#proveedorDetailModal .tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('#proveedorDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
-        
-        if (tabName === 'pagadas') {
-            document.querySelector('#proveedorDetailModal .tab:nth-child(1)').classList.add('active');
-            document.getElementById('proveedorPagadasTab').classList.add('active');
-        } else if (tabName === 'porpagar') {
-            document.querySelector('#proveedorDetailModal .tab:nth-child(2)').classList.add('active');
-            document.getElementById('proveedorPorPagarTab').classList.add('active');
-        } else if (tabName === 'docs') {
-            document.querySelector('#proveedorDetailModal .tab:nth-child(3)').classList.add('active');
-            document.getElementById('proveedorDocsTab').classList.add('active');
-        }
-    }
 }
 
 // ============================================
@@ -512,7 +429,7 @@ function renderProveedoresTable() {
     proveedores.forEach(prov => {
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
-        row.onclick = () => showProveedorDetail(prov.id);
+        row.onclick = () => showProveedorDetailModal(prov.id);
         
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
         
@@ -528,7 +445,11 @@ function renderProveedoresTable() {
     console.log('✅ Tabla de proveedores renderizada');
 }
 
-function showProveedorDetail(id) {
+// ============================================
+// PROVEEDOR DETAIL MODAL
+// ============================================
+
+function showProveedorDetailModal(id) {
     const prov = proveedores.find(p => p.id === id);
     
     if (!prov) {
@@ -536,29 +457,85 @@ function showProveedorDetail(id) {
         return;
     }
     
-    let contactosTexto = 'Sin contactos';
+    currentProveedorId = id;
+    
+    document.getElementById('proveedorDetailNombre').textContent = prov.nombre;
+    document.getElementById('detailServicio').textContent = prov.servicio || '-';
+    
+    const contactosList = document.getElementById('detailProvContactosList');
     if (prov.contactos && prov.contactos.length > 0) {
-        contactosTexto = prov.contactos.map(c => 
-            `  • ${c.nombre} - ${c.telefono || 'Sin tel'} - ${c.email || 'Sin email'}`
-        ).join('\n');
+        contactosList.innerHTML = prov.contactos.map(c => `
+            <div style="margin-bottom:0.5rem;padding:0.5rem;background:white;border-radius:4px">
+                <strong>${c.nombre}</strong><br>
+                <small><strong>Tel:</strong> ${c.telefono || '-'} | <strong>Email:</strong> ${c.email || '-'}</small>
+            </div>
+        `).join('');
+    } else {
+        contactosList.innerHTML = '<p style="color:var(--text-light)">No hay contactos</p>';
     }
     
-    let detalle = `📋 DETALLE DE PROVEEDOR
-
-Nombre: ${prov.nombre}
-Servicio: ${prov.servicio || 'N/A'}
-RFC: ${prov.rfc || 'N/A'}
-CLABE: ${prov.clabe || 'N/A'}
-
-Contactos:
-${contactosTexto}
-
-Facturas: ${prov.facturas && prov.facturas.length > 0 ? prov.facturas.length + ' factura(s)' : 'Sin facturas'}
-
-Notas: ${prov.notas || 'Sin notas'}`;
+    document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
+    document.getElementById('detailProvClabe').textContent = prov.clabe || '-';
     
-    alert(detalle);
-    console.log('🏢 Detalle de proveedor:', prov);
+    const facturasPagadasDiv = document.getElementById('facturasPagadas');
+    const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
+    const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
+    
+    facturasPagadasDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">Sin facturas pagadas</p>';
+    facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">Sin facturas por pagar</p>';
+    docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">Sin documentos</p>';
+    
+    document.getElementById('notasProveedor').textContent = prov.notas || 'No hay notas para este proveedor.';
+    
+    document.getElementById('proveedorDetailModal').classList.add('active');
+    switchTab('proveedor', 'pagadas');
+    
+    console.log('🏢 Modal de detalle abierto para:', prov.nombre);
+}
+
+// ============================================
+// TAB SWITCHING
+// ============================================
+
+function switchTab(type, tabName) {
+    if (type === 'inquilino') {
+        document.querySelectorAll('#inquilinoDetailModal .tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#inquilinoDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
+        
+        if (tabName === 'renta') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(1)').classList.add('active');
+            document.getElementById('inquilinoRentaTab').classList.add('active');
+        } else if (tabName === 'pagos') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(2)').classList.add('active');
+            document.getElementById('inquilinoPagosTab').classList.add('active');
+        } else if (tabName === 'contrato') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(3)').classList.add('active');
+            document.getElementById('inquilinoContratoTab').classList.add('active');
+        } else if (tabName === 'docs') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(4)').classList.add('active');
+            document.getElementById('inquilinoDocsTab').classList.add('active');
+        } else if (tabName === 'notas') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(5)').classList.add('active');
+            document.getElementById('inquilinoNotasTab').classList.add('active');
+        }
+    } else if (type === 'proveedor') {
+        document.querySelectorAll('#proveedorDetailModal .tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#proveedorDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
+        
+        if (tabName === 'pagadas') {
+            document.querySelector('#proveedorDetailModal .tab:nth-child(1)').classList.add('active');
+            document.getElementById('proveedorPagadasTab').classList.add('active');
+        } else if (tabName === 'porpagar') {
+            document.querySelector('#proveedorDetailModal .tab:nth-child(2)').classList.add('active');
+            document.getElementById('proveedorPorPagarTab').classList.add('active');
+        } else if (tabName === 'docs') {
+            document.querySelector('#proveedorDetailModal .tab:nth-child(3)').classList.add('active');
+            document.getElementById('proveedorDocsTab').classList.add('active');
+        } else if (tabName === 'notas') {
+            document.querySelector('#proveedorDetailModal .tab:nth-child(4)').classList.add('active');
+            document.getElementById('proveedorNotasTab').classList.add('active');
+        }
+    }
 }
 
 // ============================================
@@ -631,7 +608,7 @@ function showPageFromMenu(page) {
 }
 
 // ============================================
-// MODALS - AGREGAR INQUILINO
+// MODALS - AGREGAR
 // ============================================
 
 function showAddInquilinoModal() {
@@ -700,6 +677,27 @@ function renderContactosList(contactos, containerId, deleteCallback) {
 }
 
 // ============================================
+// DROPDOWN TOGGLE
+// ============================================
+
+function toggleDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    document.querySelectorAll('.dropdown-content').forEach(dd => {
+        if (dd.id !== dropdownId) dd.classList.remove('show');
+    });
+    dropdown.classList.toggle('show');
+}
+
+// Cerrar dropdowns al hacer click fuera
+window.addEventListener('click', function(e) {
+    if (!e.target.matches('.dropdown-toggle')) {
+        document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+            dropdown.classList.remove('show');
+        });
+    }
+});
+
+// ============================================
 // MODAL CLOSE
 // ============================================
 
@@ -745,4 +743,4 @@ function logout() {
     }
 }
 
-console.log('✅ UI.js cargado correctamente');
+console.log('✅ UI.js FINAL cargado correctamente');
