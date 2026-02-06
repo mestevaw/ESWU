@@ -816,20 +816,21 @@ function showProveedorDetailModal(id) {
    if (facturasPorPagar.length > 0) {
     facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
         totalPorPagar += f.monto;
-        const verLink = f.documento_file ? `<button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); viewPDF('${f.documento_file}')">Ver</button>` : '';
-        return `
-            <div class="payment-item" style="cursor:pointer" onclick="showEditFacturaModal(${f.id})">
-                <div class="payment-item-content">
-                    <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
-                    <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
-                    <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
-                </div>
-                <div class="payment-item-actions" onclick="event.stopPropagation()">
-                    ${verLink}
-                    <button class="btn btn-sm btn-primary" onclick="alert('Pagar factura - En desarrollo')">Dar X Pagada</button>
-                </div>
-            </div>
-        `;
+const verLink = f.documento_file ? `<button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); viewPDF('${f.documento_file}')">Ver</button>` : '';
+return `
+    <div class="payment-item" style="cursor:pointer" onclick="showEditFacturaModal(${f.id})">
+        <div class="payment-item-content">
+            <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
+            <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
+            <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
+        </div>
+        <div class="payment-item-actions" onclick="event.stopPropagation()">
+            ${verLink}
+            <button class="btn btn-sm btn-primary" onclick="pagarFactura(${f.id})">Dar X Pagada</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
+        </div>
+    </div>
+`;
     }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
 }
     
@@ -2022,6 +2023,69 @@ function populateProveedoresDropdown() {
         option.textContent = prov.nombre;
         select.appendChild(option);
     });
+}
+
+async function deleteFactura(facturaId) {
+    if (!confirm('¿Está seguro de eliminar esta factura? Esta acción no se puede deshacer.')) {
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const { error } = await supabaseClient
+            .from('facturas')
+            .delete()
+            .eq('id', facturaId);
+        
+        if (error) throw error;
+        
+        await loadProveedores();
+        showProveedorDetailModal(currentProveedorId);
+        
+        alert('✅ Factura eliminada correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar factura: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function pagarFactura(facturaId) {
+    const fechaPago = prompt('Ingresa la fecha de pago (YYYY-MM-DD):');
+    
+    if (!fechaPago) return;
+    
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaPago)) {
+        alert('Formato de fecha inválido. Usa YYYY-MM-DD (ejemplo: 2025-12-15)');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const { error } = await supabaseClient
+            .from('facturas')
+            .update({
+                fecha_pago: fechaPago
+            })
+            .eq('id', facturaId);
+        
+        if (error) throw error;
+        
+        await loadProveedores();
+        showProveedorDetailModal(currentProveedorId);
+        
+        alert('✅ Factura marcada como pagada');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al marcar factura como pagada: ' + error.message);
+    } finally {
+        hideLoading();
+    }
 }
 
 console.log('✅ UI.JS FINAL COMPLETO - Todas las partes cargadas');
