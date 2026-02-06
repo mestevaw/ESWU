@@ -299,12 +299,17 @@ function showAgregarDocumentoModal() {
     document.getElementById('agregarDocumentoModal').classList.add('active');
 }
 
+/* ========================================
+   INQUILINO - DOCUMENTO - PREGUNTA SIEMPRE
+   Reemplaza saveDocumentoAdicional en main.js
+   ======================================== */
+
 async function saveDocumentoAdicional(event) {
     event.preventDefault();
     showLoading();
     
     try {
-        const nombre = document.getElementById('nuevoDocNombre').value;
+        const inq = inquilinos.find(i => i.id === currentInquilinoId);
         const file = document.getElementById('nuevoDocPDF').files[0];
         
         if (!file) {
@@ -313,31 +318,42 @@ async function saveDocumentoAdicional(event) {
         
         const pdfBase64 = await fileToBase64(file);
         
-        const inq = inquilinos.find(i => i.id === currentInquilinoId);
+        // PREGUNTAR SIEMPRE si es contrato original
+        const mensaje = inq.contrato_file 
+            ? '¿Este documento es el CONTRATO ORIGINAL?\n\nNOTA: Ya existe un contrato. Si dices SÍ, se REEMPLAZARÁ el contrato anterior.'
+            : '¿Este documento es el CONTRATO ORIGINAL?\n\nSi es así, se guardará como contrato y no necesitas poner nombre.';
         
-        // NUEVO: Verificar si NO tiene contrato original y preguntar
-        if (!inq.contrato_file) {
-            const esContratoOriginal = confirm('¿Este documento es el CONTRATO ORIGINAL?\n\nSi es así, se guardará como contrato y no necesitas poner nombre.');
+        const esContratoOriginal = confirm(mensaje);
+        
+        if (esContratoOriginal) {
+            // Guardar/reemplazar como contrato original
+            const { error: contratoError } = await supabaseClient
+                .from('inquilinos')
+                .update({
+                    contrato_file: pdfBase64
+                })
+                .eq('id', currentInquilinoId);
             
-            if (esContratoOriginal) {
-                // Guardar como contrato original en la tabla inquilinos
-                const { error: contratoError } = await supabaseClient
-                    .from('inquilinos')
-                    .update({
-                        contrato_file: pdfBase64
-                    })
-                    .eq('id', currentInquilinoId);
-                
-                if (contratoError) throw contratoError;
-                
-                await loadInquilinos();
-                closeModal('agregarDocumentoModal');
-                showInquilinoDetailModal(currentInquilinoId);
-                
-                alert('✅ Contrato Original guardado correctamente');
-                hideLoading();
-                return;
-            }
+            if (contratoError) throw contratoError;
+            
+            await loadInquilinos();
+            closeModal('agregarDocumentoModal');
+            showInquilinoDetail(currentInquilinoId);
+            
+            const mensajeExito = inq.contrato_file 
+                ? '✅ Contrato Original REEMPLAZADO correctamente'
+                : '✅ Contrato Original guardado correctamente';
+            
+            alert(mensajeExito);
+            hideLoading();
+            return;
+        }
+        
+        // Si NO es contrato original, pedir nombre y guardar como documento adicional
+        const nombre = document.getElementById('nuevoDocNombre').value;
+        
+        if (!nombre) {
+            throw new Error('Ingresa el nombre del documento');
         }
         
         const { error } = await supabaseClient
@@ -354,7 +370,7 @@ async function saveDocumentoAdicional(event) {
         
         await loadInquilinos();
         closeModal('agregarDocumentoModal');
-        showInquilinoDetailModal(currentInquilinoId);
+        showInquilinoDetail(currentInquilinoId);
         
         alert('✅ Documento agregado correctamente');
         
