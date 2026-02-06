@@ -1,5 +1,6 @@
 /* ========================================
-   ESWU - MAIN APPLICATION COMPLETO
+   ESWU - MAIN.JS COMPLETO
+   Todas las funciones de guardado
    ======================================== */
 
 // ============================================
@@ -11,8 +12,6 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    
-    console.log('🔐 Intentando login...');
     
     showLoading();
     
@@ -30,7 +29,6 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         }
         
         currentUser = data;
-        console.log('✅ Login exitoso:', currentUser.nombre);
         
         localStorage.setItem('eswu_remembered_user', username);
         localStorage.setItem('eswu_remembered_pass', password);
@@ -42,7 +40,6 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         await initializeApp();
         
     } catch (error) {
-        console.error('❌ Error en login:', error);
         alert(error.message);
     } finally {
         hideLoading();
@@ -50,11 +47,33 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 });
 
 // ============================================
-// APP INITIALIZATION
+// AUTO-LOGIN
+// ============================================
+
+window.addEventListener('DOMContentLoaded', function() {
+    const rememberedUser = localStorage.getItem('eswu_remembered_user');
+    const rememberedPass = localStorage.getItem('eswu_remembered_pass');
+    
+    if (rememberedUser && rememberedPass) {
+        document.getElementById('username').value = rememberedUser;
+        document.getElementById('password').value = rememberedPass;
+        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+    }
+    
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    
+    setTimeout(() => {
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    }, 1000);
+});
+
+// ============================================
+// INITIALIZE APP
 // ============================================
 
 async function initializeApp() {
-    console.log('🚀 Iniciando aplicación...');
+    console.log('🚀 Inicializando app...');
     
     try {
         await Promise.all([
@@ -67,11 +86,12 @@ async function initializeApp() {
             loadBitacoraSemanal()
         ]);
         
-        populateYearSelect();
-        populateInquilinosYearSelects();
-        populateProveedoresYearSelects();
-        
-        console.log('✅ Aplicación iniciada correctamente');
+        console.log('✅ Datos cargados:', {
+            inquilinos: inquilinos.length,
+            proveedores: proveedores.length,
+            activos: activos.length,
+            usuarios: usuarios.length
+        });
         
     } catch (error) {
         console.error('❌ Error inicializando app:', error);
@@ -80,107 +100,7 @@ async function initializeApp() {
 }
 
 // ============================================
-// YEAR SELECTS
-// ============================================
-
-function populateYearSelect() {
-    const currentYear = new Date().getFullYear();
-    const yearSelect = document.getElementById('homeYear');
-    if (!yearSelect) return;
-    
-    yearSelect.innerHTML = '';
-    for (let year = currentYear - 5; year <= currentYear + 1; year++) {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        if (year === currentYear) option.selected = true;
-        yearSelect.appendChild(option);
-    }
-}
-
-function populateProveedoresYearSelects() {
-    const currentYear = new Date().getFullYear();
-    ['provFactPagYear', 'provFactPorPagYear'].forEach(selectId => {
-        const select = document.getElementById(selectId);
-        if (select) {
-            select.innerHTML = '';
-            for (let year = currentYear - 5; year <= currentYear + 1; year++) {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                if (year === currentYear) option.selected = true;
-                select.appendChild(option);
-            }
-        }
-    });
-}
-
-// ============================================
-// CONTACTOS - INQUILINOS
-// ============================================
-
-function showAddContactoInquilinoModal() {
-    document.getElementById('contactoInquilinoForm').reset();
-    document.getElementById('addContactoInquilinoModal').classList.add('active');
-}
-
-function saveContactoInquilino(event) {
-    event.preventDefault();
-    
-    const contacto = {
-        nombre: document.getElementById('contactoInquilinoNombre').value,
-        telefono: document.getElementById('contactoInquilinoTelefono').value || '',
-        email: document.getElementById('contactoInquilinoEmail').value || ''
-    };
-    
-    tempInquilinoContactos.push(contacto);
-    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
-    
-    document.getElementById('contactoInquilinoForm').reset();
-    closeModal('addContactoInquilinoModal');
-    
-    console.log('✅ Contacto agregado:', contacto);
-}
-
-function deleteInquilinoContacto(index) {
-    tempInquilinoContactos.splice(index, 1);
-    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
-}
-
-// ============================================
-// CONTACTOS - PROVEEDORES
-// ============================================
-
-function showAddContactoProveedorModal() {
-    document.getElementById('contactoProveedorForm').reset();
-    document.getElementById('addContactoProveedorModal').classList.add('active');
-}
-
-function saveContactoProveedor(event) {
-    event.preventDefault();
-    
-    const contacto = {
-        nombre: document.getElementById('contactoProveedorNombre').value,
-        telefono: document.getElementById('contactoProveedorTelefono').value || '',
-        email: document.getElementById('contactoProveedorEmail').value || ''
-    };
-    
-    tempProveedorContactos.push(contacto);
-    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
-    
-    document.getElementById('contactoProveedorForm').reset();
-    closeModal('addContactoProveedorModal');
-    
-    console.log('✅ Contacto proveedor agregado:', contacto);
-}
-
-function deleteProveedorContacto(index) {
-    tempProveedorContactos.splice(index, 1);
-    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
-}
-
-// ============================================
-// SAVE INQUILINO - COMPLETO
+// INQUILINOS - SAVE
 // ============================================
 
 async function saveInquilino(event) {
@@ -188,7 +108,6 @@ async function saveInquilino(event) {
     showLoading();
     
     try {
-        // Obtener archivo de contrato si existe
         const contratoFile = document.getElementById('inquilinoContrato').files[0];
         let contratoURL = null;
         
@@ -196,7 +115,6 @@ async function saveInquilino(event) {
             contratoURL = await fileToBase64(contratoFile);
         }
         
-        // Preparar datos del inquilino
         const inquilinoData = {
             nombre: document.getElementById('inquilinoNombre').value,
             clabe: document.getElementById('inquilinoClabe').value || null,
@@ -210,20 +128,36 @@ async function saveInquilino(event) {
             notas: document.getElementById('inquilinoNotas').value || null
         };
         
-        console.log('💾 Guardando inquilino:', inquilinoData.nombre);
+        let inquilinoId;
         
-        // Insertar inquilino en Supabase
-        const { data, error } = await supabaseClient
-            .from('inquilinos')
-            .insert([inquilinoData])
-            .select();
+        if (isEditMode && currentInquilinoId) {
+            if (!contratoURL && inquilinos.find(i => i.id === currentInquilinoId).contrato_file) {
+                delete inquilinoData.contrato_file;
+            }
+            
+            const { error } = await supabaseClient
+                .from('inquilinos')
+                .update(inquilinoData)
+                .eq('id', currentInquilinoId);
+            
+            if (error) throw error;
+            
+            await supabaseClient
+                .from('inquilinos_contactos')
+                .delete()
+                .eq('inquilino_id', currentInquilinoId);
+            
+            inquilinoId = currentInquilinoId;
+        } else {
+            const { data, error } = await supabaseClient
+                .from('inquilinos')
+                .insert([inquilinoData])
+                .select();
+            
+            if (error) throw error;
+            inquilinoId = data[0].id;
+        }
         
-        if (error) throw error;
-        
-        const inquilinoId = data[0].id;
-        console.log('✅ Inquilino guardado con ID:', inquilinoId);
-        
-        // Guardar contactos si existen
         if (tempInquilinoContactos.length > 0) {
             const contactosToInsert = tempInquilinoContactos.map(c => ({
                 inquilino_id: inquilinoId,
@@ -237,27 +171,19 @@ async function saveInquilino(event) {
                 .insert(contactosToInsert);
             
             if (contactosError) throw contactosError;
-            
-            console.log('✅ Contactos guardados:', tempInquilinoContactos.length);
         }
         
-        // Recargar datos
         await loadInquilinos();
-        
-        // Cerrar modal y limpiar
         closeModal('addInquilinoModal');
-        document.getElementById('inquilinoForm').reset();
-        tempInquilinoContactos = [];
         
-        // Refrescar tabla
         if (currentSubContext === 'inquilinos-list') {
             renderInquilinosTable();
         }
         
-        alert('✅ Inquilino guardado exitosamente');
+        alert('✅ Inquilino guardado correctamente');
         
     } catch (error) {
-        console.error('❌ Error:', error);
+        console.error('Error:', error);
         alert('Error al guardar inquilino: ' + error.message);
     } finally {
         hideLoading();
@@ -265,7 +191,220 @@ async function saveInquilino(event) {
 }
 
 // ============================================
-// SAVE PROVEEDOR - COMPLETO
+// INQUILINOS - CONTACTOS
+// ============================================
+
+function showAddContactoInquilinoModal() {
+    document.getElementById('contactoInquilinoForm').reset();
+    document.getElementById('addContactoInquilinoModal').classList.add('active');
+}
+
+function saveContactoInquilino(event) {
+    event.preventDefault();
+    
+    const contacto = {
+        nombre: document.getElementById('contactoInquilinoNombre').value,
+        telefono: document.getElementById('contactoInquilinoTelefono').value,
+        email: document.getElementById('contactoInquilinoEmail').value
+    };
+    
+    tempInquilinoContactos.push(contacto);
+    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
+    
+    closeModal('addContactoInquilinoModal');
+}
+
+function deleteInquilinoContacto(index) {
+    tempInquilinoContactos.splice(index, 1);
+    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
+}
+
+// ============================================
+// INQUILINOS - REGISTRAR PAGO
+// ============================================
+
+function showRegistrarPagoModal() {
+    closeModal('inquilinoDetailModal');
+    document.getElementById('pagoForm').reset();
+    document.getElementById('pagoMontoGroup').classList.add('hidden');
+    document.getElementById('pagoPDFFileName').textContent = '';
+    document.getElementById('registrarPagoModal').classList.add('active');
+}
+
+function toggleMontoInput() {
+    const completo = document.getElementById('pagoCompleto').value;
+    const montoGroup = document.getElementById('pagoMontoGroup');
+    
+    if (completo === 'no') {
+        montoGroup.classList.remove('hidden');
+        document.getElementById('pagoMonto').required = true;
+    } else {
+        montoGroup.classList.add('hidden');
+        document.getElementById('pagoMonto').required = false;
+    }
+}
+
+async function savePagoRenta(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
+        const completo = document.getElementById('pagoCompleto').value === 'si';
+        const monto = completo ? inquilino.renta : parseFloat(document.getElementById('pagoMonto').value);
+        
+        const pagoFile = document.getElementById('pagoPDF').files[0];
+        let pagoURL = null;
+        
+        if (pagoFile) {
+            pagoURL = await fileToBase64(pagoFile);
+        }
+        
+        const pagoData = {
+            inquilino_id: currentInquilinoId,
+            fecha: document.getElementById('pagoFecha').value,
+            monto: monto,
+            completo: completo,
+            pago_file: pagoURL
+        };
+        
+        const { error } = await supabaseClient
+            .from('pagos_inquilinos')
+            .insert([pagoData]);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        closeModal('registrarPagoModal');
+        showInquilinoDetailModal(currentInquilinoId);
+        
+        alert('✅ Pago registrado correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al registrar pago: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// INQUILINOS - AGREGAR DOCUMENTO
+// ============================================
+
+function showAgregarDocumentoModal() {
+    closeModal('inquilinoDetailModal');
+    document.getElementById('documentoForm').reset();
+    document.getElementById('nuevoDocPDFFileName').textContent = '';
+    document.getElementById('agregarDocumentoModal').classList.add('active');
+}
+
+async function saveDocumentoAdicional(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const nombre = document.getElementById('nuevoDocNombre').value;
+        const file = document.getElementById('nuevoDocPDF').files[0];
+        
+        if (!file) {
+            throw new Error('Seleccione un archivo PDF');
+        }
+        
+        const pdfBase64 = await fileToBase64(file);
+        
+        const { error } = await supabaseClient
+            .from('inquilinos_documentos')
+            .insert([{
+                inquilino_id: currentInquilinoId,
+                nombre: nombre,
+                archivo: pdfBase64,
+                fecha: new Date().toISOString().split('T')[0],
+                usuario: currentUser.nombre
+            }]);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        closeModal('agregarDocumentoModal');
+        showInquilinoDetailModal(currentInquilinoId);
+        
+        alert('✅ Documento agregado correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// INQUILINOS - EDITAR
+// ============================================
+
+function editInquilino() {
+    const inq = inquilinos.find(i => i.id === currentInquilinoId);
+    if (!inq) return;
+    
+    isEditMode = true;
+    tempInquilinoContactos = [...(inq.contactos || [])];
+    
+    document.getElementById('addInquilinoTitle').textContent = 'Editar Inquilino';
+    document.getElementById('inquilinoNombre').value = inq.nombre;
+    document.getElementById('inquilinoClabe').value = inq.clabe || '';
+    document.getElementById('inquilinoRFC').value = inq.rfc || '';
+    document.getElementById('inquilinoM2').value = inq.m2 || '';
+    document.getElementById('inquilinoDespacho').value = inq.numero_despacho || '';
+    document.getElementById('inquilinoRenta').value = inq.renta;
+    document.getElementById('inquilinoFechaInicio').value = inq.fecha_inicio;
+    document.getElementById('inquilinoFechaVenc').value = inq.fecha_vencimiento;
+    document.getElementById('inquilinoNotas').value = inq.notas || '';
+    
+    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
+    
+    closeModal('inquilinoDetailModal');
+    document.getElementById('addInquilinoModal').classList.add('active');
+}
+
+// ============================================
+// INQUILINOS - ELIMINAR
+// ============================================
+
+async function deleteInquilino() {
+    if (!confirm('¿Está seguro de eliminar este inquilino? Esta acción no se puede deshacer.')) {
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const { error } = await supabaseClient
+            .from('inquilinos')
+            .delete()
+            .eq('id', currentInquilinoId);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        closeModal('inquilinoDetailModal');
+        
+        if (currentSubContext === 'inquilinos-list') {
+            renderInquilinosTable();
+        }
+        
+        alert('✅ Inquilino eliminado correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar inquilino: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// PROVEEDORES - SAVE
 // ============================================
 
 async function saveProveedor(event) {
@@ -281,17 +420,31 @@ async function saveProveedor(event) {
             notas: document.getElementById('proveedorNotas').value || null
         };
         
-        console.log('💾 Guardando proveedor:', proveedorData.nombre);
+        let proveedorId;
         
-        const { data, error } = await supabaseClient
-            .from('proveedores')
-            .insert([proveedorData])
-            .select();
-        
-        if (error) throw error;
-        
-        const proveedorId = data[0].id;
-        console.log('✅ Proveedor guardado con ID:', proveedorId);
+        if (isEditMode && currentProveedorId) {
+            const { error } = await supabaseClient
+                .from('proveedores')
+                .update(proveedorData)
+                .eq('id', currentProveedorId);
+            
+            if (error) throw error;
+            
+            await supabaseClient
+                .from('proveedores_contactos')
+                .delete()
+                .eq('proveedor_id', currentProveedorId);
+            
+            proveedorId = currentProveedorId;
+        } else {
+            const { data, error } = await supabaseClient
+                .from('proveedores')
+                .insert([proveedorData])
+                .select();
+            
+            if (error) throw error;
+            proveedorId = data[0].id;
+        }
         
         if (tempProveedorContactos.length > 0) {
             const contactosToInsert = tempProveedorContactos.map(c => ({
@@ -306,24 +459,19 @@ async function saveProveedor(event) {
                 .insert(contactosToInsert);
             
             if (contactosError) throw contactosError;
-            
-            console.log('✅ Contactos guardados:', tempProveedorContactos.length);
         }
         
         await loadProveedores();
-        
         closeModal('addProveedorModal');
-        document.getElementById('proveedorForm').reset();
-        tempProveedorContactos = [];
         
         if (currentSubContext === 'proveedores-list') {
             renderProveedoresTable();
         }
         
-        alert('✅ Proveedor guardado exitosamente');
+        alert('✅ Proveedor guardado correctamente');
         
     } catch (error) {
-        console.error('❌ Error:', error);
+        console.error('Error:', error);
         alert('Error al guardar proveedor: ' + error.message);
     } finally {
         hideLoading();
@@ -331,16 +479,145 @@ async function saveProveedor(event) {
 }
 
 // ============================================
-// UTILITY FUNCTIONS
+// PROVEEDORES - CONTACTOS
 // ============================================
 
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
+function showAddContactoProveedorModal() {
+    document.getElementById('contactoProveedorForm').reset();
+    document.getElementById('addContactoProveedorModal').classList.add('active');
+}
+
+function saveContactoProveedor(event) {
+    event.preventDefault();
+    
+    const contacto = {
+        nombre: document.getElementById('contactoProveedorNombre').value,
+        telefono: document.getElementById('contactoProveedorTelefono').value,
+        email: document.getElementById('contactoProveedorEmail').value
+    };
+    
+    tempProveedorContactos.push(contacto);
+    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
+    
+    closeModal('addContactoProveedorModal');
+}
+
+function deleteProveedorContacto(index) {
+    tempProveedorContactos.splice(index, 1);
+    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
+}
+
+// ============================================
+// PROVEEDORES - REGISTRAR FACTURA
+// ============================================
+
+function showRegistrarFacturaModal() {
+    closeModal('proveedorDetailModal');
+    document.getElementById('facturaForm').reset();
+    document.getElementById('facturaDocumentoFileName').textContent = '';
+    document.getElementById('registrarFacturaModal').classList.add('active');
+}
+
+async function saveFactura(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const facturaFile = document.getElementById('facturaDocumento').files[0];
+        let facturaURL = null;
+        
+        if (facturaFile) {
+            facturaURL = await fileToBase64(facturaFile);
+        }
+        
+        const facturaData = {
+            proveedor_id: currentProveedorId,
+            numero: document.getElementById('facturaNumero').value || null,
+            fecha: document.getElementById('facturaFecha').value,
+            vencimiento: document.getElementById('facturaVencimiento').value,
+            monto: parseFloat(document.getElementById('facturaMonto').value),
+            iva: parseFloat(document.getElementById('facturaIVA').value) || 0,
+            documento_file: facturaURL
+        };
+        
+        const { error } = await supabaseClient
+            .from('facturas')
+            .insert([facturaData]);
+        
+        if (error) throw error;
+        
+        await loadProveedores();
+        closeModal('registrarFacturaModal');
+        showProveedorDetailModal(currentProveedorId);
+        
+        alert('✅ Factura registrada correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al registrar factura: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// PROVEEDORES - EDITAR
+// ============================================
+
+function editProveedor() {
+    const prov = proveedores.find(p => p.id === currentProveedorId);
+    if (!prov) return;
+    
+    isEditMode = true;
+    tempProveedorContactos = [...(prov.contactos || [])];
+    
+    document.getElementById('addProveedorTitle').textContent = 'Editar Proveedor';
+    document.getElementById('proveedorNombre').value = prov.nombre;
+    document.getElementById('proveedorServicio').value = prov.servicio;
+    document.getElementById('proveedorClabe').value = prov.clabe || '';
+    document.getElementById('proveedorRFC').value = prov.rfc || '';
+    document.getElementById('proveedorNotas').value = prov.notas || '';
+    
+    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
+    
+    closeModal('proveedorDetailModal');
+    document.getElementById('addProveedorModal').classList.add('active');
+}
+
+// ============================================
+// PROVEEDORES - ELIMINAR
+// ============================================
+
+async function deleteProveedor() {
+    if (!confirm('¿Está seguro de eliminar este proveedor? Esta acción no se puede deshacer.')) {
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const { error } = await supabaseClient
+            .from('proveedores')
+            .delete()
+            .eq('id', currentProveedorId);
+        
+        if (error) throw error;
+        
+        await loadProveedores();
+        closeModal('proveedorDetailModal');
+        
+        if (currentSubContext === 'proveedores-list') {
+            renderProveedoresTable();
+        }
+        
+        alert('✅ Proveedor eliminado correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar proveedor: ' + error.message);
+    } finally {
+        hideLoading();
+    }
 }
 
 // ============================================
@@ -352,9 +629,37 @@ document.addEventListener('DOMContentLoaded', function() {
     if (inquilinoContrato) {
         inquilinoContrato.addEventListener('change', function() {
             const fileName = this.files[0]?.name || '';
-            document.getElementById('contratoFileName').textContent = fileName ? `Seleccionado: ${fileName}` : '';
+            const display = document.getElementById('contratoFileName');
+            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
+    const nuevoDocPDF = document.getElementById('nuevoDocPDF');
+    if (nuevoDocPDF) {
+        nuevoDocPDF.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            const display = document.getElementById('nuevoDocPDFFileName');
+            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
+    const pagoPDF = document.getElementById('pagoPDF');
+    if (pagoPDF) {
+        pagoPDF.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            const display = document.getElementById('pagoPDFFileName');
+            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
+    const facturaDocumento = document.getElementById('facturaDocumento');
+    if (facturaDocumento) {
+        facturaDocumento.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            const display = document.getElementById('facturaDocumentoFileName');
+            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
         });
     }
 });
 
-console.log('✅ Main.js completo cargado correctamente');
+console.log('✅ MAIN.JS COMPLETO cargado correctamente');
