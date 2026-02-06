@@ -7,6 +7,28 @@
 // LOGIN
 // ============================================
 
+// ============================================
+// AGREGAR ESTO AL INICIO DE main.js
+// (Después de los comentarios, ANTES de document.getElementById)
+// ============================================
+
+// Funciones de loading (necesarias para login)
+function showLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.remove('hidden');
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.add('hidden');
+}
+
+// ============================================
+// DESPUÉS DE ESTO, CONTINÚA CON:
+// document.getElementById('loginForm')...
+// ============================================
+
+
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
