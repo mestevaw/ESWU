@@ -1,8 +1,7 @@
 /* ========================================
-   ESWU - CSS STYLES COMPLETO
+   ESWU - CSS STYLES FINAL
    ======================================== */
 
-/* Variables CSS */
 :root {
     --primary: #1a365d;
     --primary-dark: #0f2744;
@@ -19,7 +18,6 @@
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Reset básico */
 * {
     margin: 0;
     padding: 0;
@@ -34,7 +32,30 @@ body {
 }
 
 /* ========================================
-   MODALS - CRÍTICO
+   HEADER CON BOTÓN X SIMPLE
+   ======================================== */
+
+.btn-regresa-simple {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 2rem;
+    font-weight: 700;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-regresa-simple:hover {
+    transform: scale(1.2);
+    color: #c53030;
+}
+
+/* ========================================
+   MODALS
    ======================================== */
 
 .modal {
@@ -75,6 +96,7 @@ body {
     justify-content: space-between;
     align-items: center;
     background: var(--bg);
+    position: relative;
 }
 
 .modal-header-sticky {
@@ -84,11 +106,77 @@ body {
     background: white;
 }
 
+/* MENÚ HAMBURGUESA EN MODALES */
+.modal-header-left {
+    position: absolute;
+    left: 1rem;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    font-size: 1.25rem;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: 700;
+    transition: all 0.2s;
+}
+
+.dropdown-toggle:hover {
+    background: var(--primary-dark);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    min-width: 200px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    z-index: 1000;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.dropdown-content.show {
+    display: block;
+}
+
+.dropdown-content a {
+    color: var(--text);
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    display: block;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+}
+
+.dropdown-content a:last-child {
+    border-bottom: none;
+}
+
+.dropdown-content a:hover {
+    background: var(--bg);
+    color: var(--primary);
+}
+
 .modal-title {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--primary);
-    margin: 0;
+    margin: 0 auto;
+    text-align: center;
+    flex: 1;
+    padding: 0 3rem;
 }
 
 .close-modal {
@@ -104,6 +192,8 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: 700;
+    position: absolute;
+    right: 1rem;
 }
 
 .close-modal:hover {
@@ -217,7 +307,7 @@ body {
 }
 
 /* ========================================
-   PAYMENT ITEM
+   PAYMENT & DOC ITEMS
    ======================================== */
 
 .payment-item {
@@ -243,7 +333,7 @@ body {
 }
 
 /* ========================================
-   LOGIN
+   LOGIN & LOADING
    ======================================== */
 
 body.logged-in {
@@ -287,8 +377,6 @@ body.logged-in {
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    padding: 0;
-    margin: 0;
 }
 
 .login-container.hidden {
@@ -312,7 +400,7 @@ body.logged-in {
 }
 
 /* ========================================
-   APP CONTAINER
+   APP LAYOUT
    ======================================== */
 
 .app-container {
@@ -324,10 +412,6 @@ body.logged-in {
 .app-container.active {
     display: block;
 }
-
-/* ========================================
-   HEADER
-   ======================================== */
 
 .header {
     background: white;
@@ -356,6 +440,7 @@ body.logged-in {
     display: flex;
     gap: 1rem;
     align-items: center;
+    padding-right: 1rem;
 }
 
 .btn-search {
@@ -365,27 +450,6 @@ body.logged-in {
     color: var(--primary);
     cursor: pointer;
     padding: 0.5rem;
-}
-
-.btn-regresa {
-    background: none;
-    color: var(--danger);
-    border: 2px solid var(--danger);
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1.5rem;
-    font-weight: 700;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-regresa:hover {
-    background: var(--danger);
-    color: white;
 }
 
 .header-search-bar {
@@ -416,10 +480,6 @@ body.logged-in {
     padding: 0.25rem;
 }
 
-/* ========================================
-   MAIN CONTENT
-   ======================================== */
-
 .main-content {
     display: flex;
     min-height: calc(100vh - 70px);
@@ -446,7 +506,6 @@ body.logged-in {
     border-radius: 4px;
     padding: 0.75rem 1rem;
     font-size: 1rem;
-    font-weight: 400;
     cursor: pointer;
     transition: all 0.2s;
     width: calc(100% - 2rem);
@@ -496,7 +555,6 @@ body.logged-in {
     border-radius: 4px;
     padding: 0.75rem 1rem;
     font-size: 0.95rem;
-    font-weight: 400;
     cursor: pointer;
     transition: all 0.2s;
     width: 100%;
