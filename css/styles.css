@@ -854,3 +854,20 @@ tr:hover {
 .hidden {
     display: none !important;
 }
+
+/* ========================================
+   ESTACIONAMIENTO - COLORES CLAROS
+   ======================================== */
+
+.estacionamiento-espacio {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    min-width: 60px;
+    text-align: center;
+    color: #1a365d !important;
+    background: #e6f2ff !important;
+    border: 2px solid #5a9fd4;
+}
