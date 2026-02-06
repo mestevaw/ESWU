@@ -719,14 +719,14 @@ porPagar.forEach(f => {
     const row = tbody.insertRow();
     row.style.cursor = 'pointer';
     
-    // Si hay PDF, abrir PDF. Si no, abrir detalle del proveedor
- if (f.documento_file) {
+    // CAMBIO 1: Si hay PDF, click en row abre PDF. Si no, abre proveedor detail
+    if (f.documento_file) {
         row.onclick = () => viewPDF(f.documento_file);
     } else {
         row.onclick = () => showProveedorDetailModal(f.proveedorId);
     }
     
-    row.innerHTML = `<td>${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
+    row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
 });
     
     if (porPagar.length === 0) {
@@ -1939,7 +1939,8 @@ function calculateIVA() {
         const iva = monto * 0.16 / 1.16;
         document.getElementById('facturaIVA').value = iva.toFixed(2);
     }
-}function showEditFacturaModal(facturaId) {
+}
+function showEditFacturaModal(facturaId) {
     currentFacturaId = facturaId;
     
     // Buscar la factura en todos los proveedores
