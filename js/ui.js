@@ -693,11 +693,16 @@ function renderProveedoresFacturasPorPagar() {
     
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     
-    porPagar.forEach(f => {
-        const row = tbody.insertRow();
-        if (f.documento_file) {
-            row.style.cursor = 'pointer';
-            row.onclick = () => viewPDF(f.documento_file);
+porPagar.forEach(f => {
+    const row = tbody.insertRow();
+    row.style.cursor = 'pointer';
+    
+    // Si hay PDF, abrir PDF. Si no, abrir detalle del proveedor
+    if (f.documento_file) {
+        row.onclick = () => viewPDF(f.documento_file);
+    } else {
+        row.onclick = () => showProveedorDetailModal(f.proveedorId);
+    }
         }
         row.innerHTML = `<td>${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
     });
@@ -785,27 +790,25 @@ function showProveedorDetailModal(id) {
     const facturasPorPagar = prov.facturas ? prov.facturas.filter(f => !f.fecha_pago) : [];
     let totalPorPagar = 0;
     
-    if (facturasPorPagar.length > 0) {
-        facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
-            totalPorPagar += f.monto;
-            const verLink = f.documento_file ? `<button class="btn btn-sm btn-secondary" onclick="viewPDF('${f.documento_file}')">Ver</button>` : '';
-            return `
-                <div class="payment-item">
-                    <div class="payment-item-content">
-                        <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
-                        <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
-                        <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
-                    </div>
-                    <div class="payment-item-actions">
-                        ${verLink}
-                        <button class="btn btn-sm btn-primary" onclick="alert('Pagar factura - En desarrollo')">Dar X Pagada</button>
-                    </div>
+   if (facturasPorPagar.length > 0) {
+    facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
+        totalPorPagar += f.monto;
+        const verLink = f.documento_file ? `<button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); viewPDF('${f.documento_file}')">Ver</button>` : '';
+        return `
+            <div class="payment-item" style="cursor:pointer" onclick="showEditFacturaModal(${f.id})">
+                <div class="payment-item-content">
+                    <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
+                    <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
+                    <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
                 </div>
-            `;
-        }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
-    } else {
-        facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
-    }
+                <div class="payment-item-actions" onclick="event.stopPropagation()">
+                    ${verLink}
+                    <button class="btn btn-sm btn-primary" onclick="alert('Pagar factura - En desarrollo')">Dar X Pagada</button>
+                </div>
+            </div>
+        `;
+    }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
+}
     
     // Documentos Adicionales
     const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
@@ -892,7 +895,6 @@ function showActivosPage() {
     
     renderActivosTable();
 }
-
 function showNumerosPage() {
     document.getElementById('adminSubMenu').classList.remove('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -907,6 +909,13 @@ function showNumerosPage() {
     document.getElementById('contentArea').classList.add('fullwidth');
     
     populateYearSelect();
+    
+    // Configurar para mostrar MES ACTUAL por defecto
+    const hoy = new Date();
+    document.getElementById('homeFilter').value = 'mensual';
+    document.getElementById('homeMonth').value = hoy.getMonth();
+    document.getElementById('homeMonth').classList.remove('hidden');
+    
     updateHomeView();
 }
 
@@ -1908,6 +1917,46 @@ function calculateIVA() {
         const iva = monto * 0.16 / 1.16;
         document.getElementById('facturaIVA').value = iva.toFixed(2);
     }
+}function showEditFacturaModal(facturaId) {
+    currentFacturaId = facturaId;
+    
+    // Buscar la factura en todos los proveedores
+    let factura = null;
+    let proveedorId = null;
+    
+    for (const prov of proveedores) {
+        if (prov.facturas) {
+            const found = prov.facturas.find(f => f.id === facturaId);
+            if (found) {
+                factura = found;
+                proveedorId = prov.id;
+                break;
+            }
+        }
+    }
+    
+    if (!factura) {
+        alert('Factura no encontrada');
+        return;
+    }
+    
+    // Poblar el modal con los datos de la factura
+    document.getElementById('facturaNumero').value = factura.numero || '';
+    document.getElementById('facturaFecha').value = factura.fecha;
+    document.getElementById('facturaVencimiento').value = factura.vencimiento;
+    document.getElementById('facturaMonto').value = factura.monto;
+    document.getElementById('facturaIVA').value = factura.iva || 0;
+    
+    // Cambiar el título del modal
+    const modalTitle = document.querySelector('#registrarFacturaModal .modal-title');
+    if (modalTitle) modalTitle.textContent = 'Editar Factura';
+    
+    // Marcar que estamos en modo edición
+    window.editingFacturaId = facturaId;
+    window.editingProveedorId = proveedorId;
+    
+    closeModal('proveedorDetailModal');
+    document.getElementById('registrarFacturaModal').classList.add('active');
 }
 }
 
