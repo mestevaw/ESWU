@@ -338,7 +338,7 @@ async function saveDocumentoAdicional(event) {
             
             await loadInquilinos();
             closeModal('agregarDocumentoModal');
-            showInquilinoDetail(currentInquilinoId);
+            showInquilinoDetailModal(currentInquilinoId);
             
             const mensajeExito = inq.contrato_file 
                 ? '✅ Contrato Original REEMPLAZADO correctamente'
@@ -370,7 +370,7 @@ async function saveDocumentoAdicional(event) {
         
         await loadInquilinos();
         closeModal('agregarDocumentoModal');
-        showInquilinoDetail(currentInquilinoId);
+       showInquilinoDetailModal(currentInquilinoId);
         
         alert('✅ Documento agregado correctamente');
         
