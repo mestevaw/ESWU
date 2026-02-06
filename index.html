@@ -7,12 +7,10 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay hidden">
         <div class="loading-spinner"></div>
     </div>
 
-    <!-- Login Container -->
     <div id="loginContainer" class="login-container">
         <div class="login-box">
             <h1>ESWU</h1>
@@ -35,9 +33,7 @@
         </div>
     </div>
 
-    <!-- App Container -->
     <div id="appContainer" class="app-container">
-        <!-- Header -->
         <header class="header">
             <h1 class="header-title">ESWU</h1>
             <div id="headerSearchBar" class="header-search-bar">
@@ -51,9 +47,7 @@
             </div>
         </header>
 
-        <!-- Main Content -->
         <div class="main-content">
-            <!-- Menu Sidebar -->
             <div class="menu-sidebar" id="menuSidebar">
                 <button id="menuInquilinos" class="menu-btn" onclick="showSubMenu('inquilinos')">Inquilinos</button>
                 <button id="menuProveedores" class="menu-btn" onclick="showSubMenu('proveedores')">Proveedores</button>
@@ -61,7 +55,6 @@
                 <button class="menu-btn menu-btn-secondary" onclick="logout()">Salir</button>
             </div>
 
-            <!-- Inquilinos Submenu -->
             <div id="inquilinosSubMenu" class="submenu-container">
                 <button class="submenu-btn" onclick="showInquilinosView('list')">Listado</button>
                 <button class="submenu-btn" onclick="showAddInquilinoModal()">Dar de Alta</button>
@@ -69,7 +62,6 @@
                 <button class="submenu-btn" onclick="showInquilinosView('vencimientoContratos')">Contratos</button>
             </div>
 
-            <!-- Proveedores Submenu -->
             <div id="proveedoresSubMenu" class="submenu-container">
                 <button class="submenu-btn" onclick="showProveedoresView('list')">Listado</button>
                 <button class="submenu-btn" onclick="showAddProveedorModal()">Dar de Alta</button>
@@ -77,7 +69,6 @@
                 <button class="submenu-btn" onclick="showProveedoresView('facturasPorPagar')">Facturas X Pagar</button>
             </div>
 
-            <!-- Admin Submenu -->
             <div id="adminSubMenu" class="submenu-container">
                 <button class="submenu-btn" onclick="showActivosPage()">Activos</button>
                 <button class="submenu-btn" onclick="showAdminView('bancos')">Bancos</button>
@@ -87,7 +78,6 @@
                 <button class="submenu-btn" onclick="showAdminView('usuarios')">Usuarios</button>
             </div>
 
-            <!-- Content Area -->
             <div id="contentArea" class="content-area">
                 
                 <!-- Inquilinos Page -->
@@ -100,13 +90,7 @@
                             </div>
                             <div class="table-container">
                                 <table id="inquilinosTable" class="sticky-header-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Empresa</th>
-                                            <th>Renta Mensual</th>
-                                            <th>Vencimiento Contrato</th>
-                                        </tr>
-                                    </thead>
+                                    <thead><tr><th>Empresa</th><th>Renta Mensual</th><th>Vencimiento Contrato</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -115,9 +99,7 @@
 
                     <div id="inquilinosRentasRecibidasView" class="hidden">
                         <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Rentas Recibidas</h2>
-                            </div>
+                            <div class="card-header"><h2 class="card-title">Rentas Recibidas</h2></div>
                             <div style="padding: 1.5rem;">
                                 <div class="filter-section">
                                     <label>Filtro:</label>
@@ -128,29 +110,15 @@
                                     <label>Año:</label>
                                     <select id="inquilinosRentasYear" onchange="renderInquilinosRentasRecibidas()"></select>
                                     <select id="inquilinosRentasMonth" class="hidden" onchange="renderInquilinosRentasRecibidas()">
-                                        <option value="0">Enero</option>
-                                        <option value="1">Febrero</option>
-                                        <option value="2">Marzo</option>
-                                        <option value="3">Abril</option>
-                                        <option value="4">Mayo</option>
-                                        <option value="5">Junio</option>
-                                        <option value="6">Julio</option>
-                                        <option value="7">Agosto</option>
-                                        <option value="8">Septiembre</option>
-                                        <option value="9">Octubre</option>
-                                        <option value="10">Noviembre</option>
-                                        <option value="11">Diciembre</option>
+                                        <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+                                        <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+                                        <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+                                        <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
                                     </select>
                                 </div>
                                 <div class="table-container">
                                     <table id="inquilinosRentasRecibidasTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Empresa</th>
-                                                <th>Monto</th>
-                                                <th>Fecha</th>
-                                            </tr>
-                                        </thead>
+                                        <thead><tr><th>Empresa</th><th>Monto</th><th>Fecha</th></tr></thead>
                                         <tbody></tbody>
                                     </table>
                                 </div>
@@ -160,20 +128,10 @@
 
                     <div id="inquilinosVencimientoContratosView" class="hidden">
                         <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Vencimiento de Contratos</h2>
-                            </div>
+                            <div class="card-header"><h2 class="card-title">Vencimiento de Contratos</h2></div>
                             <div class="table-container">
                                 <table id="inquilinosVencimientoContratosTable" class="sticky-header-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Empresa</th>
-                                            <th>Inicio</th>
-                                            <th>Vencimiento</th>
-                                            <th>Días Restantes</th>
-                                            <th>Estado</th>
-                                        </tr>
-                                    </thead>
+                                    <thead><tr><th>Empresa</th><th>Inicio</th><th>Vencimiento</th><th>Días Restantes</th><th>Estado</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -191,15 +149,7 @@
                             </div>
                             <div class="table-container">
                                 <table id="proveedoresTable" class="sticky-header-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Proveedor</th>
-                                            <th>Servicio</th>
-                                            <th>Contacto</th>
-                                            <th>Teléfono</th>
-                                            <th>Email</th>
-                                        </tr>
-                                    </thead>
+                                    <thead><tr><th>Proveedor</th><th>Servicio</th><th>Contacto</th><th>Teléfono</th><th>Email</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -207,90 +157,58 @@
                     </div>
                     <div id="proveedoresFacturasPagadasView" class="hidden">
                         <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Facturas Pagadas</h2>
-                            </div>
-                            <div style="padding: 1.5rem;">
-                                <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
-                            </div>
+                            <div class="card-header"><h2 class="card-title">Facturas Pagadas</h2></div>
+                            <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
                         </div>
                     </div>
                     <div id="proveedoresFacturasPorPagarView" class="hidden">
                         <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Facturas Por Pagar</h2>
-                            </div>
-                            <div style="padding: 1.5rem;">
-                                <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
-                            </div>
+                            <div class="card-header"><h2 class="card-title">Facturas Por Pagar</h2></div>
+                            <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Otras páginas -->
+                <!-- Admin Pages -->
                 <div id="activosPage" class="page">
                     <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Activos</h2>
-                        </div>
-                        <div style="padding: 1.5rem;">
-                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
-                        </div>
+                        <div class="card-header"><h2 class="card-title">Activos</h2></div>
+                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
                     </div>
                 </div>
 
                 <div id="adminUsuariosPage" class="page">
                     <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Usuarios</h2>
-                        </div>
-                        <div style="padding: 1.5rem;">
-                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
-                        </div>
+                        <div class="card-header"><h2 class="card-title">Usuarios</h2></div>
+                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
                     </div>
                 </div>
 
                 <div id="adminBancosPage" class="page">
                     <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Bancos</h2>
-                        </div>
-                        <div style="padding: 1.5rem;">
-                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
-                        </div>
+                        <div class="card-header"><h2 class="card-title">Bancos</h2></div>
+                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
                     </div>
                 </div>
 
                 <div id="estacionamientoPage" class="page">
                     <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Estacionamiento</h2>
-                        </div>
-                        <div style="padding: 1.5rem;">
-                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
-                        </div>
+                        <div class="card-header"><h2 class="card-title">Estacionamiento</h2></div>
+                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
                     </div>
                 </div>
 
                 <div id="bitacoraPage" class="page">
                     <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Bitácora</h2>
-                        </div>
-                        <div style="padding: 1.5rem;">
-                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
-                        </div>
+                        <div class="card-header"><h2 class="card-title">Bitácora</h2></div>
+                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
                     </div>
                 </div>
 
                 <div id="numerosPage" class="page">
                     <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Números</h2>
-                        </div>
-                        <div style="padding: 1.5rem;">
-                            <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
-                        </div>
+                        <div class="card-header"><h2 class="card-title">Números</h2></div>
+                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
                     </div>
                 </div>
 
@@ -309,42 +227,15 @@
             </div>
             <div style="padding: 1.5rem;">
                 <form id="inquilinoForm" onsubmit="saveInquilino(event)">
-                    <div class="form-group">
-                        <label>Nombre / Empresa *</label>
-                        <input type="text" id="inquilinoNombre" required autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>CLABE</label>
-                        <input type="text" id="inquilinoClabe" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>RFC</label>
-                        <input type="text" id="inquilinoRFC" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>M²</label>
-                        <input type="number" id="inquilinoM2" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>No. Despacho</label>
-                        <input type="text" id="inquilinoDespacho" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Renta Mensual *</label>
-                        <input type="number" id="inquilinoRenta" step="0.01" required autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Fecha Inicio *</label>
-                        <input type="date" id="inquilinoFechaInicio" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Vencimiento Contrato *</label>
-                        <input type="date" id="inquilinoFechaVenc" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Notas</label>
-                        <textarea id="inquilinoNotas"></textarea>
-                    </div>
+                    <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="inquilinoNombre" required autocomplete="off"></div>
+                    <div class="form-group"><label>CLABE</label><input type="text" id="inquilinoClabe" autocomplete="off"></div>
+                    <div class="form-group"><label>RFC</label><input type="text" id="inquilinoRFC" autocomplete="off"></div>
+                    <div class="form-group"><label>M²</label><input type="number" id="inquilinoM2" autocomplete="off"></div>
+                    <div class="form-group"><label>No. Despacho</label><input type="text" id="inquilinoDespacho" autocomplete="off"></div>
+                    <div class="form-group"><label>Renta Mensual *</label><input type="number" id="inquilinoRenta" step="0.01" required autocomplete="off"></div>
+                    <div class="form-group"><label>Fecha Inicio *</label><input type="date" id="inquilinoFechaInicio" required></div>
+                    <div class="form-group"><label>Vencimiento Contrato *</label><input type="date" id="inquilinoFechaVenc" required></div>
+                    <div class="form-group"><label>Notas</label><textarea id="inquilinoNotas"></textarea></div>
                     
                     <h3 style="margin: 1.5rem 0 1rem 0;">Contactos</h3>
                     <div id="inquilinoContactosList" style="margin-bottom: 1rem;"></div>
@@ -377,18 +268,9 @@
             </div>
             <div style="padding: 1.5rem;">
                 <form id="contactoInquilinoForm" onsubmit="saveContactoInquilino(event)">
-                    <div class="form-group">
-                        <label>Nombre *</label>
-                        <input type="text" id="contactoInquilinoNombre" required autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Teléfono</label>
-                        <input type="tel" id="contactoInquilinoTelefono" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="contactoInquilinoEmail" autocomplete="off">
-                    </div>
+                    <div class="form-group"><label>Nombre *</label><input type="text" id="contactoInquilinoNombre" required autocomplete="off"></div>
+                    <div class="form-group"><label>Teléfono</label><input type="tel" id="contactoInquilinoTelefono" autocomplete="off"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="contactoInquilinoEmail" autocomplete="off"></div>
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeModal('addContactoInquilinoModal')">Cancelar</button>
                         <button type="submit" class="btn btn-success">Agregar</button>
@@ -398,7 +280,7 @@
         </div>
     </div>
 
-    <!-- Modal Detalle Inquilino CON MENÚ HAMBURGUESA -->
+    <!-- Modal Detalle Inquilino -->
     <div id="inquilinoDetailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
@@ -406,10 +288,10 @@
                     <div class="dropdown">
                         <button class="dropdown-toggle" onclick="toggleDropdown('inquilinoDetailDropdown')">☰</button>
                         <div id="inquilinoDetailDropdown" class="dropdown-content">
-                            <a href="#" onclick="event.preventDefault(); alert('Registrar Pago - En desarrollo');">Registrar Pago</a>
-                            <a href="#" onclick="event.preventDefault(); alert('Agregar Documento - En desarrollo');">Agregar Documento</a>
-                            <a href="#" onclick="event.preventDefault(); alert('Modificar Datos - En desarrollo');">Modificar Datos</a>
-                            <a href="#" onclick="event.preventDefault(); alert('Eliminar - En desarrollo');">Eliminar</a>
+                            <a href="#" onclick="event.preventDefault(); showRegistrarPagoModal();">Registrar Pago</a>
+                            <a href="#" onclick="event.preventDefault(); showAgregarDocumentoModal();">Agregar Documento</a>
+                            <a href="#" onclick="event.preventDefault(); editInquilino();">Modificar Datos</a>
+                            <a href="#" onclick="event.preventDefault(); deleteInquilino();">Eliminar</a>
                         </div>
                     </div>
                 </div>
@@ -417,19 +299,16 @@
                 <button class="close-modal" onclick="closeModal('inquilinoDetailModal')">×</button>
             </div>
             <div style="padding: 1.5rem;">
-                
                 <div class="info-box">
                     <div class="info-box-title">CONTACTOS</div>
                     <div id="detailContactosList"></div>
                 </div>
-
                 <div class="info-box">
                     <div class="info-box-content">
                         <strong>RFC:</strong> <span id="detailRFC"></span> &nbsp;&nbsp;&nbsp; 
                         <strong>CLABE:</strong> <span id="detailClabe"></span>
                     </div>
                 </div>
-
                 <div class="tabs-container">
                     <div class="tabs">
                         <button class="tab active" onclick="switchTab('inquilino', 'renta')">Datos de Renta</button>
@@ -438,49 +317,85 @@
                         <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos</button>
                         <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
                     </div>
-
                     <div id="inquilinoRentaTab" class="tab-content active">
                         <div class="info-grid">
-                            <div class="info-item">
-                                <div class="info-label">Renta Mensual</div>
-                                <div class="info-value currency" id="detailRenta"></div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">M²</div>
-                                <div class="info-value" id="detailM2"></div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">No. Despacho</div>
-                                <div class="info-value" id="detailDespacho"></div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Inicio Rentando</div>
-                                <div class="info-value" id="detailFechaInicio"></div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Vencimiento Contrato</div>
-                                <div class="info-value" id="detailFechaVenc"></div>
-                            </div>
+                            <div class="info-item"><div class="info-label">Renta Mensual</div><div class="info-value currency" id="detailRenta"></div></div>
+                            <div class="info-item"><div class="info-label">M²</div><div class="info-value" id="detailM2"></div></div>
+                            <div class="info-item"><div class="info-label">No. Despacho</div><div class="info-value" id="detailDespacho"></div></div>
+                            <div class="info-item"><div class="info-label">Inicio Rentando</div><div class="info-value" id="detailFechaInicio"></div></div>
+                            <div class="info-item"><div class="info-label">Vencimiento Contrato</div><div class="info-value" id="detailFechaVenc"></div></div>
                         </div>
                     </div>
-
-                    <div id="inquilinoPagosTab" class="tab-content">
-                        <div id="historialPagos"></div>
-                    </div>
-
-                    <div id="inquilinoContratoTab" class="tab-content">
-                        <div id="contratoOriginalSection"></div>
-                    </div>
-
-                    <div id="inquilinoDocsTab" class="tab-content">
-                        <div id="documentosAdicionales"></div>
-                    </div>
-
-                    <div id="inquilinoNotasTab" class="tab-content">
-                        <p id="notasInquilino"></p>
-                    </div>
+                    <div id="inquilinoPagosTab" class="tab-content"><div id="historialPagos"></div></div>
+                    <div id="inquilinoContratoTab" class="tab-content"><div id="contratoOriginalSection"></div></div>
+                    <div id="inquilinoDocsTab" class="tab-content"><div id="documentosAdicionales"></div></div>
+                    <div id="inquilinoNotasTab" class="tab-content"><p id="notasInquilino"></p></div>
                 </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Modal Registrar Pago -->
+    <div id="registrarPagoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Registrar Pago de Renta</h2>
+                <button class="close-modal" onclick="closeModal('registrarPagoModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form id="pagoForm" onsubmit="savePagoRenta(event)">
+                    <div class="form-group"><label>Fecha de Pago *</label><input type="date" id="pagoFecha" required></div>
+                    <div class="form-group">
+                        <label>¿Pago completo?</label>
+                        <select id="pagoCompleto" onchange="toggleMontoInput()">
+                            <option value="si">Sí</option>
+                            <option value="no">No (pago parcial)</option>
+                        </select>
+                    </div>
+                    <div id="pagoMontoGroup" class="form-group hidden">
+                        <label>Monto del Pago *</label>
+                        <input type="number" id="pagoMonto" step="0.01" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label>Comprobante de Pago (PDF)</label>
+                        <div class="file-upload" onclick="document.getElementById('pagoPDF').click()">
+                            <input type="file" id="pagoPDF" accept=".pdf">
+                            <p>Click para seleccionar PDF del comprobante</p>
+                            <p id="pagoPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('registrarPagoModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Documento -->
+    <div id="agregarDocumentoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar Documento Adicional</h2>
+                <button class="close-modal" onclick="closeModal('agregarDocumentoModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form id="documentoForm" onsubmit="saveDocumentoAdicional(event)">
+                    <div class="form-group"><label>Nombre del Documento *</label><input type="text" id="nuevoDocNombre" required autocomplete="off"></div>
+                    <div class="form-group">
+                        <label>Documento (PDF) *</label>
+                        <div class="file-upload" onclick="document.getElementById('nuevoDocPDF').click()">
+                            <input type="file" id="nuevoDocPDF" accept=".pdf" required>
+                            <p>Click para seleccionar PDF</p>
+                            <p id="nuevoDocPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('agregarDocumentoModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -494,26 +409,11 @@
             </div>
             <div style="padding: 1.5rem;">
                 <form id="proveedorForm" onsubmit="saveProveedor(event)">
-                    <div class="form-group">
-                        <label>Nombre / Empresa *</label>
-                        <input type="text" id="proveedorNombre" required autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Servicio *</label>
-                        <input type="text" id="proveedorServicio" required autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>CLABE</label>
-                        <input type="text" id="proveedorClabe" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>RFC</label>
-                        <input type="text" id="proveedorRFC" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Notas</label>
-                        <textarea id="proveedorNotas"></textarea>
-                    </div>
+                    <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="proveedorNombre" required autocomplete="off"></div>
+                    <div class="form-group"><label>Servicio *</label><input type="text" id="proveedorServicio" required autocomplete="off"></div>
+                    <div class="form-group"><label>CLABE</label><input type="text" id="proveedorClabe" autocomplete="off"></div>
+                    <div class="form-group"><label>RFC</label><input type="text" id="proveedorRFC" autocomplete="off"></div>
+                    <div class="form-group"><label>Notas</label><textarea id="proveedorNotas"></textarea></div>
                     
                     <h3 style="margin: 1.5rem 0 1rem 0;">Contactos</h3>
                     <div id="proveedorContactosList" style="margin-bottom: 1rem;"></div>
@@ -537,18 +437,9 @@
             </div>
             <div style="padding: 1.5rem;">
                 <form id="contactoProveedorForm" onsubmit="saveContactoProveedor(event)">
-                    <div class="form-group">
-                        <label>Nombre *</label>
-                        <input type="text" id="contactoProveedorNombre" required autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Teléfono</label>
-                        <input type="tel" id="contactoProveedorTelefono" autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="contactoProveedorEmail" autocomplete="off">
-                    </div>
+                    <div class="form-group"><label>Nombre *</label><input type="text" id="contactoProveedorNombre" required autocomplete="off"></div>
+                    <div class="form-group"><label>Teléfono</label><input type="tel" id="contactoProveedorTelefono" autocomplete="off"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="contactoProveedorEmail" autocomplete="off"></div>
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeModal('addContactoProveedorModal')">Cancelar</button>
                         <button type="submit" class="btn btn-success">Agregar</button>
@@ -558,7 +449,7 @@
         </div>
     </div>
 
-    <!-- Modal Detalle Proveedor CON MENÚ HAMBURGUESA Y TABS -->
+    <!-- Modal Detalle Proveedor -->
     <div id="proveedorDetailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
@@ -566,9 +457,9 @@
                     <div class="dropdown">
                         <button class="dropdown-toggle" onclick="toggleDropdown('proveedorDetailDropdown')">☰</button>
                         <div id="proveedorDetailDropdown" class="dropdown-content">
-                            <a href="#" onclick="event.preventDefault(); alert('Registrar Factura - En desarrollo');">Registrar Factura</a>
-                            <a href="#" onclick="event.preventDefault(); alert('Modificar Datos - En desarrollo');">Modificar Datos</a>
-                            <a href="#" onclick="event.preventDefault(); alert('Eliminar - En desarrollo');">Eliminar</a>
+                            <a href="#" onclick="event.preventDefault(); showRegistrarFacturaModal();">Registrar Factura</a>
+                            <a href="#" onclick="event.preventDefault(); editProveedor();">Modificar Datos</a>
+                            <a href="#" onclick="event.preventDefault(); deleteProveedor();">Eliminar</a>
                         </div>
                     </div>
                 </div>
@@ -576,26 +467,19 @@
                 <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
             </div>
             <div style="padding: 1.5rem;">
-                
                 <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">Servicio</div>
-                        <div class="info-value" id="detailServicio"></div>
-                    </div>
+                    <div class="info-item"><div class="info-label">Servicio</div><div class="info-value" id="detailServicio"></div></div>
                 </div>
-
                 <div class="info-box">
                     <div class="info-box-title">CONTACTOS</div>
                     <div id="detailProvContactosList"></div>
                 </div>
-
                 <div class="info-box">
                     <div class="info-box-content">
                         <strong>RFC:</strong> <span id="detailProvRFC"></span> &nbsp;&nbsp;&nbsp; 
                         <strong>CLABE:</strong> <span id="detailProvClabe"></span>
                     </div>
                 </div>
-
                 <div class="tabs-container">
                     <div class="tabs">
                         <button class="tab active" onclick="switchTab('proveedor', 'pagadas')">Facturas Pagadas</button>
@@ -603,32 +487,47 @@
                         <button class="tab" onclick="switchTab('proveedor', 'docs')">Documentos</button>
                         <button class="tab" onclick="switchTab('proveedor', 'notas')">Notas</button>
                     </div>
-
-                    <div id="proveedorPagadasTab" class="tab-content active">
-                        <div id="facturasPagadas"></div>
-                    </div>
-
-                    <div id="proveedorPorPagarTab" class="tab-content">
-                        <div id="facturasPorPagar"></div>
-                    </div>
-
-                    <div id="proveedorDocsTab" class="tab-content">
-                        <div id="proveedorDocumentosAdicionales"></div>
-                    </div>
-
-                    <div id="proveedorNotasTab" class="tab-content">
-                        <p id="notasProveedor"></p>
-                    </div>
+                    <div id="proveedorPagadasTab" class="tab-content active"><div id="facturasPagadas"></div></div>
+                    <div id="proveedorPorPagarTab" class="tab-content"><div id="facturasPorPagar"></div></div>
+                    <div id="proveedorDocsTab" class="tab-content"><div id="proveedorDocumentosAdicionales"></div></div>
+                    <div id="proveedorNotasTab" class="tab-content"><p id="notasProveedor"></p></div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- Supabase Library -->
+    <!-- Modal Registrar Factura -->
+    <div id="registrarFacturaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Registrar Factura</h2>
+                <button class="close-modal" onclick="closeModal('registrarFacturaModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form id="facturaForm" onsubmit="saveFactura(event)">
+                    <div class="form-group"><label>Número de Factura</label><input type="text" id="facturaNumero" autocomplete="off"></div>
+                    <div class="form-group"><label>Fecha Factura *</label><input type="date" id="facturaFecha" required></div>
+                    <div class="form-group"><label>Vencimiento *</label><input type="date" id="facturaVencimiento" required></div>
+                    <div class="form-group"><label>Monto *</label><input type="number" id="facturaMonto" step="0.01" required autocomplete="off"></div>
+                    <div class="form-group"><label>IVA</label><input type="number" id="facturaIVA" step="0.01" autocomplete="off"></div>
+                    <div class="form-group">
+                        <label>Factura (PDF)</label>
+                        <div class="file-upload" onclick="document.getElementById('facturaDocumento').click()">
+                            <input type="file" id="facturaDocumento" accept=".pdf">
+                            <p>Click para seleccionar PDF de la factura</p>
+                            <p id="facturaDocumentoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('registrarFacturaModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- JavaScript Files -->
     <script src="js/config.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/database.js"></script>
