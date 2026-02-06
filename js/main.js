@@ -751,6 +751,7 @@ async function eliminarProveedoresMigrados() {
     } finally {
         hideLoading();
     }
+   
    async function terminarContratoInquilino() {
     const fechaTerminacion = prompt('Ingresa la fecha de terminación del contrato (YYYY-MM-DD):');
     
@@ -795,6 +796,7 @@ async function eliminarProveedoresMigrados() {
         hideLoading();
     }
 }
+   
    // ============================================
 // CARGA BÁSICA (RÁPIDA)
 // ============================================
@@ -930,4 +932,4 @@ async function ensureBitacoraLoaded() {
         hideLoading();
     }
 }
-}
+
