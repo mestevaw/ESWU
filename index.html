@@ -706,8 +706,12 @@
                         <div class="form-group"><label>Número de Factura</label><input type="text" id="facturaNumero" autocomplete="off"></div>
                         <div class="form-group"><label>Fecha Factura *</label><input type="date" id="facturaFecha" required></div>
                         <div class="form-group"><label>Vencimiento *</label><input type="date" id="facturaVencimiento" required></div>
-                        <div class="form-group"><label>Monto *</label><input type="number" id="facturaMonto" step="0.01" required autocomplete="off"></div>
-                        <div class="form-group">
+                       <div class="form-group"><label>Monto Total (incluye IVA) *</label><input type="number" id="facturaMonto" step="0.01" required autocomplete="off" onchange="calculateIVA()"></div>
+<div class="form-group">
+    <div class="form-group">
+    <label>IVA (editable)</label>
+    <input type="number" id="facturaIVA" step="0.01" autocomplete="off" placeholder="Se calcula automático o escribe manualmente">
+</div>
                             <label>Factura (PDF)</label>
                             <div class="file-upload" onclick="document.getElementById('facturaDocumento').click()">
                                 <input type="file" id="facturaDocumento" accept=".pdf">
