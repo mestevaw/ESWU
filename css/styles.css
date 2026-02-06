@@ -871,3 +871,57 @@ tr:hover {
     background: #e6f2ff !important;
     border: 2px solid #5a9fd4;
 }
+
+/* ========================================
+   AGREGAR AL FINAL DE styles.css
+   ======================================== */
+
+/* BITÁCORA - HOVER TOOLTIP */
+.bitacora-notas-cell {
+    position: relative;
+    max-width: 600px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bitacora-notas-cell:hover::after {
+    content: attr(data-fulltext);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: white;
+    border: 2px solid var(--primary);
+    padding: 1rem;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 1000;
+    white-space: pre-wrap;
+    max-width: 600px;
+    min-width: 300px;
+    margin-top: 0.5rem;
+}
+
+/* HEADERS ORDENABLES - ICONOS */
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+th.sortable::after {
+    content: ' ↕';
+    opacity: 0.3;
+    font-size: 0.8em;
+}
+
+th.sorted-asc::after {
+    content: ' ↑';
+    opacity: 1;
+    color: var(--primary);
+}
+
+th.sorted-desc::after {
+    content: ' ↓';
+    opacity: 1;
+    color: var(--primary);
+}
