@@ -485,25 +485,34 @@ function showInquilinoDetailModal(id) {
     
     document.getElementById('detailRFC').textContent = inq.rfc || '-';
     document.getElementById('detailClabe').textContent = inq.clabe || '-';
-    // Calcular saldo (última renta pagada)
+  
+ // Calcular saldo (última renta pagada)
 const hoy = new Date();
 const mesActual = hoy.getMonth();
 const anioActual = hoy.getFullYear();
 
-// Buscar si hay pago del mes actual
-const pagoMesActual = inq.pagos && inq.pagos.find(p => {
-    const fechaPago = new Date(p.fecha + 'T00:00:00');
-    return fechaPago.getMonth() === mesActual && fechaPago.getFullYear() === anioActual;
-});
-
-// Mostrar renta con indicador de pago
-if (pagoMesActual) {
-    document.getElementById('detailRenta').innerHTML = formatCurrency(inq.renta) + ' <span style="color:var(--success);font-weight:bold;margin-left:0.5rem">✓ Pagado</span>';
+// Si el contrato está terminado, NO hay deuda
+if (inq.contrato_activo === false) {
+    document.getElementById('detailRenta').innerHTML = formatCurrency(0) + ' <span style="color:var(--text-light);font-weight:bold;margin-left:0.5rem">Contrato Terminado</span>';
+    document.getElementById('detailRenta').style.color = 'var(--text)';
 } else {
-    // Si no hay pago del mes, mostrar en rojo como pendiente
-    document.getElementById('detailRenta').innerHTML = formatCurrency(-inq.renta) + ' <span style="color:var(--danger);font-weight:bold;margin-left:0.5rem">⚠ PENDIENTE</span>';
-    document.getElementById('detailRenta').style.color = 'var(--danger)';
+    // Buscar si hay pago del mes actual
+    const pagoMesActual = inq.pagos && inq.pagos.find(p => {
+        const fechaPago = new Date(p.fecha + 'T00:00:00');
+        return fechaPago.getMonth() === mesActual && fechaPago.getFullYear() === anioActual;
+    });
+
+    // Mostrar renta con indicador de pago
+    if (pagoMesActual) {
+        document.getElementById('detailRenta').innerHTML = formatCurrency(inq.renta) + ' <span style="color:var(--success);font-weight:bold;margin-left:0.5rem">✓ Pagado</span>';
+        document.getElementById('detailRenta').style.color = 'var(--text)';
+    } else {
+        // Si no hay pago del mes, mostrar en rojo como pendiente
+        document.getElementById('detailRenta').innerHTML = formatCurrency(-inq.renta) + ' <span style="color:var(--danger);font-weight:bold;margin-left:0.5rem">⚠ PENDIENTE</span>';
+        document.getElementById('detailRenta').style.color = 'var(--danger)';
+    }
 }
+   
     document.getElementById('detailM2').textContent = inq.m2 || '-';
     document.getElementById('detailDespacho').textContent = inq.numero_despacho || '-';
     document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
