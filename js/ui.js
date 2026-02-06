@@ -311,10 +311,9 @@ function renderInquilinosRentasRecibidas() {
     const rentas = [];
     let totalPeriodo = 0;
     
-    // CAMBIO: Filtrar solo inquilinos con contrato activo
-    inquilinos.forEach(inq => {
-        // Solo procesar inquilinos con contrato activo
-        if (inq.contrato_activo === false) return;
+   // MOSTRAR TODOS LOS PAGOS (activos e inactivos) en historial
+inquilinos.forEach(inq => {
+    // NO filtrar por contrato_activo - mostrar todos los pagos históricos
         
         if (inq.pagos && inq.pagos.length > 0) {
             inq.pagos.forEach(pago => {
