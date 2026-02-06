@@ -41,9 +41,9 @@
         <header class="header">
             <h1 class="header-title">ESWU</h1>
             <div id="headerSearchBar" class="header-search-bar">
-                <input type="text" id="searchInput" placeholder="Buscar..." onkeypress="if(event.key==='Enter') executeSearch()">
-                <button class="btn-icon search" onclick="executeSearch()" title="Buscar">🔍</button>
-                <button class="btn-icon clear" onclick="clearSearch()" title="Limpiar">🧹</button>
+                <input type="text" id="searchInput" placeholder="Buscar...">
+                <button class="btn-icon search" onclick="executeSearch()">🔍</button>
+                <button class="btn-icon clear" onclick="clearSearch()">🧹</button>
             </div>
             <div class="header-actions">
                 <button id="btnSearch" class="btn-search hidden" onclick="toggleSearch()">🔍</button>
@@ -92,7 +92,6 @@
                 
                 <!-- Inquilinos Page -->
                 <div id="inquilinosPage" class="page">
-                    <!-- Listado de Inquilinos -->
                     <div id="inquilinosListView" class="hidden">
                         <div class="card">
                             <div class="card-header">
@@ -114,7 +113,6 @@
                         </div>
                     </div>
 
-                    <!-- Rentas Recibidas -->
                     <div id="inquilinosRentasRecibidasView" class="hidden">
                         <div class="card">
                             <div class="card-header">
@@ -160,7 +158,6 @@
                         </div>
                     </div>
 
-                    <!-- Vencimiento de Contratos -->
                     <div id="inquilinosVencimientoContratosView" class="hidden">
                         <div class="card">
                             <div class="card-header">
@@ -186,7 +183,6 @@
 
                 <!-- Proveedores Page -->
                 <div id="proveedoresPage" class="page">
-                    <!-- Listado de Proveedores -->
                     <div id="proveedoresListView" class="hidden">
                         <div class="card">
                             <div class="card-header">
@@ -209,8 +205,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Facturas Pagadas -->
                     <div id="proveedoresFacturasPagadasView" class="hidden">
                         <div class="card">
                             <div class="card-header">
@@ -221,8 +215,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Facturas Por Pagar -->
                     <div id="proveedoresFacturasPorPagarView" class="hidden">
                         <div class="card">
                             <div class="card-header">
@@ -235,12 +227,11 @@
                     </div>
                 </div>
 
-                <!-- Activos Page -->
+                <!-- Otras páginas (Activos, Admin, etc.) -->
                 <div id="activosPage" class="page">
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title">Activos</h2>
-                            <button class="btn btn-primary" onclick="showAddActivoModal()">+ Agregar</button>
                         </div>
                         <div style="padding: 1.5rem;">
                             <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
@@ -248,12 +239,10 @@
                     </div>
                 </div>
 
-                <!-- Admin Usuarios Page -->
                 <div id="adminUsuariosPage" class="page">
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title">Usuarios</h2>
-                            <button class="btn btn-primary" onclick="showAddUsuarioModal()">+ Agregar</button>
                         </div>
                         <div style="padding: 1.5rem;">
                             <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
@@ -261,12 +250,10 @@
                     </div>
                 </div>
 
-                <!-- Admin Bancos Page -->
                 <div id="adminBancosPage" class="page">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Bancos - Documentos</h2>
-                            <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
+                            <h2 class="card-title">Bancos</h2>
                         </div>
                         <div style="padding: 1.5rem;">
                             <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
@@ -274,7 +261,6 @@
                     </div>
                 </div>
 
-                <!-- Estacionamiento Page -->
                 <div id="estacionamientoPage" class="page">
                     <div class="card">
                         <div class="card-header">
@@ -286,11 +272,10 @@
                     </div>
                 </div>
 
-                <!-- Bitácora Page -->
                 <div id="bitacoraPage" class="page">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Bitácora Semanal</h2>
+                            <h2 class="card-title">Bitácora</h2>
                         </div>
                         <div style="padding: 1.5rem;">
                             <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
@@ -298,11 +283,10 @@
                     </div>
                 </div>
 
-                <!-- Números Page -->
                 <div id="numerosPage" class="page">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Resumen Financiero</h2>
+                            <h2 class="card-title">Números</h2>
                         </div>
                         <div style="padding: 1.5rem;">
                             <p style="color:var(--text-light);text-align:center">Vista en desarrollo</p>
@@ -414,32 +398,42 @@
         </div>
     </div>
 
-    <!-- Modal Detalle Inquilino CON TABS -->
+    <!-- ========================================
+         MODAL DETALLE INQUILINO CON TABS
+         ======================================== -->
     <div id="inquilinoDetailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
                 <h2 class="modal-title" id="inquilinoDetailNombre"></h2>
                 <button class="close-modal" onclick="closeModal('inquilinoDetailModal')">×</button>
             </div>
-            <div style="padding: 1.5rem; padding-top: 5rem;">
+            <div style="padding: 1.5rem;">
+                
+                <!-- Sección de Contactos -->
                 <div class="info-box">
                     <div class="info-box-title">CONTACTOS</div>
                     <div id="detailContactosList"></div>
                 </div>
+
+                <!-- Sección RFC y CLABE -->
                 <div class="info-box">
                     <div class="info-box-content">
                         <strong>RFC:</strong> <span id="detailRFC"></span> &nbsp;&nbsp;&nbsp; 
                         <strong>CLABE:</strong> <span id="detailClabe"></span>
                     </div>
                 </div>
+
+                <!-- TABS -->
                 <div class="tabs-container">
                     <div class="tabs">
                         <button class="tab active" onclick="switchTab('inquilino', 'renta')">Datos de Renta</button>
                         <button class="tab" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos</button>
                         <button class="tab" onclick="switchTab('inquilino', 'contrato')">Contrato Original</button>
-                        <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos Adicionales</button>
+                        <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos</button>
                         <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
                     </div>
+
+                    <!-- Tab: Datos de Renta -->
                     <div id="inquilinoRentaTab" class="tab-content active">
                         <div class="info-grid">
                             <div class="info-item">
@@ -464,19 +458,28 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Tab: Historial de Pagos -->
                     <div id="inquilinoPagosTab" class="tab-content">
                         <div id="historialPagos"></div>
                     </div>
+
+                    <!-- Tab: Contrato Original -->
                     <div id="inquilinoContratoTab" class="tab-content">
                         <div id="contratoOriginalSection"></div>
                     </div>
+
+                    <!-- Tab: Documentos Adicionales -->
                     <div id="inquilinoDocsTab" class="tab-content">
                         <div id="documentosAdicionales"></div>
                     </div>
+
+                    <!-- Tab: Notas -->
                     <div id="inquilinoNotasTab" class="tab-content">
                         <p id="notasInquilino"></p>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
