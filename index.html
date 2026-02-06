@@ -264,7 +264,12 @@
                                 </div>
                                 <div class="table-container">
                                     <table id="proveedoresFacturasPagadasTable">
-                                        <thead><tr><th>Proveedor</th><th>Número</th><th>Monto</th><th>Fecha Pago</th></tr></thead>
+                                        <thead><tr>
+       <th class="sortable" data-column="proveedor" onclick="sortFacturasPagadas('proveedor')" style="cursor:pointer; width:35%">Proveedor</th>
+       <th style="width:20%">Número</th>
+       <th style="width:20%">Monto</th>
+       <th class="sortable" data-column="fecha" onclick="sortFacturasPagadas('fecha')" style="cursor:pointer; width:25%">Fecha Pago</th>
+   </tr></thead>
                                         <tbody></tbody>
                                     </table>
                                 </div>
@@ -296,7 +301,12 @@
                                 </div>
                                 <div class="table-container">
                                     <table id="proveedoresFacturasPorPagarTable">
-                                        <thead><tr><th>Proveedor</th><th>Número</th><th>Monto</th><th>Vencimiento</th></tr></thead>
+                                         <thead><tr>
+       <th class="sortable" data-column="proveedor" onclick="sortFacturasPorPagar('proveedor')" style="cursor:pointer; width:35%">Proveedor</th>
+       <th style="width:20%">Número</th>
+       <th style="width:20%">Monto</th>
+       <th class="sortable" data-column="vencimiento" onclick="sortFacturasPorPagar('vencimiento')" style="cursor:pointer; width:25%">Vencimiento</th>
+   </tr></thead>
                                         <tbody></tbody>
                                     </table>
                                 </div>
@@ -378,8 +388,17 @@
                 <div id="bitacoraPage" class="page">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Bitácora Semanal</h2>
-                        </div>
+       <div class="modal-header-left">
+           <div class="dropdown">
+               <button class="dropdown-toggle" onclick="toggleDropdown('bitacoraMenuDropdown'); updateBitacoraMenu();" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
+               <div id="bitacoraMenuDropdown" class="dropdown-content">
+                   <a href="#" id="bitacoraMenuAgregar" onclick="event.preventDefault(); agregarNuevaSemana(); toggleDropdown('bitacoraMenuDropdown');">Agregar Semana</a>
+                   <a href="#" onclick="event.preventDefault(); alert('Haz click en una de las 2 semanas más recientes para modificarla'); toggleDropdown('bitacoraMenuDropdown');">Modificar</a>
+               </div>
+           </div>
+       </div>
+       <h2 class="card-title">Bitácora Semanal</h2>
+   </div>
                         <div class="table-container">
                             <table id="bitacoraTable" class="sticky-header-table">
                                 <thead><tr><th style="width:200px" class="sortable" onclick="sortBitacora()">Semana</th><th>Notas</th></tr></thead>
