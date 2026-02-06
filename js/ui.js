@@ -720,14 +720,14 @@ porPagar.forEach(f => {
     row.style.cursor = 'pointer';
     
     // Si hay PDF, abrir PDF. Si no, abrir detalle del proveedor
-    if (f.documento_file) {
+ if (f.documento_file) {
         row.onclick = () => viewPDF(f.documento_file);
     } else {
         row.onclick = () => showProveedorDetailModal(f.proveedorId);
     }
-        }
-        row.innerHTML = `<td>${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
-    });
+    
+    row.innerHTML = `<td>${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
+});
     
     if (porPagar.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
