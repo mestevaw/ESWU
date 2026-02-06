@@ -952,6 +952,21 @@ async function showNumerosPage() {
         ensureInquilinosFullLoaded(),
         ensureProveedoresFullLoaded()
     ]);
+    
+    document.getElementById('adminSubMenu').classList.remove('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('numerosPage').classList.add('active');
+    
+    currentSubContext = 'admin-numeros';
+    
+    document.getElementById('btnRegresa').classList.remove('hidden');
+    document.getElementById('btnSearch').classList.add('hidden');
+    document.getElementById('menuSidebar').classList.add('hidden');
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('contentArea').classList.add('fullwidth');
+    
+    updateHomeView();
+}
 
 // ============================================
 // ADMIN - RENDERS
@@ -1945,6 +1960,8 @@ function updateSortIndicators(tableId, sortColumn, sortOrder) {
             th.classList.add(sortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
         }
     });
+}
+   
 function calculateIVA() {
     const monto = parseFloat(document.getElementById('facturaMonto').value);
     if (!isNaN(monto) && monto > 0) {
