@@ -47,7 +47,7 @@
             </div>
             <div class="header-actions">
                 <button id="btnSearch" class="btn-search hidden" onclick="toggleSearch()">🔍</button>
-                <button id="btnRegresa" class="btn-regresa hidden" onclick="handleRegresa()">✖</button>
+                <button id="btnRegresa" class="btn-regresa-simple hidden" onclick="handleRegresa()">✖</button>
             </div>
         </header>
 
@@ -227,7 +227,7 @@
                     </div>
                 </div>
 
-                <!-- Otras páginas (Activos, Admin, etc.) -->
+                <!-- Otras páginas -->
                 <div id="activosPage" class="page">
                     <div class="card">
                         <div class="card-header">
@@ -398,24 +398,31 @@
         </div>
     </div>
 
-    <!-- ========================================
-         MODAL DETALLE INQUILINO CON TABS
-         ======================================== -->
+    <!-- Modal Detalle Inquilino CON MENÚ HAMBURGUESA -->
     <div id="inquilinoDetailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
+                <div class="modal-header-left">
+                    <div class="dropdown">
+                        <button class="dropdown-toggle" onclick="toggleDropdown('inquilinoDetailDropdown')">☰</button>
+                        <div id="inquilinoDetailDropdown" class="dropdown-content">
+                            <a href="#" onclick="event.preventDefault(); alert('Registrar Pago - En desarrollo');">Registrar Pago</a>
+                            <a href="#" onclick="event.preventDefault(); alert('Agregar Documento - En desarrollo');">Agregar Documento</a>
+                            <a href="#" onclick="event.preventDefault(); alert('Modificar Datos - En desarrollo');">Modificar Datos</a>
+                            <a href="#" onclick="event.preventDefault(); alert('Eliminar - En desarrollo');">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
                 <h2 class="modal-title" id="inquilinoDetailNombre"></h2>
                 <button class="close-modal" onclick="closeModal('inquilinoDetailModal')">×</button>
             </div>
             <div style="padding: 1.5rem;">
                 
-                <!-- Sección de Contactos -->
                 <div class="info-box">
                     <div class="info-box-title">CONTACTOS</div>
                     <div id="detailContactosList"></div>
                 </div>
 
-                <!-- Sección RFC y CLABE -->
                 <div class="info-box">
                     <div class="info-box-content">
                         <strong>RFC:</strong> <span id="detailRFC"></span> &nbsp;&nbsp;&nbsp; 
@@ -423,7 +430,6 @@
                     </div>
                 </div>
 
-                <!-- TABS -->
                 <div class="tabs-container">
                     <div class="tabs">
                         <button class="tab active" onclick="switchTab('inquilino', 'renta')">Datos de Renta</button>
@@ -433,7 +439,6 @@
                         <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
                     </div>
 
-                    <!-- Tab: Datos de Renta -->
                     <div id="inquilinoRentaTab" class="tab-content active">
                         <div class="info-grid">
                             <div class="info-item">
@@ -459,22 +464,18 @@
                         </div>
                     </div>
 
-                    <!-- Tab: Historial de Pagos -->
                     <div id="inquilinoPagosTab" class="tab-content">
                         <div id="historialPagos"></div>
                     </div>
 
-                    <!-- Tab: Contrato Original -->
                     <div id="inquilinoContratoTab" class="tab-content">
                         <div id="contratoOriginalSection"></div>
                     </div>
 
-                    <!-- Tab: Documentos Adicionales -->
                     <div id="inquilinoDocsTab" class="tab-content">
                         <div id="documentosAdicionales"></div>
                     </div>
 
-                    <!-- Tab: Notas -->
                     <div id="inquilinoNotasTab" class="tab-content">
                         <p id="notasInquilino"></p>
                     </div>
@@ -553,6 +554,73 @@
                         <button type="submit" class="btn btn-success">Agregar</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalle Proveedor CON MENÚ HAMBURGUESA Y TABS -->
+    <div id="proveedorDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header modal-header-sticky">
+                <div class="modal-header-left">
+                    <div class="dropdown">
+                        <button class="dropdown-toggle" onclick="toggleDropdown('proveedorDetailDropdown')">☰</button>
+                        <div id="proveedorDetailDropdown" class="dropdown-content">
+                            <a href="#" onclick="event.preventDefault(); alert('Registrar Factura - En desarrollo');">Registrar Factura</a>
+                            <a href="#" onclick="event.preventDefault(); alert('Modificar Datos - En desarrollo');">Modificar Datos</a>
+                            <a href="#" onclick="event.preventDefault(); alert('Eliminar - En desarrollo');">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="modal-title" id="proveedorDetailNombre"></h2>
+                <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Servicio</div>
+                        <div class="info-value" id="detailServicio"></div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-box-title">CONTACTOS</div>
+                    <div id="detailProvContactosList"></div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-box-content">
+                        <strong>RFC:</strong> <span id="detailProvRFC"></span> &nbsp;&nbsp;&nbsp; 
+                        <strong>CLABE:</strong> <span id="detailProvClabe"></span>
+                    </div>
+                </div>
+
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button class="tab active" onclick="switchTab('proveedor', 'pagadas')">Facturas Pagadas</button>
+                        <button class="tab" onclick="switchTab('proveedor', 'porpagar')">Facturas X Pagar</button>
+                        <button class="tab" onclick="switchTab('proveedor', 'docs')">Documentos</button>
+                        <button class="tab" onclick="switchTab('proveedor', 'notas')">Notas</button>
+                    </div>
+
+                    <div id="proveedorPagadasTab" class="tab-content active">
+                        <div id="facturasPagadas"></div>
+                    </div>
+
+                    <div id="proveedorPorPagarTab" class="tab-content">
+                        <div id="facturasPorPagar"></div>
+                    </div>
+
+                    <div id="proveedorDocsTab" class="tab-content">
+                        <div id="proveedorDocumentosAdicionales"></div>
+                    </div>
+
+                    <div id="proveedorNotasTab" class="tab-content">
+                        <p id="notasProveedor"></p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
