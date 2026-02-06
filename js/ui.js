@@ -1033,10 +1033,10 @@ function renderBitacoraTable() {
         return bitacoraSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
     });
     
-    sorted.forEach(sem => {
-        const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.onclick = () => showEditBitacoraModal(sem.id);
+ sorted.forEach(sem => {
+    const row = tbody.insertRow();
+    row.style.cursor = 'pointer';
+    row.onclick = () => showEditBitacoraModal(sem.id);  // Siempre abre, la función decide qué mostrar
         
         const notasPreview = sem.notas ? (sem.notas.length > 100 ? sem.notas.substring(0, 100) + '...' : sem.notas) : 'Sin notas';
         const notasCompletas = sem.notas || 'Sin notas';
@@ -1623,20 +1623,31 @@ function updateBitacoraMenu() {
     }
 }
 
-
-// REEMPLAZAR showEditBitacoraModal existente
 function showEditBitacoraModal(bitacoraId) {
-    if (!puedeModificarBitacora(bitacoraId)) {
-        alert('Solo puedes modificar las 2 semanas más recientes');
-        return;
-    }
-    
     const bitacora = bitacoraSemanal.find(b => b.id === bitacoraId);
     currentBitacoraId = bitacoraId;
     
     document.getElementById('editBitacoraFecha').value = bitacora.semana_inicio || '';
     document.getElementById('editBitacoraNotas').value = bitacora.notas || '';
     
+    // Verificar si se puede modificar
+    const puedeModificar = puedeModificarBitacora(bitacoraId);
+    
+    // Deshabilitar campos si no se puede modificar
+    document.getElementById('editBitacoraFecha').disabled = !puedeModificar;
+    document.getElementById('editBitacoraNotas').disabled = !puedeModificar;
+    
+    // Mostrar/ocultar botones de acción
+    const botonesDiv = document.querySelector('#editBitacoraModal .modal-actions');
+    if (botonesDiv) {
+        if (puedeModificar) {
+            botonesDiv.style.display = 'flex';
+        } else {
+            botonesDiv.style.display = 'none';
+        }
+    }
+    
+    // SIEMPRE ABRE EL MODAL (sin alert)
     document.getElementById('editBitacoraModal').classList.add('active');
 }
 
