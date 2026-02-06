@@ -1480,4 +1480,361 @@ function deleteProveedor() {
     alert('Eliminar proveedor - Función conectada en main.js');
 }
 
+/* ========================================
+   AGREGAR ESTAS FUNCIONES AL FINAL DE ui.js
+   (O reemplazar si ya existen)
+   ======================================== */
+
+// VARIABLES GLOBALES PARA ORDENAMIENTO DE FACTURAS
+let facturasPagadasSortColumn = 'fecha';
+let facturasPagadasSortOrder = 'desc';
+let facturasPorPagarSortColumn = 'vencimiento';
+let facturasPorPagarSortOrder = 'asc';
+
+// ============================================
+// BITÁCORA - FUNCIONES NUEVAS
+// ============================================
+
+function getProximoSabado() {
+    const hoy = new Date();
+    const diaSemana = hoy.getDay();
+    const diasHastaSabado = (6 - diaSemana + 7) % 7;
+    const proximoSabado = new Date(hoy);
+    proximoSabado.setDate(hoy.getDate() + (diasHastaSabado === 0 ? 7 : diasHastaSabado));
+    return proximoSabado.toISOString().split('T')[0];
+}
+
+function yaExisteProximaSemana() {
+    const proximoSabado = getProximoSabado();
+    return bitacoraSemanal.some(b => b.semana_inicio === proximoSabado);
+}
+
+async function agregarNuevaSemana() {
+    if (yaExisteProximaSemana()) {
+        alert('La próxima semana ya está registrada');
+        return;
+    }
+    
+    showLoading();
+    try {
+        const proximoSabado = getProximoSabado();
+        const fecha = new Date(proximoSabado);
+        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        const semanaTexto = `al ${fecha.getDate()} de ${meses[fecha.getMonth()]} ${fecha.getFullYear()}`;
+        
+        const { error } = await supabaseClient
+            .from('bitacora_semanal')
+            .insert([{
+                semana_inicio: proximoSabado,
+                semana_texto: semanaTexto,
+                notas: ''
+            }]);
+        
+        if (error) throw error;
+        
+        await loadBitacoraSemanal();
+        renderBitacoraTable();
+        
+        alert('✅ Nueva semana agregada correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al agregar semana: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function puedeModificarBitacora(bitacoraId) {
+    const ordenadas = [...bitacoraSemanal].sort((a, b) => 
+        new Date(b.semana_inicio) - new Date(a.semana_inicio)
+    );
+    const modificables = ordenadas.slice(0, 2).map(b => b.id);
+    return modificables.includes(bitacoraId);
+}
+
+function updateBitacoraMenu() {
+    const agregarBtn = document.getElementById('bitacoraMenuAgregar');
+    if (agregarBtn) {
+        if (yaExisteProximaSemana()) {
+            agregarBtn.style.display = 'none';
+        } else {
+            agregarBtn.style.display = 'block';
+        }
+    }
+}
+
+// REEMPLAZAR renderBitacoraTable existente
+function renderBitacoraTable() {
+    const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    if (!bitacoraSemanal || bitacoraSemanal.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-light)">No hay bitácora</td></tr>';
+        return;
+    }
+    
+    const sorted = [...bitacoraSemanal].sort((a, b) => {
+        const dateA = new Date(a.semana_inicio);
+        const dateB = new Date(b.semana_inicio);
+        return bitacoraSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    
+    sorted.forEach(sem => {
+        const row = tbody.insertRow();
+        const puedeModificar = puedeModificarBitacora(sem.id);
+        
+        if (puedeModificar) {
+            row.style.cursor = 'pointer';
+            row.onclick = () => showEditBitacoraModal(sem.id);
+        } else {
+            row.style.cursor = 'not-allowed';
+            row.style.opacity = '0.6';
+            row.onclick = () => alert('Solo puedes modificar las 2 semanas más recientes');
+        }
+        
+        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
+        const notasCompletas = sem.notas || 'Sin notas';
+        const semanaTexto = sem.semana_texto ? sem.semana_texto.replace('Semana del', 'al') : '';
+        
+        row.innerHTML = `
+            <td><strong>${semanaTexto}</strong></td>
+            <td class="bitacora-notas-cell" data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>
+        `;
+    });
+    
+    const th = document.querySelector('#bitacoraTable th.sortable');
+    if (th) {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        th.classList.add(bitacoraSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    }
+}
+
+// REEMPLAZAR showEditBitacoraModal existente
+function showEditBitacoraModal(bitacoraId) {
+    if (!puedeModificarBitacora(bitacoraId)) {
+        alert('Solo puedes modificar las 2 semanas más recientes');
+        return;
+    }
+    
+    const bitacora = bitacoraSemanal.find(b => b.id === bitacoraId);
+    currentBitacoraId = bitacoraId;
+    
+    document.getElementById('editBitacoraFecha').value = bitacora.semana_inicio || '';
+    document.getElementById('editBitacoraNotas').value = bitacora.notas || '';
+    
+    document.getElementById('editBitacoraModal').classList.add('active');
+}
+
+// MODIFICAR showPageFromMenu para incluir updateBitacoraMenu
+// BUSCA esta función y agrega updateBitacoraMenu() en la sección de bitácora
+
+// ============================================
+// FACTURAS - ORDENAMIENTO
+// ============================================
+
+// REEMPLAZAR renderProveedoresFacturasPagadas existente
+function renderProveedoresFacturasPagadas() {
+    const tbody = document.getElementById('proveedoresFacturasPagadasTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    const filterType = document.getElementById('provFactPagFilter').value;
+    const year = parseInt(document.getElementById('provFactPagYear').value);
+    const monthSelect = document.getElementById('provFactPagMonth');
+    
+    if (filterType === 'mensual') {
+        monthSelect.classList.remove('hidden');
+    } else {
+        monthSelect.classList.add('hidden');
+    }
+    
+    const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+    const pagadas = [];
+    let totalPagadas = 0;
+    
+    proveedores.forEach(prov => {
+        if (prov.facturas) {
+            prov.facturas.forEach(f => {
+                if (f.fecha_pago) {
+                    const pd = new Date(f.fecha_pago + 'T00:00:00');
+                    if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
+                        pagadas.push({
+                            proveedorId: prov.id,
+                            proveedor: prov.nombre,
+                            numero: f.numero || 'S/N',
+                            monto: f.monto,
+                            fecha: f.fecha_pago,
+                            documento_file: f.documento_file,
+                            pago_file: f.pago_file
+                        });
+                        totalPagadas += f.monto;
+                    }
+                }
+            });
+        }
+    });
+    
+    pagadas.sort((a, b) => {
+        let compareA, compareB;
+        
+        if (facturasPagadasSortColumn === 'proveedor') {
+            compareA = a.proveedor.toLowerCase();
+            compareB = b.proveedor.toLowerCase();
+            return facturasPagadasSortOrder === 'asc' 
+                ? compareA.localeCompare(compareB) 
+                : compareB.localeCompare(compareA);
+        } else if (facturasPagadasSortColumn === 'fecha') {
+            compareA = new Date(a.fecha);
+            compareB = new Date(b.fecha);
+            return facturasPagadasSortOrder === 'asc' 
+                ? compareA - compareB 
+                : compareB - compareA;
+        }
+        return 0;
+    });
+    
+    pagadas.forEach(f => {
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';
+        row.onclick = () => showProveedorDetail(f.proveedorId);
+        
+        const facturaCell = f.documento_file 
+            ? `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewFacturaDoc('${f.documento_file}')">${f.numero}</td>`
+            : `<td>${f.numero}</td>`;
+        const fechaCell = f.pago_file
+            ? `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewFacturaDoc('${f.pago_file}')">${formatDate(f.fecha)}</td>`
+            : `<td>${formatDate(f.fecha)}</td>`;
+        
+        row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
+    });
+    
+    if (pagadas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas pagadas</td></tr>';
+    } else {
+        const row = tbody.insertRow();
+        row.className = 'total-row';
+        row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
+    }
+    
+    updateSortIndicators('proveedoresFacturasPagadasTable', facturasPagadasSortColumn, facturasPagadasSortOrder);
+}
+
+// REEMPLAZAR renderProveedoresFacturasPorPagar existente
+function renderProveedoresFacturasPorPagar() {
+    const tbody = document.getElementById('proveedoresFacturasPorPagarTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    const filterType = document.getElementById('provFactPorPagFilter').value;
+    const year = parseInt(document.getElementById('provFactPorPagYear').value);
+    const monthSelect = document.getElementById('provFactPorPagMonth');
+    
+    if (filterType === 'mensual') {
+        monthSelect.classList.remove('hidden');
+    } else {
+        monthSelect.classList.add('hidden');
+    }
+    
+    const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+    const porPagar = [];
+    let totalPorPagar = 0;
+    
+    proveedores.forEach(prov => {
+        if (prov.facturas) {
+            prov.facturas.forEach(f => {
+                if (!f.fecha_pago) {
+                    const vd = new Date(f.vencimiento + 'T00:00:00');
+                    if (vd.getFullYear() === year && (month === null || month === vd.getMonth())) {
+                        porPagar.push({
+                            proveedorId: prov.id,
+                            factId: f.id,
+                            proveedor: prov.nombre,
+                            numero: f.numero || 'S/N',
+                            monto: f.monto,
+                            vencimiento: f.vencimiento,
+                            documento_file: f.documento_file
+                        });
+                        totalPorPagar += f.monto;
+                    }
+                }
+            });
+        }
+    });
+    
+    porPagar.sort((a, b) => {
+        let compareA, compareB;
+        
+        if (facturasPorPagarSortColumn === 'proveedor') {
+            compareA = a.proveedor.toLowerCase();
+            compareB = b.proveedor.toLowerCase();
+            return facturasPorPagarSortOrder === 'asc' 
+                ? compareA.localeCompare(compareB) 
+                : compareB.localeCompare(compareA);
+        } else if (facturasPorPagarSortColumn === 'vencimiento') {
+            compareA = new Date(a.vencimiento);
+            compareB = new Date(b.vencimiento);
+            return facturasPorPagarSortOrder === 'asc' 
+                ? compareA - compareB 
+                : compareB - compareA;
+        }
+        return 0;
+    });
+    
+    porPagar.forEach(f => {
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';
+        row.onclick = () => showProveedorDetail(f.proveedorId);
+        
+        if (f.documento_file) {
+            const numeroCell = `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewFacturaDoc('${f.documento_file}')">${f.numero}</td>`;
+            row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${numeroCell}<td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
+        } else {
+            row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
+        }
+    });
+    
+    if (porPagar.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
+    } else {
+        const row = tbody.insertRow();
+        row.className = 'total-row';
+        row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
+    }
+    
+    updateSortIndicators('proveedoresFacturasPorPagarTable', facturasPorPagarSortColumn, facturasPorPagarSortOrder);
+}
+
+function sortFacturasPagadas(column) {
+    if (facturasPagadasSortColumn === column) {
+        facturasPagadasSortOrder = facturasPagadasSortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        facturasPagadasSortColumn = column;
+        facturasPagadasSortOrder = column === 'fecha' ? 'desc' : 'asc';
+    }
+    renderProveedoresFacturasPagadas();
+}
+
+function sortFacturasPorPagar(column) {
+    if (facturasPorPagarSortColumn === column) {
+        facturasPorPagarSortOrder = facturasPorPagarSortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        facturasPorPagarSortColumn = column;
+        facturasPorPagarSortOrder = 'asc';
+    }
+    renderProveedoresFacturasPorPagar();
+}
+
+function updateSortIndicators(tableId, sortColumn, sortOrder) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    
+    const headers = table.querySelectorAll('th.sortable');
+    headers.forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        if (th.dataset.column === sortColumn) {
+            th.classList.add(sortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        }
+    });
+}
+
 console.log('✅ UI.JS FINAL COMPLETO - Todas las partes cargadas');
