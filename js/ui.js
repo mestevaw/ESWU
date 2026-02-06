@@ -272,12 +272,24 @@ function renderInquilinosTable() {
         return;
     }
     
-    inquilinos.forEach(inq => {
-        const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.onclick = () => showInquilinoDetailModal(inq.id);
-        row.innerHTML = `<td>${inq.nombre}</td><td class="currency">${formatCurrency(inq.renta)}</td><td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>`;
-    });
+inquilinos.forEach(inq => {
+    const row = tbody.insertRow();
+    row.style.cursor = 'pointer';
+    row.onclick = () => showInquilinoDetailModal(inq.id);
+    
+    // Si el contrato está terminado, aplicar estilo tenue
+    if (inq.contrato_activo === false) {
+        row.style.opacity = '0.5';
+        row.style.backgroundColor = '#f5f5f5';
+    }
+    
+    const rentaDisplay = inq.contrato_activo === false ? '$0.00' : formatCurrency(inq.renta);
+    const vencimientoDisplay = inq.contrato_activo === false ? 
+        '<span style="color:#999">Terminado</span>' : 
+        formatDateVencimiento(inq.fecha_vencimiento);
+    
+    row.innerHTML = `<td>${inq.nombre}</td><td class="currency">${rentaDisplay}</td><td>${vencimientoDisplay}</td>`;
+});
 }
 
 function renderInquilinosRentasRecibidas() {
