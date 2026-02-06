@@ -2010,7 +2010,6 @@ function showEditFacturaModal(facturaId) {
     closeModal('proveedorDetailModal');
     document.getElementById('registrarFacturaModal').classList.add('active');
 }
-}
 
 function populateProveedoresDropdown() {
     const select = document.getElementById('activoProveedor');
