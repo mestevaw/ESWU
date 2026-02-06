@@ -2012,5 +2012,18 @@ function showEditFacturaModal(facturaId) {
 }
 }
 
+function populateProveedoresDropdown() {
+    const select = document.getElementById('activoProveedor');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">-- Seleccione un proveedor --</option>';
+    
+    proveedores.forEach(prov => {
+        const option = document.createElement('option');
+        option.value = prov.nombre;
+        option.textContent = prov.nombre;
+        select.appendChild(option);
+    });
+}
 
 console.log('✅ UI.JS FINAL COMPLETO - Todas las partes cargadas');
