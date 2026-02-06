@@ -596,30 +596,56 @@ async function saveFactura(event) {
         }
         
         const facturaData = {
-            proveedor_id: currentProveedorId,
             numero: document.getElementById('facturaNumero').value || null,
             fecha: document.getElementById('facturaFecha').value,
             vencimiento: document.getElementById('facturaVencimiento').value,
             monto: parseFloat(document.getElementById('facturaMonto').value),
-            iva: parseFloat(document.getElementById('facturaIVA').value) || 0,
-            documento_file: facturaURL
+            iva: parseFloat(document.getElementById('facturaIVA').value) || 0
         };
         
-        const { error } = await supabaseClient
-            .from('facturas')
-            .insert([facturaData]);
+        // Solo actualizar documento si hay archivo nuevo
+        if (facturaURL) {
+            facturaData.documento_file = facturaURL;
+        }
         
-        if (error) throw error;
-        
-        await loadProveedores();
-        closeModal('registrarFacturaModal');
-        showProveedorDetailModal(currentProveedorId);
-        
-        alert('✅ Factura registrada correctamente');
+        // *** MODO EDICIÓN ***
+        if (window.editingFacturaId) {
+            const { error } = await supabaseClient
+                .from('facturas')
+                .update(facturaData)
+                .eq('id', window.editingFacturaId);
+            
+            if (error) throw error;
+            
+            delete window.editingFacturaId;
+            delete window.editingProveedorId;
+            
+            await loadProveedores();
+            closeModal('registrarFacturaModal');
+            showProveedorDetailModal(currentProveedorId);
+            
+            alert('✅ Factura actualizada correctamente');
+        }
+        // *** MODO CREAR ***
+        else {
+            facturaData.proveedor_id = currentProveedorId;
+            
+            const { error } = await supabaseClient
+                .from('facturas')
+                .insert([facturaData]);
+            
+            if (error) throw error;
+            
+            await loadProveedores();
+            closeModal('registrarFacturaModal');
+            showProveedorDetailModal(currentProveedorId);
+            
+            alert('✅ Factura registrada correctamente');
+        }
         
     } catch (error) {
         console.error('Error:', error);
-        alert('Error al registrar factura: ' + error.message);
+        alert('Error al guardar factura: ' + error.message);
     } finally {
         hideLoading();
     }
