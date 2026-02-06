@@ -802,10 +802,11 @@ function showPageFromMenu(pageName) {
     document.getElementById('contentArea').classList.add('fullwidth');
     
     if (pageName === 'bitacora') {
-        document.getElementById('btnSearch').classList.remove('hidden');
-        currentSearchContext = 'bitacora';
-        renderBitacoraTable();
-    } else if (pageName === 'estacionamiento') {
+    document.getElementById('btnSearch').classList.remove('hidden');
+    currentSearchContext = 'bitacora';
+    renderBitacoraTable();
+    updateBitacoraMenu();  // ← LÍNEA NUEVA
+} else if (pageName === 'estacionamiento') {
         document.getElementById('btnSearch').classList.add('hidden');
         currentSearchContext = null;
         renderEstacionamientoTable();
@@ -1017,7 +1018,6 @@ function updateDespachoField() {
    Reemplaza las funciones en ui.js
    ======================================== */
 
-// REEMPLAZAR renderBitacoraTable
 function renderBitacoraTable() {
     const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
     tbody.innerHTML = '';
@@ -1044,14 +1044,14 @@ function renderBitacoraTable() {
         
         row.innerHTML = `
             <td><strong>${semanaTexto}</strong></td>
-            <td class="bitacora-notas-preview">${notasPreview}</td>
+            <td class="bitacora-notas-cell">${notasPreview}</td>
         `;
         
         // AGREGAR TOOLTIP MANUALMENTE
         const notasCell = row.cells[1];
         notasCell.title = notasCompletas;
         
-        // Agregar hover event para tooltip personalizado
+        // EVENTO HOVER PARA TOOLTIP
         notasCell.addEventListener('mouseenter', function(e) {
             showBitacoraTooltip(e, notasCompletas);
         });
@@ -1076,33 +1076,6 @@ function sortBitacora() {
     renderBitacoraTable();
 }
 
-// REEMPLAZAR showEditBitacoraModal - AHORA SIEMPRE ABRE
-function showEditBitacoraModal(bitacoraId) {
-    const bitacora = bitacoraSemanal.find(b => b.id === bitacoraId);
-    currentBitacoraId = bitacoraId;
-    
-    document.getElementById('editBitacoraFecha').value = bitacora.semana_inicio || '';
-    document.getElementById('editBitacoraNotas').value = bitacora.notas || '';
-    
-    // Verificar si se puede modificar
-    const puedeModificar = puedeModificarBitacora(bitacoraId);
-    
-    // Deshabilitar campos si no se puede modificar
-    document.getElementById('editBitacoraFecha').disabled = !puedeModificar;
-    document.getElementById('editBitacoraNotas').disabled = !puedeModificar;
-    
-    // Mostrar/ocultar botones de acción
-    const botonesDiv = document.querySelector('#editBitacoraModal .modal-actions');
-    if (botonesDiv) {
-        if (puedeModificar) {
-            botonesDiv.style.display = 'flex';
-        } else {
-            botonesDiv.style.display = 'none';
-        }
-    }
-    
-    document.getElementById('editBitacoraModal').classList.add('active');
-}
 
 function showBitacoraTooltip(event, text) {
     // Crear tooltip si no existe
@@ -1650,51 +1623,6 @@ function updateBitacoraMenu() {
     }
 }
 
-// REEMPLAZAR renderBitacoraTable existente
-function renderBitacoraTable() {
-    const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    if (!bitacoraSemanal || bitacoraSemanal.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-light)">No hay bitácora</td></tr>';
-        return;
-    }
-    
-    const sorted = [...bitacoraSemanal].sort((a, b) => {
-        const dateA = new Date(a.semana_inicio);
-        const dateB = new Date(b.semana_inicio);
-        return bitacoraSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-    });
-    
-    sorted.forEach(sem => {
-        const row = tbody.insertRow();
-        const puedeModificar = puedeModificarBitacora(sem.id);
-        
-        if (puedeModificar) {
-            row.style.cursor = 'pointer';
-            row.onclick = () => showEditBitacoraModal(sem.id);
-        } else {
-            row.style.cursor = 'not-allowed';
-            row.style.opacity = '0.6';
-            row.onclick = () => alert('Solo puedes modificar las 2 semanas más recientes');
-        }
-        
-        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
-        const notasCompletas = sem.notas || 'Sin notas';
-        const semanaTexto = sem.semana_texto ? sem.semana_texto.replace('Semana del', 'al') : '';
-        
-        row.innerHTML = `
-            <td><strong>${semanaTexto}</strong></td>
-            <td class="bitacora-notas-cell" data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>
-        `;
-    });
-    
-    const th = document.querySelector('#bitacoraTable th.sortable');
-    if (th) {
-        th.classList.remove('sorted-asc', 'sorted-desc');
-        th.classList.add(bitacoraSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
-    }
-}
 
 // REEMPLAZAR showEditBitacoraModal existente
 function showEditBitacoraModal(bitacoraId) {
