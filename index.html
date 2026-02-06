@@ -169,46 +169,141 @@
                     </div>
                 </div>
 
-                <!-- Admin Pages -->
+                <!-- ADMIN PAGES -->
+
+                <!-- Activos Page -->
                 <div id="activosPage" class="page">
                     <div class="card">
-                        <div class="card-header"><h2 class="card-title">Activos</h2></div>
-                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
+                        <div class="card-header">
+                            <h2 class="card-title">Activos</h2>
+                            <button class="btn btn-primary" onclick="showAddActivoModal()">+ Agregar</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="activosTable" class="sticky-header-table">
+                                <thead><tr><th>Nombre</th><th>Último Mantenimiento</th><th>Próximo Mantenimiento</th><th>Proveedor</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Usuarios Page -->
                 <div id="adminUsuariosPage" class="page">
                     <div class="card">
-                        <div class="card-header"><h2 class="card-title">Usuarios</h2></div>
-                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
+                        <div class="card-header">
+                            <h2 class="card-title">Usuarios</h2>
+                            <button class="btn btn-primary" onclick="showAddUsuarioModal()">+ Agregar</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="usuariosTable" class="sticky-header-table">
+                                <thead><tr><th>Nombre</th><th>Password</th><th>Estado</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Bancos Page -->
                 <div id="adminBancosPage" class="page">
                     <div class="card">
-                        <div class="card-header"><h2 class="card-title">Bancos</h2></div>
-                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
+                        <div class="card-header">
+                            <h2 class="card-title">Bancos - Documentos</h2>
+                            <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="bancosTable" class="sticky-header-table">
+                                <thead><tr><th>Tipo</th><th>Fecha</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Estacionamiento Page -->
                 <div id="estacionamientoPage" class="page">
                     <div class="card">
-                        <div class="card-header"><h2 class="card-title">Estacionamiento</h2></div>
-                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
+                        <div class="card-header">
+                            <h2 class="card-title">Estacionamiento</h2>
+                        </div>
+                        <div class="table-container">
+                            <table id="estacionamientoTable" class="sticky-header-table">
+                                <thead><tr><th style="cursor:pointer" onclick="sortEstacionamiento('espacio')">Espacio ▼</th><th style="cursor:pointer" onclick="sortEstacionamiento('inquilino')">Inquilino ▼</th><th>No. Despacho</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Bitácora Page -->
                 <div id="bitacoraPage" class="page">
                     <div class="card">
-                        <div class="card-header"><h2 class="card-title">Bitácora</h2></div>
-                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
+                        <div class="card-header">
+                            <h2 class="card-title">Bitácora Semanal</h2>
+                        </div>
+                        <div class="table-container">
+                            <table id="bitacoraTable" class="sticky-header-table">
+                                <thead><tr><th style="width:200px;cursor:pointer" onclick="sortBitacora()">Semana ▼</th><th>Notas</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Números Page -->
                 <div id="numerosPage" class="page">
                     <div class="card">
-                        <div class="card-header"><h2 class="card-title">Números</h2></div>
-                        <div style="padding: 1.5rem;"><p style="color:var(--text-light);text-align:center">Vista en desarrollo</p></div>
+                        <div class="card-header">
+                            <h2 class="card-title">Resumen Financiero</h2>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <div class="filter-section">
+                                <label>Filtro:</label>
+                                <select id="homeFilter" onchange="updateHomeView()">
+                                    <option value="anual">Anual</option>
+                                    <option value="mensual">Mensual</option>
+                                </select>
+                                <label>Año:</label>
+                                <select id="homeYear" onchange="updateHomeView()"></select>
+                                <select id="homeMonth" class="hidden" onchange="updateHomeView()">
+                                    <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+                                    <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+                                    <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+                                    <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+                                </select>
+                            </div>
+                            <div class="summary-grid">
+                                <div class="summary-card" onclick="toggleHomeTable('ingresos')">
+                                    <div class="summary-label">Ingresos del Periodo</div>
+                                    <div class="summary-value" id="summaryIngresos">$0.00</div>
+                                </div>
+                                <div class="summary-card" onclick="toggleHomeTable('pagos')">
+                                    <div class="summary-label">Pagos del Periodo</div>
+                                    <div class="summary-value" id="summaryGastos">$0.00</div>
+                                </div>
+                                <div class="summary-card">
+                                    <div class="summary-label">Neto</div>
+                                    <div class="summary-value" id="summaryNeto">$0.00</div>
+                                </div>
+                            </div>
+                            <div id="homeIngresosContainer" class="hidden">
+                                <h3 style="margin: 1.5rem 0 1rem 0;">Detalle de Ingresos</h3>
+                                <div class="table-container">
+                                    <table id="homeIngresosTable">
+                                        <thead><tr><th>Inquilino</th><th>Fecha</th><th>Monto</th></tr></thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="homePagosContainer" class="hidden">
+                                <h3 style="margin: 1.5rem 0 1rem 0;">Detalle de Pagos</h3>
+                                <div class="table-container">
+                                    <table id="homePagosTable">
+                                        <thead><tr><th>Proveedor</th><th>Fecha</th><th>Monto</th></tr></thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -216,9 +311,7 @@
         </div>
     </div>
 
-    <!-- MODALES -->
-
-    <!-- Modal Agregar Inquilino -->
+    <!-- MODALES INQUILINOS (ya creados antes) -->
     <div id="addInquilinoModal" class="modal">
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
@@ -236,11 +329,9 @@
                     <div class="form-group"><label>Fecha Inicio *</label><input type="date" id="inquilinoFechaInicio" required></div>
                     <div class="form-group"><label>Vencimiento Contrato *</label><input type="date" id="inquilinoFechaVenc" required></div>
                     <div class="form-group"><label>Notas</label><textarea id="inquilinoNotas"></textarea></div>
-                    
                     <h3 style="margin: 1.5rem 0 1rem 0;">Contactos</h3>
                     <div id="inquilinoContactosList" style="margin-bottom: 1rem;"></div>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="showAddContactoInquilinoModal()">+ Agregar Contacto</button>
-                    
                     <div class="form-group" style="margin-top: 1.5rem;">
                         <label>Contrato Original (PDF Opcional)</label>
                         <div class="file-upload" onclick="document.getElementById('inquilinoContrato').click()">
@@ -249,7 +340,6 @@
                             <p id="contratoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
                         </div>
                     </div>
-                    
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeModal('addInquilinoModal')">Cancelar</button>
                         <button type="submit" class="btn btn-success">Guardar</button>
@@ -259,7 +349,6 @@
         </div>
     </div>
 
-    <!-- Modal Agregar Contacto Inquilino -->
     <div id="addContactoInquilinoModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -280,7 +369,6 @@
         </div>
     </div>
 
-    <!-- Modal Detalle Inquilino -->
     <div id="inquilinoDetailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
@@ -335,7 +423,6 @@
         </div>
     </div>
 
-    <!-- Modal Registrar Pago -->
     <div id="registrarPagoModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -373,7 +460,6 @@
         </div>
     </div>
 
-    <!-- Modal Agregar Documento -->
     <div id="agregarDocumentoModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -400,7 +486,7 @@
         </div>
     </div>
 
-    <!-- Modal Agregar Proveedor -->
+    <!-- MODALES PROVEEDORES (ya creados antes) -->
     <div id="addProveedorModal" class="modal">
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
@@ -414,11 +500,9 @@
                     <div class="form-group"><label>CLABE</label><input type="text" id="proveedorClabe" autocomplete="off"></div>
                     <div class="form-group"><label>RFC</label><input type="text" id="proveedorRFC" autocomplete="off"></div>
                     <div class="form-group"><label>Notas</label><textarea id="proveedorNotas"></textarea></div>
-                    
                     <h3 style="margin: 1.5rem 0 1rem 0;">Contactos</h3>
                     <div id="proveedorContactosList" style="margin-bottom: 1rem;"></div>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="showAddContactoProveedorModal()">+ Agregar Contacto</button>
-                    
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeModal('addProveedorModal')">Cancelar</button>
                         <button type="submit" class="btn btn-success">Guardar</button>
@@ -428,7 +512,6 @@
         </div>
     </div>
 
-    <!-- Modal Agregar Contacto Proveedor -->
     <div id="addContactoProveedorModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -449,7 +532,6 @@
         </div>
     </div>
 
-    <!-- Modal Detalle Proveedor -->
     <div id="proveedorDetailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
@@ -496,7 +578,6 @@
         </div>
     </div>
 
-    <!-- Modal Registrar Factura -->
     <div id="registrarFacturaModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -520,6 +601,157 @@
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeModal('registrarFacturaModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALES ADMIN -->
+
+    <!-- Modal Agregar Activo -->
+    <div id="addActivoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="addActivoTitle">Agregar Activo</h2>
+                <button class="close-modal" onclick="closeModal('addActivoModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form id="activoForm" onsubmit="saveActivo(event)">
+                    <div class="form-group"><label>Nombre *</label><input type="text" id="activoNombre" required autocomplete="off"></div>
+                    <div class="form-group"><label>Último Mantenimiento</label><input type="date" id="activoUltimoMant"></div>
+                    <div class="form-group"><label>Próximo Mantenimiento</label><input type="date" id="activoProximoMant"></div>
+                    <div class="form-group">
+                        <label>Proveedor</label>
+                        <select id="activoProveedor">
+                            <option value="">-- Seleccione --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Notas</label><textarea id="activoNotas"></textarea></div>
+                    <div class="form-group">
+                        <label>Fotos</label>
+                        <div class="file-upload" onclick="document.getElementById('activoFotos').click()">
+                            <input type="file" id="activoFotos" accept="image/*" multiple>
+                            <p>Click para seleccionar fotos</p>
+                            <p id="activoFotosFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addActivoModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Usuario -->
+    <div id="addUsuarioModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="addUsuarioTitle">Agregar Usuario</h2>
+                <button class="close-modal" onclick="closeModal('addUsuarioModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form id="usuarioForm" onsubmit="saveUsuario(event)">
+                    <div class="form-group"><label>Nombre *</label><input type="text" id="usuarioNombre" required autocomplete="off"></div>
+                    <div class="form-group"><label>Password *</label><input type="password" id="usuarioPassword" required autocomplete="new-password"></div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="usuarioActivo">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addUsuarioModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Subir Documento Banco -->
+    <div id="addBancoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Subir Documento Banco</h2>
+                <button class="close-modal" onclick="closeModal('addBancoModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form id="bancoForm" onsubmit="saveBancoDoc(event)">
+                    <div class="form-group">
+                        <label>Tipo de Documento *</label>
+                        <select id="bancoTipo" required>
+                            <option value="">-- Seleccione --</option>
+                            <option value="Estado de Cuenta">Estado de Cuenta</option>
+                            <option value="Consulta de Movimientos">Consulta de Movimientos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Documento (PDF) *</label>
+                        <div class="file-upload" onclick="document.getElementById('bancoDocumento').click()">
+                            <input type="file" id="bancoDocumento" accept=".pdf" required>
+                            <p>Click para seleccionar PDF</p>
+                            <p id="bancoDocumentoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addBancoModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Estacionamiento -->
+    <div id="editEstacionamientoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Editar Espacio <span id="editEspacioNumero"></span></h2>
+                <button class="close-modal" onclick="closeModal('editEstacionamientoModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <div class="form-group">
+                    <label>Inquilino</label>
+                    <select id="editEspacioInquilino" onchange="updateDespachoField()">
+                        <option value="">-- Sin asignar --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Número de Despacho</label>
+                    <input type="text" id="editEspacioDespacho" disabled style="background: var(--bg)">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editEstacionamientoModal')">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="saveEstacionamiento()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Bitácora -->
+    <div id="editBitacoraModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Editar Bitácora</h2>
+                <button class="close-modal" onclick="closeModal('editBitacoraModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form id="bitacoraForm" onsubmit="saveBitacora(event)">
+                    <div class="form-group">
+                        <label>Fecha de la Semana</label>
+                        <input type="date" id="editBitacoraFecha" disabled style="background: var(--bg)">
+                    </div>
+                    <div class="form-group">
+                        <label>Notas</label>
+                        <textarea id="editBitacoraNotas" style="min-height: 200px"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('editBitacoraModal')">Cancelar</button>
                         <button type="submit" class="btn btn-success">Guardar</button>
                     </div>
                 </form>
