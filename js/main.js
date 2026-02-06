@@ -751,4 +751,48 @@ async function eliminarProveedoresMigrados() {
     } finally {
         hideLoading();
     }
+   async function terminarContratoInquilino() {
+    const fechaTerminacion = prompt('Ingresa la fecha de terminación del contrato (YYYY-MM-DD):');
+    
+    if (!fechaTerminacion) return;
+    
+    // Validar formato de fecha
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaTerminacion)) {
+        alert('Formato de fecha inválido. Usa YYYY-MM-DD (ejemplo: 2026-02-15)');
+        return;
+    }
+    
+    if (!confirm('¿Está seguro de terminar el contrato de este inquilino?')) {
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const { error } = await supabaseClient
+            .from('inquilinos')
+            .update({
+                contrato_activo: false,
+                fecha_terminacion: fechaTerminacion
+            })
+            .eq('id', currentInquilinoId);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        closeModal('inquilinoDetailModal');
+        
+        if (currentSubContext === 'inquilinos-list') {
+            renderInquilinosTable();
+        }
+        
+        alert('✅ Contrato terminado correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al terminar contrato: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
 }
