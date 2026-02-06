@@ -1,11 +1,16 @@
-/* ESWU - CSS STYLES */
+/* ========================================
+   ESWU - CSS STYLES COMPLETO
+   ======================================== */
 
+/* Variables CSS */
 :root {
     --primary: #1a365d;
     --primary-dark: #0f2744;
     --secondary: #7d94b5;
+    --accent: #5a9fd4;
     --success: #38a169;
     --danger: #e53e3e;
+    --warning: #dd6b20;
     --bg: #f0f4f8;
     --card-bg: #ffffff;
     --text: #2d3748;
@@ -14,6 +19,7 @@
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* Reset básico */
 * {
     margin: 0;
     padding: 0;
@@ -27,11 +33,223 @@ body {
     line-height: 1.6;
 }
 
+/* ========================================
+   MODALS - CRÍTICO
+   ======================================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    overflow-y: auto;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.modal.active {
+    display: flex !important;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    max-width: 900px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    z-index: 10000;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg);
+}
+
+.modal-header-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.close-modal:hover {
+    color: #c53030;
+    transform: scale(1.1);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+/* ========================================
+   TABS
+   ======================================== */
+
+.tabs-container {
+    margin-top: 1.5rem;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 1.5rem;
+}
+
+.tab {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-light);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    color: var(--primary);
+}
+
+.tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ========================================
+   INFO BOXES
+   ======================================== */
+
+.info-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.info-box-title {
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+}
+
+.info-box-content {
+    color: var(--text);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-item {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+}
+
+.info-label {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* ========================================
+   PAYMENT ITEM
+   ======================================== */
+
+.payment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.doc-item {
+    padding: 0.75rem;
+    background: var(--bg);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+}
+
+.doc-item:hover {
+    background: #e2e8f0;
+}
+
+/* ========================================
+   LOGIN
+   ======================================== */
+
 body.logged-in {
     padding-top: 70px;
 }
 
-/* Loading */
 .loading-overlay {
     position: fixed;
     top: 0;
@@ -63,13 +281,14 @@ body.logged-in {
     100% { transform: rotate(360deg); }
 }
 
-/* Login */
 .login-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    padding: 0;
+    margin: 0;
 }
 
 .login-container.hidden {
@@ -92,19 +311,28 @@ body.logged-in {
     font-size: 2rem;
 }
 
-/* App Container */
+/* ========================================
+   APP CONTAINER
+   ======================================== */
+
 .app-container {
     display: none;
+    min-height: 100vh;
+    background: white;
 }
 
 .app-container.active {
     display: block;
 }
 
-/* Header */
+/* ========================================
+   HEADER
+   ======================================== */
+
 .header {
     background: white;
-    padding: 1rem;
+    color: var(--primary);
+    padding: 1rem 1rem 1rem 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-bottom: 2px solid var(--border);
     display: flex;
@@ -121,6 +349,7 @@ body.logged-in {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--primary);
+    padding-left: 1rem;
 }
 
 .header-actions {
@@ -138,10 +367,6 @@ body.logged-in {
     padding: 0.5rem;
 }
 
-.btn-search:hover {
-    opacity: 0.7;
-}
-
 .btn-regresa {
     background: none;
     color: var(--danger);
@@ -149,8 +374,13 @@ body.logged-in {
     padding: 0.5rem 1rem;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1.5rem;
     font-weight: 700;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-regresa:hover {
@@ -158,13 +388,43 @@ body.logged-in {
     color: white;
 }
 
-/* Main Content */
+.header-search-bar {
+    display: none;
+    flex: 1;
+    margin: 0 2rem;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.header-search-bar.active {
+    display: flex;
+}
+
+.header-search-bar input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+/* ========================================
+   MAIN CONTENT
+   ======================================== */
+
 .main-content {
     display: flex;
     min-height: calc(100vh - 70px);
 }
 
-/* Menu Sidebar */
 .menu-sidebar {
     width: 200px;
     background: white;
@@ -178,17 +438,15 @@ body.logged-in {
     z-index: 100;
 }
 
-.menu-sidebar.hidden {
-    display: none;
-}
-
 .menu-btn {
     background: white;
     color: var(--text);
     border: 1px solid var(--border);
     margin: 0.5rem 1rem;
+    border-radius: 4px;
     padding: 0.75rem 1rem;
     font-size: 1rem;
+    font-weight: 400;
     cursor: pointer;
     transition: all 0.2s;
     width: calc(100% - 2rem);
@@ -213,7 +471,6 @@ body.logged-in {
     margin-top: 2rem;
 }
 
-/* Submenu Container */
 .submenu-container {
     position: fixed;
     left: 200px;
@@ -236,15 +493,16 @@ body.logged-in {
     background: white;
     color: var(--text);
     border: 1px solid var(--border);
+    border-radius: 4px;
     padding: 0.75rem 1rem;
     font-size: 0.95rem;
+    font-weight: 400;
     cursor: pointer;
     transition: all 0.2s;
     width: 100%;
     text-align: left;
     display: block;
     margin-bottom: 0.5rem;
-    border-radius: 4px;
 }
 
 .submenu-btn:hover {
@@ -252,27 +510,23 @@ body.logged-in {
     border-color: var(--primary);
 }
 
-/* Content Area */
 .content-area {
     margin-left: 200px;
     padding: 2rem;
     flex: 1;
-    width: calc(100% - 200px);
-    z-index: 1;
+    transition: margin 0.3s;
     position: relative;
+    z-index: 1;
 }
 
 .content-area.with-submenu {
     margin-left: 450px;
-    width: calc(100% - 450px);
 }
 
 .content-area.fullwidth {
-    margin-left: 0 !important;
-    width: 100% !important;
+    margin-left: 0;
 }
 
-/* Pages */
 .page {
     display: none;
 }
@@ -281,7 +535,10 @@ body.logged-in {
     display: block;
 }
 
-/* Cards */
+/* ========================================
+   CARDS & TABLES
+   ======================================== */
+
 .card {
     background: var(--card-bg);
     border-radius: 4px;
@@ -306,11 +563,9 @@ body.logged-in {
     font-weight: 600;
 }
 
-/* Tables */
 .table-container {
     overflow-x: auto;
-    padding: 1rem;
-    max-height: calc(100vh - 250px);
+    max-height: 600px;
     overflow-y: auto;
 }
 
@@ -324,10 +579,6 @@ body.logged-in {
 table {
     width: 100%;
     border-collapse: collapse;
-}
-
-thead {
-    background: var(--bg);
 }
 
 th {
@@ -345,19 +596,24 @@ td {
     white-space: nowrap;
 }
 
-tr {
-    transition: background 0.2s;
-}
-
 tr:hover {
     background: var(--bg);
 }
 
-tr[style*="cursor: pointer"] {
-    cursor: pointer;
+.currency {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
 }
 
-/* Buttons */
+.vencimiento-proximo {
+    color: var(--danger);
+    font-weight: bold;
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
 .btn {
     padding: 0.75rem 1.5rem;
     border: none;
@@ -366,6 +622,8 @@ tr[style*="cursor: pointer"] {
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .btn-primary {
@@ -377,6 +635,15 @@ tr[style*="cursor: pointer"] {
     background: var(--primary-dark);
 }
 
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover {
+    filter: brightness(1.1);
+}
+
 .btn-secondary {
     background: var(--text-light);
     color: white;
@@ -386,7 +653,24 @@ tr[style*="cursor: pointer"] {
     filter: brightness(0.9);
 }
 
-/* Forms */
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    filter: brightness(1.1);
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+/* ========================================
+   FORMS
+   ======================================== */
+
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -399,32 +683,70 @@ tr[style*="cursor: pointer"] {
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
     width: 100%;
     padding: 0.75rem;
     border: 2px solid var(--border);
     border-radius: 4px;
     font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
     outline: none;
     border-color: var(--primary);
 }
 
-.hidden {
-    display: none !important;
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
 }
 
-.currency {
-    text-align: right;
+.file-upload {
+    border: 2px dashed var(--border);
+    border-radius: 4px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-/* ESTILOS ADICIONALES PARA INQUILINOS */
-/* Agregar estos estilos al final de tu styles.css */
+.file-upload:hover {
+    border-color: var(--primary);
+    background: var(--bg);
+}
 
-/* Filter Section */
+.file-upload input[type="file"] {
+    display: none;
+}
+
+/* ========================================
+   CONTACTOS
+   ======================================== */
+
+.contacto-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.contacto-info {
+    flex: 1;
+}
+
+/* ========================================
+   FILTER & BADGES
+   ======================================== */
+
 .filter-section {
     display: flex;
     gap: 1rem;
@@ -444,7 +766,6 @@ tr[style*="cursor: pointer"] {
     font-size: 1rem;
 }
 
-/* Badges para estados */
 .badge {
     padding: 0.25rem 0.75rem;
     border-radius: 4px;
@@ -468,12 +789,10 @@ tr[style*="cursor: pointer"] {
     color: #721c24;
 }
 
-/* Fila de totales en tablas */
-tr.total-row {
-    background: #e6f2ff;
-    font-weight: bold;
-}
+/* ========================================
+   UTILITIES
+   ======================================== */
 
-tr.total-row td {
-    border-top: 2px solid var(--primary);
+.hidden {
+    display: none !important;
 }
