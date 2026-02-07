@@ -1104,13 +1104,13 @@ th.sorted-desc::after {
     background: #2f855a;
 }
 
-/* Tooltip para iconos + */
+/* Tooltip para iconos + - AL LADO IZQUIERDO */
 .btn-icon-add::before {
     content: attr(title);
     position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
+    right: 100%; /* Cambio: de left a right */
+    top: 50%;
+    transform: translateY(-50%); /* Cambio: centrado vertical */
     background: rgba(0, 0, 0, 0.9);
     color: white;
     padding: 0.5rem 1rem;
@@ -1121,7 +1121,7 @@ th.sorted-desc::after {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
-    margin-bottom: 0.5rem;
+    margin-right: 0.5rem; /* Cambio: margen a la derecha */
     z-index: 10000;
 }
 
@@ -1129,15 +1129,15 @@ th.sorted-desc::after {
     opacity: 1;
 }
 
-/* Flecha del tooltip */
+/* Flecha del tooltip - APUNTANDO A LA DERECHA */
 .btn-icon-add::after {
     content: '';
     position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
+    right: 100%; /* Cambio: de left a right */
+    top: 50%;
+    transform: translateY(-50%) translateX(6px); /* Ajuste posición */
     border: 6px solid transparent;
-    border-top-color: rgba(0, 0, 0, 0.9);
+    border-left-color: rgba(0, 0, 0, 0.9); /* Cambio: de top a left */
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
