@@ -331,7 +331,28 @@ inquilinos.forEach(inq => {
         }
     });
     
-    rentas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    // Ordenar según columna seleccionada
+rentas.sort((a, b) => {
+    let compareA, compareB;
+    
+    if (rentasRecibidasSortColumn === 'inquilino') {
+        compareA = a.empresa.toLowerCase();
+        compareB = b.empresa.toLowerCase();
+        return rentasRecibidasSortOrder === 'asc' 
+            ? compareA.localeCompare(compareB) 
+            : compareB.localeCompare(compareA);
+    } else if (rentasRecibidasSortColumn === 'fecha') {
+        compareA = new Date(a.fecha);
+        compareB = new Date(b.fecha);
+        return rentasRecibidasSortOrder === 'asc' 
+            ? compareA - compareB 
+            : compareB - compareA;
+    }
+    return 0;
+});
+
+// Actualizar indicadores visuales
+updateSortIndicators('inquilinosRentasRecibidasTable', rentasRecibidasSortColumn, rentasRecibidasSortOrder);
     
     // Primero agregar las rentas recibidas
     rentas.forEach(r => {
@@ -2146,6 +2167,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+/* ========================================
+   ORDENAMIENTO RENTAS RECIBIDAS
+   ======================================== */
+
+let rentasRecibidasSortColumn = 'fecha';
+let rentasRecibidasSortOrder = 'desc';
+
+function sortRentasRecibidas(column) {
+    if (rentasRecibidasSortColumn === column) {
+        rentasRecibidasSortOrder = rentasRecibidasSortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        rentasRecibidasSortColumn = column;
+        rentasRecibidasSortOrder = column === 'fecha' ? 'desc' : 'asc';
+    }
+    renderInquilinosRentasRecibidas();
+}
 /* ========================================
    FIN DEL CÓDIGO A AGREGAR
    ======================================== */
