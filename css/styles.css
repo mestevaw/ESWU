@@ -925,3 +925,229 @@ th.sorted-desc::after {
     opacity: 1;
     color: var(--primary);
 }
+/* ========================================
+   NUEVOS ESTILOS - AGREGAR AL FINAL DE styles.css
+   ======================================== */
+
+/* ========================================
+   MODAL COMPACTO - FACTURAS
+   ======================================== */
+
+.modal-content-compact {
+    max-width: 600px !important;
+}
+
+.modal-header-compact {
+    padding: 1rem 1.5rem;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg);
+}
+
+.modal-header-compact .modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+}
+
+.modal-header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-icon-save {
+    background: var(--success);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-icon-save:hover {
+    background: #2f855a;
+    transform: scale(1.05);
+}
+
+.modal-header-compact .close-modal {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.modal-header-compact .close-modal:hover {
+    color: #c53030;
+    transform: scale(1.1);
+}
+
+.modal-body-compact {
+    padding: 0;
+}
+
+.form-row-inline {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: white;
+}
+
+.form-row-inline.form-row-alternate {
+    background: #f9fafb;
+}
+
+.form-row-inline label {
+    margin: 0;
+    font-weight: 500;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+.form-row-inline input[type="text"],
+.form-row-inline input[type="number"],
+.form-row-inline input[type="date"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.form-row-inline input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.file-upload-compact {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.file-upload-compact input[type="file"] {
+    display: none;
+}
+
+.file-upload-text {
+    background: var(--primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.file-upload-text:hover {
+    background: var(--primary-dark);
+}
+
+.file-upload-filename {
+    color: var(--success);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* ========================================
+   BOTONES ICONO "+" - AGREGAR
+   ======================================== */
+
+.btn-icon-add {
+    background: var(--primary);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.btn-icon-add:hover {
+    background: var(--primary-dark);
+    transform: scale(1.1);
+}
+
+.btn-icon-add-green {
+    background: var(--success);
+}
+
+.btn-icon-add-green:hover {
+    background: #2f855a;
+}
+
+/* Tooltip para iconos + */
+.btn-icon-add::before {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: normal;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    margin-bottom: 0.5rem;
+    z-index: 10000;
+}
+
+.btn-icon-add:hover::before {
+    opacity: 1;
+}
+
+/* Flecha del tooltip */
+.btn-icon-add::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 10000;
+}
+
+.btn-icon-add:hover::after {
+    opacity: 1;
+}
+
+/* ========================================
+   FIN DE NUEVOS ESTILOS
+   ======================================== */
