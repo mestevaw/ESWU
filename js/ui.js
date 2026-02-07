@@ -2097,4 +2097,27 @@ async function pagarFactura(facturaId) {
     }
 }
 
+/* ========================================
+   AGREGAR AL FINAL DE ui.js
+   Listener para mostrar nombre de archivo en modal compacto
+   ======================================== */
+
+// File input listener para modal de factura compacto
+document.addEventListener('DOMContentLoaded', function() {
+    const facturaDocumento = document.getElementById('facturaDocumento');
+    if (facturaDocumento) {
+        facturaDocumento.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            const displayElement = document.getElementById('facturaDocumentoFileName');
+            if (displayElement) {
+                displayElement.textContent = fileName;
+            }
+        });
+    }
+});
+
+/* ========================================
+   FIN DEL CÓDIGO A AGREGAR
+   ======================================== */
+
 console.log('✅ UI.JS FINAL COMPLETO - Todas las partes cargadas');
