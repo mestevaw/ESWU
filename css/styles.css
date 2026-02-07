@@ -1231,6 +1231,36 @@ th.sorted-desc::after {
 }
 
 /* ========================================
+   BOTÓN EXPORTAR EXCEL
+   ======================================== */
+
+.btn-excel {
+    background: #217346;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-excel:hover {
+    background: #1a5c37;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.btn-excel::before {
+    content: '📊';
+    font-size: 1rem;
+}
+
+/* ========================================
    FIN TABLA PROVEEDORES
    ======================================== */
 
