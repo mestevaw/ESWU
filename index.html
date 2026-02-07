@@ -171,7 +171,7 @@
 <div class="card-header">
     <h2 class="card-title">Inquilinos</h2>
     <div style="display:flex;gap:0.5rem;align-items:center">
-        <button class="btn-excel" onclick="exportarInquilinosExcel()">Excel</button>
+        <button class="btn-excel-icon" onclick="exportarInquilinosExcel()" title="Exportar a Excel">📊</button>
         <button class="btn-icon-add btn-icon-add-green" onclick="showAddInquilinoModal()" title="Agregar Nuevo Inquilino">+</button>
     </div>
 </div>
@@ -187,9 +187,9 @@
                     <!-- Rentas Recibidas -->
                     <div id="inquilinosRentasRecibidasView" class="hidden">
                         <div class="card">
-                  <div class="card-header">
+                 <div class="card-header">
     <h2 class="card-title">Rentas</h2>
-    <button class="btn-excel" onclick="exportarRentasExcel()">Excel</button>
+    <button class="btn-excel-icon" onclick="exportarRentasExcel()" title="Exportar a Excel">📊</button>
 </div>
                             <div style="padding: 1.5rem;">
                                 <div class="filter-section">
@@ -226,9 +226,9 @@
                     <!-- Vencimiento de Contratos -->
                     <div id="inquilinosVencimientoContratosView" class="hidden">
                         <div class="card">
-                            <div class="card-header">
+                            <<div class="card-header">
     <h2 class="card-title">Vencimiento de Contratos</h2>
-    <button class="btn-excel" onclick="exportarContratosExcel()">Excel</button>
+    <button class="btn-excel-icon" onclick="exportarContratosExcel()" title="Exportar a Excel">📊</button>
 </div>
                             <div class="table-container">
                                 <table id="inquilinosVencimientoContratosTable" class="sticky-header-table">
@@ -246,10 +246,10 @@
                     <!-- Listado de Proveedores -->
 <div id="proveedoresListView" class="hidden">
     <div class="card">
-        <div class="card-header">
+       <div class="card-header">
     <h2 class="card-title">Proveedores</h2>
     <div style="display:flex;gap:0.5rem;align-items:center">
-        <button class="btn-excel" onclick="exportarProveedoresExcel()">Excel</button>
+        <button class="btn-excel-icon" onclick="exportarProveedoresExcel()" title="Exportar a Excel">📊</button>
         <button class="btn-icon-add" onclick="showAddProveedorModal()" title="Agregar Nuevo Proveedor">+</button>
     </div>
 </div>
@@ -267,7 +267,8 @@
                         <div class="card">
                           <div class="card-header">
     <h2 class="card-title">Facturas Pagadas</h2>
-    <button class="btn-excel" onclick="exportarFacturasPagadasExcel()">Excel</button>
+    <button class="btn-excel-icon" onclick="exportarFacturasPagadasExcel()" title="Exportar a Excel">📊</button>
+</div>
                             <div style="padding: 1.5rem;">
                                 <div class="filter-section">
                                     <label>Filtro:</label>
@@ -304,7 +305,7 @@
                         <div class="card">
                            <div class="card-header">
     <h2 class="card-title">Facturas Por Pagar</h2>
-    <button class="btn-excel" onclick="exportarFacturasPorPagarExcel()">Excel</button>
+    <button class="btn-excel-icon" onclick="exportarFacturasPorPagarExcel()" title="Exportar a Excel">📊</button>
 </div>
                             <div style="padding: 1.5rem;">
                                 <div class="filter-section">
@@ -342,12 +343,10 @@
                 <div id="activosPage" class="page">
                     <div class="card">
                         <div class="card-header">
-    <h2 class="card-title">Activos</h2>
-    <div style="display:flex;gap:0.5rem;align-items:center">
-        <button class="btn-excel" onclick="exportarActivosExcel()">Excel</button>
-        <button class="btn btn-primary" onclick="showAddActivoModal()">+ Agregar</button>
-    </div>
-</div>
+                        <h2 class="card-title">Activos</h2>
+                        <button class="btn btn-primary" onclick="showAddActivoModal()">+ Agregar</button>
+                    </div>
+                
                         <div class="table-container">
                             <table id="activosTable" class="sticky-header-table">
                                 <thead><tr><th>Nombre</th><th>Último Mantenimiento</th><th>Próximo Mantenimiento</th><th>Proveedor</th></tr></thead>
@@ -360,13 +359,11 @@
                 <!-- Admin Usuarios Page -->
                 <div id="adminUsuariosPage" class="page">
                     <div class="card">
-                      <div class="card-header">
+                     <div class="card-header">
     <h2 class="card-title">Usuarios</h2>
-    <div style="display:flex;gap:0.5rem;align-items:center">
-        <button class="btn-excel" onclick="exportarUsuariosExcel()">Excel</button>
-        <button class="btn btn-primary" onclick="showAddUsuarioModal()">+ Agregar</button>
-    </div>
+    <button class="btn btn-primary" onclick="showAddUsuarioModal()">+ Agregar</button>
 </div>
+                    
                         <div class="table-container">
                             <table id="usuariosTable" class="sticky-header-table">
                                 <thead><tr><th>Nombre</th><th>Password</th><th>Estado</th></tr></thead>
@@ -381,10 +378,7 @@
                     <div class="card">
                         <div class="card-header">
     <h2 class="card-title">Bancos - Documentos</h2>
-    <div style="display:flex;gap:0.5rem;align-items:center">
-        <button class="btn-excel" onclick="exportarBancosExcel()">Excel</button>
-        <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
-    </div>
+    <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
 </div>
                         <div class="table-container">
                             <table id="bancosTable" class="sticky-header-table">
@@ -398,9 +392,8 @@
                 <!-- Estacionamiento Page -->
                 <div id="estacionamientoPage" class="page">
                     <div class="card">
-                       <div class="card-header">
+                       <<div class="card-header">
     <h2 class="card-title">Estacionamiento</h2>
-    <button class="btn-excel" onclick="exportarEstacionamientoExcel()">Excel</button>
 </div>
                         <div class="table-container">
                             <table id="estacionamientoTable" class="sticky-header-table">
