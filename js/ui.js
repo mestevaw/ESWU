@@ -691,6 +691,7 @@ function renderProveedoresFacturasPagadas() {
     const pagadas = [];
     let totalPagadas = 0;
     
+    // RECORRER PROVEEDORES Y CONSTRUIR ARRAY
     proveedores.forEach(prov => {
         if (prov.facturas) {
             prov.facturas.forEach(f => {
@@ -698,6 +699,7 @@ function renderProveedoresFacturasPagadas() {
                     const pd = new Date(f.fecha_pago + 'T00:00:00');
                     if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
                         pagadas.push({
+                            proveedorId: prov.id,  // ✅ ESTA LÍNEA ES CRÍTICA
                             proveedor: prov.nombre,
                             numero: f.numero || 'S/N',
                             monto: f.monto,
@@ -712,23 +714,27 @@ function renderProveedoresFacturasPagadas() {
         }
     });
     
+    // ORDENAR POR FECHA (MÁS RECIENTES PRIMERO)
     pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     
-pagadas.forEach(f => {
-    const row = tbody.insertRow();
-    row.style.cursor = 'pointer';
-    row.onclick = () => showProveedorDetailModal(f.proveedorId);
+    // RENDERIZAR FILAS
+    pagadas.forEach(f => {
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';  // ✅ AGREGAR CURSOR
+        row.onclick = () => showProveedorDetailModal(f.proveedorId);  // ✅ FUNCIÓN CORRECTA
+        
+        const facturaCell = f.documento_file 
+            ? `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewPDF('${f.documento_file}')">${f.numero}</td>`
+            : `<td>${f.numero}</td>`;
+        
+        const fechaCell = f.pago_file
+            ? `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewPDF('${f.pago_file}')">${formatDate(f.fecha)}</td>`
+            : `<td>${formatDate(f.fecha)}</td>`;
+        
+        row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
+    });
     
-    const facturaCell = f.documento_file 
-        ? `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewPDF('${f.documento_file}')">${f.numero}</td>`
-        : `<td>${f.numero}</td>`;
-    const fechaCell = f.pago_file
-        ? `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewPDF('${f.pago_file}')">${formatDate(f.fecha)}</td>`
-        : `<td>${formatDate(f.fecha)}</td>`;
-    
-    row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
-});
-    
+    // MENSAJES Y TOTALES
     if (pagadas.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas pagadas</td></tr>';
     } else {
@@ -737,6 +743,11 @@ pagadas.forEach(f => {
         row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
     }
 }
+
+
+// ============================================
+// FACTURAS POR PAGAR - VERSIÓN CORREGIDA
+// ============================================
 
 function renderProveedoresFacturasPorPagar() {
     const tbody = document.getElementById('proveedoresFacturasPorPagarTable').querySelector('tbody');
@@ -756,6 +767,7 @@ function renderProveedoresFacturasPorPagar() {
     const porPagar = [];
     let totalPorPagar = 0;
     
+    // RECORRER PROVEEDORES Y CONSTRUIR ARRAY
     proveedores.forEach(prov => {
         if (prov.facturas) {
             prov.facturas.forEach(f => {
@@ -763,7 +775,7 @@ function renderProveedoresFacturasPorPagar() {
                     const vd = new Date(f.vencimiento + 'T00:00:00');
                     if (vd.getFullYear() === year && (month === null || month === vd.getMonth())) {
                         porPagar.push({
-                            provId: prov.id,
+                            proveedorId: prov.id,  // ✅ ESTA LÍNEA ES CRÍTICA (era "provId")
                             factId: f.id,
                             proveedor: prov.nombre,
                             numero: f.numero || 'S/N',
@@ -778,21 +790,24 @@ function renderProveedoresFacturasPorPagar() {
         }
     });
     
+    // ORDENAR POR VENCIMIENTO (MÁS PRÓXIMAS PRIMERO)
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     
-porPagar.forEach(f => {
-    const row = tbody.insertRow();
-    row.style.cursor = 'pointer';
-    row.onclick = () => showProveedorDetailModal(f.proveedorId);
+    // RENDERIZAR FILAS
+    porPagar.forEach(f => {
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';  // ✅ AGREGAR CURSOR
+        row.onclick = () => showProveedorDetailModal(f.proveedorId);  // ✅ FUNCIÓN CORRECTA
+        
+        if (f.documento_file) {
+            const numeroCell = `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewPDF('${f.documento_file}')">${f.numero}</td>`;
+            row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${numeroCell}<td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
+        } else {
+            row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
+        }
+    });
     
-    if (f.documento_file) {
-        const numeroCell = `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewPDF('${f.documento_file}')">${f.numero}</td>`;
-        row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${numeroCell}<td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
-    } else {
-        row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
-    }
-});
-    
+    // MENSAJES Y TOTALES
     if (porPagar.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
     } else {
@@ -801,7 +816,6 @@ porPagar.forEach(f => {
         row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
     }
 }
-
 function populateProveedoresYearSelects() {
     const currentYear = new Date().getFullYear();
     ['provFactPagYear', 'provFactPorPagYear'].forEach(selectId => {
