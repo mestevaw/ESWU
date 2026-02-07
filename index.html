@@ -170,7 +170,10 @@
                         <div class="card">
 <div class="card-header">
     <h2 class="card-title">Inquilinos</h2>
-    <button class="btn-icon-add btn-icon-add-green" onclick="showAddInquilinoModal()" title="Agregar Nuevo Inquilino">+</button>
+    <div style="display:flex;gap:0.5rem;align-items:center">
+        <button class="btn-excel" onclick="exportarInquilinosExcel()">Excel</button>
+        <button class="btn-icon-add btn-icon-add-green" onclick="showAddInquilinoModal()" title="Agregar Nuevo Inquilino">+</button>
+    </div>
 </div>
                             <div class="table-container">
                                 <table id="inquilinosTable" class="sticky-header-table">
@@ -184,9 +187,10 @@
                     <!-- Rentas Recibidas -->
                     <div id="inquilinosRentasRecibidasView" class="hidden">
                         <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Rentas Recibidas</h2>
-                            </div>
+                  <div class="card-header">
+    <h2 class="card-title">Rentas</h2>
+    <button class="btn-excel" onclick="exportarRentasExcel()">Excel</button>
+</div>
                             <div style="padding: 1.5rem;">
                                 <div class="filter-section">
                                     <label>Filtro:</label>
@@ -204,10 +208,16 @@
                                     </select>
                                 </div>
                                 <div class="table-container">
-                                    <table id="inquilinosRentasRecibidasTable">
-                                        <thead><tr><th>Empresa</th><th>Monto</th><th>Fecha Pago</th></tr></thead>
-                                        <tbody></tbody>
-                                    </table>
+                                   <table id="inquilinosRentasRecibidasTable">
+    <thead>
+        <tr>
+            <th class="sortable" data-column="inquilino" onclick="sortRentasRecibidas('inquilino')">Inquilino</th>
+            <th>Monto</th>
+            <th class="sortable" data-column="fecha" onclick="sortRentasRecibidas('fecha')">Fecha</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
                                 </div>
                             </div>
                         </div>
@@ -217,8 +227,9 @@
                     <div id="inquilinosVencimientoContratosView" class="hidden">
                         <div class="card">
                             <div class="card-header">
-                                <h2 class="card-title">Vencimiento de Contratos</h2>
-                            </div>
+    <h2 class="card-title">Vencimiento de Contratos</h2>
+    <button class="btn-excel" onclick="exportarContratosExcel()">Excel</button>
+</div>
                             <div class="table-container">
                                 <table id="inquilinosVencimientoContratosTable" class="sticky-header-table">
                                     <thead><tr><th>Empresa</th><th>Inicio</th><th>Vencimiento</th><th>Días Restantes</th><th>Estado</th></tr></thead>
@@ -236,9 +247,12 @@
 <div id="proveedoresListView" class="hidden">
     <div class="card">
         <div class="card-header">
-            <h2 class="card-title">Proveedores</h2>
-            <button class="btn-icon-add" onclick="showAddProveedorModal()" title="Agregar Nuevo Proveedor">+</button>
-        </div>
+    <h2 class="card-title">Proveedores</h2>
+    <div style="display:flex;gap:0.5rem;align-items:center">
+        <button class="btn-excel" onclick="exportarProveedoresExcel()">Excel</button>
+        <button class="btn-icon-add" onclick="showAddProveedorModal()" title="Agregar Nuevo Proveedor">+</button>
+    </div>
+</div>
         <div class="table-container">
             <table id="proveedoresTable" class="sticky-header-table">
                 <thead><tr><th>Proveedor</th><th>Servicio</th><th>Contacto</th><th>Teléfono</th><th>Email</th></tr></thead>
@@ -251,9 +265,9 @@
                     <!-- Facturas Pagadas -->
                     <div id="proveedoresFacturasPagadasView" class="hidden">
                         <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Facturas Pagadas</h2>
-                            </div>
+                          <div class="card-header">
+    <h2 class="card-title">Facturas Pagadas</h2>
+    <button class="btn-excel" onclick="exportarFacturasPagadasExcel()">Excel</button>
                             <div style="padding: 1.5rem;">
                                 <div class="filter-section">
                                     <label>Filtro:</label>
@@ -288,9 +302,10 @@
                     <!-- Facturas Por Pagar -->
                     <div id="proveedoresFacturasPorPagarView" class="hidden">
                         <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Facturas Por Pagar</h2>
-                            </div>
+                           <div class="card-header">
+    <h2 class="card-title">Facturas Por Pagar</h2>
+    <button class="btn-excel" onclick="exportarFacturasPorPagarExcel()">Excel</button>
+</div>
                             <div style="padding: 1.5rem;">
                                 <div class="filter-section">
                                     <label>Filtro:</label>
@@ -327,9 +342,12 @@
                 <div id="activosPage" class="page">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Activos</h2>
-                            <button class="btn btn-primary" onclick="showAddActivoModal()">+ Agregar</button>
-                        </div>
+    <h2 class="card-title">Activos</h2>
+    <div style="display:flex;gap:0.5rem;align-items:center">
+        <button class="btn-excel" onclick="exportarActivosExcel()">Excel</button>
+        <button class="btn btn-primary" onclick="showAddActivoModal()">+ Agregar</button>
+    </div>
+</div>
                         <div class="table-container">
                             <table id="activosTable" class="sticky-header-table">
                                 <thead><tr><th>Nombre</th><th>Último Mantenimiento</th><th>Próximo Mantenimiento</th><th>Proveedor</th></tr></thead>
@@ -342,10 +360,13 @@
                 <!-- Admin Usuarios Page -->
                 <div id="adminUsuariosPage" class="page">
                     <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Usuarios</h2>
-                            <button class="btn btn-primary" onclick="showAddUsuarioModal()">+ Agregar</button>
-                        </div>
+                      <div class="card-header">
+    <h2 class="card-title">Usuarios</h2>
+    <div style="display:flex;gap:0.5rem;align-items:center">
+        <button class="btn-excel" onclick="exportarUsuariosExcel()">Excel</button>
+        <button class="btn btn-primary" onclick="showAddUsuarioModal()">+ Agregar</button>
+    </div>
+</div>
                         <div class="table-container">
                             <table id="usuariosTable" class="sticky-header-table">
                                 <thead><tr><th>Nombre</th><th>Password</th><th>Estado</th></tr></thead>
@@ -359,9 +380,12 @@
                 <div id="adminBancosPage" class="page">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Bancos - Documentos</h2>
-                            <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
-                        </div>
+    <h2 class="card-title">Bancos - Documentos</h2>
+    <div style="display:flex;gap:0.5rem;align-items:center">
+        <button class="btn-excel" onclick="exportarBancosExcel()">Excel</button>
+        <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
+    </div>
+</div>
                         <div class="table-container">
                             <table id="bancosTable" class="sticky-header-table">
                                 <thead><tr><th>Tipo</th><th>Fecha</th></tr></thead>
@@ -374,9 +398,10 @@
                 <!-- Estacionamiento Page -->
                 <div id="estacionamientoPage" class="page">
                     <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Estacionamiento</h2>
-                        </div>
+                       <div class="card-header">
+    <h2 class="card-title">Estacionamiento</h2>
+    <button class="btn-excel" onclick="exportarEstacionamientoExcel()">Excel</button>
+</div>
                         <div class="table-container">
                             <table id="estacionamientoTable" class="sticky-header-table">
                                 <thead>
