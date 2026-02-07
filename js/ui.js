@@ -714,16 +714,20 @@ function renderProveedoresFacturasPagadas() {
     
     pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     
-    pagadas.forEach(f => {
-        const row = tbody.insertRow();
-        const facturaCell = f.documento_file 
-            ? `<td style="cursor:pointer;color:var(--primary)" onclick="viewPDF('${f.documento_file}')">${f.numero}</td>`
-            : `<td>${f.numero}</td>`;
-        const fechaCell = f.pago_file
-            ? `<td style="cursor:pointer;color:var(--primary)" onclick="viewPDF('${f.pago_file}')">${formatDate(f.fecha)}</td>`
-            : `<td>${formatDate(f.fecha)}</td>`;
-        row.innerHTML = `<td>${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
-    });
+pagadas.forEach(f => {
+    const row = tbody.insertRow();
+    row.style.cursor = 'pointer';
+    row.onclick = () => showProveedorDetailModal(f.proveedorId);
+    
+    const facturaCell = f.documento_file 
+        ? `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewPDF('${f.documento_file}')">${f.numero}</td>`
+        : `<td>${f.numero}</td>`;
+    const fechaCell = f.pago_file
+        ? `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewPDF('${f.pago_file}')">${formatDate(f.fecha)}</td>`
+        : `<td>${formatDate(f.fecha)}</td>`;
+    
+    row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
+});
     
     if (pagadas.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas pagadas</td></tr>';
@@ -779,15 +783,14 @@ function renderProveedoresFacturasPorPagar() {
 porPagar.forEach(f => {
     const row = tbody.insertRow();
     row.style.cursor = 'pointer';
+    row.onclick = () => showProveedorDetailModal(f.proveedorId);
     
-    // CAMBIO 1: Si hay PDF, click en row abre PDF. Si no, abre proveedor detail
     if (f.documento_file) {
-        row.onclick = () => viewPDF(f.documento_file);
+        const numeroCell = `<td style="color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewPDF('${f.documento_file}')">${f.numero}</td>`;
+        row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${numeroCell}<td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
     } else {
-        row.onclick = () => showProveedorDetailModal(f.proveedorId);
+        row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
     }
-    
-    row.innerHTML = `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
 });
     
     if (porPagar.length === 0) {
