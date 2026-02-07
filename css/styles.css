@@ -1149,5 +1149,91 @@ th.sorted-desc::after {
 }
 
 /* ========================================
+   TABLA PROVEEDORES - COMPACTA
+   ======================================== */
+
+/* Tabla de proveedores con anchos fijos */
+#proveedoresTable {
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* Columna Proveedor - máximo 30 caracteres */
+#proveedoresTable thead th:nth-child(1),
+#proveedoresTable tbody td:nth-child(1) {
+    max-width: 250px;
+    width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Columna Servicio - máximo 15 caracteres */
+#proveedoresTable thead th:nth-child(2),
+#proveedoresTable tbody td:nth-child(2) {
+    max-width: 150px;
+    width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Columna Contacto - máximo 30 caracteres */
+#proveedoresTable thead th:nth-child(3),
+#proveedoresTable tbody td:nth-child(3) {
+    max-width: 250px;
+    width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Columna Teléfono - ancho fijo */
+#proveedoresTable thead th:nth-child(4),
+#proveedoresTable tbody td:nth-child(4) {
+    max-width: 120px;
+    width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Columna Email - ancho flexible */
+#proveedoresTable thead th:nth-child(5),
+#proveedoresTable tbody td:nth-child(5) {
+    max-width: 200px;
+    width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Tooltip al hacer hover sobre celdas truncadas */
+#proveedoresTable tbody td {
+    position: relative;
+    cursor: pointer;
+}
+
+#proveedoresTable tbody td[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    white-space: normal;
+    max-width: 300px;
+    z-index: 1000;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* ========================================
+   FIN TABLA PROVEEDORES
+   ======================================== */
+
+/* ========================================
    FIN DE NUEVOS ESTILOS
    ======================================== */
