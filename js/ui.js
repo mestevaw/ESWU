@@ -2186,6 +2186,171 @@ function sortRentasRecibidas(column) {
     }
     renderInquilinosRentasRecibidas();
 }
+
+/* ========================================
+   EXPORTAR A EXCEL - AGREGAR AL FINAL DE ui.js
+   ======================================== */
+
+// ============================================
+// EXPORTAR A EXCEL
+// ============================================
+
+function exportToExcel(data, fileName) {
+    if (!data || data.length === 0) {
+        alert('No hay datos para exportar');
+        return;
+    }
+    
+    const ws = XLSX.utils.json_to_sheet(data);
+    
+    const colWidths = Object.keys(data[0]).map(key => {
+        const maxLength = Math.max(
+            key.length,
+            ...data.map(row => String(row[key] || '').length)
+        );
+        return { wch: Math.min(maxLength + 2, 50) };
+    });
+    ws['!cols'] = colWidths;
+    
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Datos');
+    
+    const today = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `${fileName}_${today}.xlsx`);
+}
+
+function exportarInquilinosExcel() {
+    const data = inquilinos.map(inq => ({
+        'Empresa': inq.nombre,
+        'Renta Mensual': inq.renta,
+        'No. Despacho': inq.numero_despacho || '',
+        'Vencimiento Contrato': inq.fecha_vencimiento
+    }));
+    exportToExcel(data, 'Inquilinos');
+}
+
+function exportarRentasExcel() {
+    const filterType = document.getElementById('inquilinosRentasFilter').value;
+    const year = parseInt(document.getElementById('inquilinosRentasYear').value);
+    const month = filterType === 'mensual' ? parseInt(document.getElementById('inquilinosRentasMonth').value) : null;
+    
+    const rentas = [];
+    
+    inquilinos.forEach(inq => {
+        if (inq.pagos) {
+            inq.pagos.forEach(pago => {
+                const pd = new Date(pago.fecha + 'T00:00:00');
+                if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
+                    rentas.push({
+                        'Inquilino': inq.nombre,
+                        'Monto': pago.monto,
+                        'Fecha': pago.fecha
+                    });
+                }
+            });
+        }
+    });
+    
+    exportToExcel(rentas, 'Rentas');
+}
+
+function exportarContratosExcel() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const data = inquilinos.map(inq => {
+        const venc = new Date(inq.fecha_vencimiento + 'T00:00:00');
+        const diffDays = Math.ceil((venc - today) / (1000 * 60 * 60 * 24));
+        
+        let estado = '';
+        if (diffDays < 0) estado = 'Vencido';
+        else if (diffDays <= 30) estado = 'Próximo a vencer';
+        else estado = 'Vigente';
+        
+        return {
+            'Empresa': inq.nombre,
+            'Inicio': inq.fecha_inicio,
+            'Vencimiento': inq.fecha_vencimiento,
+            'Días Restantes': diffDays,
+            'Estado': estado
+        };
+    });
+    
+    exportToExcel(data, 'Contratos');
+}
+
+function exportarProveedoresExcel() {
+    const data = proveedores.map(prov => {
+        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
+        return {
+            'Proveedor': prov.nombre,
+            'Servicio': prov.servicio || '',
+            'Contacto': primerContacto.nombre || '',
+            'Teléfono': primerContacto.telefono || '',
+            'Email': primerContacto.email || ''
+        };
+    });
+    exportToExcel(data, 'Proveedores');
+}
+
+function exportarFacturasPagadasExcel() {
+    const filterType = document.getElementById('provFactPagFilter').value;
+    const year = parseInt(document.getElementById('provFactPagYear').value);
+    const month = filterType === 'mensual' ? parseInt(document.getElementById('provFactPagMonth').value) : null;
+    
+    const pagadas = [];
+    
+    proveedores.forEach(prov => {
+        if (prov.facturas) {
+            prov.facturas.forEach(f => {
+                if (f.fecha_pago) {
+                    const pd = new Date(f.fecha_pago + 'T00:00:00');
+                    if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
+                        pagadas.push({
+                            'Proveedor': prov.nombre,
+                            'Número': f.numero || 'S/N',
+                            'Monto': f.monto,
+                            'Fecha Pago': f.fecha_pago
+                        });
+                    }
+                }
+            });
+        }
+    });
+    
+    exportToExcel(pagadas, 'Facturas_Pagadas');
+}
+
+function exportarFacturasPorPagarExcel() {
+    const filterType = document.getElementById('provFactPorPagFilter').value;
+    const year = parseInt(document.getElementById('provFactPorPagYear').value);
+    const month = filterType === 'mensual' ? parseInt(document.getElementById('provFactPorPagMonth').value) : null;
+    
+    const porPagar = [];
+    
+    proveedores.forEach(prov => {
+        if (prov.facturas) {
+            prov.facturas.forEach(f => {
+                if (!f.fecha_pago) {
+                    const vd = new Date(f.vencimiento + 'T00:00:00');
+                    if (vd.getFullYear() === year && (month === null || month === vd.getMonth())) {
+                        porPagar.push({
+                            'Proveedor': prov.nombre,
+                            'Número': f.numero || 'S/N',
+                            'Monto': f.monto,
+                            'Vencimiento': f.vencimiento
+                        });
+                    }
+                }
+            });
+        }
+    });
+    
+    exportToExcel(porPagar, 'Facturas_Por_Pagar');
+}
+
+console.log('✅ Funciones de Excel cargadas correctamente');
+
 /* ========================================
    FIN DEL CÓDIGO A AGREGAR
    ======================================== */
