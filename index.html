@@ -72,21 +72,17 @@
                 <button class="menu-btn menu-btn-secondary" onclick="logout()">Salir</button>
             </div>
 
-            <!-- Inquilinos SubMenu -->
-            <div id="inquilinosSubMenu" class="submenu-container">
-                <button class="submenu-btn" onclick="showInquilinosView('list')">Listado</button>
-                <button class="submenu-btn" onclick="showAddInquilinoModal()">Agregar Nvo Inquilino</button>
-                <button class="submenu-btn" onclick="showInquilinosView('rentasRecibidas')">Rentas</button>
-                <button class="submenu-btn" onclick="showInquilinosView('vencimientoContratos')">Contratos</button>
-            </div>
+<div id="inquilinosSubMenu" class="submenu-container">
+    <button class="submenu-btn" onclick="showInquilinosView('list')">Listado</button>
+    <button class="submenu-btn" onclick="showInquilinosView('rentasRecibidas')">Rentas</button>
+    <button class="submenu-btn" onclick="showInquilinosView('vencimientoContratos')">Contratos</button>
+</div>
 
-            <!-- Proveedores Submenu -->
-            <div id="proveedoresSubMenu" class="submenu-container">
-                <button class="submenu-btn" onclick="showProveedoresView('list')">Listado</button>
-                <button class="submenu-btn" onclick="showAddProveedorModal()">Agregar Nvo Prov</button>
-                <button class="submenu-btn" onclick="showProveedoresView('facturasPagadas')">Facturas Pagadas</button>
-                <button class="submenu-btn" onclick="showProveedoresView('facturasPorPagar')">Facturas X Pagar</button>
-            </div>
+<div id="proveedoresSubMenu" class="submenu-container">
+    <button class="submenu-btn" onclick="showProveedoresView('list')">Listado</button>
+    <button class="submenu-btn" onclick="showProveedoresView('facturasPagadas')">Facturas Pagadas</button>
+    <button class="submenu-btn" onclick="showProveedoresView('facturasPorPagar')">Facturas X Pagar</button>
+</div>
 
             <!-- Admin SubMenu -->
             <div id="adminSubMenu" class="submenu-container">
@@ -172,10 +168,10 @@
                     <!-- Listado de Inquilinos -->
                     <div id="inquilinosListView" class="hidden">
                         <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Listado de Inquilinos</h2>
-                                <button class="btn btn-primary" onclick="showAddInquilinoModal()">+ Agregar</button>
-                            </div>
+<div class="card-header">
+    <h2 class="card-title">Inquilinos</h2>
+    <button class="btn-icon-add btn-icon-add-green" onclick="showAddInquilinoModal()" title="Agregar Nuevo Inquilino">+</button>
+</div>
                             <div class="table-container">
                                 <table id="inquilinosTable" class="sticky-header-table">
                                     <thead><tr><th>Empresa</th><th>Renta Mensual</th><th>Vencimiento Contrato</th></tr></thead>
@@ -239,7 +235,7 @@
                     <div id="proveedoresListView" class="hidden">
                         <div class="card">
                             <div class="card-header">
-                                <h2 class="card-title">Listado de Proveedores</h2>
+                                <h2 class="card-title">Proveedores</h2>
                                 <button class="btn btn-primary" onclick="showAddProveedorModal()">+ Agregar</button>
                             </div>
                             <div class="table-container">
@@ -704,39 +700,60 @@
         </div>
 
         <!-- Registrar Factura Modal -->
-        <div id="registrarFacturaModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title">Registrar Factura</h2>
-                    <button class="close-modal" onclick="closeModal('registrarFacturaModal')">×</button>
-                </div>
-                <form id="facturaForm" onsubmit="saveFactura(event)">
-                    <div style="padding: 1.5rem;">
-                        <div class="form-group"><label>Número de Factura</label><input type="text" id="facturaNumero" autocomplete="off"></div>
-                        <div class="form-group"><label>Fecha Factura *</label><input type="date" id="facturaFecha" required></div>
-                        <div class="form-group"><label>Vencimiento *</label><input type="date" id="facturaVencimiento" required></div>
-                       <div class="form-group"><label>Monto Total (incluye IVA) *</label><input type="number" id="facturaMonto" step="0.01" required autocomplete="off" onchange="calculateIVA()"></div>
-<div class="form-group">
-    <div class="form-group">
-    <label>IVA (editable)</label>
-    <input type="number" id="facturaIVA" step="0.01" autocomplete="off" placeholder="Se calcula automático o escribe manualmente">
-</div>
-                            <label>Factura (PDF)</label>
-                            <div class="file-upload" onclick="document.getElementById('facturaDocumento').click()">
-                                <input type="file" id="facturaDocumento" accept=".pdf">
-                                <p>Click para seleccionar PDF</p>
-                                <p id="facturaDocumentoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
-                            </div>
-                        </div>
-                        <div class="modal-actions">
-                            <button type="button" class="btn btn-secondary" onclick="closeModal('registrarFacturaModal')">Cancelar</button>
-                            <button type="submit" class="btn btn-success">Guardar</button>
-                        </div>
-                    </div>
-                </form>
+<div id="registrarFacturaModal" class="modal">
+    <div class="modal-content modal-content-compact">
+        <div class="modal-header-compact">
+            <h2 class="modal-title">Registrar Factura</h2>
+            <div class="modal-header-actions">
+                <button type="submit" form="facturaForm" class="btn-icon-save" title="Guardar">✓</button>
+                <button class="close-modal" onclick="closeModal('registrarFacturaModal')">×</button>
             </div>
         </div>
-
+        <form id="facturaForm" onsubmit="saveFactura(event)">
+            <div class="modal-body-compact">
+                <!-- Fila 1 -->
+                <div class="form-row-inline">
+                    <label>Número:</label>
+                    <input type="text" id="facturaNumero" autocomplete="off">
+                </div>
+                
+                <!-- Fila 2 -->
+                <div class="form-row-inline form-row-alternate">
+                    <label>Fecha Factura *:</label>
+                    <input type="date" id="facturaFecha" required>
+                </div>
+                
+                <!-- Fila 3 -->
+                <div class="form-row-inline">
+                    <label>Vencimiento *:</label>
+                    <input type="date" id="facturaVencimiento" required>
+                </div>
+                
+                <!-- Fila 4 -->
+                <div class="form-row-inline form-row-alternate">
+                    <label>Monto *:</label>
+                    <input type="number" id="facturaMonto" step="0.01" required autocomplete="off" onchange="calculateIVA()">
+                </div>
+                
+                <!-- Fila 5 -->
+                <div class="form-row-inline">
+                    <label>IVA:</label>
+                    <input type="number" id="facturaIVA" step="0.01" autocomplete="off">
+                </div>
+                
+                <!-- Fila 6 - PDF -->
+                <div class="form-row-inline form-row-alternate">
+                    <label>Factura (PDF):</label>
+                    <div class="file-upload-compact" onclick="document.getElementById('facturaDocumento').click()">
+                        <input type="file" id="facturaDocumento" accept=".pdf">
+                        <span class="file-upload-text">Seleccionar PDF</span>
+                        <span id="facturaDocumentoFileName" class="file-upload-filename"></span>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
         <!-- Edit Estacionamiento Modal -->
         <div id="editEstacionamientoModal" class="modal">
             <div class="modal-content">
