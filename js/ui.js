@@ -617,8 +617,38 @@ function renderProveedoresTable() {
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
         row.onclick = () => showProveedorDetailModal(prov.id);
+        
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
-        row.innerHTML = `<td>${prov.nombre}</td><td>${prov.servicio || '-'}</td><td>${primerContacto.nombre || '-'}</td><td>${primerContacto.telefono || '-'}</td><td>${primerContacto.email || '-'}</td>`;
+        
+        // Truncar textos y agregar tooltips
+        const nombreProveedor = prov.nombre || '-';
+        const servicio = prov.servicio || '-';
+        const nombreContacto = primerContacto.nombre || '-';
+        const telefono = primerContacto.telefono || '-';
+        const email = primerContacto.email || '-';
+        
+        // Crear celdas con tooltips si el texto es muy largo
+        const tdNombre = nombreProveedor.length > 30 ? 
+            `<td title="${nombreProveedor}">${nombreProveedor}</td>` : 
+            `<td>${nombreProveedor}</td>`;
+        
+        const tdServicio = servicio.length > 15 ? 
+            `<td title="${servicio}">${servicio}</td>` : 
+            `<td>${servicio}</td>`;
+        
+        const tdContacto = nombreContacto.length > 30 ? 
+            `<td title="${nombreContacto}">${nombreContacto}</td>` : 
+            `<td>${nombreContacto}</td>`;
+        
+        const tdTelefono = telefono.length > 15 ? 
+            `<td title="${telefono}">${telefono}</td>` : 
+            `<td>${telefono}</td>`;
+        
+        const tdEmail = email.length > 25 ? 
+            `<td title="${email}">${email}</td>` : 
+            `<td>${email}</td>`;
+        
+        row.innerHTML = tdNombre + tdServicio + tdContacto + tdTelefono + tdEmail;
     });
 }
 
