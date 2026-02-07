@@ -1231,33 +1231,53 @@ th.sorted-desc::after {
 }
 
 /* ========================================
-   BOTÓN EXPORTAR EXCEL
+   BOTÓN EXPORTAR EXCEL - SOLO ÍCONO
    ======================================== */
 
-.btn-excel {
+.btn-excel-icon {
     background: #217346;
     color: white;
     border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    font-size: 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.btn-excel-icon:hover {
+    background: #1a5c37;
+    transform: scale(1.05);
+}
+
+/* Tooltip */
+.btn-excel-icon::before {
+    content: attr(title);
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
     padding: 0.5rem 1rem;
     border-radius: 4px;
     font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
+    font-weight: normal;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    margin-right: 0.5rem;
+    z-index: 10000;
 }
 
-.btn-excel:hover {
-    background: #1a5c37;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.btn-excel::before {
-    content: '📊';
-    font-size: 1rem;
+.btn-excel-icon:hover::before {
+    opacity: 1;
 }
 
 /* ========================================
