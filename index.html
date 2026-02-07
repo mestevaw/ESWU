@@ -231,21 +231,22 @@
 
                 <!-- Proveedores Page -->
                 <div id="proveedoresPage" class="page">
+
                     <!-- Listado de Proveedores -->
-                    <div id="proveedoresListView" class="hidden">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Proveedores</h2>
-                                <button class="btn btn-primary" onclick="showAddProveedorModal()">+ Agregar</button>
-                            </div>
-                            <div class="table-container">
-                                <table id="proveedoresTable" class="sticky-header-table">
-                                    <thead><tr><th>Proveedor</th><th>Servicio</th><th>Contacto</th><th>Teléfono</th><th>Email</th></tr></thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+<div id="proveedoresListView" class="hidden">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Proveedores</h2>
+            <button class="btn-icon-add" onclick="showAddProveedorModal()" title="Agregar Nuevo Proveedor">+</button>
+        </div>
+        <div class="table-container">
+            <table id="proveedoresTable" class="sticky-header-table">
+                <thead><tr><th>Proveedor</th><th>Servicio</th><th>Contacto</th><th>Teléfono</th><th>Email</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
                     <!-- Facturas Pagadas -->
                     <div id="proveedoresFacturasPagadasView" class="hidden">
