@@ -110,3 +110,4 @@ function updateDespachoField() {
     const inq = inquilinos.find(i => i.nombre === selectedInquilino);
     document.getElementById('editEspacioDespacho').value = inq?.numero_despacho || '';
 }
+console.log('✅ UTILS.JS cargado');
