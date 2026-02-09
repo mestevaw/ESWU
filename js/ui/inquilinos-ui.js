@@ -49,22 +49,26 @@ function showInquilinosView(view) {
 
 function renderInquilinosTable() {
     const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
-    tbody.innerHTML = '';
+    tbody.innerHTML = '<tr><td colspan="3" class="table-loading">Cargando inquilinos</td></tr>';
     
-    inquilinos.forEach(inq => {
-        const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
-        tbody.innerHTML += `
-            <tr style="cursor: pointer;" onclick="showInquilinoDetail(${inq.id})">
-                <td style="font-size:0.9rem">${nombreCorto}</td>
-                <td class="currency">${formatCurrency(inq.renta)}</td>
-                <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
-            </tr>
-        `;
-    });
-    
-    if (inquilinos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No hay inquilinos</td></tr>';
-    }
+    setTimeout(() => {
+        tbody.innerHTML = '';
+        
+        inquilinos.forEach(inq => {
+            const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
+            tbody.innerHTML += `
+                <tr style="cursor: pointer;" onclick="showInquilinoDetail(${inq.id})">
+                    <td style="font-size:0.9rem">${nombreCorto}</td>
+                    <td class="currency">${formatCurrency(inq.renta)}</td>
+                    <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
+                </tr>
+            `;
+        });
+        
+        if (inquilinos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No hay inquilinos</td></tr>';
+        }
+    }, 100);
 }
 
 function filtrarInquilinos(query) {
