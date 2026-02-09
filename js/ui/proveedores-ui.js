@@ -54,14 +54,16 @@ function renderProveedoresTable() {
     proveedores.forEach(prov => {
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
         
-        tbody.innerHTML += `
-            <tr style="cursor: pointer;" onclick="showProveedorDetail(${prov.id})">
-                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
-                <td>${prov.servicio}</td>
-                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
-                <td>${primerContacto.telefono || '-'}</td>
-                <td>${primerContacto.email || '-'}</td>
-            </tr>
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';
+        row.onclick = () => showProveedorDetail(prov.id);
+        
+        row.innerHTML = `
+            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
+            <td>${prov.servicio}</td>
+            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
+            <td>${primerContacto.telefono || '-'}</td>
+            <td>${primerContacto.email || '-'}</td>
         `;
     });
     
@@ -274,55 +276,56 @@ function showProveedorDetail(id) {
     let totalPorPagar = 0;
     const isMobile = window.innerWidth <= 768;
     
-    if (facturasPorPagar.length > 0) {
-        if (isMobile) {
-            facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
-                totalPorPagar += f.monto;
-                const clickAction = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
-                const cursorStyle = f.documento_file ? 'cursor:pointer;' : '';
-                return `
-                    <div class="factura-box" ${clickAction} style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white; ${cursorStyle}">
-                        <div style="margin-bottom: 0.5rem;">
-                            <strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong>
-                        </div>
-                        <div style="margin-bottom: 0.5rem;">
-                            Vence: <strong>${formatDate(f.vencimiento)}</strong>
-                        </div>
-                        <div style="text-align:right; font-size: 1.1rem; color: var(--primary);">
-                            <strong>${formatCurrency(f.monto)}</strong>
-                        </div>
-                        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;" onclick="event.stopPropagation()">
-                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
-                        </div>
+if (facturasPorPagar.length > 0) {
+    if (isMobile) {
+        facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
+            totalPorPagar += f.monto;
+            const clickAction = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
+            const cursorStyle = f.documento_file ? 'cursor:pointer;' : '';
+            return `
+                <div class="factura-box" ${clickAction} style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white; ${cursorStyle}">
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong>
                     </div>
-                `;
-            }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
-        } else {
-            facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
-                totalPorPagar += f.monto;
-                const verLink = f.documento_file 
-                    ? `<button class="btn btn-sm btn-secondary" onclick="viewFacturaDoc('${f.documento_file}')">Ver</button>` 
-                    : '';
-                return `
-                    <div class="payment-item">
-                        <div class="payment-item-content">
-                            <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
-                            <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
-                            <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
-                        </div>
-                        <div class="payment-item-actions">
-                            ${verLink}
-                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
-                        </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        Vence: <strong>${formatDate(f.vencimiento)}</strong>
                     </div>
-                `;
-            }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
-        }
+                    <div style="text-align:right; font-size: 1.1rem; color: var(--primary);">
+                        <strong>${formatCurrency(f.monto)}</strong>
+                    </div>
+                    <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;" onclick="event.stopPropagation()">
+                        <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
+                    </div>
+                </div>
+            `;
+        }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
     } else {
-        facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
+        facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
+            totalPorPagar += f.monto;
+            const clickable = f.documento_file ? `style="cursor:pointer;" onclick="viewFacturaDoc('${f.documento_file}')"` : '';
+            const verLink = f.documento_file 
+                ? `<button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); viewFacturaDoc('${f.documento_file}')">Ver</button>` 
+                : '';
+            return `
+                <div class="payment-item" ${clickable}>
+                    <div class="payment-item-content">
+                        <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
+                        <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
+                        <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
+                    </div>
+                    <div class="payment-item-actions" onclick="event.stopPropagation()">
+                        ${verLink}
+                        <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
+                    </div>
+                </div>
+            `;
+        }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
     }
+} else {
+    facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
+}
     
     const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
     if (prov.documentos && prov.documentos.length > 0) {
