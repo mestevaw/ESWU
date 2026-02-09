@@ -98,6 +98,7 @@ function filtrarProveedores(query) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron proveedores</td></tr>';
     }
 }
+
 // ============================================
 // FACTURAS PAGADAS
 // ============================================
@@ -206,7 +207,7 @@ function renderProveedoresFacturasPorPagar() {
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     porPagar.forEach(f => {
         const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
+        row.style.cursor = f.documento_file ? 'pointer' : 'default';
         if (f.documento_file) {
             row.onclick = () => viewFacturaDoc(f.documento_file);
         }
@@ -273,62 +274,62 @@ function showProveedorDetail(id) {
         facturasPagadasDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas pagadas</p>';
     }
     
-const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
-const facturasPorPagar = prov.facturas.filter(f => !f.fecha_pago);
-let totalPorPagar = 0;
-const isMobile = window.innerWidth <= 768;
-
-if (facturasPorPagar.length > 0) {
-    let html = '';
+    const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
+    const facturasPorPagar = prov.facturas.filter(f => !f.fecha_pago);
+    let totalPorPagar = 0;
+    const isMobile = window.innerWidth <= 768;
     
-    facturasPorPagar.forEach(f => {
-        totalPorPagar += f.monto;
+    if (facturasPorPagar.length > 0) {
+        let html = '';
         
-        if (isMobile) {
-            const clickAction = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
-            const cursorStyle = f.documento_file ? 'cursor:pointer;' : '';
-            html += `
-                <div class="factura-box" ${clickAction} style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white; ${cursorStyle}">
-                    <div style="margin-bottom: 0.5rem;">
-                        <strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong>
-                    </div>
-                    <div style="margin-bottom: 0.5rem;">
-                        Vence: <strong>${formatDate(f.vencimiento)}</strong>
-                    </div>
-                    <div style="text-align:right; font-size: 1.1rem; color: var(--primary);">
-                        <strong>${formatCurrency(f.monto)}</strong>
-                    </div>
-                    <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;" onclick="event.stopPropagation()">
-                        <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
-                    </div>
-                </div>
-            `;
-        } else {
-            const hasDoc = f.documento_file;
-            const rowClass = hasDoc ? 'payment-item-clickable' : 'payment-item';
-            const clickHandler = hasDoc ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
-            const cursorStyle = hasDoc ? 'cursor:pointer;' : '';
+        facturasPorPagar.forEach(f => {
+            totalPorPagar += f.monto;
             
-            html += `
-                <div class="${rowClass}" ${clickHandler} style="${cursorStyle}">
-                    <div class="payment-item-content">
-                        <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
-                        <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
-                        <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
+            if (isMobile) {
+                const clickAction = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
+                const cursorStyle = f.documento_file ? 'cursor:pointer;' : '';
+                html += `
+                    <div class="factura-box" ${clickAction} style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white; ${cursorStyle}">
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong>
+                        </div>
+                        <div style="margin-bottom: 0.5rem;">
+                            Vence: <strong>${formatDate(f.vencimiento)}</strong>
+                        </div>
+                        <div style="text-align:right; font-size: 1.1rem; color: var(--primary);">
+                            <strong>${formatCurrency(f.monto)}</strong>
+                        </div>
+                        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;" onclick="event.stopPropagation()">
+                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+                        </div>
                     </div>
-                    <div class="payment-item-actions" onclick="event.stopPropagation()">
-                        <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+                `;
+            } else {
+                const hasDoc = f.documento_file;
+                const rowClass = hasDoc ? 'payment-item-clickable' : 'payment-item';
+                const clickHandler = hasDoc ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
+                const cursorStyle = hasDoc ? 'cursor:pointer;' : '';
+                
+                html += `
+                    <div class="${rowClass}" ${clickHandler} style="${cursorStyle}">
+                        <div class="payment-item-content">
+                            <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
+                            <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
+                            <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
+                        </div>
+                        <div class="payment-item-actions" onclick="event.stopPropagation()">
+                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+                        </div>
                     </div>
-                </div>
-            `;
-        }
-    });
-    
-    html += `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
-    facturasPorPagarDiv.innerHTML = html;
-} else {
-    facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
-}
+                `;
+            }
+        });
+        
+        html += `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
+        facturasPorPagarDiv.innerHTML = html;
+    } else {
+        facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
+    }
     
     const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
     if (prov.documentos && prov.documentos.length > 0) {
