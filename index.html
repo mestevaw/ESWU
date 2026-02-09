@@ -867,39 +867,28 @@
     <!-- SheetJS para exportar Excel -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     
-    <!-- Supabase Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
- <!-- Config -->
-<script src="js/config.js"></script>
+<!-- Supabase Library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- Core modules -->
+<!-- SheetJS (Excel export) -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+<!-- Core Scripts -->
+<script src="js/config.js"></script>
 <script src="js/core/utils.js"></script>
 <script src="js/core/loaders.js"></script>
 <script src="js/core/saves.js"></script>
 
-<!-- UI (debe ir ANTES de auth) -->
 <!-- UI Modules -->
 <script src="js/ui/navigation.js"></script>
 <script src="js/ui/inquilinos-ui.js"></script>
 <script src="js/ui/modals.js"></script>
+<script src="js/ui/proveedores-ui.js"></script>
+<script src="js/ui/admin-ui.js"></script>
+<script src="js/ui/tables.js"></script>
 
-<!-- UI Main (resto de funciones) -->
-<script src="js/ui.js"></script>
-
-<!-- Auth al final (usa todo lo anterior) -->
+<!-- Authentication (loads last) -->
 <script src="js/core/auth.js"></script>
-```
 
----
-
-## 📋 **ORDEN CORRECTO:**
-```
-1. config.js     ← Variables globales
-2. utils.js      ← Helpers
-3. loaders.js    ← Funciones load
-4. saves.js      ← Funciones save
-5. ui.js         ← Funciones UI (renderInquilinosTable, etc)
-6. auth.js       ← Login e init (usa TODO lo anterior)
 </body>
 </html>
