@@ -186,59 +186,71 @@ function renderProveedoresFacturasPagadas() {
 
 function renderProveedoresFacturasPorPagar() {
     const tbody = document.getElementById('proveedoresFacturasPorPagarTable').querySelector('tbody');
-    tbody.innerHTML = '';
+    tbody.innerHTML = '<tr><td colspan="4" class="table-loading">Cargando facturas</td></tr>';
     
-    const filterType = document.getElementById('provFactPorPagFilter').value;
-    const year = parseInt(document.getElementById('provFactPorPagYear').value);
-    const monthSelect = document.getElementById('provFactPorPagMonth');
-    
-    if (filterType === 'mensual') {
-        monthSelect.classList.remove('hidden');
-    } else {
-        monthSelect.classList.add('hidden');
-    }
-    
-    const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
-    const porPagar = [];
-    let totalPorPagar = 0;
-    
-    proveedores.forEach(prov => {
-        if (prov.facturas) {
-            prov.facturas.forEach(f => {
-                if (!f.fecha_pago) {
-                    const vd = new Date(f.vencimiento + 'T00:00:00');
-                    if (vd.getFullYear() === year && (month === null || month === vd.getMonth())) {
-                        porPagar.push({
-                            provId: prov.id,
-                            factId: f.id,
-                            proveedor: prov.nombre,
-                            numero: f.numero || 'S/N',
-                            monto: f.monto,
-                            vencimiento: f.vencimiento,
-                            documento_file: f.documento_file
-                        });
-                        totalPorPagar += f.monto;
+    setTimeout(() => {
+        tbody.innerHTML = '';
+        
+        const filterType = document.getElementById('provFactPorPagFilter').value;
+        const year = parseInt(document.getElementById('provFactPorPagYear').value);
+        const monthSelect = document.getElementById('provFactPorPagMonth');
+        
+        if (filterType === 'mensual') {
+            monthSelect.classList.remove('hidden');
+        } else {
+            monthSelect.classList.add('hidden');
+        }
+        
+        const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+        const porPagar = [];
+        let totalPorPagar = 0;
+        
+        proveedores.forEach(prov => {
+            if (prov.facturas) {
+                prov.facturas.forEach(f => {
+                    if (!f.fecha_pago) {
+                        const vd = new Date(f.vencimiento + 'T00:00:00');
+                        if (vd.getFullYear() === year && (month === null || month === vd.getMonth())) {
+                            porPagar.push({
+                                provId: prov.id,
+                                factId: f.id,
+                                proveedor: prov.nombre,
+                                numero: f.numero || 'S/N',
+                                monto: f.monto,
+                                vencimiento: f.vencimiento,
+                                documento_file: f.documento_file
+                            });
+                            totalPorPagar += f.monto;
+                        }
                     }
-                }
-            });
+                });
+            }
+        });
+        
+        porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
+        porPagar.forEach(f => {
+            const row = tbody.insertRow();
+            
+            // Hacer clickeable la fila si tiene PDF
+            if (f.documento_file) {
+                row.style.cursor = 'pointer';
+                row.onclick = () => viewFacturaDoc(f.documento_file);
+            }
+            
+            row.innerHTML = `
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
+                <td>${f.numero}</td>
+                <td class="currency">${formatCurrency(f.monto)}</td>
+                <td>${formatDateVencimiento(f.vencimiento)}</td>
+            `;
+        });
+        
+        if (porPagar.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
+        } else {
+            tbody.innerHTML += `<tr class="total-row"><td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td></tr>`;
         }
-    });
-    
-    porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
-    porPagar.forEach(f => {
-        const row = tbody.insertRow();
-        row.style.cursor = f.documento_file ? 'pointer' : 'default';
-        if (f.documento_file) {
-            row.onclick = () => viewFacturaDoc(f.documento_file);
-        }
-        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
-    });
-    
-    if (porPagar.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
-    } else {
-        tbody.innerHTML += `<tr class="total-row"><td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td></tr>`;
-    }
+    }, 100);
 }
 
 // ============================================
