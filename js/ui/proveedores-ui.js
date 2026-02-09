@@ -109,59 +109,75 @@ function filtrarProveedores(query) {
 
 function renderProveedoresFacturasPagadas() {
     const tbody = document.getElementById('proveedoresFacturasPagadasTable').querySelector('tbody');
-    tbody.innerHTML = '';
+    tbody.innerHTML = '<tr><td colspan="4" class="table-loading">Cargando facturas</td></tr>';
     
-    const filterType = document.getElementById('provFactPagFilter').value;
-    const year = parseInt(document.getElementById('provFactPagYear').value);
-    const monthSelect = document.getElementById('provFactPagMonth');
-    
-    if (filterType === 'mensual') {
-        monthSelect.classList.remove('hidden');
-    } else {
-        monthSelect.classList.add('hidden');
-    }
-    
-    const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
-    const pagadas = [];
-    let totalPagadas = 0;
-    
-    proveedores.forEach(prov => {
-        if (prov.facturas) {
-            prov.facturas.forEach(f => {
-                if (f.fecha_pago) {
-                    const pd = new Date(f.fecha_pago + 'T00:00:00');
-                    if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
-                        pagadas.push({
-                            proveedor: prov.nombre,
-                            numero: f.numero || 'S/N',
-                            monto: f.monto,
-                            fecha: f.fecha_pago,
-                            documento_file: f.documento_file,
-                            pago_file: f.pago_file
-                        });
-                        totalPagadas += f.monto;
-                    }
-                }
-            });
+    setTimeout(() => {
+        tbody.innerHTML = '';
+        
+        const filterType = document.getElementById('provFactPagFilter').value;
+        const year = parseInt(document.getElementById('provFactPagYear').value);
+        const monthSelect = document.getElementById('provFactPagMonth');
+        
+        if (filterType === 'mensual') {
+            monthSelect.classList.remove('hidden');
+        } else {
+            monthSelect.classList.add('hidden');
         }
-    });
-    
-    pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    pagadas.forEach(f => {
-        const facturaCell = f.documento_file 
-            ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" onclick="viewFacturaDoc('${f.documento_file}')">${f.numero}</td>`
-            : `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.numero}</td>`;
-        const fechaCell = f.pago_file
-            ? `<td style="cursor:pointer;color:var(--primary)" onclick="viewFacturaDoc('${f.pago_file}')">${formatDate(f.fecha)}</td>`
-            : `<td>${formatDate(f.fecha)}</td>`;
-        tbody.innerHTML += `<tr><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}</tr>`;
-    });
-    
-    if (pagadas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas pagadas</td></tr>';
-    } else {
-        tbody.innerHTML += `<tr class="total-row"><td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td></tr>`;
-    }
+        
+        const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+        const pagadas = [];
+        let totalPagadas = 0;
+        
+        proveedores.forEach(prov => {
+            if (prov.facturas) {
+                prov.facturas.forEach(f => {
+                    if (f.fecha_pago) {
+                        const pd = new Date(f.fecha_pago + 'T00:00:00');
+                        if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
+                            pagadas.push({
+                                proveedor: prov.nombre,
+                                numero: f.numero || 'S/N',
+                                monto: f.monto,
+                                fecha: f.fecha_pago,
+                                documento_file: f.documento_file,
+                                pago_file: f.pago_file
+                            });
+                            totalPagadas += f.monto;
+                        }
+                    }
+                });
+            }
+        });
+        
+        pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+        pagadas.forEach(f => {
+            const row = tbody.insertRow();
+            
+            // Hacer clickeable la fila si tiene PDF de factura
+            if (f.documento_file) {
+                row.style.cursor = 'pointer';
+                row.onclick = () => viewFacturaDoc(f.documento_file);
+            }
+            
+            const numeroText = f.numero;
+            const pagoLink = f.pago_file 
+                ? `<span style="cursor:pointer;color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewFacturaDoc('${f.pago_file}')">${formatDate(f.fecha)}</span>`
+                : formatDate(f.fecha);
+            
+            row.innerHTML = `
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${numeroText}</td>
+                <td class="currency">${formatCurrency(f.monto)}</td>
+                <td>${pagoLink}</td>
+            `;
+        });
+        
+        if (pagadas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas pagadas</td></tr>';
+        } else {
+            tbody.innerHTML += `<tr class="total-row"><td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td></tr>`;
+        }
+    }, 100);
 }
 
 // ============================================
