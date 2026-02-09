@@ -870,8 +870,28 @@
     <!-- Supabase Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/config.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+  <!-- Config -->
+<script src="js/config.js"></script>
+
+<!-- Core modules (antes main.js) -->
+<script src="js/core/utils.js"></script>
+<script src="js/core/loaders.js"></script>
+<script src="js/core/saves.js"></script>
+<script src="js/core/auth.js"></script>
+
+<!-- UI (todavía sin modularizar) -->
+<script src="js/ui.js"></script>
+```
+
+---
+
+## ⚠️ **IMPORTANTE - ORDEN CORRECTO:**
+```
+1. config.js       ← Primero (variables globales)
+2. utils.js        ← Segundo (helpers)
+3. loaders.js      ← Tercero (load functions)
+4. saves.js        ← Cuarto (save functions)
+5. auth.js         ← Quinto (login e init)
+6. ui.js           ← Último (interfaz)
 </body>
 </html>
