@@ -13,8 +13,8 @@ async function loadInquilinos() {
         // Solo cargar datos básicos primero
         const { data, error } = await supabaseClient
             .from('inquilinos')
-            .select('id, nombre, renta, fecha_vencimiento, activo')
-            .eq('activo', true)
+            .select('id, nombre, renta, fecha_vencimiento, contrato_activo')
+            .eq('contrato_activo', true)
             .order('nombre');
         
         if (error) throw error;
@@ -24,7 +24,7 @@ async function loadInquilinos() {
             nombre: inq.nombre,
             renta: parseFloat(inq.renta || 0),
             fecha_vencimiento: inq.fecha_vencimiento,
-            activo: inq.activo,
+            contrato_activo: inq.contrato_activo,
             // Datos que se cargarán después
             contactos: [],
             pagos: [],
@@ -43,21 +43,34 @@ async function ensureInquilinosFullLoaded() {
     if (inquilinosFullLoaded) return;
     
     try {
-        // Cargar todos los datos completos
-        const { data, error } = await supabaseClient
+        const { data: inquilinosData, error: inquilinosError } = await supabaseClient
             .from('inquilinos')
-            .select(`
-                *,
-                inquilinos_contactos (*),
-                pagos_inquilinos (*),
-                inquilinos_documentos (*)
-            `)
-            .eq('activo', true)
+            .select('*')
+            .eq('contrato_activo', true)
             .order('nombre');
         
-        if (error) throw error;
+        if (inquilinosError) throw inquilinosError;
         
-        inquilinos = data.map(inq => ({
+        const { data: contactosData, error: contactosError } = await supabaseClient
+            .from('inquilinos_contactos')
+            .select('*');
+        
+        if (contactosError) throw contactosError;
+        
+        const { data: pagosData, error: pagosError } = await supabaseClient
+            .from('pagos_inquilinos')
+            .select('*')
+            .order('fecha', { ascending: false });
+        
+        if (pagosError) throw pagosError;
+        
+        const { data: docsData, error: docsError } = await supabaseClient
+            .from('inquilinos_documentos')
+            .select('*');
+        
+        if (docsError) throw docsError;
+        
+        inquilinos = inquilinosData.map(inq => ({
             id: inq.id,
             nombre: inq.nombre,
             clabe: inq.clabe,
@@ -69,27 +82,17 @@ async function ensureInquilinosFullLoaded() {
             notas: inq.notas,
             numero_despacho: inq.numero_despacho,
             contrato_file: inq.contrato_file,
-            activo: inq.activo,
-            contactos: (inq.inquilinos_contactos || []).map(c => ({
-                id: c.id,
-                nombre: c.nombre,
-                telefono: c.telefono,
-                email: c.email
-            })),
-            pagos: (inq.pagos_inquilinos || []).map(p => ({
+            contrato_activo: inq.contrato_activo,
+            fecha_terminacion: inq.fecha_terminacion,
+            contactos: contactosData.filter(c => c.inquilino_id === inq.id),
+            pagos: pagosData.filter(p => p.inquilino_id === inq.id).map(p => ({
                 id: p.id,
                 fecha: p.fecha,
                 monto: parseFloat(p.monto),
                 completo: p.completo,
                 pago_file: p.pago_file
-            })).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)),
-            documentos: (inq.inquilinos_documentos || []).map(d => ({
-                id: d.id,
-                nombre: d.nombre_documento,
-                archivo: d.archivo_pdf,
-                fecha: d.fecha_guardado,
-                usuario: d.usuario_guardo
-            })).sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
+            })),
+            documentos: docsData.filter(d => d.inquilino_id === inq.id)
         }));
         
         inquilinosFullLoaded = true;
@@ -139,33 +142,41 @@ async function ensureProveedoresFullLoaded() {
     if (proveedoresFullLoaded) return;
     
     try {
-        // Cargar todos los datos completos
-        const { data, error } = await supabaseClient
+        const { data: proveedoresData, error: proveedoresError } = await supabaseClient
             .from('proveedores')
-            .select(`
-                *,
-                proveedores_contactos (*),
-                facturas (*),
-                proveedores_documentos (*)
-            `)
+            .select('*')
             .order('nombre');
         
-        if (error) throw error;
+        if (proveedoresError) throw proveedoresError;
         
-        proveedores = data.map(prov => ({
+        const { data: contactosData, error: contactosError } = await supabaseClient
+            .from('proveedores_contactos')
+            .select('*');
+        
+        if (contactosError) throw contactosError;
+        
+        const { data: facturasData, error: facturasError } = await supabaseClient
+            .from('facturas')
+            .select('*')
+            .order('fecha', { ascending: false });
+        
+        if (facturasError) throw facturasError;
+        
+        const { data: docsData, error: docsError } = await supabaseClient
+            .from('proveedores_documentos')
+            .select('*');
+        
+        if (docsError) throw docsError;
+        
+        proveedores = proveedoresData.map(prov => ({
             id: prov.id,
             nombre: prov.nombre,
             servicio: prov.servicio,
             clabe: prov.clabe,
             rfc: prov.rfc,
             notas: prov.notas,
-            contactos: (prov.proveedores_contactos || []).map(c => ({
-                id: c.id,
-                nombre: c.nombre,
-                telefono: c.telefono,
-                email: c.email
-            })),
-            facturas: (prov.facturas || []).map(f => ({
+            contactos: contactosData.filter(c => c.proveedor_id === prov.id),
+            facturas: facturasData.filter(f => f.proveedor_id === prov.id).map(f => ({
                 id: f.id,
                 numero: f.numero,
                 fecha: f.fecha,
@@ -175,14 +186,8 @@ async function ensureProveedoresFullLoaded() {
                 fecha_pago: f.fecha_pago,
                 documento_file: f.documento_file,
                 pago_file: f.pago_file
-            })).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)),
-            documentos: (prov.proveedores_documentos || []).map(d => ({
-                id: d.id,
-                nombre: d.nombre_documento,
-                archivo: d.archivo_pdf,
-                fecha: d.fecha_guardado,
-                usuario: d.usuario_guardo
-            })).sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
+            })),
+            documentos: docsData.filter(d => d.proveedor_id === prov.id)
         }));
         
         proveedoresFullLoaded = true;
@@ -200,21 +205,27 @@ async function ensureProveedoresFullLoaded() {
 
 async function loadActivos() {
     try {
-        const { data, error } = await supabaseClient
+        const { data: activosData, error: activosError } = await supabaseClient
             .from('activos')
-            .select('id, nombre, ultimo_mant, proximo_mant, proveedor')
+            .select('*')
             .order('nombre');
         
-        if (error) throw error;
+        if (activosError) throw activosError;
         
-        activos = data.map(act => ({
+        const { data: fotosData, error: fotosError } = await supabaseClient
+            .from('activos_fotos')
+            .select('*');
+        
+        if (fotosError) throw fotosError;
+        
+        activos = activosData.map(act => ({
             id: act.id,
             nombre: act.nombre,
             ultimo_mant: act.ultimo_mant,
             proximo_mant: act.proximo_mant,
             proveedor: act.proveedor,
             notas: act.notas,
-            fotos: []
+            fotos: fotosData.filter(f => f.activo_id === act.id)
         }));
         
         console.log(`✅ ${activos.length} activos cargados`);
@@ -226,36 +237,7 @@ async function loadActivos() {
 }
 
 async function ensureActivosLoaded() {
-    if (activos.length > 0 && activos[0].fotos && activos[0].fotos.length >= 0) return;
-    
-    try {
-        const { data, error } = await supabaseClient
-            .from('activos')
-            .select('*, activos_fotos (*)')
-            .order('nombre');
-        
-        if (error) throw error;
-        
-        activos = data.map(act => ({
-            id: act.id,
-            nombre: act.nombre,
-            ultimo_mant: act.ultimo_mant,
-            proximo_mant: act.proximo_mant,
-            proveedor: act.proveedor,
-            notas: act.notas,
-            fotos: (act.activos_fotos || []).map(f => ({
-                id: f.id,
-                data: f.foto_data,
-                name: f.foto_name
-            }))
-        }));
-        
-        console.log(`✅ ${activos.length} activos cargados (completo)`);
-        
-    } catch (error) {
-        console.error('Error loading activos full:', error);
-        throw error;
-    }
+    return; // Ya están cargados
 }
 
 // ============================================
@@ -271,14 +253,7 @@ async function loadEstacionamiento() {
         
         if (error) throw error;
         
-        estacionamiento = data.map(e => ({
-            id: e.id,
-            numero_espacio: e.numero_espacio,
-            inquilino_nombre: e.inquilino_nombre,
-            numero_despacho: e.numero_despacho,
-            color_asignado: e.color_asignado
-        }));
-        
+        estacionamiento = data;
         console.log(`✅ ${estacionamiento.length} espacios cargados`);
         
     } catch (error) {
@@ -295,19 +270,13 @@ async function loadBitacoraSemanal() {
     try {
         const { data, error } = await supabaseClient
             .from('bitacora_semanal')
-            .select('id, semana_inicio, semana_texto, notas')
+            .select('*')
             .order('semana_inicio', { ascending: false })
             .limit(52);
         
         if (error) throw error;
         
-        bitacoraSemanal = data.map(b => ({
-            id: b.id,
-            semana_inicio: b.semana_inicio,
-            semana_texto: b.semana_texto,
-            notas: b.notas
-        }));
-        
+        bitacoraSemanal = data || [];
         console.log(`✅ ${bitacoraSemanal.length} semanas cargadas`);
         
     } catch (error) {
@@ -329,13 +298,7 @@ async function loadUsuarios() {
         
         if (error) throw error;
         
-        usuarios = data.map(u => ({
-            id: u.id,
-            nombre: u.nombre,
-            password: u.password,
-            activo: u.activo
-        }));
-        
+        usuarios = data;
         console.log(`✅ ${usuarios.length} usuarios cargados`);
         
     } catch (error) {
@@ -357,19 +320,13 @@ async function loadBancosDocumentos() {
     try {
         const { data, error } = await supabaseClient
             .from('bancos_documentos')
-            .select('id, tipo, archivo_pdf, fecha_subida')
+            .select('*')
             .order('fecha_subida', { ascending: false })
             .limit(100);
         
         if (error) throw error;
         
-        bancosDocumentos = data.map(b => ({
-            id: b.id,
-            tipo: b.tipo,
-            archivo_pdf: b.archivo_pdf,
-            fecha_subida: b.fecha_subida
-        }));
-        
+        bancosDocumentos = data || [];
         console.log(`✅ ${bancosDocumentos.length} documentos bancarios cargados`);
         
     } catch (error) {
