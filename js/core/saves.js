@@ -422,7 +422,8 @@ async function saveBancoDoc(event) {
             .insert([{
                 tipo: tipo,
                 archivo_pdf: pdfBase64,
-                fecha_subida: new Date().toISOString().split('T')[0]
+                fecha_subida: new Date().toISOString().split('T')[0],
+                usuario_subio: currentUser.nombre
             }]);
         
         if (error) throw error;
@@ -440,6 +441,8 @@ async function saveBancoDoc(event) {
         hideLoading();
     }
 }
+
+console.log('✅ SAVES.JS cargado');
 
 // ============================================
 // SAVE CONTACTO INQUILINO
