@@ -124,3 +124,4 @@ function showLoading() {
 function hideLoading() {
     document.getElementById('loadingOverlay').classList.add('hidden');
 }
+console.log('✅ AUTH.JS cargado');
