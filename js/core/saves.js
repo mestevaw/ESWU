@@ -1,1 +1,562 @@
+/* ========================================
+   SAVES.JS - Save Functions
+   ======================================== */
 
+// ============================================
+// SAVE INQUILINO
+// ============================================
+
+async function saveInquilino(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const contratoFile = document.getElementById('inquilinoContrato').files[0];
+        let contratoURL = null;
+        
+        if (contratoFile) {
+            const contratoBase64 = await fileToBase64(contratoFile);
+            contratoURL = contratoBase64;
+        }
+        
+        const inquilinoData = {
+            nombre: document.getElementById('inquilinoNombre').value,
+            clabe: document.getElementById('inquilinoClabe').value || null,
+            rfc: document.getElementById('inquilinoRFC').value || null,
+            m2: document.getElementById('inquilinoM2').value || null,
+            numero_despacho: document.getElementById('inquilinoDespacho').value || null,
+            renta: parseFloat(document.getElementById('inquilinoRenta').value),
+            fecha_inicio: document.getElementById('inquilinoFechaInicio').value,
+            fecha_vencimiento: document.getElementById('inquilinoFechaVenc').value,
+            contrato_file: contratoURL,
+            notas: document.getElementById('inquilinoNotas').value || null
+        };
+        
+        let inquilinoId;
+        
+        if (isEditMode && currentInquilinoId) {
+            if (!contratoURL && inquilinos.find(i => i.id === currentInquilinoId)?.contrato_file) {
+                delete inquilinoData.contrato_file;
+            }
+            
+            const { error } = await supabaseClient
+                .from('inquilinos')
+                .update(inquilinoData)
+                .eq('id', currentInquilinoId);
+            
+            if (error) throw error;
+            
+            await supabaseClient
+                .from('inquilinos_contactos')
+                .delete()
+                .eq('inquilino_id', currentInquilinoId);
+            
+            inquilinoId = currentInquilinoId;
+        } else {
+            const { data, error } = await supabaseClient
+                .from('inquilinos')
+                .insert([inquilinoData])
+                .select();
+            
+            if (error) throw error;
+            inquilinoId = data[0].id;
+        }
+        
+        if (tempInquilinoContactos.length > 0) {
+            const contactosToInsert = tempInquilinoContactos.map(c => ({
+                inquilino_id: inquilinoId,
+                nombre: c.nombre,
+                telefono: c.telefono || null,
+                email: c.email || null
+            }));
+            
+            const { error: contactosError } = await supabaseClient
+                .from('inquilinos_contactos')
+                .insert(contactosToInsert);
+            
+            if (contactosError) throw contactosError;
+        }
+        
+        await loadInquilinos();
+        closeModal('addInquilinoModal');
+        
+        if (currentSubContext === 'inquilinos-list') {
+            renderInquilinosTable();
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar inquilino: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// SAVE PROVEEDOR
+// ============================================
+
+async function saveProveedor(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const proveedorData = {
+            nombre: document.getElementById('proveedorNombre').value,
+            servicio: document.getElementById('proveedorServicio').value,
+            clabe: document.getElementById('proveedorClabe').value || null,
+            rfc: document.getElementById('proveedorRFC').value || null,
+            notas: document.getElementById('proveedorNotas').value || null
+        };
+        
+        let proveedorId;
+        
+        if (isEditMode && currentProveedorId) {
+            const { error } = await supabaseClient
+                .from('proveedores')
+                .update(proveedorData)
+                .eq('id', currentProveedorId);
+            
+            if (error) throw error;
+            
+            await supabaseClient
+                .from('proveedores_contactos')
+                .delete()
+                .eq('proveedor_id', currentProveedorId);
+            
+            proveedorId = currentProveedorId;
+        } else {
+            const { data, error } = await supabaseClient
+                .from('proveedores')
+                .insert([proveedorData])
+                .select();
+            
+            if (error) throw error;
+            proveedorId = data[0].id;
+        }
+        
+        if (tempProveedorContactos.length > 0) {
+            const contactosToInsert = tempProveedorContactos.map(c => ({
+                proveedor_id: proveedorId,
+                nombre: c.nombre,
+                telefono: c.telefono || null,
+                email: c.email || null
+            }));
+            
+            const { error: contactosError } = await supabaseClient
+                .from('proveedores_contactos')
+                .insert(contactosToInsert);
+            
+            if (contactosError) throw contactosError;
+        }
+        
+        await loadProveedores();
+        closeModal('addProveedorModal');
+        
+        if (currentSubContext === 'proveedores-list') {
+            renderProveedoresTable();
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar proveedor: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// SAVE PAGO RENTA
+// ============================================
+
+async function savePagoRenta(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
+        const completo = document.getElementById('pagoCompleto').value;
+        const monto = completo === 'si' ? inquilino.renta : parseFloat(document.getElementById('pagoMonto').value);
+        
+        const pagoFile = document.getElementById('pagoPDF').files[0];
+        let pagoURL = null;
+        
+        if (pagoFile) {
+            pagoURL = await fileToBase64(pagoFile);
+        }
+        
+        const pagoData = {
+            inquilino_id: currentInquilinoId,
+            fecha: document.getElementById('pagoFecha').value,
+            monto: monto,
+            completo: completo === 'si',
+            pago_file: pagoURL
+        };
+        
+        const { error } = await supabaseClient
+            .from('pagos_inquilinos')
+            .insert([pagoData]);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        showInquilinoDetail(currentInquilinoId);
+        closeModal('registrarPagoModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar pago: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// SAVE DOCUMENTO ADICIONAL
+// ============================================
+
+async function saveDocumentoAdicional(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const nombre = document.getElementById('nuevoDocNombre').value;
+        const file = document.getElementById('nuevoDocPDF').files[0];
+        
+        if (!file) {
+            throw new Error('Seleccione un archivo PDF');
+        }
+        
+        const pdfBase64 = await fileToBase64(file);
+        
+        const { error } = await supabaseClient
+            .from('inquilinos_documentos')
+            .insert([{
+                inquilino_id: currentInquilinoId,
+                nombre_documento: nombre,
+                archivo_pdf: pdfBase64,
+                fecha_guardado: new Date().toISOString().split('T')[0],
+                usuario_guardo: currentUser.nombre
+            }]);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        showInquilinoDetail(currentInquilinoId);
+        closeModal('agregarDocumentoModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// SAVE FACTURA
+// ============================================
+
+async function saveFactura(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const facturaFile = document.getElementById('facturaDocumento').files[0];
+        let facturaURL = null;
+        
+        if (facturaFile) {
+            facturaURL = await fileToBase64(facturaFile);
+        }
+        
+        const facturaData = {
+            proveedor_id: currentProveedorId,
+            numero: document.getElementById('facturaNumero').value || null,
+            fecha: document.getElementById('facturaFecha').value,
+            vencimiento: document.getElementById('facturaVencimiento').value,
+            monto: parseFloat(document.getElementById('facturaMonto').value),
+            iva: parseFloat(document.getElementById('facturaIVA').value) || 0,
+            documento_file: facturaURL
+        };
+        
+        const { error } = await supabaseClient
+            .from('facturas')
+            .insert([facturaData]);
+        
+        if (error) throw error;
+        
+        await loadProveedores();
+        showProveedorDetail(currentProveedorId);
+        closeModal('registrarFacturaModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar factura: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// SAVE PAGO FACTURA
+// ============================================
+
+async function savePagoFactura(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const pagoFile = document.getElementById('pagoPDFFactura').files[0];
+        let pagoURL = null;
+        
+        if (pagoFile) {
+            pagoURL = await fileToBase64(pagoFile);
+        }
+        
+        const { error } = await supabaseClient
+            .from('facturas')
+            .update({
+                fecha_pago: document.getElementById('fechaPagoFactura').value,
+                pago_file: pagoURL
+            })
+            .eq('id', currentFacturaId);
+        
+        if (error) throw error;
+        
+        await loadProveedores();
+        showProveedorDetail(currentProveedorId);
+        closeModal('pagarFacturaModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar pago: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// SAVE ESTACIONAMIENTO
+// ============================================
+
+async function saveEstacionamiento() {
+    showLoading();
+    try {
+        const inquilinoSeleccionado = document.getElementById('editEspacioInquilino').value;
+        const despacho = document.getElementById('editEspacioDespacho').value;
+        
+        const { error } = await supabaseClient
+            .from('estacionamiento')
+            .update({
+                inquilino_nombre: inquilinoSeleccionado || null,
+                numero_despacho: despacho || null
+            })
+            .eq('id', currentEstacionamientoId);
+        
+        if (error) throw error;
+        
+        await loadEstacionamiento();
+        renderEstacionamientoTable();
+        closeModal('editEstacionamientoModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// SAVE BITACORA
+// ============================================
+
+async function saveBitacora() {
+    showLoading();
+    try {
+        const fecha = document.getElementById('editBitacoraFecha').value;
+        const notas = document.getElementById('editBitacoraNotas').value;
+        
+        const { error } = await supabaseClient
+            .from('bitacora_semanal')
+            .update({
+                semana_inicio: fecha,
+                notas: notas
+            })
+            .eq('id', currentBitacoraId);
+        
+        if (error) throw error;
+        
+        await loadBitacoraSemanal();
+        renderBitacoraTable();
+        closeModal('editBitacoraModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar bitácora: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// SAVE BANCO DOCUMENTO
+// ============================================
+
+async function saveBancoDoc(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const tipo = document.getElementById('bancoTipo').value;
+        const file = document.getElementById('bancoDocumento').files[0];
+        
+        if (!file) {
+            throw new Error('Seleccione un archivo PDF');
+        }
+        
+        const pdfBase64 = await fileToBase64(file);
+        
+        const { error } = await supabaseClient
+            .from('bancos_documentos')
+            .insert([{
+                tipo: tipo,
+                archivo_pdf: pdfBase64,
+                fecha_subida: new Date().toISOString().split('T')[0]
+            }]);
+        
+        if (error) throw error;
+        
+        await loadBancosDocumentos();
+        renderBancosTable();
+        closeModal('addBancoModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// SAVE CONTACTO INQUILINO
+// ============================================
+
+function saveContactoInquilino(event) {
+    event.preventDefault();
+    
+    const contacto = {
+        nombre: document.getElementById('contactoInquilinoNombre').value,
+        telefono: document.getElementById('contactoInquilinoTelefono').value,
+        email: document.getElementById('contactoInquilinoEmail').value
+    };
+    
+    if (window.editingContactoIndex !== undefined) {
+        tempInquilinoContactos[window.editingContactoIndex] = contacto;
+        delete window.editingContactoIndex;
+    } else {
+        tempInquilinoContactos.push(contacto);
+    }
+    
+    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto', 'showEditContactoInquilinoModal');
+    
+    document.getElementById('contactoInquilinoForm').reset();
+    closeModal('addContactoInquilinoModal');
+}
+
+// ============================================
+// SAVE CONTACTO PROVEEDOR
+// ============================================
+
+function saveContactoProveedor(event) {
+    event.preventDefault();
+    
+    const contacto = {
+        nombre: document.getElementById('contactoProveedorNombre').value,
+        telefono: document.getElementById('contactoProveedorTelefono').value,
+        email: document.getElementById('contactoProveedorEmail').value
+    };
+    
+    if (window.editingContactoProveedorIndex !== undefined) {
+        tempProveedorContactos[window.editingContactoProveedorIndex] = contacto;
+        delete window.editingContactoProveedorIndex;
+    } else {
+        tempProveedorContactos.push(contacto);
+    }
+    
+    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');
+    
+    document.getElementById('contactoProveedorForm').reset();
+    closeModal('addContactoProveedorModal');
+}
+
+// ============================================
+// TERMINAR CONTRATO
+// ============================================
+
+async function terminarContratoInquilino() {
+    if (!confirm('¿Terminar contrato de este inquilino? Se marcará como inactivo.')) return;
+    
+    showLoading();
+    try {
+        const { error } = await supabaseClient
+            .from('inquilinos')
+            .update({ activo: false })
+            .eq('id', currentInquilinoId);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        closeModal('inquilinoDetailModal');
+        renderInquilinosTable();
+        
+        alert('Contrato terminado exitosamente');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al terminar contrato: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// AGREGAR NUEVA SEMANA BITACORA
+// ============================================
+
+async function agregarNuevaSemana() {
+    showLoading();
+    try {
+        const hoy = new Date();
+        const lunes = new Date(hoy);
+        lunes.setDate(hoy.getDate() - hoy.getDay() + 1);
+        
+        const sabado = new Date(lunes);
+        sabado.setDate(lunes.getDate() + 5);
+        
+        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        
+        const textoSemana = `${lunes.getDate()} al ${sabado.getDate()} ${meses[sabado.getMonth()]} ${sabado.getFullYear()}`;
+        
+        const { error } = await supabaseClient
+            .from('bitacora_semanal')
+            .insert([{
+                semana_inicio: lunes.toISOString().split('T')[0],
+                semana_texto: textoSemana,
+                notas: ''
+            }]);
+        
+        if (error) throw error;
+        
+        await loadBitacoraSemanal();
+        renderBitacoraTable();
+        
+        alert('Nueva semana agregada');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al agregar semana: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
