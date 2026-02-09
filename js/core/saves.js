@@ -431,6 +431,8 @@ async function saveBancoDoc(event) {
         renderBancosTable();
         closeModal('addBancoModal');
         
+        alert('Documento guardado exitosamente');
+        
     } catch (error) {
         console.error('Error:', error);
         alert('Error al guardar documento: ' + error.message);
