@@ -44,213 +44,189 @@ function showProveedoresView(view) {
 }
 
 // ============================================
-// RENDER PROVEEDORES TABLE
+// RENDER PROVEEDORES TABLE (OPTIMIZADO)
 // ============================================
 
 function renderProveedoresTable() {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="5" class="table-loading">Cargando proveedores</td></tr>';
+    tbody.innerHTML = '';
     
-    setTimeout(() => {
-        tbody.innerHTML = '';
-        
-        proveedores.forEach(prov => {
-            const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
-            
-            const row = tbody.insertRow();
-            row.style.cursor = 'pointer';
-            row.onclick = () => showProveedorDetail(prov.id);
-            
-            row.innerHTML = `
+    // Construir todo el HTML de una vez
+    const rows = proveedores.map(prov => {
+        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
+        return `
+            <tr style="cursor: pointer;" onclick="showProveedorDetail(${prov.id})">
                 <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
                 <td>${prov.servicio}</td>
                 <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
                 <td>${primerContacto.telefono || '-'}</td>
                 <td>${primerContacto.email || '-'}</td>
-            `;
-        });
-        
-        if (proveedores.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay proveedores</td></tr>';
-        }
-    }, 100);
+            </tr>
+        `;
+    }).join('');
+    
+    if (proveedores.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay proveedores</td></tr>';
+    } else {
+        tbody.innerHTML = rows;
+    }
 }
 
 function filtrarProveedores(query) {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
     const filtrados = proveedores.filter(prov => prov.nombre.toLowerCase().includes(query));
     
-    filtrados.forEach(prov => {
+    const rows = filtrados.map(prov => {
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
-        
-        const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.onclick = () => showProveedorDetail(prov.id);
-        
-        row.innerHTML = `
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
-            <td>${prov.servicio}</td>
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
-            <td>${primerContacto.telefono || '-'}</td>
-            <td>${primerContacto.email || '-'}</td>
+        return `
+            <tr style="cursor: pointer;" onclick="showProveedorDetail(${prov.id})">
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
+                <td>${prov.servicio}</td>
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
+                <td>${primerContacto.telefono || '-'}</td>
+                <td>${primerContacto.email || '-'}</td>
+            </tr>
         `;
-    });
+    }).join('');
     
     if (filtrados.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron proveedores</td></tr>';
+    } else {
+        tbody.innerHTML = rows;
     }
 }
 
 // ============================================
-// FACTURAS PAGADAS
+// FACTURAS PAGADAS (OPTIMIZADO)
 // ============================================
 
 function renderProveedoresFacturasPagadas() {
     const tbody = document.getElementById('proveedoresFacturasPagadasTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="4" class="table-loading">Cargando facturas</td></tr>';
     
-    setTimeout(() => {
-        tbody.innerHTML = '';
-        
-        const filterType = document.getElementById('provFactPagFilter').value;
-        const year = parseInt(document.getElementById('provFactPagYear').value);
-        const monthSelect = document.getElementById('provFactPagMonth');
-        
-        if (filterType === 'mensual') {
-            monthSelect.classList.remove('hidden');
-        } else {
-            monthSelect.classList.add('hidden');
-        }
-        
-        const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
-        const pagadas = [];
-        let totalPagadas = 0;
-        
-        proveedores.forEach(prov => {
-            if (prov.facturas) {
-                prov.facturas.forEach(f => {
-                    if (f.fecha_pago) {
-                        const pd = new Date(f.fecha_pago + 'T00:00:00');
-                        if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
-                            pagadas.push({
-                                proveedor: prov.nombre,
-                                numero: f.numero || 'S/N',
-                                monto: f.monto,
-                                fecha: f.fecha_pago,
-                                documento_file: f.documento_file,
-                                pago_file: f.pago_file
-                            });
-                            totalPagadas += f.monto;
-                        }
+    const filterType = document.getElementById('provFactPagFilter').value;
+    const year = parseInt(document.getElementById('provFactPagYear').value);
+    const monthSelect = document.getElementById('provFactPagMonth');
+    
+    if (filterType === 'mensual') {
+        monthSelect.classList.remove('hidden');
+    } else {
+        monthSelect.classList.add('hidden');
+    }
+    
+    const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+    const pagadas = [];
+    let totalPagadas = 0;
+    
+    proveedores.forEach(prov => {
+        if (prov.facturas) {
+            prov.facturas.forEach(f => {
+                if (f.fecha_pago) {
+                    const pd = new Date(f.fecha_pago + 'T00:00:00');
+                    if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
+                        pagadas.push({
+                            proveedor: prov.nombre,
+                            numero: f.numero || 'S/N',
+                            monto: f.monto,
+                            fecha: f.fecha_pago,
+                            documento_file: f.documento_file,
+                            pago_file: f.pago_file
+                        });
+                        totalPagadas += f.monto;
                     }
-                });
-            }
-        });
-        
-        pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-        pagadas.forEach(f => {
-            const row = tbody.insertRow();
-            
-            // Hacer clickeable la fila si tiene PDF de factura
-            if (f.documento_file) {
-                row.style.cursor = 'pointer';
-                row.onclick = () => viewFacturaDoc(f.documento_file);
-            }
-            
-            const numeroText = f.numero;
-            const pagoLink = f.pago_file 
-                ? `<span style="cursor:pointer;color:var(--primary);text-decoration:underline" onclick="event.stopPropagation(); viewFacturaDoc('${f.pago_file}')">${formatDate(f.fecha)}</span>`
-                : formatDate(f.fecha);
-            
-            row.innerHTML = `
-                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
-                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${numeroText}</td>
-                <td class="currency">${formatCurrency(f.monto)}</td>
-                <td>${pagoLink}</td>
-            `;
-        });
-        
-        if (pagadas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas pagadas</td></tr>';
-        } else {
-            tbody.innerHTML += `<tr class="total-row"><td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td></tr>`;
+                }
+            });
         }
-    }, 100);
+    });
+    
+    pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    
+    const rows = pagadas.map(f => {
+        const tienePDF = f.documento_file ? true : false;
+        const onclickAttr = tienePDF ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
+        const styleAttr = tienePDF ? 'style="cursor:pointer;"' : '';
+        
+        return `
+            <tr ${styleAttr} ${onclickAttr}>
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.numero}</td>
+                <td class="currency">${formatCurrency(f.monto)}</td>
+                <td>${formatDate(f.fecha)}</td>
+            </tr>
+        `;
+    }).join('');
+    
+    if (pagadas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas pagadas</td></tr>';
+    } else {
+        tbody.innerHTML = rows + `<tr class="total-row"><td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td></tr>`;
+    }
 }
 
 // ============================================
-// FACTURAS POR PAGAR
+// FACTURAS POR PAGAR (OPTIMIZADO)
 // ============================================
 
 function renderProveedoresFacturasPorPagar() {
     const tbody = document.getElementById('proveedoresFacturasPorPagarTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="4" class="table-loading">Cargando facturas</td></tr>';
     
-    setTimeout(() => {
-        tbody.innerHTML = '';
-        
-        const filterType = document.getElementById('provFactPorPagFilter').value;
-        const year = parseInt(document.getElementById('provFactPorPagYear').value);
-        const monthSelect = document.getElementById('provFactPorPagMonth');
-        
-        if (filterType === 'mensual') {
-            monthSelect.classList.remove('hidden');
-        } else {
-            monthSelect.classList.add('hidden');
-        }
-        
-        const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
-        const porPagar = [];
-        let totalPorPagar = 0;
-        
-        proveedores.forEach(prov => {
-            if (prov.facturas) {
-                prov.facturas.forEach(f => {
-                    if (!f.fecha_pago) {
-                        const vd = new Date(f.vencimiento + 'T00:00:00');
-                        if (vd.getFullYear() === year && (month === null || month === vd.getMonth())) {
-                            porPagar.push({
-                                provId: prov.id,
-                                factId: f.id,
-                                proveedor: prov.nombre,
-                                numero: f.numero || 'S/N',
-                                monto: f.monto,
-                                vencimiento: f.vencimiento,
-                                documento_file: f.documento_file
-                            });
-                            totalPorPagar += f.monto;
-                        }
+    const filterType = document.getElementById('provFactPorPagFilter').value;
+    const year = parseInt(document.getElementById('provFactPorPagYear').value);
+    const monthSelect = document.getElementById('provFactPorPagMonth');
+    
+    if (filterType === 'mensual') {
+        monthSelect.classList.remove('hidden');
+    } else {
+        monthSelect.classList.add('hidden');
+    }
+    
+    const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
+    const porPagar = [];
+    let totalPorPagar = 0;
+    
+    proveedores.forEach(prov => {
+        if (prov.facturas) {
+            prov.facturas.forEach(f => {
+                if (!f.fecha_pago) {
+                    const vd = new Date(f.vencimiento + 'T00:00:00');
+                    if (vd.getFullYear() === year && (month === null || month === vd.getMonth())) {
+                        porPagar.push({
+                            provId: prov.id,
+                            factId: f.id,
+                            proveedor: prov.nombre,
+                            numero: f.numero || 'S/N',
+                            monto: f.monto,
+                            vencimiento: f.vencimiento,
+                            documento_file: f.documento_file
+                        });
+                        totalPorPagar += f.monto;
                     }
-                });
-            }
-        });
+                }
+            });
+        }
+    });
+    
+    porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
+    
+    const rows = porPagar.map(f => {
+        const tienePDF = f.documento_file ? true : false;
+        const onclickAttr = tienePDF ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
+        const styleAttr = tienePDF ? 'style="cursor:pointer;"' : '';
         
-        porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
-        porPagar.forEach(f => {
-            const row = tbody.insertRow();
-            
-            // Hacer clickeable la fila si tiene PDF
-            if (f.documento_file) {
-                row.style.cursor = 'pointer';
-                row.onclick = () => viewFacturaDoc(f.documento_file);
-            }
-            
-            row.innerHTML = `
+        return `
+            <tr ${styleAttr} ${onclickAttr}>
                 <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
                 <td>${f.numero}</td>
                 <td class="currency">${formatCurrency(f.monto)}</td>
                 <td>${formatDateVencimiento(f.vencimiento)}</td>
-            `;
-        });
-        
-        if (porPagar.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
-        } else {
-            tbody.innerHTML += `<tr class="total-row"><td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td></tr>`;
-        }
-    }, 100);
+            </tr>
+        `;
+    }).join('');
+    
+    if (porPagar.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
+    } else {
+        tbody.innerHTML = rows + `<tr class="total-row"><td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td></tr>`;
+    }
 }
 
 // ============================================
@@ -376,8 +352,6 @@ function showProveedorDetail(id) {
     } else {
         docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
     }
-    
-    document.getElementById('notasProveedor').textContent = prov.notas || 'No hay notas para este proveedor.';
     
     document.getElementById('proveedorDetailModal').classList.add('active');
     switchTab('proveedor', 'pagadas');
