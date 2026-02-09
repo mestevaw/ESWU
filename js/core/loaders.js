@@ -264,4 +264,5 @@ async function ensureInquilinosFullLoaded() {
 async function ensureProveedoresFullLoaded() {
     await ensureProveedoresLoaded();
 }
+console.log('✅ LOADERS.JS cargado');
 
