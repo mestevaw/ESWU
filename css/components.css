@@ -138,7 +138,7 @@
 .btn-excel-icon {
     background: var(--bg);
     color: #10a37f;
-    border: 2px solid #10a37f;
+    border: none;
     padding: 0.5rem 0.75rem;
     border-radius: 4px;
     cursor: pointer;
