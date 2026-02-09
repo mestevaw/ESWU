@@ -136,23 +136,20 @@
 }
 
 .btn-excel-icon {
-    background: #217346;
-    color: white;
-    border: none;
-    width: 36px;
-    height: 36px;
+    background: white;
+    color: #10a37f;
+    border: 2px solid #10a37f;
+    padding: 0.5rem 0.75rem;
     border-radius: 4px;
-    font-size: 1.25rem;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 1.25rem;
     transition: all 0.2s;
-    position: relative;
+    font-weight: bold;
 }
 
 .btn-excel-icon:hover {
-    background: #1a5c37;
+    background: #10a37f;
+    color: white;
     transform: scale(1.05);
 }
 
