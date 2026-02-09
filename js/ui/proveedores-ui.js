@@ -49,27 +49,31 @@ function showProveedoresView(view) {
 
 function renderProveedoresTable() {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
-    tbody.innerHTML = '';
+    tbody.innerHTML = '<tr><td colspan="5" class="table-loading">Cargando proveedores</td></tr>';
     
-    proveedores.forEach(prov => {
-        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
+    setTimeout(() => {
+        tbody.innerHTML = '';
         
-        const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.onclick = () => showProveedorDetail(prov.id);
+        proveedores.forEach(prov => {
+            const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
+            
+            const row = tbody.insertRow();
+            row.style.cursor = 'pointer';
+            row.onclick = () => showProveedorDetail(prov.id);
+            
+            row.innerHTML = `
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
+                <td>${prov.servicio}</td>
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
+                <td>${primerContacto.telefono || '-'}</td>
+                <td>${primerContacto.email || '-'}</td>
+            `;
+        });
         
-        row.innerHTML = `
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
-            <td>${prov.servicio}</td>
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
-            <td>${primerContacto.telefono || '-'}</td>
-            <td>${primerContacto.email || '-'}</td>
-        `;
-    });
-    
-    if (proveedores.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay proveedores</td></tr>';
-    }
+        if (proveedores.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay proveedores</td></tr>';
+        }
+    }, 100);
 }
 
 function filtrarProveedores(query) {
