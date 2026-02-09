@@ -253,3 +253,14 @@ async function ensureBancosLoaded() {
         await loadBancosDocumentos();
     }
 }
+// ============================================
+// ENSURE FULL LOADED (para lazy loading completo)
+// ============================================
+
+async function ensureInquilinosFullLoaded() {
+    await ensureInquilinosLoaded();
+}
+
+async function ensureProveedoresFullLoaded() {
+    await ensureProveedoresLoaded();
+}
