@@ -106,7 +106,10 @@ function logout() {
         document.getElementById('loginContainer').classList.remove('hidden');
         document.body.classList.remove('logged-in');
         
-        regresaMainMenu();
+        // Resetear menús
+        document.querySelectorAll('.submenu-container').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('menuSidebar').classList.remove('hidden');
     }
 }
 
