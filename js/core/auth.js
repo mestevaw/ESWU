@@ -76,21 +76,36 @@ window.addEventListener('DOMContentLoaded', function() {
 
 async function initializeApp() {
     try {
-        await Promise.all([
-            loadInquilinos(),
-            loadProveedores(),
-            loadActivos(),
-            loadUsuarios(),
-            loadBancosDocumentos(),
-            loadEstacionamiento(),
-            loadBitacoraSemanal()
-        ]);
+        showLoadingBanner('Cargando inquilinos...');
+        await loadInquilinos();
         
+        updateLoadingText('Cargando proveedores...');
+        await loadProveedores();
+        
+        updateLoadingText('Cargando activos...');
+        await loadActivos();
+        
+        updateLoadingText('Cargando usuarios...');
+        await loadUsuarios();
+        
+        updateLoadingText('Cargando documentos bancarios...');
+        await loadBancosDocumentos();
+        
+        updateLoadingText('Cargando estacionamiento...');
+        await loadEstacionamiento();
+        
+        updateLoadingText('Cargando bitácora...');
+        await loadBitacoraSemanal();
+        
+        updateLoadingText('Finalizando...');
         populateYearSelect();
         populateInquilinosYearSelects();
         populateProveedoresYearSelects();
         
+        hideLoadingBanner();
+        
     } catch (error) {
+        hideLoadingBanner();
         console.error('Error inicializando app:', error);
         alert('Error cargando datos: ' + error.message);
     }
