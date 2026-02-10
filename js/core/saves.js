@@ -335,19 +335,21 @@ async function saveFactura(event) {
             console.log('✅ Factura creada');
         }
         
-        // Recargar datos completos de proveedores
-        await ensureProveedoresFullLoaded();
-        
-        // Cerrar modal
+      // ✅ CRÍTICO: Primero cerrar modal
         closeModal('registrarFacturaModal');
         
-        // Resetear formulario
+        // ✅ CRÍTICO: Resetear formulario
         document.getElementById('facturaForm').reset();
         document.getElementById('facturaDocumentoFileName').textContent = '';
         
+        // ✅ CRÍTICO: Recargar COMPLETO proveedores
+        await ensureProveedoresFullLoaded();
+        
+        // ✅ CRÍTICO: Dar tiempo para que cargue
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         // Recargar vistas según donde estemos
         if (document.getElementById('proveedorDetailModal').classList.contains('active')) {
-            // Si estamos en el detalle del proveedor, recargarlo
             showProveedorDetail(currentProveedorId);
         }
         
