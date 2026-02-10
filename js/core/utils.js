@@ -110,4 +110,29 @@ function updateDespachoField() {
     const inq = inquilinos.find(i => i.nombre === selectedInquilino);
     document.getElementById('editEspacioDespacho').value = inq?.numero_despacho || '';
 }
+// ============================================
+// LOADING BANNER FUNCTIONS
+// ============================================
+
+function showLoadingBanner(text) {
+    const banner = document.getElementById('loadingBanner');
+    if (banner) {
+        banner.querySelector('.loading-text').textContent = `⏳ ${text}`;
+        banner.classList.remove('hidden');
+    }
+}
+
+function updateLoadingText(text) {
+    const banner = document.getElementById('loadingBanner');
+    if (banner) {
+        banner.querySelector('.loading-text').textContent = `⏳ ${text}`;
+    }
+}
+
+function hideLoadingBanner() {
+    const banner = document.getElementById('loadingBanner');
+    if (banner) {
+        banner.classList.add('hidden');
+    }
+}
 console.log('✅ UTILS.JS cargado');
