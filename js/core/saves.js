@@ -233,10 +233,6 @@ async function savePagoRenta(event) {
 // SAVE DOCUMENTO ADICIONAL
 // ============================================
 
-// ============================================
-// SAVE DOCUMENTO ADICIONAL
-// ============================================
-
 async function saveDocumentoAdicional(event) {
     event.preventDefault();
     showLoading();
@@ -276,6 +272,10 @@ async function saveDocumentoAdicional(event) {
         hideLoading();
     }
 }
+
+// ============================================
+// SAVE FACTURA
+// ============================================
 
 async function saveFactura(event) {
     event.preventDefault();
@@ -453,7 +453,7 @@ async function savePagoFactura(event) {
                     monto: montoParcial,
                     iva: ivaParcial,
                     fecha_pago: fechaPago,
-                    documento_file: facturaActual.documento_file, // Mismo PDF de factura
+                    documento_file: facturaActual.documento_file,
                     pago_file: pagoFileData
                 }]);
             
@@ -585,8 +585,6 @@ async function saveBancoDoc(event) {
     }
 }
 
-console.log('✅ SAVES.JS cargado');
-
 // ============================================
 // SAVE CONTACTO INQUILINO
 // ============================================
@@ -669,46 +667,6 @@ async function terminarContratoInquilino() {
 }
 
 // ============================================
-// AGREGAR NUEVA SEMANA BITACORA
-// ============================================
-
-async function agregarNuevaSemana() {
-    showLoading();
-    try {
-        const hoy = new Date();
-        const lunes = new Date(hoy);
-        lunes.setDate(hoy.getDate() - hoy.getDay() + 1);
-        
-        const sabado = new Date(lunes);
-        sabado.setDate(lunes.getDate() + 5);
-        
-        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
-                      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-        
-        const textoSemana = `${lunes.getDate()} al ${sabado.getDate()} ${meses[sabado.getMonth()]} ${sabado.getFullYear()}`;
-        
-        const { error } = await supabaseClient
-            .from('bitacora_semanal')
-            .insert([{
-                semana_inicio: lunes.toISOString().split('T')[0],
-                semana_texto: textoSemana,
-                notas: ''
-            }]);
-        
-        if (error) throw error;
-        
-        await loadBitacoraSemanal();
-        renderBitacoraTable();
-        
-        alert('Nueva semana agregada');
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al agregar semana: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-// ============================================
 // BITÁCORA - AGREGAR SEMANA
 // ============================================
 
@@ -746,7 +704,7 @@ async function agregarSemanaBitacora() {
         // Formato de texto para semana
         const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
                       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-        const semanaTexto = `al ${nuevaFechaInicio.getDate()} al ${nuevaFechaFin.getDate()} ${meses[nuevaFechaFin.getMonth()]} ${nuevaFechaFin.getFullYear()}`;
+        const semanaTexto = `${nuevaFechaInicio.getDate()} al ${nuevaFechaFin.getDate()} ${meses[nuevaFechaFin.getMonth()]} ${nuevaFechaFin.getFullYear()}`;
         
         const { error } = await supabaseClient
             .from('bitacora_semanal')
@@ -771,3 +729,5 @@ async function agregarSemanaBitacora() {
         hideLoading();
     }
 }
+
+console.log('✅ SAVES.JS cargado');
