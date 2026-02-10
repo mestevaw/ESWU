@@ -49,27 +49,32 @@ function showProveedoresView(view) {
 
 function renderProveedoresTable() {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
-    tbody.innerHTML = '';
     
-    // Construir todo el HTML de una vez
-    const rows = proveedores.map(prov => {
-        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
-        return `
-            <tr style="cursor: pointer;" onclick="showProveedorDetail(${prov.id})">
-                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
-                <td>${prov.servicio}</td>
-                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
-                <td>${primerContacto.telefono || '-'}</td>
-                <td>${primerContacto.email || '-'}</td>
-            </tr>
-        `;
-    }).join('');
+    // Mostrar mensaje de carga
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--primary)">⏳ Cargando proveedores...</td></tr>';
     
-    if (proveedores.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay proveedores</td></tr>';
-    } else {
-        tbody.innerHTML = rows;
-    }
+    // Usar setTimeout para permitir que el mensaje se muestre
+    setTimeout(() => {
+        const rows = proveedores.map(prov => {
+            const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
+            
+            return `
+                <tr style="cursor: pointer;" onclick="showProveedorDetail(${prov.id})">
+                    <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
+                    <td>${prov.servicio || '-'}</td>
+                    <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
+                    <td>${primerContacto.telefono || '-'}</td>
+                    <td>${primerContacto.email || '-'}</td>
+                </tr>
+            `;
+        }).join('');
+        
+        if (proveedores.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:2rem">No hay proveedores</td></tr>';
+        } else {
+            tbody.innerHTML = rows;
+        }
+    }, 100);
 }
 
 function filtrarProveedores(query) {
