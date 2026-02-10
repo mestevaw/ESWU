@@ -367,10 +367,6 @@ async function saveFactura(event) {
     }
 }
 
-// ============================================
-// SAVE PAGO FACTURA
-// ============================================
-
 async function savePagoFactura(event) {
     event.preventDefault();
     showLoading();
@@ -460,12 +456,21 @@ async function savePagoFactura(event) {
             if (insertError) throw insertError;
         }
         
-        await loadProveedores();
+        // ✅ CRÍTICO: RECARGAR PROVEEDORES COMPLETO
+        await ensureProveedoresFullLoaded();
+        
         closeModal('pagarFacturaModal');
         
         // Refrescar la vista del proveedor
-        if (currentProveedorId) {
+        if (currentProveedorId && document.getElementById('proveedorDetailModal').classList.contains('active')) {
             showProveedorDetail(currentProveedorId);
+        }
+        
+        // Refrescar vistas si están activas
+        if (currentSubContext === 'proveedores-facturasPorPagar') {
+            renderProveedoresFacturasPorPagar();
+        } else if (currentSubContext === 'proveedores-facturasPagadas') {
+            renderProveedoresFacturasPagadas();
         }
         
         alert('✅ Pago registrado correctamente');
