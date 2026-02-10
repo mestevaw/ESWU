@@ -205,6 +205,11 @@ function renderHomeIngresos() {
 }
 
 function renderHomePagosDetalle() {
+       await ensureProveedoresFullLoaded();
+    
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
