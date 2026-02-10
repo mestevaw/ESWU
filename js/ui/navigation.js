@@ -101,9 +101,13 @@ function showPageFromMenu(pageName) {
     document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.add('fullwidth');
     
+    // ✅ AGREGAR ESTO:
     // Cargar contenido
-    if (pageName === 'estacionamiento') renderEstacionamientoTable();
-    if (pageName === 'bitacora') renderBitacoraTable();
+    if (pageName === 'estacionamiento') {
+        renderEstacionamientoTable();
+    } else if (pageName === 'bitacora') {
+        renderBitacoraTable(); // ← ESTA LÍNEA FALTABA
+    }
 }
 
 // ============================================
