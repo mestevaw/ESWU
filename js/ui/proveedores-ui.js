@@ -232,21 +232,20 @@ function renderProveedoresFacturasPorPagar() {
     
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     
-    const rows = porPagar.map(f => {
-        // NUEVO: Atributo data-clabe para hover
-        const clabeAttr = f.clabe ? `data-clabe="CLABE: ${f.clabe}"` : '';
-        const cursorStyle = f.documento_file ? 'cursor:pointer;' : '';
-        const clickAction = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
-        
-        return `
-            <tr style="${cursorStyle}" ${clickAction}>
-                <td class="proveedor-clabe-hover" ${clabeAttr} style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
-                <td>${f.numero}</td>
-                <td class="currency">${formatCurrency(f.monto)}</td>
-                <td>${formatDateVencimiento(f.vencimiento)}</td>
-            </tr>
-        `;
-    }).join('');
+const rows = porPagar.map(f => {
+    const clabeAttr = f.clabe ? `data-clabe="CLABE: ${f.clabe}"` : '';
+    const cursorStyle = f.documento_file ? 'cursor:pointer;' : '';
+    const clickAction = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
+    
+    return `
+        <tr style="${cursorStyle}" ${clickAction}>
+            <td class="proveedor-clabe-hover" ${clabeAttr} style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
+            <td>${f.numero}</td>
+            <td class="currency">${formatCurrency(f.monto)}</td>
+            <td>${formatDateVencimiento(f.vencimiento)}</td>
+        </tr>
+    `;
+}).join('');
     
     if (porPagar.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
