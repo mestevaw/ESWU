@@ -211,6 +211,7 @@ th.sorted-desc::after {
     font-weight: 600;
     letter-spacing: 1px;
     border: 3px solid white;
+    pointer-events: none; /* ← AGREGADO */
 }
 
 .proveedor-clabe-hover[data-clabe]:hover::before {
@@ -222,4 +223,5 @@ th.sorted-desc::after {
     height: 100%;
     background: rgba(0, 0, 0, 0.3);
     z-index: 999998;
+    pointer-events: none; /* ← AGREGADO */
 }
