@@ -198,3 +198,28 @@ th.sorted-desc::after {
     font-size: 0.95rem;
     line-height: 1.5;
 }
+/* Hover para mostrar CLABE en facturas por pagar */
+.proveedor-clabe-hover {
+    position: relative;
+}
+
+.proveedor-clabe-hover[data-clabe]:hover::after {
+    content: attr(data-clabe);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: white;
+    border: 2px solid var(--primary);
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 1000;
+    white-space: nowrap;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.proveedor-clabe-hover[data-clabe]:hover {
+    cursor: help;
+}
