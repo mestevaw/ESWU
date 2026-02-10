@@ -6,6 +6,10 @@
 // INQUILINOS - VIEWS
 // ============================================
 
+// Estado de ordenamiento
+let inquilinosSortColumn = null;
+let inquilinosSortOrder = 'asc';
+
 function showInquilinosView(view) {
     document.getElementById('inquilinosSubMenu').classList.remove('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -49,28 +53,73 @@ function showInquilinosView(view) {
 
 function renderInquilinosTable() {
     const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
-    tbody.innerHTML = '<tr><td colspan="3" class="table-loading">Cargando inquilinos</td></tr>';
+    const thead = document.getElementById('inquilinosTable').querySelector('thead tr');
     
-    setTimeout(() => {
-        tbody.innerHTML = '';
-        
-        inquilinos.forEach(inq => {
-            const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
-            tbody.innerHTML += `
-                <tr style="cursor: pointer;" onclick="showInquilinoDetail(${inq.id})">
-                    <td style="font-size:0.9rem">${nombreCorto}</td>
-                    <td class="currency">${formatCurrency(inq.renta)}</td>
-                    <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
-                </tr>
-            `;
+    // Actualizar headers con indicadores de ordenamiento
+    thead.innerHTML = `
+        <th style="cursor:pointer" onclick="sortInquilinos('nombre')">Empresa ${inquilinosSortColumn === 'nombre' ? (inquilinosSortOrder === 'asc' ? '↑' : '↓') : '↕'}</th>
+        <th style="cursor:pointer" onclick="sortInquilinos('renta')">Renta Mensual ${inquilinosSortColumn === 'renta' ? (inquilinosSortOrder === 'asc' ? '↑' : '↓') : '↕'}</th>
+        <th style="cursor:pointer" onclick="sortInquilinos('vencimiento')">Vencimiento Contrato ${inquilinosSortColumn === 'vencimiento' ? (inquilinosSortOrder === 'asc' ? '↑' : '↓') : '↕'}</th>
+    `;
+    
+    // Ordenar inquilinos si hay columna seleccionada
+    let sortedInquilinos = [...inquilinos];
+    if (inquilinosSortColumn) {
+        sortedInquilinos.sort((a, b) => {
+            let valA, valB;
+            
+            if (inquilinosSortColumn === 'nombre') {
+                valA = a.nombre.toLowerCase();
+                valB = b.nombre.toLowerCase();
+                return inquilinosSortOrder === 'asc' 
+                    ? valA.localeCompare(valB)
+                    : valB.localeCompare(valA);
+            } else if (inquilinosSortColumn === 'renta') {
+                valA = a.renta;
+                valB = b.renta;
+                return inquilinosSortOrder === 'asc' ? valA - valB : valB - valA;
+            } else if (inquilinosSortColumn === 'vencimiento') {
+                valA = new Date(a.fecha_vencimiento || '9999-12-31');
+                valB = new Date(b.fecha_vencimiento || '9999-12-31');
+                return inquilinosSortOrder === 'asc' ? valA - valB : valB - valA;
+            }
         });
+    }
+    
+    // Renderizar filas
+    const rows = sortedInquilinos.map(inq => {
+        const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
+        const inactivo = !inq.contrato_activo;
+        const styleClass = inactivo ? 'style="opacity:0.4;font-style:italic"' : '';
         
-        if (inquilinos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No hay inquilinos</td></tr>';
-        }
-    }, 100);
+        return `
+            <tr style="cursor: pointer;" onclick="showInquilinoDetail(${inq.id})" ${styleClass}>
+                <td style="font-size:0.9rem">${nombreCorto}</td>
+                <td class="currency">${formatCurrency(inq.renta)}</td>
+                <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
+            </tr>
+        `;
+    }).join('');
+    
+    if (sortedInquilinos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No hay inquilinos</td></tr>';
+    } else {
+        tbody.innerHTML = rows;
+    }
 }
 
+function sortInquilinos(column) {
+    if (inquilinosSortColumn === column) {
+        // Cambiar dirección
+        inquilinosSortOrder = inquilinosSortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        // Nueva columna
+        inquilinosSortColumn = column;
+        inquilinosSortOrder = 'asc';
+    }
+    
+    renderInquilinosTable();
+}
 function filtrarInquilinos(query) {
     const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
     tbody.innerHTML = '';
