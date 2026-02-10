@@ -125,7 +125,8 @@ function toggleSearch() {
 }
 
 function executeSearch() {
-    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    const searchInput = document.getElementById('searchInput');
+    const query = searchInput.value.toLowerCase().trim();
     
     if (!query) {
         alert('Por favor ingresa un término de búsqueda');
@@ -139,6 +140,9 @@ function executeSearch() {
     } else if (currentSearchContext === 'inquilinos') {
         filtrarInquilinos(query);
     }
+    
+    // NUEVO: Borrar búsqueda automáticamente
+    searchInput.value = '';
     
     // Ocultar barra de búsqueda después de buscar
     document.getElementById('headerSearchBar').classList.remove('active');
