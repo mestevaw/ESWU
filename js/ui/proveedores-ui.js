@@ -518,9 +518,40 @@ function deleteFactura(facturaId) {
 }
 
 function editFactura(facturaId) {
-    alert('Función editFactura - Pendiente de implementar para factura ID: ' + facturaId);
+    // Encontrar la factura
+    let factura = null;
+    let proveedorId = null;
+    
+    for (const prov of proveedores) {
+        if (prov.facturas) {
+            factura = prov.facturas.find(f => f.id === facturaId);
+            if (factura) {
+                proveedorId = prov.id;
+                break;
+            }
+        }
+    }
+    
+    if (!factura) {
+        alert('Factura no encontrada');
+        return;
+    }
+    
+    // Establecer modo edición
+    isEditMode = true;
+    currentFacturaId = facturaId;
+    currentProveedorId = proveedorId;
+    
+    // Rellenar formulario
+    document.getElementById('facturaNumero').value = factura.numero || '';
+    document.getElementById('facturaFecha').value = factura.fecha;
+    document.getElementById('facturaVencimiento').value = factura.vencimiento;
+    document.getElementById('facturaMonto').value = factura.monto;
+    document.getElementById('facturaIVA').value = factura.iva || '';
+    document.getElementById('facturaDocumentoFileName').textContent = factura.documento_file ? 'Archivo existente' : '';
+    
+    // Abrir modal
+    document.getElementById('registrarFacturaModal').classList.add('active');
 }
-       
-console.log('✅ PROVEEDORES-UI.JS cargado');
-       
+   
 console.log('✅ PROVEEDORES-UI.JS cargado');
