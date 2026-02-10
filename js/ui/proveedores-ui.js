@@ -74,7 +74,12 @@ function renderProveedoresTable() {
 
 function filtrarProveedores(query) {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
-    const filtrados = proveedores.filter(prov => prov.nombre.toLowerCase().includes(query));
+    
+    // Buscar en nombre Y servicio
+    const filtrados = proveedores.filter(prov => 
+        prov.nombre.toLowerCase().includes(query) || 
+        prov.servicio.toLowerCase().includes(query)
+    );
     
     const rows = filtrados.map(prov => {
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
