@@ -771,4 +771,3 @@ async function agregarSemanaBitacora() {
         hideLoading();
     }
 }
-console.log('✅ SAVES.JS cargado');
