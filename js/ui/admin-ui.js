@@ -545,7 +545,12 @@ function showEditBitacoraModal(bitacoraId) {
 }
 
 function updateBitacoraMenu() {
-    // Placeholder para futuras funcionalidades del menú de bitácora
+    // Esta función se llama cuando se abre el dropdown
+    // No necesita hacer nada especial por ahora
+}
+
+function agregarNuevaSemana() {
+    agregarSemanaBitacora();
 }
 
 console.log('✅ ADMIN-UI.JS cargado');
