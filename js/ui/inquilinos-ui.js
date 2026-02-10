@@ -321,7 +321,8 @@ if (inq.contactos && inq.contactos.length > 0) {
 } else {
     contactosList.innerHTML = '<span style="color:var(--text-light)">No hay contactos</span>';
 }
-        
+      document.getElementById('detailRFC').textContent = inq.rfc || '-';
+        document.getElementById('detailClabe').textContent = inq.clabe || '-';       
         document.getElementById('detailRenta').textContent = formatCurrency(inq.renta);
         document.getElementById('detailM2').textContent = inq.m2 || '-';
         document.getElementById('detailDespacho').textContent = inq.numero_despacho || '-';
