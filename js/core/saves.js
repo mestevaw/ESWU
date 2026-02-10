@@ -262,32 +262,44 @@ async function saveFactura(event) {
     showLoading();
     
     try {
-        const facturaFile = document.getElementById('facturaDocumento').files[0];
-        let facturaURL = null;
+        const numero = document.getElementById('facturaNumero').value || null;
+        const fecha = document.getElementById('facturaFecha').value;
+        const vencimiento = document.getElementById('facturaVencimiento').value;
+        const monto = parseFloat(document.getElementById('facturaMonto').value);
+        const iva = parseFloat(document.getElementById('facturaIVA').value) || null;
+        const file = document.getElementById('facturaDocumento').files[0];
         
-        if (facturaFile) {
-            facturaURL = await fileToBase64(facturaFile);
+        let documentoFileData = null;
+        if (file) {
+            documentoFileData = await fileToBase64(file);
         }
-        
-        const facturaData = {
-            proveedor_id: currentProveedorId,
-            numero: document.getElementById('facturaNumero').value || null,
-            fecha: document.getElementById('facturaFecha').value,
-            vencimiento: document.getElementById('facturaVencimiento').value,
-            monto: parseFloat(document.getElementById('facturaMonto').value),
-            iva: parseFloat(document.getElementById('facturaIVA').value) || 0,
-            documento_file: facturaURL
-        };
         
         const { error } = await supabaseClient
             .from('facturas')
-            .insert([facturaData]);
+            .insert([{
+                proveedor_id: currentProveedorId,
+                numero: numero,
+                fecha: fecha,
+                vencimiento: vencimiento,
+                monto: monto,
+                iva: iva,
+                fecha_pago: null,
+                documento_file: documentoFileData,
+                pago_file: null
+            }]);
         
         if (error) throw error;
         
         await loadProveedores();
-        showProveedorDetail(currentProveedorId);
+        
         closeModal('registrarFacturaModal');
+        
+        // Refrescar la vista del proveedor automáticamente
+        if (currentProveedorId) {
+            showProveedorDetail(currentProveedorId);
+        }
+        
+        alert('✅ Factura registrada correctamente');
         
     } catch (error) {
         console.error('Error:', error);
