@@ -183,24 +183,24 @@ th.sorted-desc::after {
 
 .bitacora-notas-hover:hover::after {
     content: attr(data-notas);
-    position: fixed; /* ← CAMBIADO de absolute a fixed */
-    left: 50%; /* ← CENTRADO */
-    top: 50%; /* ← CENTRADO */
-    transform: translate(-50%, -50%); /* ← CENTRADO */
-    background: #ffffff; /* ← Fondo sólido */
-    border: 3px solid var(--primary); /* ← Borde más grueso */
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4); /* ← Sombra más fuerte */
-    z-index: 999999; /* ← Z-index altísimo */
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: rgba(255, 255, 255, 0.98); /* ← Casi opaco */
+    border: 3px solid var(--primary);
+    padding: 1rem;
+    border-radius: 4px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.5); /* ← Sombra más fuerte */
+    z-index: 999999;
     white-space: pre-wrap;
     max-width: 600px;
     min-width: 300px;
-    max-height: 80vh; /* ← Altura máxima */
-    overflow-y: auto; /* ← Scroll si es muy largo */
     font-size: 0.95rem;
-    line-height: 1.6;
-    color: var(--text); /* ← Color de texto explícito */
+    line-height: 1.5;
+    color: #000000; /* ← Negro sólido */
+    font-weight: 500; /* ← Texto más grueso */
+    backdrop-filter: blur(10px); /* ← Efecto blur al fondo */
+    -webkit-backdrop-filter: blur(10px);
 }
 
 /* Fondo oscuro detrás del hover */
