@@ -233,95 +233,91 @@ async function savePagoRenta(event) {
 // SAVE DOCUMENTO ADICIONAL
 // ============================================
 
-async function saveDocumentoAdicional(event) {
-    event.preventDefault();
-    showLoading();
-    
-    try {
-        const nombre = document.getElementById('nuevoDocNombre').value;
-        const file = document.getElementById('nuevoDocPDF').files[0];
-        
-        if (!file) {
-            throw new Error('Seleccione un archivo PDF');
-        }
-        
-        const pdfBase64 = await fileToBase64(file);
-        
-        const { error } = await supabaseClient
-            .from('inquilinos_documentos')
-            .insert([{
-                inquilino_id: currentInquilinoId,
-                nombre_documento: nombre,
-                archivo_pdf: pdfBase64,
-                fecha_guardado: new Date().toISOString().split('T')[0],
-                usuario_guardo: currentUser.nombre
-            }]);
-        
-        if (error) throw error;
-        
-        await loadInquilinos();
-        showInquilinoDetail(currentInquilinoId);
-        closeModal('agregarDocumentoModal');
-        
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al guardar documento: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// SAVE FACTURA
-// ============================================
-
 async function saveFactura(event) {
     event.preventDefault();
     showLoading();
     
     try {
-        const numero = document.getElementById('facturaNumero').value || null;
+        const numero = document.getElementById('facturaNumero').value;
         const fecha = document.getElementById('facturaFecha').value;
         const vencimiento = document.getElementById('facturaVencimiento').value;
         const monto = parseFloat(document.getElementById('facturaMonto').value);
         const iva = parseFloat(document.getElementById('facturaIVA').value) || null;
-        const file = document.getElementById('facturaDocumento').files[0];
         
-        let documentoFileData = null;
-        if (file) {
-            documentoFileData = await fileToBase64(file);
+        const docFile = document.getElementById('facturaDocumento').files[0];
+        let docURL = null;
+        
+        if (docFile) {
+            docURL = await fileToBase64(docFile);
         }
         
-        const { error } = await supabaseClient
-            .from('facturas')
-            .insert([{
-                proveedor_id: currentProveedorId,
-                numero: numero,
-                fecha: fecha,
-                vencimiento: vencimiento,
-                monto: monto,
-                iva: iva,
-                fecha_pago: null,
-                documento_file: documentoFileData,
-                pago_file: null
-            }]);
+        const facturaData = {
+            proveedor_id: currentProveedorId,
+            numero: numero || null,
+            fecha: fecha,
+            vencimiento: vencimiento,
+            monto: monto,
+            iva: iva
+        };
         
-        if (error) throw error;
+        // Solo agregar documento si hay archivo nuevo
+        if (docURL) {
+            facturaData.documento_file = docURL;
+        }
         
-        await loadProveedores();
+        // Detectar si es edición o creación
+        if (isEditMode && currentFacturaId) {
+            // MODO EDICIÓN
+            const { error } = await supabaseClient
+                .from('facturas')
+                .update(facturaData)
+                .eq('id', currentFacturaId);
+            
+            if (error) throw error;
+            
+            console.log('✅ Factura actualizada:', currentFacturaId);
+            
+            // Resetear modo edición
+            isEditMode = false;
+            currentFacturaId = null;
+        } else {
+            // MODO CREAR NUEVA
+            const { error } = await supabaseClient
+                .from('facturas')
+                .insert([facturaData]);
+            
+            if (error) throw error;
+            
+            console.log('✅ Factura creada');
+        }
         
+        // Recargar datos completos de proveedores
+        await ensureProveedoresFullLoaded();
+        
+        // Cerrar modal
         closeModal('registrarFacturaModal');
         
-        // Refrescar la vista del proveedor automáticamente
-        if (currentProveedorId) {
+        // Resetear formulario
+        document.getElementById('facturaForm').reset();
+        document.getElementById('facturaDocumentoFileName').textContent = '';
+        
+        // Recargar vistas según donde estemos
+        if (document.getElementById('proveedorDetailModal').classList.contains('active')) {
+            // Si estamos en el detalle del proveedor, recargarlo
             showProveedorDetail(currentProveedorId);
         }
         
-        alert('✅ Factura registrada correctamente');
+        if (currentSubContext === 'proveedores-facturasPorPagar') {
+            renderProveedoresFacturasPorPagar();
+        } else if (currentSubContext === 'proveedores-facturasPagadas') {
+            renderProveedoresFacturasPagadas();
+        }
+        
+        alert('✅ Factura guardada correctamente');
         
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error al guardar factura: ' + error.message);
+        console.error('Error guardando factura:', error);
+        alert('❌ Error al guardar factura: ' + error.message);
     } finally {
         hideLoading();
     }
