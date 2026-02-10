@@ -80,6 +80,10 @@ th.sorted-desc::after {
     color: var(--primary);
 }
 
+/* ========================================
+   PROVEEDORES TABLE STYLES
+   ======================================== */
+
 #proveedoresTable {
     table-layout: fixed;
     width: 100%;
@@ -150,32 +154,11 @@ th.sorted-desc::after {
     font-size: 0.875rem;
     margin-top: 0.25rem;
 }
-/* Bitácora hover para notas completas */
-.bitacora-notas-cell {
-    position: relative;
-    max-width: 400px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
 
-.bitacora-notas-cell:hover::after {
-    content: attr(data-fulltext);
-    position: absolute;
-    left: 0;
-    top: 100%;
-    background: white;
-    border: 2px solid var(--primary);
-    padding: 1rem;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 1000;
-    white-space: pre-wrap;
-    max-width: 600px;
-    min-width: 300px;
-}
+/* ========================================
+   BITÁCORA HOVER
+   ======================================== */
 
-/* Bitácora - Hover para notas completas */
 .bitacora-notas-hover {
     position: relative;
     cursor: help;
@@ -186,24 +169,23 @@ th.sorted-desc::after {
     position: absolute;
     left: 0;
     top: 100%;
-    background: rgba(255, 255, 255, 0.98); /* ← Casi opaco */
+    background: rgba(255, 255, 255, 0.98);
     border: 3px solid var(--primary);
     padding: 1rem;
     border-radius: 4px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.5); /* ← Sombra más fuerte */
+    box-shadow: 0 8px 16px rgba(0,0,0,0.5);
     z-index: 999999;
     white-space: pre-wrap;
     max-width: 600px;
     min-width: 300px;
     font-size: 0.95rem;
     line-height: 1.5;
-    color: #000000; /* ← Negro sólido */
-    font-weight: 500; /* ← Texto más grueso */
-    backdrop-filter: blur(10px); /* ← Efecto blur al fondo */
+    color: #000000;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
 
-/* Fondo oscuro detrás del hover */
 .bitacora-notas-hover:hover::before {
     content: '';
     position: fixed;
@@ -211,9 +193,18 @@ th.sorted-desc::after {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.3); /* ← Fondo semi-transparente */
+    background: rgba(0, 0, 0, 0.3);
     z-index: 999998;
     pointer-events: none;
+}
+
+/* ========================================
+   HOVER CLABE EN FACTURAS POR PAGAR
+   ======================================== */
+
+/* ✅ AGREGAR ESTA CLASE BASE */
+.proveedor-clabe-hover {
+    position: relative;
 }
 
 .proveedor-clabe-hover[data-clabe]:hover::after {
@@ -226,14 +217,14 @@ th.sorted-desc::after {
     padding: 0.75rem 1rem;
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 100000; /* ← AUMENTADO A 100000 */
+    z-index: 100000;
     white-space: nowrap;
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--primary);
-    opacity: 1; /* ← AGREGAR */
-    background-color: #ffffff; /* ← AGREGAR */
-    pointer-events: none; /* ← AGREGAR para que no interfiera */
+    opacity: 1;
+    background-color: #ffffff;
+    pointer-events: none;
 }
 
 .proveedor-clabe-hover[data-clabe]:hover {
