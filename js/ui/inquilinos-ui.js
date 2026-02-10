@@ -306,22 +306,23 @@ function showInquilinoDetail(id) {
     try {
         document.getElementById('inquilinoDetailNombre').textContent = inq.nombre;
         
-const contactosList = document.getElementById('detailContactosList');
-if (inq.contactos && inq.contactos.length > 0) {
-    const titulo = inq.contactos.length === 1 ? 'Contacto:' : 'Contactos:';
-    contactosList.innerHTML = `
-        <div style="display:flex;flex-direction:column;gap:0.5rem;">
-            ${inq.contactos.map((c, idx) => `
-                <div style="display:flex;align-items:center;gap:1rem;">
-                    ${idx === 0 ? `<strong style="min-width:80px;">${titulo}</strong>` : '<span style="min-width:80px;"></span>'}
-                    <span><strong>${c.nombre}</strong> | Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}</span>
+        // CONTACTOS EN UNA LÍNEA
+        const contactosList = document.getElementById('detailContactosList');
+        if (inq.contactos && inq.contactos.length > 0) {
+            const titulo = inq.contactos.length === 1 ? 'Contacto:' : 'Contactos:';
+            contactosList.innerHTML = `
+                <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                    ${inq.contactos.map((c, idx) => `
+                        <div style="display:flex;align-items:center;gap:1rem;">
+                            ${idx === 0 ? `<strong style="min-width:80px;">${titulo}</strong>` : '<span style="min-width:80px;"></span>'}
+                            <span><strong>${c.nombre}</strong> | Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}</span>
+                        </div>
+                    `).join('')}
                 </div>
-            `).join('')}
-        </div>
-    `;
-} else {
-    contactosList.innerHTML = '<strong style="min-width:80px;">Contacto:</strong> <span style="color:var(--text-light)">No hay contactos</span>';
-}
+            `;
+        } else {
+            contactosList.innerHTML = '<div style="display:flex;align-items:center;gap:1rem;"><strong style="min-width:80px;">Contacto:</strong> <span style="color:var(--text-light)">No hay contactos</span></div>';
+        }
         
         document.getElementById('detailRFC').textContent = inq.rfc || '-';
         document.getElementById('detailClabe').textContent = inq.clabe || '-';
@@ -331,13 +332,23 @@ if (inq.contactos && inq.contactos.length > 0) {
         document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
         document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
         
-        const contratoSection = document.getElementById('contratoOriginalSection');
+        // BOTÓN DE CONTRATO
+        const contratoButtonSection = document.getElementById('contratoButtonSection');
         if (inq.contrato_file) {
-            contratoSection.innerHTML = '<a href="#" onclick="event.preventDefault(); viewContrato();" style="color:var(--primary);text-decoration:underline;">Contrato de Renta Original</a>';
+            contratoButtonSection.innerHTML = `
+                <button class="btn btn-primary" onclick="viewContrato()" style="width:100%;font-size:1.1rem;padding:1rem;">
+                    📄 Ver Contrato Original
+                </button>
+            `;
         } else {
-            contratoSection.innerHTML = '<p style="color:var(--text-light)">No hay contrato cargado</p>';
+            contratoButtonSection.innerHTML = `
+                <div style="padding:1rem;background:var(--bg);border-radius:4px;text-align:center;color:var(--text-light);">
+                    No hay contrato cargado
+                </div>
+            `;
         }
         
+        // HISTORIAL DE PAGOS
         const historialDiv = document.getElementById('historialPagos');
         if (inq.pagos && inq.pagos.length > 0) {
             historialDiv.innerHTML = inq.pagos.map(p => `
@@ -350,6 +361,7 @@ if (inq.contactos && inq.contactos.length > 0) {
             historialDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay pagos</p>';
         }
         
+        // DOCUMENTOS ADICIONALES
         const docsDiv = document.getElementById('documentosAdicionales');
         if (inq.documentos && inq.documentos.length > 0) {
             docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:50px;"></th></tr></thead><tbody>' +
@@ -365,11 +377,13 @@ if (inq.contactos && inq.contactos.length > 0) {
             docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
         }
         
+        // NOTAS
         document.getElementById('notasInquilino').textContent = inq.notas || 'No hay notas para este inquilino.';
         
         document.getElementById('inquilinoDetailModal').classList.add('active');
         
-        switchTab('inquilino', 'renta');
+        // Activar primera pestaña
+        switchTab('inquilino', 'pagos');
         
     } catch (error) {
         console.error('ERROR en showInquilinoDetail:', error);
