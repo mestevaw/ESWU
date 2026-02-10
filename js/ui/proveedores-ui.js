@@ -326,42 +326,46 @@ function showProveedorDetail(id) {
             if (isMobile) {
                 const clickAction = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
                 const cursorStyle = f.documento_file ? 'cursor:pointer;' : '';
-                html += `
-                    <div class="factura-box" ${clickAction} style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white; ${cursorStyle}">
-                        <div style="margin-bottom: 0.5rem;">
-                            <strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong>
-                        </div>
-                        <div style="margin-bottom: 0.5rem;">
-                            Vence: <strong>${formatDate(f.vencimiento)}</strong>
-                        </div>
-                        <div style="text-align:right; font-size: 1.1rem; color: var(--primary);">
-                            <strong>${formatCurrency(f.monto)}</strong>
-                        </div>
-                        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;" onclick="event.stopPropagation()">
-                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
-                        </div>
-                    </div>
-                `;
+html += `
+    <div class="factura-box" ${clickAction} style="...">
+        <div style="margin-bottom: 0.5rem;">
+            <strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong>
+        </div>
+        <div style="margin-bottom: 0.5rem;">
+            Vence: <strong>${formatDate(f.vencimiento)}</strong>
+        </div>
+        <div style="margin-bottom: 0.5rem;">
+            <strong>Monto Total Factura:</strong> ${formatCurrency(f.monto)}
+            ${f.iva ? `<br><strong>IVA:</strong> ${formatCurrency(f.iva)}` : ''}
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;" onclick="event.stopPropagation()">
+            <button class="btn btn-sm btn-secondary" onclick="editFactura(${f.id})" title="Editar">✏️</button>
+            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+        </div>
+    </div>
+`;
             } else {
                 const hasDoc = f.documento_file;
                 const rowClass = hasDoc ? 'payment-item-clickable' : 'payment-item';
                 const clickHandler = hasDoc ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
                 const cursorStyle = hasDoc ? 'cursor:pointer;' : '';
                 
-                html += `
-                    <div class="${rowClass}" ${clickHandler} style="${cursorStyle}">
-                        <div class="payment-item-content">
-                            <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
-                            <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
-                            <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
-                        </div>
-                        <div class="payment-item-actions" onclick="event.stopPropagation()">
-                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
-                        </div>
-                    </div>
-                `;
-            }
-        });
+html += `
+    <div class="${rowClass}" ${clickHandler} style="${cursorStyle}">
+        <div class="payment-item-content">
+            <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
+            <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
+            <div style="margin-top:0.5rem">
+                <strong>Monto Total Factura:</strong> ${formatCurrency(f.monto)}
+                ${f.iva ? ` | <strong>IVA:</strong> ${formatCurrency(f.iva)}` : ''}
+            </div>
+        </div>
+        <div class="payment-item-actions" onclick="event.stopPropagation()">
+            <button class="btn btn-sm btn-secondary" onclick="editFactura(${f.id})" title="Editar">✏️</button>
+            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+        </div>
+    </div>
+`;
         
         html += `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
         facturasPorPagarDiv.innerHTML = html;
@@ -504,5 +508,9 @@ function showPagarFacturaModal(facturaId) {
 function deleteFactura(facturaId) {
     alert('Función deleteFactura - pendiente de implementar para factura ID: ' + facturaId);
 }
-
+function editFactura(facturaId) {
+    alert('Función editFactura - Pendiente de implementar para factura ID: ' + facturaId);
+    // TODO: Aquí irá el modal de editar factura
+}
+       
 console.log('✅ PROVEEDORES-UI.JS cargado');
