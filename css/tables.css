@@ -202,6 +202,7 @@ th.sorted-desc::after {
 }
 
 /* Hover para mostrar CLABE en facturas por pagar */
+/* Hover para mostrar CLABE en facturas por pagar */
 .proveedor-clabe-hover {
     position: relative;
 }
@@ -216,11 +217,14 @@ th.sorted-desc::after {
     padding: 0.75rem 1rem;
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 1000;
+    z-index: 100000; /* ← AUMENTADO A 100000 */
     white-space: nowrap;
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--primary);
+    opacity: 1; /* ← AGREGAR */
+    background-color: #ffffff; /* ← AGREGAR */
+    pointer-events: none; /* ← AGREGAR para que no interfiera */
 }
 
 .proveedor-clabe-hover[data-clabe]:hover {
