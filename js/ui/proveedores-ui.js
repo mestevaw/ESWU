@@ -75,11 +75,24 @@ function renderProveedoresTable() {
 function filtrarProveedores(query) {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
     
-    // Buscar en nombre Y servicio
-    const filtrados = proveedores.filter(prov => 
-        prov.nombre.toLowerCase().includes(query) || 
-        prov.servicio.toLowerCase().includes(query)
-    );
+    // Buscar en nombre, servicio Y contactos
+    const filtrados = proveedores.filter(prov => {
+        // Buscar en nombre
+        const nombreMatch = prov.nombre.toLowerCase().includes(query);
+        
+        // Buscar en servicio
+        const servicioMatch = prov.servicio.toLowerCase().includes(query);
+        
+        // Buscar en contactos
+        const contactoMatch = prov.contactos && prov.contactos.some(c => 
+            (c.nombre && c.nombre.toLowerCase().includes(query)) ||
+            (c.telefono && c.telefono.toLowerCase().includes(query)) ||
+            (c.email && c.email.toLowerCase().includes(query))
+        );
+        
+        // Devolver true si coincide con cualquiera
+        return nombreMatch || servicioMatch || contactoMatch;
+    });
     
     const rows = filtrados.map(prov => {
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
