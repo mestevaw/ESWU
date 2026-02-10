@@ -205,51 +205,85 @@ function renderHomeIngresos() {
 }
 
 function renderHomePagosDetalle() {
-    const filterType = document.getElementById('homeFilter').value;
-    const year = parseInt(document.getElementById('homeYear').value);
-    const month = filterType === 'mensual' ? parseInt(document.getElementById('homeMonth').value) : null;
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
     
-    const tbody = document.getElementById('homePagosTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    const pagos = [];
-    let total = 0;
+    const tbodyPorPagar = document.getElementById('homeFacturasPorPagarTable').querySelector('tbody');
+    const tbodyPagadas = document.getElementById('homeFacturasPagadasTable').querySelector('tbody');
+    tbodyPorPagar.innerHTML = '';
+    tbodyPagadas.innerHTML = '';
+    
+    const porPagar = [];
+    const pagadas = [];
+    let totalPorPagar = 0;
+    let totalPagadas = 0;
     
     proveedores.forEach(prov => {
         if (prov.facturas) {
-            prov.facturas.forEach(fact => {
-                if (fact.fecha_pago) {
-                    const pd = new Date(fact.fecha_pago + 'T00:00:00');
-                    if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
-                        pagos.push({
+            prov.facturas.forEach(f => {
+                if (!f.fecha_pago) {
+                    porPagar.push({
+                        proveedor: prov.nombre,
+                        proveedorId: prov.id,
+                        clabe: prov.clabe || null, // NUEVO
+                        monto: f.monto,
+                        vencimiento: f.vencimiento
+                    });
+                    totalPorPagar += f.monto;
+                } else {
+                    const pd = new Date(f.fecha_pago + 'T00:00:00');
+                    if (pd.getMonth() === currentMonth && pd.getFullYear() === currentYear) {
+                        pagadas.push({
                             proveedor: prov.nombre,
                             proveedorId: prov.id,
-                            fecha: fact.fecha_pago,
-                            monto: fact.monto
+                            monto: f.monto,
+                            fecha: f.fecha_pago
                         });
-                        total += fact.monto;
+                        totalPagadas += f.monto;
                     }
                 }
             });
         }
     });
     
-    pagos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     const isMobile = window.innerWidth <= 768;
-    pagos.forEach(p => {
-        const proveedorText = isMobile && p.proveedor.length > 22 ? p.proveedor.substring(0, 22) + '...' : p.proveedor;
-        tbody.innerHTML += `
-            <tr class="clickable" style="cursor: pointer;" onclick="showProveedorDetail(${p.proveedorId})">
-                <td class="proveedor-truncate">${proveedorText}</td>
-                <td>${formatDate(p.fecha)}</td>
-                <td class="currency">${formatCurrency(p.monto)}</td>
-            </tr>
-        `;
+    porPagar.forEach(f => {
+        const row = tbodyPorPagar.insertRow();
+        row.className = 'clickable';
+        row.onclick = () => showProveedorDetail(f.proveedorId);
+        const proveedorText = isMobile && f.proveedor.length > 22 ? f.proveedor.substring(0, 22) + '...' : f.proveedor;
+        
+        // NUEVO: Agregar data-clabe
+        const clabeAttr = f.clabe ? `data-clabe="CLABE: ${f.clabe}"` : '';
+        
+        row.innerHTML = `<td class="proveedor-truncate proveedor-clabe-hover" ${clabeAttr}>${proveedorText}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
     });
     
-    if (pagos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay pagos</td></tr>';
+    if (porPagar.length === 0) {
+        tbodyPorPagar.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
     } else {
-        tbody.innerHTML += `<tr class="total-row"><td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(total)}</strong></td></tr>`;
+        const row = tbodyPorPagar.insertRow();
+        row.className = 'total-row';
+        row.innerHTML = `<td style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
+    }
+    
+    pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    pagadas.forEach(f => {
+        const row = tbodyPagadas.insertRow();
+        row.className = 'clickable';
+        row.onclick = () => showProveedorDetail(f.proveedorId);
+        const proveedorText = isMobile && f.proveedor.length > 22 ? f.proveedor.substring(0, 22) + '...' : f.proveedor;
+        row.innerHTML = `<td class="proveedor-truncate">${proveedorText}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDate(f.fecha)}</td>`;
+    });
+    
+    if (pagadas.length === 0) {
+        tbodyPagadas.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay facturas pagadas este mes</td></tr>';
+    } else {
+        const row = tbodyPagadas.insertRow();
+        row.className = 'total-row';
+        row.innerHTML = `<td style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
     }
 }
 
