@@ -381,7 +381,12 @@ if (inq.contactos && inq.contactos.length > 0) {
         document.getElementById('inquilinoDetailModal').classList.add('active');
         
         // Activar primera pestaña
-        switchTab('inquilino', 'pagos');
+       // Asegurar que SOLO la primera pestaña esté activa
+document.querySelectorAll('#inquilinoDetailModal .tab').forEach(t => t.classList.remove('active'));
+document.querySelectorAll('#inquilinoDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
+
+document.querySelector('#inquilinoDetailModal .tab:nth-child(1)').classList.add('active');
+document.getElementById('inquilinoPagosTab').classList.add('active');
         
     } catch (error) {
         console.error('ERROR en showInquilinoDetail:', error);
