@@ -307,22 +307,20 @@ function showInquilinoDetail(id) {
         document.getElementById('inquilinoDetailNombre').textContent = inq.nombre;
         
         // CONTACTOS EN UNA LÍNEA
-        const contactosList = document.getElementById('detailContactosList');
-        if (inq.contactos && inq.contactos.length > 0) {
-            const titulo = inq.contactos.length === 1 ? 'Contacto:' : 'Contactos:';
-            contactosList.innerHTML = `
-                <div style="display:flex;flex-direction:column;gap:0.5rem;">
-                    ${inq.contactos.map((c, idx) => `
-                        <div style="display:flex;align-items:center;gap:1rem;">
-                            ${idx === 0 ? `<strong style="min-width:80px;">${titulo}</strong>` : '<span style="min-width:80px;"></span>'}
-                            <span><strong>${c.nombre}</strong> | Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}</span>
-                        </div>
-                    `).join('')}
+const contactosList = document.getElementById('detailContactosList');
+if (inq.contactos && inq.contactos.length > 0) {
+    contactosList.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            ${inq.contactos.map(c => `
+                <div>
+                    <strong>${c.nombre}</strong> | Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}
                 </div>
-            `;
-        } else {
-            contactosList.innerHTML = '<div style="display:flex;align-items:center;gap:1rem;"><strong style="min-width:80px;">Contacto:</strong> <span style="color:var(--text-light)">No hay contactos</span></div>';
-        }
+            `).join('')}
+        </div>
+    `;
+} else {
+    contactosList.innerHTML = '<span style="color:var(--text-light)">No hay contactos</span>';
+}
         
         document.getElementById('detailRFC').textContent = inq.rfc || '-';
         document.getElementById('detailClabe').textContent = inq.clabe || '-';
