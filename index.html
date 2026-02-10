@@ -437,65 +437,84 @@
         <!-- MODALS -->
         
         <!-- Inquilino Detail Modal -->
-        <div id="inquilinoDetailModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header modal-header-sticky">
-                    <div class="modal-header-left">
-                        <div class="dropdown">
-                            <button class="dropdown-toggle" onclick="toggleDropdown('inquilinoDetailDropdown')">☰</button>
-                            <div id="inquilinoDetailDropdown" class="dropdown-content">
-                                <a href="#" onclick="event.preventDefault(); showRegistrarPagoModal();">Registrar Pago</a>
-                                <a href="#" onclick="event.preventDefault(); showAgregarDocumentoModal();">Agregar Documento</a>
-                                <a href="#" onclick="event.preventDefault(); editInquilino();">Modificar Datos</a>
-                               <a href="#" onclick="event.preventDefault(); terminarContratoInquilino();">Terminar Contrato</a>                            </div>
-                        </div>
-                    </div>
-                    <h2 class="modal-title" id="inquilinoDetailNombre"></h2>
-                    <button class="close-modal" onclick="closeModal('inquilinoDetailModal')">×</button>
-                </div>
-<div style="padding: 1.5rem; padding-top: 2.5rem;">
-                    <div class="info-box">
-                        <div class="info-box-title">CONTACTOS</div>
-                        <div id="detailContactosList"></div>
-                    </div>
-                    <div class="info-box">
-                        <div class="info-box-content">
-                            <strong>RFC:</strong> <span id="detailRFC"></span> &nbsp;&nbsp;&nbsp; <strong>CLABE:</strong> <span id="detailClabe"></span>
-                        </div>
-                    </div>
-                    <div class="tabs-container">
-                        <div class="tabs">
-                            <button class="tab active" onclick="switchTab('inquilino', 'renta')">Datos de Renta</button>
-                            <button class="tab" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos</button>
-                            <button class="tab" onclick="switchTab('inquilino', 'contrato')">Contrato Original</button>
-                            <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos Adicionales</button>
-                            <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
-                        </div>
-                        <div id="inquilinoRentaTab" class="tab-content active">
-                            <div class="info-grid">
-                                <div class="info-item"><div class="info-label">Renta Mensual</div><div class="info-value currency" id="detailRenta"></div></div>
-                                <div class="info-item"><div class="info-label">M²</div><div class="info-value" id="detailM2"></div></div>
-                                <div class="info-item"><div class="info-label">No. Despacho</div><div class="info-value" id="detailDespacho"></div></div>
-                                <div class="info-item"><div class="info-label">Inicio Rentando</div><div class="info-value" id="detailFechaInicio"></div></div>
-                                <div class="info-item"><div class="info-label">Vencimiento Contrato</div><div class="info-value" id="detailFechaVenc"></div></div>
-                            </div>
-                        </div>
-                        <div id="inquilinoPagosTab" class="tab-content">
-                            <div id="historialPagos"></div>
-                        </div>
-                        <div id="inquilinoContratoTab" class="tab-content">
-                            <div id="contratoOriginalSection"></div>
-                        </div>
-                        <div id="inquilinoDocsTab" class="tab-content">
-                            <div id="documentosAdicionales"></div>
-                        </div>
-                        <div id="inquilinoNotasTab" class="tab-content">
-                            <p id="notasInquilino"></p>
-                        </div>
+<div id="inquilinoDetailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header modal-header-sticky">
+            <div class="modal-header-left">
+                <div class="dropdown">
+                    <button class="dropdown-toggle" onclick="toggleDropdown('inquilinoDetailDropdown')">☰</button>
+                    <div id="inquilinoDetailDropdown" class="dropdown-content">
+                        <a href="#" onclick="event.preventDefault(); showRegistrarPagoModal();">Registrar Pago</a>
+                        <a href="#" onclick="event.preventDefault(); showAgregarDocumentoModal();">Agregar Documento</a>
+                        <a href="#" onclick="event.preventDefault(); editInquilino();">Modificar Datos</a>
+                        <a href="#" onclick="event.preventDefault(); terminarContratoInquilino();">Terminar Contrato</a>
                     </div>
                 </div>
             </div>
+            <h2 class="modal-title" id="inquilinoDetailNombre"></h2>
+            <button class="close-modal" onclick="closeModal('inquilinoDetailModal')">×</button>
         </div>
+        <div style="padding: 1.5rem; padding-top: 2.5rem;">
+            <!-- CONTACTOS -->
+            <div class="info-box">
+                <div id="detailContactosList"></div>
+            </div>
+            
+            <!-- RFC Y CLABE -->
+            <div class="info-box">
+                <div class="info-box-content">
+                    <strong>RFC:</strong> <span id="detailRFC"></span> &nbsp;&nbsp;&nbsp; 
+                    <strong>CLABE:</strong> <span id="detailClabe"></span>
+                </div>
+            </div>
+            
+            <!-- DATOS DE RENTA EN UNA LÍNEA -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem;">
+                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Renta Mensual</div>
+                    <div class="currency" style="font-size:1.1rem;font-weight:600;" id="detailRenta"></div>
+                </div>
+                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">M²</div>
+                    <div style="font-size:1.1rem;font-weight:600;" id="detailM2"></div>
+                </div>
+                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Despacho</div>
+                    <div style="font-size:1.1rem;font-weight:600;" id="detailDespacho"></div>
+                </div>
+                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Fecha Inicio Renta</div>
+                    <div style="font-size:1.1rem;font-weight:600;" id="detailFechaInicio"></div>
+                </div>
+                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Fecha Vence Contrato</div>
+                    <div style="font-size:1.1rem;font-weight:600;" id="detailFechaVenc"></div>
+                </div>
+            </div>
+            
+            <!-- BOTÓN DE CONTRATO -->
+            <div id="contratoButtonSection" style="margin-bottom:1.5rem;"></div>
+            
+            <!-- PESTAÑAS (SIN DATOS DE RENTA NI CONTRATO) -->
+            <div class="tabs-container">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos</button>
+                    <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos Adicionales</button>
+                    <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
+                </div>
+                <div id="inquilinoPagosTab" class="tab-content active">
+                    <div id="historialPagos"></div>
+                </div>
+                <div id="inquilinoDocsTab" class="tab-content">
+                    <div id="documentosAdicionales"></div>
+                </div>
+                <div id="inquilinoNotasTab" class="tab-content">
+                    <p id="notasInquilino"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Proveedor Detail Modal -->
 <div id="proveedorDetailModal" class="modal">
