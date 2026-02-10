@@ -478,7 +478,7 @@ function renderBitacoraTable() {
             row.style.opacity = '0.7';
         }
         
-        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
+        const notasPreview = sem.notas ? (sem.notas.length > 100 ? sem.notas.substring(0, 100) + '...' : sem.notas) : 'Sin notas';
         const notasCompletas = sem.notas || 'Sin notas';
         
         // Cambiar "Semana del" por "al"
@@ -486,14 +486,16 @@ function renderBitacoraTable() {
         
         row.innerHTML = `
             <td><strong>${semanaTexto}</strong></td>
-            <td class="bitacora-notas-cell" data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>
+            <td class="bitacora-notas-hover" data-notas="${notasCompletas.replace(/"/g, '&quot;').replace(/\n/g, '&#10;')}">${notasPreview}</td>
         `;
     });
     
     // Actualizar indicador de ordenamiento
     const th = document.querySelector('#bitacoraTable th.sortable');
-    th.classList.remove('sorted-asc', 'sorted-desc');
-    th.classList.add(bitacoraSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    if (th) {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        th.classList.add(bitacoraSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    }
 }
 
 function sortBitacora() {
