@@ -174,34 +174,52 @@ async function savePagoRenta(event) {
     showLoading();
     
     try {
+        const fecha = document.getElementById('pagoFecha').value;
+        const pagoCompleto = document.getElementById('pagoCompleto').value;
+        const file = document.getElementById('pagoPDF').files[0];
+        
         const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
-        const completo = document.getElementById('pagoCompleto').value;
-        const monto = completo === 'si' ? inquilino.renta : parseFloat(document.getElementById('pagoMonto').value);
-        
-        const pagoFile = document.getElementById('pagoPDF').files[0];
-        let pagoURL = null;
-        
-        if (pagoFile) {
-            pagoURL = await fileToBase64(pagoFile);
+        if (!inquilino) {
+            throw new Error('Inquilino no encontrado');
         }
         
-        const pagoData = {
-            inquilino_id: currentInquilinoId,
-            fecha: document.getElementById('pagoFecha').value,
-            monto: monto,
-            completo: completo === 'si',
-            pago_file: pagoURL
-        };
+        let monto;
+        if (pagoCompleto === 'si') {
+            monto = inquilino.renta;
+        } else {
+            monto = parseFloat(document.getElementById('pagoMonto').value);
+            if (!monto || monto <= 0) {
+                throw new Error('El monto debe ser mayor a 0');
+            }
+        }
+        
+        let pagoFileData = null;
+        if (file) {
+            pagoFileData = await fileToBase64(file);
+        }
         
         const { error } = await supabaseClient
             .from('pagos_inquilinos')
-            .insert([pagoData]);
+            .insert([{
+                inquilino_id: currentInquilinoId,
+                fecha: fecha,
+                monto: monto,
+                completo: pagoCompleto === 'si',
+                pago_file: pagoFileData
+            }]);
         
         if (error) throw error;
         
         await loadInquilinos();
-        showInquilinoDetail(currentInquilinoId);
+        
         closeModal('registrarPagoModal');
+        
+        // Refrescar la vista del inquilino
+        if (currentInquilinoId) {
+            showInquilinoDetail(currentInquilinoId);
+        }
+        
+        alert('✅ Pago registrado correctamente');
         
     } catch (error) {
         console.error('Error:', error);
