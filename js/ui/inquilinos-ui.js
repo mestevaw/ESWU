@@ -53,59 +53,82 @@ function showInquilinosView(view) {
 
 function renderInquilinosTable() {
     const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
-    const thead = document.getElementById('inquilinosTable').querySelector('thead tr');
     
-    // Actualizar headers con indicadores de ordenamiento
-    thead.innerHTML = `
-        <th style="cursor:pointer" onclick="sortInquilinos('nombre')">Empresa ${inquilinosSortColumn === 'nombre' ? (inquilinosSortOrder === 'asc' ? '↑' : '↓') : '↕'}</th>
-        <th style="cursor:pointer" onclick="sortInquilinos('renta')">Renta Mensual ${inquilinosSortColumn === 'renta' ? (inquilinosSortOrder === 'asc' ? '↑' : '↓') : '↕'}</th>
-        <th style="cursor:pointer" onclick="sortInquilinos('vencimiento')">Vencimiento Contrato ${inquilinosSortColumn === 'vencimiento' ? (inquilinosSortOrder === 'asc' ? '↑' : '↓') : '↕'}</th>
-    `;
+    // Mostrar mensaje de carga
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem;color:var(--primary)">⏳ Cargando inquilinos...</td></tr>';
     
-    // Ordenar inquilinos si hay columna seleccionada
-    let sortedInquilinos = [...inquilinos];
-    if (inquilinosSortColumn) {
-        sortedInquilinos.sort((a, b) => {
-            let valA, valB;
-            
-            if (inquilinosSortColumn === 'nombre') {
-                valA = a.nombre.toLowerCase();
-                valB = b.nombre.toLowerCase();
-                return inquilinosSortOrder === 'asc' 
-                    ? valA.localeCompare(valB)
-                    : valB.localeCompare(valA);
-            } else if (inquilinosSortColumn === 'renta') {
-                valA = a.renta;
-                valB = b.renta;
-                return inquilinosSortOrder === 'asc' ? valA - valB : valB - valA;
-            } else if (inquilinosSortColumn === 'vencimiento') {
-                valA = new Date(a.fecha_vencimiento || '9999-12-31');
-                valB = new Date(b.fecha_vencimiento || '9999-12-31');
-                return inquilinosSortOrder === 'asc' ? valA - valB : valB - valA;
-            }
-        });
-    }
-    
-    // Renderizar filas
-    const rows = sortedInquilinos.map(inq => {
-        const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
-        const inactivo = !inq.contrato_activo;
-        const styleClass = inactivo ? 'style="opacity:0.4;font-style:italic"' : '';
+    // Usar setTimeout para permitir que el mensaje se muestre
+    setTimeout(() => {
+        // Copiar array para no mutar el original
+        let sortedInquilinos = [...inquilinos];
         
-        return `
-            <tr style="cursor: pointer;" onclick="showInquilinoDetail(${inq.id})" ${styleClass}>
-                <td style="font-size:0.9rem">${nombreCorto}</td>
-                <td class="currency">${formatCurrency(inq.renta)}</td>
-                <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
-            </tr>
-        `;
-    }).join('');
-    
-    if (sortedInquilinos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No hay inquilinos</td></tr>';
-    } else {
-        tbody.innerHTML = rows;
-    }
+        // Aplicar ordenamiento si hay columna seleccionada
+        if (inquilinosSortColumn) {
+            sortedInquilinos.sort((a, b) => {
+                let valA, valB;
+                
+                if (inquilinosSortColumn === 'nombre') {
+                    valA = a.nombre.toLowerCase();
+                    valB = b.nombre.toLowerCase();
+                    return inquilinosSortOrder === 'asc' 
+                        ? valA.localeCompare(valB) 
+                        : valB.localeCompare(valA);
+                } else if (inquilinosSortColumn === 'renta') {
+                    valA = parseFloat(a.renta) || 0;
+                    valB = parseFloat(b.renta) || 0;
+                    return inquilinosSortOrder === 'asc' 
+                        ? valA - valB 
+                        : valB - valA;
+                } else if (inquilinosSortColumn === 'vencimiento') {
+                    valA = new Date(a.fecha_vencimiento || '9999-12-31');
+                    valB = new Date(b.fecha_vencimiento || '9999-12-31');
+                    return inquilinosSortOrder === 'asc' 
+                        ? valA - valB 
+                        : valB - valA;
+                }
+                return 0;
+            });
+        }
+        
+        // Generar filas
+        const rows = sortedInquilinos.map(inq => {
+            const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
+            const inactivo = !inq.contrato_activo;
+            const opacityStyle = inactivo ? 'opacity:0.4;font-style:italic;' : '';
+            
+            return `
+                <tr style="cursor:pointer;${opacityStyle}" onclick="showInquilinoDetail(${inq.id})">
+                    <td style="font-size:0.9rem">${nombreCorto}</td>
+                    <td class="currency">${formatCurrency(inq.renta)}</td>
+                    <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
+                </tr>
+            `;
+        }).join('');
+        
+        if (inquilinos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No hay inquilinos</td></tr>';
+        } else {
+            tbody.innerHTML = rows;
+        }
+        
+        // Actualizar headers de ordenamiento
+        document.querySelectorAll('#inquilinosTable th').forEach(th => {
+            th.classList.remove('sorted-asc', 'sorted-desc');
+        });
+        
+        if (inquilinosSortColumn) {
+            const columnMap = {
+                'nombre': 0,
+                'renta': 1,
+                'vencimiento': 2
+            };
+            const thIndex = columnMap[inquilinosSortColumn];
+            const th = document.querySelectorAll('#inquilinosTable th')[thIndex];
+            if (th) {
+                th.classList.add(inquilinosSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            }
+        }
+    }, 100);
 }
 
 function sortInquilinos(column) {
