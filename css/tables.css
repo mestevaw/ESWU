@@ -225,8 +225,5 @@ th.sorted-desc::after {
     opacity: 1;
     background-color: #ffffff;
     pointer-events: none;
-}
 
-.proveedor-clabe-hover[data-clabe]:hover {
-    cursor: help;
 }
