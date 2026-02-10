@@ -565,4 +565,67 @@ async function agregarNuevaSemana() {
         hideLoading();
     }
 }
+// ============================================
+// BITÁCORA - AGREGAR SEMANA
+// ============================================
+
+async function agregarSemanaBitacora() {
+    showLoading();
+    try {
+        // Obtener la última semana
+        const { data: lastWeek, error: lastError } = await supabaseClient
+            .from('bitacora_semanal')
+            .select('semana_inicio')
+            .order('semana_inicio', { ascending: false })
+            .limit(1)
+            .single();
+        
+        let nuevaFechaInicio;
+        
+        if (lastWeek) {
+            // Calcular siguiente lunes después de la última semana
+            const ultimaFecha = new Date(lastWeek.semana_inicio);
+            nuevaFechaInicio = new Date(ultimaFecha);
+            nuevaFechaInicio.setDate(nuevaFechaInicio.getDate() + 7);
+        } else {
+            // Si no hay semanas, usar el próximo lunes
+            const hoy = new Date();
+            const dia = hoy.getDay();
+            const diasHastaLunes = dia === 0 ? 1 : (8 - dia);
+            nuevaFechaInicio = new Date(hoy);
+            nuevaFechaInicio.setDate(hoy.getDate() + diasHastaLunes);
+        }
+        
+        // Calcular fecha fin (6 días después = domingo)
+        const nuevaFechaFin = new Date(nuevaFechaInicio);
+        nuevaFechaFin.setDate(nuevaFechaInicio.getDate() + 6);
+        
+        // Formato de texto para semana
+        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        const semanaTexto = `al ${nuevaFechaInicio.getDate()} al ${nuevaFechaFin.getDate()} ${meses[nuevaFechaFin.getMonth()]} ${nuevaFechaFin.getFullYear()}`;
+        
+        const { error } = await supabaseClient
+            .from('bitacora_semanal')
+            .insert([{
+                semana_inicio: nuevaFechaInicio.toISOString().split('T')[0],
+                semana_fin: nuevaFechaFin.toISOString().split('T')[0],
+                semana_texto: semanaTexto,
+                notas: ''
+            }]);
+        
+        if (error) throw error;
+        
+        await loadBitacoraSemanal();
+        renderBitacoraTable();
+        
+        alert('✅ Semana agregada correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al agregar semana: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
 console.log('✅ SAVES.JS cargado');
