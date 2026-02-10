@@ -773,6 +773,56 @@
         </form>
     </div>
 </div>
+<!-- Pagar Factura Modal -->
+<div id="pagarFacturaModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Dar Factura X Pagada</h2>
+            <button class="close-modal" onclick="closeModal('pagarFacturaModal')">×</button>
+        </div>
+        <form id="pagarFacturaForm" onsubmit="savePagoFactura(event)">
+            <div style="padding: 1.5rem;">
+                <div class="form-group">
+                    <label>Fecha de Pago *</label>
+                    <input type="date" id="fechaPagoFactura" required>
+                </div>
+                
+                <!-- Tipo de pago -->
+                <div class="form-group">
+                    <label>¿Pago completo?</label>
+                    <select id="pagoFacturaCompleto" onchange="toggleMontoParcialFactura()">
+                        <option value="si">Sí - Pago completo</option>
+                        <option value="no">No - Pago parcial</option>
+                    </select>
+                </div>
+                
+                <!-- Monto parcial (oculto por defecto) -->
+                <div id="pagoFacturaParcialGroup" class="form-group hidden">
+                    <label>Monto del Pago Parcial *</label>
+                    <input type="number" id="montoPagoFacturaParcial" step="0.01" autocomplete="off">
+                    <small style="color:var(--text-light);display:block;margin-top:0.5rem;">
+                        Monto total de la factura: <span id="montoTotalFactura" style="font-weight:bold;">$0.00</span>
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Comprobante de Pago (PDF)</label>
+                    <div class="file-upload" onclick="document.getElementById('pagoPDFFactura').click()">
+                        <input type="file" id="pagoPDFFactura" accept=".pdf">
+                        <p>Click para seleccionar PDF del comprobante</p>
+                        <p id="pagoPDFFacturaFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('pagarFacturaModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Pago</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+        
         <!-- Edit Estacionamiento Modal -->
         <div id="editEstacionamientoModal" class="modal">
             <div class="modal-content">
