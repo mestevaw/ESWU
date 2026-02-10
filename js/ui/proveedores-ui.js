@@ -470,6 +470,27 @@ function viewFacturaDoc(archivo) {
 
 function showPagarFacturaModal(facturaId) {
     currentFacturaId = facturaId;
+    
+    // Encontrar la factura para mostrar el monto total
+    let factura = null;
+    for (const prov of proveedores) {
+        if (prov.facturas) {
+            factura = prov.facturas.find(f => f.id === facturaId);
+            if (factura) break;
+        }
+    }
+    
+    // Resetear form
+    document.getElementById('pagarFacturaForm').reset();
+    document.getElementById('pagoPDFFacturaFileName').textContent = '';
+    document.getElementById('pagoFacturaCompleto').value = 'si';
+    document.getElementById('pagoFacturaParcialGroup').classList.add('hidden');
+    
+    // Mostrar monto total
+    if (factura) {
+        document.getElementById('montoTotalFactura').textContent = formatCurrency(factura.monto);
+    }
+    
     document.getElementById('pagarFacturaModal').classList.add('active');
 }
 
