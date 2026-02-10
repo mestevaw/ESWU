@@ -191,6 +191,7 @@ function renderProveedoresFacturasPagadas() {
 
 function renderProveedoresFacturasPorPagar() {
     const tbody = document.getElementById('proveedoresFacturasPorPagarTable').querySelector('tbody');
+    tbody.innerHTML = '';
     
     const filterType = document.getElementById('provFactPorPagFilter').value;
     const year = parseInt(document.getElementById('provFactPorPagYear').value);
@@ -216,6 +217,7 @@ function renderProveedoresFacturasPorPagar() {
                             provId: prov.id,
                             factId: f.id,
                             proveedor: prov.nombre,
+                            clabe: prov.clabe || null, // NUEVO
                             numero: f.numero || 'S/N',
                             monto: f.monto,
                             vencimiento: f.vencimiento,
@@ -231,13 +233,14 @@ function renderProveedoresFacturasPorPagar() {
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     
     const rows = porPagar.map(f => {
-        const tienePDF = f.documento_file ? true : false;
-        const onclickAttr = tienePDF ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
-        const styleAttr = tienePDF ? 'style="cursor:pointer;"' : '';
+        // NUEVO: Atributo data-clabe para hover
+        const clabeAttr = f.clabe ? `data-clabe="CLABE: ${f.clabe}"` : '';
+        const cursorStyle = f.documento_file ? 'cursor:pointer;' : '';
+        const clickAction = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
         
         return `
-            <tr ${styleAttr} ${onclickAttr}>
-                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
+            <tr style="${cursorStyle}" ${clickAction}>
+                <td class="proveedor-clabe-hover" ${clabeAttr} style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
                 <td>${f.numero}</td>
                 <td class="currency">${formatCurrency(f.monto)}</td>
                 <td>${formatDateVencimiento(f.vencimiento)}</td>
@@ -248,7 +251,12 @@ function renderProveedoresFacturasPorPagar() {
     if (porPagar.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
     } else {
-        tbody.innerHTML = rows + `<tr class="total-row"><td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td></tr>`;
+        tbody.innerHTML = rows;
+        
+        // Agregar fila de total
+        const rowTotal = tbody.insertRow();
+        rowTotal.className = 'total-row';
+        rowTotal.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
     }
 }
 
