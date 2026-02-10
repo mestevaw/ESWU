@@ -183,28 +183,37 @@ th.sorted-desc::after {
 
 .bitacora-notas-hover:hover::after {
     content: attr(data-notas);
-    position: absolute;
-    left: 0;
-    top: 100%;
-    background: white;
-    border: 2px solid var(--primary);
-    padding: 1rem;
-    border-radius: 4px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-    z-index: 10000; /* Aumentado de 1000 a 10000 */
+    position: fixed; /* ← CAMBIADO de absolute a fixed */
+    left: 50%; /* ← CENTRADO */
+    top: 50%; /* ← CENTRADO */
+    transform: translate(-50%, -50%); /* ← CENTRADO */
+    background: #ffffff; /* ← Fondo sólido */
+    border: 3px solid var(--primary); /* ← Borde más grueso */
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4); /* ← Sombra más fuerte */
+    z-index: 999999; /* ← Z-index altísimo */
     white-space: pre-wrap;
     max-width: 600px;
     min-width: 300px;
+    max-height: 80vh; /* ← Altura máxima */
+    overflow-y: auto; /* ← Scroll si es muy largo */
     font-size: 0.95rem;
-    line-height: 1.5;
-    opacity: 1; /* NUEVO: Asegurar opacidad total */
-    background-color: #ffffff; /* NUEVO: Fondo sólido */
+    line-height: 1.6;
+    color: var(--text); /* ← Color de texto explícito */
 }
 
-/* Hover para mostrar CLABE en facturas por pagar */
-/* Hover para mostrar CLABE en facturas por pagar */
-.proveedor-clabe-hover {
-    position: relative;
+/* Fondo oscuro detrás del hover */
+.bitacora-notas-hover:hover::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.3); /* ← Fondo semi-transparente */
+    z-index: 999998;
+    pointer-events: none;
 }
 
 .proveedor-clabe-hover[data-clabe]:hover::after {
