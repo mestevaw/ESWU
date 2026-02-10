@@ -46,7 +46,7 @@ async function ensureInquilinosFullLoaded() {
         const { data: inquilinosData, error: inquilinosError } = await supabaseClient
             .from('inquilinos')
             .select('*')
-            .eq('contrato_activo', true)
+            .order('contrato_activo', { ascending: false })
             .order('nombre');
         
         if (inquilinosError) throw inquilinosError;
