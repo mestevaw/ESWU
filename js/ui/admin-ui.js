@@ -457,25 +457,40 @@ function renderBitacoraTable() {
     const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
     tbody.innerHTML = '';
     
+    // Ordenar según bitacoraSortOrder
     const sorted = [...bitacoraSemanal].sort((a, b) => {
         const dateA = new Date(a.semana_inicio);
         const dateB = new Date(b.semana_inicio);
         return bitacoraSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
     });
     
-    sorted.forEach(sem => {
+    sorted.forEach((sem, index) => {
+        const row = tbody.insertRow();
+        
+        // Solo las 2 primeras son editables (más recientes)
+        const esEditable = index < 2;
+        
+        if (esEditable) {
+            row.onclick = () => showEditBitacoraModal(sem.id);
+            row.style.cursor = 'pointer';
+        } else {
+            row.style.cursor = 'default';
+            row.style.opacity = '0.7';
+        }
+        
         const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
         const notasCompletas = sem.notas || 'Sin notas';
+        
+        // Cambiar "Semana del" por "al"
         const semanaTexto = sem.semana_texto ? sem.semana_texto.replace('Semana del', 'al') : '';
         
-        tbody.innerHTML += `
-            <tr onclick="showEditBitacoraModal(${sem.id})" style="cursor:pointer">
-                <td><strong>${semanaTexto}</strong></td>
-                <td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>
-            </tr>
+        row.innerHTML = `
+            <td><strong>${semanaTexto}</strong></td>
+            <td class="bitacora-notas-cell" data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>
         `;
     });
     
+    // Actualizar indicador de ordenamiento
     const th = document.querySelector('#bitacoraTable th.sortable');
     th.classList.remove('sorted-asc', 'sorted-desc');
     th.classList.add(bitacoraSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
