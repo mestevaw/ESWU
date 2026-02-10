@@ -204,18 +204,18 @@ function renderHomeIngresos() {
     }
 }
 
-function renderHomePagosDetalle() {
-       await ensureProveedoresFullLoaded();
+async function renderHomePagosDetalle() {
+    await ensureProveedoresFullLoaded();
     
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
     
-    const tbodyPorPagar = document.getElementById('homeFacturasPorPagarTable').querySelector('tbody');
-    const tbodyPagadas = document.getElementById('homeFacturasPagadasTable').querySelector('tbody');
+    const tbodyPorPagar = document.getElementById('homeFacturasPorPagarTable')?.querySelector('tbody');
+    const tbodyPagadas = document.getElementById('homeFacturasPagadasTable')?.querySelector('tbody');
+    
+    if (!tbodyPorPagar || !tbodyPagadas) return;
+    
     tbodyPorPagar.innerHTML = '';
     tbodyPagadas.innerHTML = '';
     
@@ -231,7 +231,7 @@ function renderHomePagosDetalle() {
                     porPagar.push({
                         proveedor: prov.nombre,
                         proveedorId: prov.id,
-                        clabe: prov.clabe || null, // NUEVO
+                        clabe: prov.clabe || null,
                         monto: f.monto,
                         vencimiento: f.vencimiento
                     });
@@ -251,6 +251,45 @@ function renderHomePagosDetalle() {
             });
         }
     });
+    
+    porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
+    const isMobile = window.innerWidth <= 768;
+    porPagar.forEach(f => {
+        const row = tbodyPorPagar.insertRow();
+        row.className = 'clickable';
+        row.onclick = () => showProveedorDetail(f.proveedorId);
+        const proveedorText = isMobile && f.proveedor.length > 22 ? f.proveedor.substring(0, 22) + '...' : f.proveedor;
+        
+        const clabeAttr = f.clabe ? `data-clabe="CLABE: ${f.clabe}"` : '';
+        
+        row.innerHTML = `<td class="proveedor-truncate proveedor-clabe-hover" ${clabeAttr}>${proveedorText}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
+    });
+    
+    if (porPagar.length === 0) {
+        tbodyPorPagar.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
+    } else {
+        const row = tbodyPorPagar.insertRow();
+        row.className = 'total-row';
+        row.innerHTML = `<td style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
+    }
+    
+    pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    pagadas.forEach(f => {
+        const row = tbodyPagadas.insertRow();
+        row.className = 'clickable';
+        row.onclick = () => showProveedorDetail(f.proveedorId);
+        const proveedorText = isMobile && f.proveedor.length > 22 ? f.proveedor.substring(0, 22) + '...' : f.proveedor;
+        row.innerHTML = `<td class="proveedor-truncate">${proveedorText}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDate(f.fecha)}</td>`;
+    });
+    
+    if (pagadas.length === 0) {
+        tbodyPagadas.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay facturas pagadas este mes</td></tr>';
+    } else {
+        const row = tbodyPagadas.insertRow();
+        row.className = 'total-row';
+        row.innerHTML = `<td style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
+    }
+}
     
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     const isMobile = window.innerWidth <= 768;
