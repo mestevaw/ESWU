@@ -112,6 +112,7 @@ async function saveProveedor(event) {
         let proveedorId;
         
         if (isEditMode && currentProveedorId) {
+            // MODO EDICIÓN
             const { error } = await supabaseClient
                 .from('proveedores')
                 .update(proveedorData)
@@ -119,22 +120,33 @@ async function saveProveedor(event) {
             
             if (error) throw error;
             
+            console.log('✅ Proveedor actualizado:', currentProveedorId);
+            
+            // Borrar contactos existentes
             await supabaseClient
                 .from('proveedores_contactos')
                 .delete()
                 .eq('proveedor_id', currentProveedorId);
             
             proveedorId = currentProveedorId;
+            
+            // Resetear modo edición
+            isEditMode = false;
+            currentProveedorId = null;
         } else {
+            // MODO CREAR NUEVO
             const { data, error } = await supabaseClient
                 .from('proveedores')
                 .insert([proveedorData])
                 .select();
             
             if (error) throw error;
+            
+            console.log('✅ Proveedor creado');
             proveedorId = data[0].id;
         }
         
+        // Guardar contactos
         if (tempProveedorContactos.length > 0) {
             const contactosToInsert = tempProveedorContactos.map(c => ({
                 proveedor_id: proveedorId,
@@ -150,12 +162,31 @@ async function saveProveedor(event) {
             if (contactosError) throw contactosError;
         }
         
-        await loadProveedores();
+        // ✅ CRÍTICO: Cerrar modal primero
         closeModal('addProveedorModal');
+        
+        // ✅ CRÍTICO: Resetear formulario
+        document.getElementById('proveedorForm').reset();
+        tempProveedorContactos = [];
+        
+        // ✅ CRÍTICO: Recargar COMPLETO
+        await ensureProveedoresFullLoaded();
+        
+        // ✅ CRÍTICO: Dar tiempo para que cargue
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Recargar vistas según contexto
+        if (document.getElementById('proveedorDetailModal').classList.contains('active')) {
+            // Si venimos del detalle, recargarlo con el ID correcto
+            const idToShow = isEditMode ? currentProveedorId : proveedorId;
+            showProveedorDetail(idToShow);
+        }
         
         if (currentSubContext === 'proveedores-list') {
             renderProveedoresTable();
         }
+        
+        alert('✅ Proveedor guardado correctamente');
         
     } catch (error) {
         console.error('Error:', error);
