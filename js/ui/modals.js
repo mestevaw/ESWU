@@ -229,5 +229,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+function toggleMontoParcialFactura() {
+    const completo = document.getElementById('pagoFacturaCompleto').value;
+    const montoGroup = document.getElementById('pagoFacturaParcialGroup');
+    const montoInput = document.getElementById('montoPagoFacturaParcial');
+    
+    if (completo === 'no') {
+        montoGroup.classList.remove('hidden');
+        montoInput.required = true;
+    } else {
+        montoGroup.classList.add('hidden');
+        montoInput.required = false;
+    }
+}
 
 console.log('✅ MODALS.JS cargado');
