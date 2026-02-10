@@ -537,5 +537,22 @@ function deleteProveedor() {
             hideLoading();
         });
 }
+// ============================================
+// FORCE LOAD ON VIEW
+// ============================================
+
+// Forzar carga completa al mostrar vistas de facturas
+const originalShowProveedoresView = showProveedoresView;
+showProveedoresView = async function(view) {
+    showLoadingBanner();
+    
+    // Cargar completo ANTES de mostrar
+    await ensureProveedoresFullLoaded();
+    
+    hideLoadingBanner();
+    
+    // Llamar función original
+    originalShowProveedoresView(view);
+};
 
 console.log('✅ PROVEEDORES-UI.JS cargado');
