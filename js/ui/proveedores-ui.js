@@ -78,10 +78,10 @@ function filtrarProveedores(query) {
     // Buscar en nombre, servicio Y contactos
     const filtrados = proveedores.filter(prov => {
         // Buscar en nombre
-        const nombreMatch = prov.nombre.toLowerCase().includes(query);
+        const nombreMatch = prov.nombre && prov.nombre.toLowerCase().includes(query);
         
         // Buscar en servicio
-        const servicioMatch = prov.servicio.toLowerCase().includes(query);
+        const servicioMatch = prov.servicio && prov.servicio.toLowerCase().includes(query);
         
         // Buscar en contactos
         const contactoMatch = prov.contactos && prov.contactos.some(c => 
@@ -99,7 +99,7 @@ function filtrarProveedores(query) {
         return `
             <tr style="cursor: pointer;" onclick="showProveedorDetail(${prov.id})">
                 <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
-                <td>${prov.servicio}</td>
+                <td>${prov.servicio || '-'}</td>
                 <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
                 <td>${primerContacto.telefono || '-'}</td>
                 <td>${primerContacto.email || '-'}</td>
