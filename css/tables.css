@@ -174,3 +174,27 @@ th.sorted-desc::after {
     max-width: 600px;
     min-width: 300px;
 }
+
+/* Bitácora - Hover para notas completas */
+.bitacora-notas-hover {
+    position: relative;
+    cursor: help;
+}
+
+.bitacora-notas-hover:hover::after {
+    content: attr(data-notas);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: white;
+    border: 2px solid var(--primary);
+    padding: 1rem;
+    border-radius: 4px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    z-index: 1000;
+    white-space: pre-wrap;
+    max-width: 600px;
+    min-width: 300px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
