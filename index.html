@@ -573,22 +573,13 @@
             </div>
         </div>
 
-        <!-- Add Inquilino Modal -->
+<!-- Add Inquilino Modal -->
         <div id="addInquilinoModal" class="modal">
             <div class="modal-content">
-<div class="modal-header modal-header-sticky">
-    <div class="modal-header-left">
-        <div class="dropdown">
-            <button class="dropdown-toggle" onclick="toggleDropdown('proveedorDetailDropdown')" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
-            <div id="proveedorDetailDropdown" class="dropdown-content">
-                <a href="#" onclick="event.preventDefault(); deleteProveedor();">Eliminar</a>
-            </div>
-        </div>
-        <button class="btn-icon" onclick="editProveedor()" title="Modificar Datos Proveedor" style="background: none; border: none; color: var(--primary); font-size: 1.5rem; margin-left: 0.5rem; cursor: pointer;">✏️</button>
-    </div>
-    <h2 class="modal-title" id="proveedorDetailNombre"></h2>
-    <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
-</div>
+                <div class="modal-header modal-header-sticky">
+                    <h2 class="modal-title" id="addInquilinoTitle">Agregar Inquilino</h2>
+                    <button class="close-modal" onclick="closeModal('addInquilinoModal')">×</button>
+                </div>
                 <div style="padding: 1.5rem;">
                     <form id="inquilinoForm" onsubmit="saveInquilino(event)">
                         <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="inquilinoNombre" required autocomplete="off"></div>
