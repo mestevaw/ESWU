@@ -10,11 +10,11 @@ let inquilinosFullLoaded = false;
 
 async function loadInquilinos() {
     try {
-        // Solo cargar datos básicos primero
+        // Cargar TODOS los inquilinos (activos e inactivos)
         const { data, error } = await supabaseClient
             .from('inquilinos')
             .select('id, nombre, renta, fecha_vencimiento, contrato_activo')
-            .eq('contrato_activo', true)
+            .order('contrato_activo', { ascending: false })
             .order('nombre');
         
         if (error) throw error;
