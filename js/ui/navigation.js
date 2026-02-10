@@ -196,5 +196,44 @@ function formatDateVencimiento(dateString) {
     }
     return formatted;
 }
+// ============================================
+// TAB SWITCHING
+// ============================================
+
+function switchTab(type, tabName) {
+    if (type === 'inquilino') {
+        // Remover active de todos
+        document.querySelectorAll('#inquilinoDetailModal .tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#inquilinoDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
+        
+        if (tabName === 'pagos') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(1)').classList.add('active');
+            document.getElementById('inquilinoPagosTab').classList.add('active');
+        } else if (tabName === 'docs') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(2)').classList.add('active');
+            document.getElementById('inquilinoDocsTab').classList.add('active');
+        } else if (tabName === 'notas') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(3)').classList.add('active');
+            document.getElementById('inquilinoNotasTab').classList.add('active');
+        }
+    } else if (type === 'proveedor') {
+        // Remover active de todos
+        document.querySelectorAll('#proveedorDetailModal .tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#proveedorDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
+        
+        if (tabName === 'pagadas') {
+            document.querySelector('#proveedorDetailModal .tab:nth-child(1)').classList.add('active');
+            document.getElementById('proveedorPagadasTab').classList.add('active');
+        } else if (tabName === 'porpagar') {
+            document.querySelector('#proveedorDetailModal .tab:nth-child(2)').classList.add('active');
+            document.getElementById('proveedorPorPagarTab').classList.add('active');
+        } else if (tabName === 'docs') {
+            document.querySelector('#proveedorDetailModal .tab:nth-child(3)').classList.add('active');
+            document.getElementById('proveedorDocsTab').classList.add('active');
+        }
+    }
+}
+
+console.log('✅ switchTab function loaded');
 
 console.log('✅ NAVIGATION.JS cargado');
