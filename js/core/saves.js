@@ -306,26 +306,99 @@ async function savePagoFactura(event) {
     showLoading();
     
     try {
-        const pagoFile = document.getElementById('pagoPDFFactura').files[0];
-        let pagoURL = null;
+        const fechaPago = document.getElementById('fechaPagoFactura').value;
+        const pagoCompleto = document.getElementById('pagoFacturaCompleto').value;
+        const file = document.getElementById('pagoPDFFactura').files[0];
         
-        if (pagoFile) {
-            pagoURL = await fileToBase64(pagoFile);
+        let pagoFileData = null;
+        if (file) {
+            pagoFileData = await fileToBase64(file);
         }
         
-        const { error } = await supabaseClient
-            .from('facturas')
-            .update({
-                fecha_pago: document.getElementById('fechaPagoFactura').value,
-                pago_file: pagoURL
-            })
-            .eq('id', currentFacturaId);
+        // Obtener la factura actual
+        let facturaActual = null;
+        let proveedorActual = null;
         
-        if (error) throw error;
+        for (const prov of proveedores) {
+            if (prov.facturas) {
+                facturaActual = prov.facturas.find(f => f.id === currentFacturaId);
+                if (facturaActual) {
+                    proveedorActual = prov;
+                    break;
+                }
+            }
+        }
+        
+        if (!facturaActual) {
+            throw new Error('Factura no encontrada');
+        }
+        
+        if (pagoCompleto === 'si') {
+            // PAGO COMPLETO: Solo actualizar fecha_pago y archivo
+            const { error } = await supabaseClient
+                .from('facturas')
+                .update({
+                    fecha_pago: fechaPago,
+                    pago_file: pagoFileData
+                })
+                .eq('id', currentFacturaId);
+            
+            if (error) throw error;
+            
+        } else {
+            // PAGO PARCIAL
+            const montoParcial = parseFloat(document.getElementById('montoPagoFacturaParcial').value);
+            
+            if (!montoParcial || montoParcial <= 0) {
+                throw new Error('El monto parcial debe ser mayor a 0');
+            }
+            
+            if (montoParcial >= facturaActual.monto) {
+                throw new Error('El monto parcial debe ser menor al total de la factura');
+            }
+            
+            const montoRestante = facturaActual.monto - montoParcial;
+            const ivaRestante = facturaActual.iva ? (facturaActual.iva * montoRestante / facturaActual.monto) : null;
+            const ivaParcial = facturaActual.iva ? (facturaActual.iva * montoParcial / facturaActual.monto) : null;
+            
+            // 1. Actualizar factura original con el monto restante (queda pendiente)
+            const { error: updateError } = await supabaseClient
+                .from('facturas')
+                .update({
+                    monto: montoRestante,
+                    iva: ivaRestante
+                })
+                .eq('id', currentFacturaId);
+            
+            if (updateError) throw updateError;
+            
+            // 2. Crear nueva factura con el monto pagado (marcada como pagada)
+            const { error: insertError } = await supabaseClient
+                .from('facturas')
+                .insert([{
+                    proveedor_id: proveedorActual.id,
+                    numero: facturaActual.numero + ' (Parcial)',
+                    fecha: facturaActual.fecha,
+                    vencimiento: facturaActual.vencimiento,
+                    monto: montoParcial,
+                    iva: ivaParcial,
+                    fecha_pago: fechaPago,
+                    documento_file: facturaActual.documento_file, // Mismo PDF de factura
+                    pago_file: pagoFileData
+                }]);
+            
+            if (insertError) throw insertError;
+        }
         
         await loadProveedores();
-        showProveedorDetail(currentProveedorId);
         closeModal('pagarFacturaModal');
+        
+        // Refrescar la vista del proveedor
+        if (currentProveedorId) {
+            showProveedorDetail(currentProveedorId);
+        }
+        
+        alert('✅ Pago registrado correctamente');
         
     } catch (error) {
         console.error('Error:', error);
