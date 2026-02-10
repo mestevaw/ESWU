@@ -290,46 +290,6 @@ async function renderHomePagosDetalle() {
         row.innerHTML = `<td style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
     }
 }
-    
-    porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
-    const isMobile = window.innerWidth <= 768;
-    porPagar.forEach(f => {
-        const row = tbodyPorPagar.insertRow();
-        row.className = 'clickable';
-        row.onclick = () => showProveedorDetail(f.proveedorId);
-        const proveedorText = isMobile && f.proveedor.length > 22 ? f.proveedor.substring(0, 22) + '...' : f.proveedor;
-        
-        // NUEVO: Agregar data-clabe
-        const clabeAttr = f.clabe ? `data-clabe="CLABE: ${f.clabe}"` : '';
-        
-        row.innerHTML = `<td class="proveedor-truncate proveedor-clabe-hover" ${clabeAttr}>${proveedorText}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
-    });
-    
-    if (porPagar.length === 0) {
-        tbodyPorPagar.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
-    } else {
-        const row = tbodyPorPagar.insertRow();
-        row.className = 'total-row';
-        row.innerHTML = `<td style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
-    }
-    
-    pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    pagadas.forEach(f => {
-        const row = tbodyPagadas.insertRow();
-        row.className = 'clickable';
-        row.onclick = () => showProveedorDetail(f.proveedorId);
-        const proveedorText = isMobile && f.proveedor.length > 22 ? f.proveedor.substring(0, 22) + '...' : f.proveedor;
-        row.innerHTML = `<td class="proveedor-truncate">${proveedorText}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDate(f.fecha)}</td>`;
-    });
-    
-    if (pagadas.length === 0) {
-        tbodyPagadas.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay facturas pagadas este mes</td></tr>';
-    } else {
-        const row = tbodyPagadas.insertRow();
-        row.className = 'total-row';
-        row.innerHTML = `<td style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
-    }
-}
 
 // ============================================
 // USUARIOS
@@ -532,10 +492,16 @@ function sortEstacionamiento(columna) {
 let bitacoraSortOrder = 'desc';
 
 function renderBitacoraTable() {
-    const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
+    const tbody = document.getElementById('bitacoraTable')?.querySelector('tbody');
+    if (!tbody) return;
+    
     tbody.innerHTML = '';
     
-    // Ordenar según bitacoraSortOrder
+    if (!bitacoraSemanal || bitacoraSemanal.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-light);padding:2rem">No hay bitácora semanal</td></tr>';
+        return;
+    }
+    
     const sorted = [...bitacoraSemanal].sort((a, b) => {
         const dateA = new Date(a.semana_inicio);
         const dateB = new Date(b.semana_inicio);
@@ -545,7 +511,6 @@ function renderBitacoraTable() {
     sorted.forEach((sem, index) => {
         const row = tbody.insertRow();
         
-        // Solo las 2 primeras son editables (más recientes)
         const esEditable = index < 2;
         
         if (esEditable) {
@@ -559,8 +524,7 @@ function renderBitacoraTable() {
         const notasPreview = sem.notas ? (sem.notas.length > 100 ? sem.notas.substring(0, 100) + '...' : sem.notas) : 'Sin notas';
         const notasCompletas = sem.notas || 'Sin notas';
         
-        // Cambiar "Semana del" por "al"
-        const semanaTexto = sem.semana_texto ? sem.semana_texto.replace('Semana del', 'al') : '';
+        const semanaTexto = sem.semana_texto ? sem.semana_texto.replace('Semana del', '').trim() : '';
         
         row.innerHTML = `
             <td><strong>${semanaTexto}</strong></td>
@@ -568,7 +532,6 @@ function renderBitacoraTable() {
         `;
     });
     
-    // Actualizar indicador de ordenamiento
     const th = document.querySelector('#bitacoraTable th.sortable');
     if (th) {
         th.classList.remove('sorted-asc', 'sorted-desc');
@@ -602,7 +565,7 @@ function filtrarBitacora(query) {
         tbody.innerHTML += `
             <tr onclick="showEditBitacoraModal(${sem.id})" style="cursor:pointer">
                 <td><strong>${sem.semana_texto}</strong></td>
-                <td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>
+                <td class="bitacora-notas-hover" data-notas="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>
             </tr>
         `;
     });
@@ -641,7 +604,6 @@ function showEditBitacoraModal(bitacoraId) {
 
 function updateBitacoraMenu() {
     // Esta función se llama cuando se abre el dropdown
-    // No necesita hacer nada especial por ahora
 }
 
 function agregarNuevaSemana() {
