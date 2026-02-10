@@ -40,8 +40,7 @@ async function loadInquilinos() {
 }
 
 async function ensureInquilinosFullLoaded() {
-    if (inquilinosFullLoaded) return;
-    
+    // ✅ SIEMPRE RECARGAR - Quitar el if
     try {
         const { data: inquilinosData, error: inquilinosError } = await supabaseClient
             .from('inquilinos')
@@ -96,7 +95,7 @@ async function ensureInquilinosFullLoaded() {
         }));
         
         inquilinosFullLoaded = true;
-        console.log(`✅ ${inquilinos.length} inquilinos cargados (completo)`);
+        console.log(`✅ ${inquilinos.length} inquilinos recargados (completo)`);
         
     } catch (error) {
         console.error('Error loading inquilinos full:', error);
@@ -139,8 +138,7 @@ async function loadProveedores() {
 }
 
 async function ensureProveedoresFullLoaded() {
-    if (proveedoresFullLoaded) return;
-    
+    // ✅ CRÍTICO: SIEMPRE RECARGAR - Quitar el if que impedía recargar
     try {
         const { data: proveedoresData, error: proveedoresError } = await supabaseClient
             .from('proveedores')
@@ -191,7 +189,7 @@ async function ensureProveedoresFullLoaded() {
         }));
         
         proveedoresFullLoaded = true;
-        console.log(`✅ ${proveedores.length} proveedores cargados (completo)`);
+        console.log(`✅ ${proveedores.length} proveedores recargados (completo) - ${proveedores.reduce((sum, p) => sum + p.facturas.length, 0)} facturas totales`);
         
     } catch (error) {
         console.error('Error loading proveedores full:', error);
