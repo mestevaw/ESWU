@@ -460,37 +460,21 @@
                 <div id="detailContactosList"></div>
             </div>
             
-            <!-- RFC Y CLABE -->
-            <div class="info-box">
-                <div class="info-box-content">
-                    <strong>RFC:</strong> <span id="detailRFC"></span> &nbsp;&nbsp;&nbsp; 
-                    <strong>CLABE:</strong> <span id="detailClabe"></span>
+            <!-- RFC Y CLABE EN DOS RECUADROS SEPARADOS -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">RFC</div>
+                    <div style="font-size:1rem;font-weight:600;" id="detailRFC"></div>
+                </div>
+                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">CLABE</div>
+                    <div style="font-size:1rem;font-weight:600;" id="detailClabe"></div>
                 </div>
             </div>
             
             <!-- DATOS DE RENTA EN UNA LÍNEA -->
             <div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr 2fr;gap:1rem;margin-bottom:1.5rem;">
-    <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-        <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Renta Mensual</div>
-        <div class="currency" style="font-size:1.1rem;font-weight:600;" id="detailRenta"></div>
-    </div>
-    <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-        <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">M²</div>
-        <div style="font-size:1.1rem;font-weight:600;" id="detailM2"></div>
-    </div>
-    <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-        <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Despacho</div>
-        <div style="font-size:1.1rem;font-weight:600;" id="detailDespacho"></div>
-    </div>
-    <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-        <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Fecha Inicio Renta</div>
-        <div style="font-size:1.1rem;font-weight:600;" id="detailFechaInicio"></div>
-    </div>
-    <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-        <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Fecha Vence Contrato</div>
-        <div style="font-size:1.1rem;font-weight:600;" id="detailFechaVenc"></div>
-    </div>
-</div>                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
                     <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Renta Mensual</div>
                     <div class="currency" style="font-size:1.1rem;font-weight:600;" id="detailRenta"></div>
                 </div>
