@@ -242,5 +242,21 @@ function toggleMontoParcialFactura() {
         montoInput.required = false;
     }
 }
+/* ========================================
+   AJUSTE SPACING LÁPIZ
+   ======================================== */
+
+.btn-icon-edit {
+    margin-right: 0.75rem !important;
+}
+
+/* ========================================
+   HOVERS ÍCONOS FACTURAS
+   ======================================== */
+
+.btn-icon-action:hover {
+    transform: scale(1.3);
+    transition: transform 0.2s;
+}
 
 console.log('✅ MODALS.JS cargado');
