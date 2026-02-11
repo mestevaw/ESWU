@@ -688,31 +688,31 @@
         
         <div style="padding: 1.5rem; padding-top: 2rem;">
             
-            <!-- ✅ TELÉFONO Y EMAIL COMPRIMIDOS -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-                <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.5rem;">
-                    <span style="font-size:1.3rem;">📞</span>
-                    <span style="font-weight:600;" id="proveedorTelefono">-</span>
-                </div>
-                <a id="proveedorEmailLink" href="#" style="text-decoration:none;color:inherit;">
-                    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.5rem;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                        <span style="font-size:1.3rem;">✉️</span>
-                        <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;" id="proveedorEmail">-</span>
-                    </div>
-                </a>
-            </div>
-            
-            <!-- ✅ RFC Y CLABE COMPRIMIDOS -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-                <div style="background:var(--bg);padding:0.75rem 1rem;border-radius:4px;border:1px solid var(--border);">
-                    <span style="color:var(--text-light);font-size:0.875rem;">RFC:</span>
-                    <span style="font-weight:600;margin-left:0.5rem;" id="detailProvRFC">-</span>
-                </div>
-                <div style="background:var(--bg);padding:0.75rem 1rem;border-radius:4px;border:1px solid var(--border);">
-                    <span style="color:var(--text-light);font-size:0.875rem;">CLABE:</span>
-                    <span style="font-weight:600;margin-left:0.5rem;" id="detailProvClabe">-</span>
-                </div>
-            </div>
+          <!-- ✅ TELÉFONO Y EMAIL COMPRIMIDOS CON SOMBRA -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.5rem;">
+        <span style="font-size:1.3rem;">📞</span>
+        <span style="font-weight:600;" id="proveedorTelefono">-</span>
+    </div>
+    <a id="proveedorEmailLink" href="#" style="text-decoration:none;color:inherit;">
+        <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.5rem;cursor:pointer;transition:transform 0.2s;height:100%;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <span style="font-size:1.3rem;">✉️</span>
+            <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;" id="proveedorEmail">-</span>
+        </div>
+    </a>
+</div>
+
+<!-- ✅ RFC Y CLABE COMPRIMIDOS CON SOMBRA -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);">
+        <span style="color:var(--text-light);font-size:0.875rem;">RFC:</span>
+        <span style="font-weight:600;margin-left:0.5rem;" id="detailProvRFC">-</span>
+    </div>
+    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);">
+        <span style="color:var(--text-light);font-size:0.875rem;">CLABE:</span>
+        <span style="font-weight:600;margin-left:0.5rem;" id="detailProvClabe">-</span>
+    </div>
+</div>
             
             <!-- ✅ CONTACTOS -->
             <div id="proveedorContactosSection"></div>
