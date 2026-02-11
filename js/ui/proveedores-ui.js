@@ -419,13 +419,25 @@ function showRegistrarFacturaModalFromDetail() {
     isEditMode = false;
     currentFacturaId = null;
     
+    // ✅ AGREGAR MODAL SI NO EXISTE
+    let modal = document.getElementById('registrarFacturaModal');
+    if (!modal) {
+        console.error('❌ Modal registrarFacturaModal no existe en el HTML');
+        alert('Error: Modal de factura no encontrado. Por favor recarga la página.');
+        return;
+    }
+    
     const facturaForm = document.getElementById('facturaForm');
     if (facturaForm) {
         facturaForm.reset();
-        document.getElementById('facturaDocumentoFileName').textContent = '';
     }
     
-    document.getElementById('registrarFacturaModal').classList.add('active');
+    const fileName = document.getElementById('facturaDocumentoFileName');
+    if (fileName) {
+        fileName.textContent = '';
+    }
+    
+    modal.classList.add('active');
 }
 
 function showAgregarDocumentoProveedorModal() {
