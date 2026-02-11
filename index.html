@@ -530,35 +530,33 @@
                 <h2 class="modal-title" id="proveedorDetailNombre" style="margin:0;"></h2>
                 <div id="proveedorDetailServicio" style="color:var(--text-light);font-size:0.9rem;margin-top:0.25rem;"></div>
             </div>
-            <div style="display:flex;gap:0.5rem;align-items:center;">
-                <button class="btn-icon-edit" onclick="editProveedor()" title="Editar Proveedor">✏️</button>
-                <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
-            </div>
+            <button class="btn-icon-edit" onclick="editProveedor()" title="Editar Proveedor">✏️</button>
+            <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
         </div>
         
         <div style="padding: 1.5rem; padding-top: 2rem;">
             
-            <!-- ✅ TELÉFONO Y EMAIL CON SOMBRAS -->
+            <!-- ✅ TELÉFONO Y EMAIL CON SOMBRAS FORZADAS -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
-                <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.1);display:flex;align-items:center;gap:0.75rem;">
+                <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.1) !important;border:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;">
                     <span style="font-size:1.5rem;">📞</span>
                     <span style="font-weight:600;" id="proveedorTelefono">-</span>
                 </div>
-                <a id="proveedorEmailLink" href="#" style="text-decoration:none;color:inherit;">
-                    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.1);display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:all 0.2s;height:100%;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 2px 4px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
+                <a id="proveedorEmailLink" href="#" style="text-decoration:none;color:inherit;display:block;">
+                    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.1) !important;border:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:all 0.2s;height:100%;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 2px 4px rgba(0,0,0,0.15) !important'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1) !important'">
                         <span style="font-size:1.5rem;">✉️</span>
                         <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;" id="proveedorEmail">-</span>
                     </div>
                 </a>
             </div>
 
-            <!-- ✅ RFC Y CLABE CON SOMBRAS -->
+            <!-- ✅ RFC Y CLABE CON SOMBRAS FORZADAS -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
-                <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.1) !important;border:1px solid var(--border);">
                     <span style="color:var(--text-light);font-size:0.875rem;">RFC:</span>
                     <span style="font-weight:600;margin-left:0.5rem;" id="detailProvRFC">-</span>
                 </div>
-                <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.1) !important;border:1px solid var(--border);">
                     <span style="color:var(--text-light);font-size:0.875rem;">CLABE:</span>
                     <span style="font-weight:600;margin-left:0.5rem;" id="detailProvClabe">-</span>
                 </div>
