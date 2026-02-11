@@ -24,58 +24,45 @@ function viewDocumento(archivo) {
 // NAVEGACIÓN Y VISTAS
 // ============================================
 
-let proveedoresYaCargados = false;
-
-async function ensureProveedoresFullLoaded() {
-    if (!proveedoresYaCargados) {
-        showLoadingBanner('Cargando proveedores completos...');
-        await loadProveedores();
-        proveedoresYaCargados = true;
-        hideLoadingBanner();
+function showProveedoresView(view) {
+    document.getElementById('proveedoresSubMenu').classList.remove('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('proveedoresPage').classList.add('active');
+    
+    document.getElementById('proveedoresListView').classList.add('hidden');
+    document.getElementById('proveedoresFacturasPagadasView').classList.add('hidden');
+    document.getElementById('proveedoresFacturasPorPagarView').classList.add('hidden');
+    
+    currentSubContext = 'proveedores-' + view;
+    
+    document.getElementById('btnRegresa').classList.remove('hidden');
+    
+    if (view === 'list') {
+        document.getElementById('btnSearch').classList.remove('hidden');
+        currentSearchContext = 'proveedores';
+    } else {
+        document.getElementById('btnSearch').classList.add('hidden');
+        currentSearchContext = null;
+    }
+    
+    document.getElementById('contentArea').classList.remove('with-submenu');
+    document.getElementById('menuSidebar').classList.add('hidden');
+    document.getElementById('contentArea').classList.add('fullwidth');
+    
+    if (view === 'list') {
+        document.getElementById('proveedoresListView').classList.remove('hidden');
+        renderProveedoresTable();
+    } else if (view === 'facturasPagadas') {
+        document.getElementById('proveedoresFacturasPagadasView').classList.remove('hidden');
+        renderProveedoresFacturasPagadas();
+    } else if (view === 'facturasPorPagar') {
+        document.getElementById('proveedoresFacturasPorPagarView').classList.remove('hidden');
+        renderProveedoresFacturasPorPagar();
     }
 }
 
-function showProveedoresView(view) {
-    ensureProveedoresFullLoaded().then(() => {
-        document.getElementById('proveedoresSubMenu').classList.remove('active');
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('proveedoresPage').classList.add('active');
-        
-        document.getElementById('proveedoresListView').classList.add('hidden');
-        document.getElementById('proveedoresFacturasPagadasView').classList.add('hidden');
-        document.getElementById('proveedoresFacturasPorPagarView').classList.add('hidden');
-        
-        currentSubContext = 'proveedores-' + view;
-        
-        document.getElementById('btnRegresa').classList.remove('hidden');
-        
-        if (view === 'list') {
-            document.getElementById('btnSearch').classList.remove('hidden');
-            currentSearchContext = 'proveedores';
-        } else {
-            document.getElementById('btnSearch').classList.add('hidden');
-            currentSearchContext = null;
-        }
-        
-        document.getElementById('contentArea').classList.remove('with-submenu');
-        document.getElementById('menuSidebar').classList.add('hidden');
-        document.getElementById('contentArea').classList.add('fullwidth');
-        
-        if (view === 'list') {
-            document.getElementById('proveedoresListView').classList.remove('hidden');
-            renderProveedoresTable();
-        } else if (view === 'facturasPagadas') {
-            document.getElementById('proveedoresFacturasPagadasView').classList.remove('hidden');
-            renderProveedoresFacturasPagadas();
-        } else if (view === 'facturasPorPagar') {
-            document.getElementById('proveedoresFacturasPorPagarView').classList.remove('hidden');
-            renderProveedoresFacturasPorPagar();
-        }
-    });
-}
-
 // ============================================
-// RENDER TABLAS
+// RENDERIZADO DE TABLAS
 // ============================================
 
 function renderProveedoresTable() {
@@ -84,9 +71,11 @@ function renderProveedoresTable() {
     
     proveedores.forEach(prov => {
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
+        
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
         row.onclick = () => showProveedorDetail(prov.id);
+        
         row.innerHTML = `
             <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
             <td>${prov.servicio}</td>
@@ -98,6 +87,25 @@ function renderProveedoresTable() {
     
     if (proveedores.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay proveedores</td></tr>';
+    }
+}
+
+function filtrarProveedores(query) {
+    const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    const filtrados = proveedores.filter(prov => prov.nombre.toLowerCase().includes(query));
+    
+    filtrados.forEach(prov => {
+        const row = tbody.insertRow();
+        row.style.cursor = 'pointer';
+        row.onclick = () => showProveedorDetail(prov.id);
+        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
+        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td><td>${prov.servicio}</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td><td>${primerContacto.telefono || '-'}</td><td>${primerContacto.email || '-'}</td>`;
+    });
+    
+    if (filtrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron proveedores</td></tr>';
     }
 }
 
@@ -127,6 +135,7 @@ function renderProveedoresFacturasPagadas() {
                     if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
                         pagadas.push({
                             proveedor: prov.nombre,
+                            proveedorId: prov.id,
                             numero: f.numero || 'S/N',
                             monto: f.monto,
                             fecha: f.fecha_pago,
@@ -141,21 +150,18 @@ function renderProveedoresFacturasPagadas() {
     });
     
     pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    
     pagadas.forEach(f => {
         const row = tbody.insertRow();
+        row.style.cursor = 'pointer';
+        row.onclick = () => showProveedorDetail(f.proveedorId);
+        
         const facturaCell = f.documento_file 
-            ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" onclick="viewFacturaDoc('${f.documento_file}')">${f.numero}</td>`
+            ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" onclick="event.stopPropagation(); viewFacturaDoc('${f.documento_file}')">${f.numero}</td>`
             : `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.numero}</td>`;
         const fechaCell = f.pago_file
-            ? `<td style="cursor:pointer;color:var(--primary)" onclick="viewFacturaDoc('${f.pago_file}')">${formatDate(f.fecha)}</td>`
+            ? `<td style="cursor:pointer;color:var(--primary)" onclick="event.stopPropagation(); viewFacturaDoc('${f.pago_file}')">${formatDate(f.fecha)}</td>`
             : `<td>${formatDate(f.fecha)}</td>`;
-        row.innerHTML = `
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
-            ${facturaCell}
-            <td class="currency">${formatCurrency(f.monto)}</td>
-            ${fechaCell}
-        `;
+        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
     });
     
     if (pagadas.length === 0) {
@@ -196,7 +202,6 @@ function renderProveedoresFacturasPorPagar() {
                             factId: f.id,
                             proveedor: prov.nombre,
                             numero: f.numero || 'S/N',
-                            clabe: prov.clabe || '-',
                             monto: f.monto,
                             vencimiento: f.vencimiento,
                             documento_file: f.documento_file
@@ -209,38 +214,34 @@ function renderProveedoresFacturasPorPagar() {
     });
     
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
-    
     porPagar.forEach(f => {
         const row = tbody.insertRow();
         row.style.cursor = 'pointer';
         if (f.documento_file) {
             row.onclick = () => viewFacturaDoc(f.documento_file);
         }
-        row.innerHTML = `
-            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
-            <td>${f.numero}</td>
-            <td style="font-family:monospace;font-size:0.85rem;">${f.clabe}</td>
-            <td>${formatDateVencimiento(f.vencimiento)}</td>
-            <td class="currency">${formatCurrency(f.monto)}</td>
-        `;
+        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
     });
     
     if (porPagar.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
     } else {
         const row = tbody.insertRow();
         row.className = 'total-row';
-        row.innerHTML = `<td colspan="4" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td>`;
+        row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
     }
 }
 
 // ============================================
-// MODAL PROVEEDOR DETAIL
+// MODAL DE DETALLE
 // ============================================
 
 function showProveedorDetail(id) {
     const prov = proveedores.find(p => p.id === id);
-    if (!prov) return;
+    if (!prov) {
+        alert('ERROR: Proveedor no encontrado');
+        return;
+    }
     
     currentProveedorId = id;
     
@@ -263,7 +264,7 @@ function showProveedorDetail(id) {
     document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
     
     const facturasPagadasDiv = document.getElementById('facturasPagadas');
-    const facturasPagadas = prov.facturas ? prov.facturas.filter(f => f.fecha_pago) : [];
+    const facturasPagadas = prov.facturas.filter(f => f.fecha_pago);
     let totalPagadas = 0;
     
     if (facturasPagadas.length > 0) {
@@ -290,30 +291,56 @@ function showProveedorDetail(id) {
     }
     
     const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
-    const facturasPorPagar = prov.facturas ? prov.facturas.filter(f => !f.fecha_pago) : [];
+    const facturasPorPagar = prov.facturas.filter(f => !f.fecha_pago);
     let totalPorPagar = 0;
+    const isMobile = window.innerWidth <= 768;
     
     if (facturasPorPagar.length > 0) {
-        facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
-            totalPorPagar += f.monto;
-            const verLink = f.documento_file 
-                ? `<button class="btn btn-sm btn-secondary" onclick="viewFacturaDoc('${f.documento_file}')">Ver</button>` 
-                : '';
-            return `
-                <div class="payment-item">
-                    <div class="payment-item-content">
-                        <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
-                        <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
-                        <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
+        if (isMobile) {
+            facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
+                totalPorPagar += f.monto;
+                const clickAction = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
+                const cursorStyle = f.documento_file ? 'cursor:pointer;' : '';
+                return `
+                    <div class="factura-box" ${clickAction} style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white; ${cursorStyle}">
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong>
+                        </div>
+                        <div style="margin-bottom: 0.5rem;">
+                            Vence: <strong>${formatDate(f.vencimiento)}</strong>
+                        </div>
+                        <div style="text-align:right; font-size: 1.1rem; color: var(--primary);">
+                            <strong>${formatCurrency(f.monto)}</strong>
+                        </div>
+                        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;" onclick="event.stopPropagation()">
+                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
+                        </div>
                     </div>
-                    <div class="payment-item-actions">
-                        ${verLink}
-                        <button class="btn btn-sm btn-success" onclick="showPagarFacturaModal(${f.id})">💾 Dar X Pagada</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
+                `;
+            }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
+        } else {
+            facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
+                totalPorPagar += f.monto;
+                const verLink = f.documento_file 
+                    ? `<button class="btn btn-sm btn-secondary" onclick="viewFacturaDoc('${f.documento_file}')">Ver</button>` 
+                    : '';
+                return `
+                    <div class="payment-item">
+                        <div class="payment-item-content">
+                            <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
+                            <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
+                            <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
+                        </div>
+                        <div class="payment-item-actions">
+                            ${verLink}
+                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
+                        </div>
                     </div>
-                </div>
-            `;
-        }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
+                `;
+            }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
+        }
     } else {
         facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
     }
@@ -336,52 +363,4 @@ function showProveedorDetail(id) {
     switchTab('proveedor', 'pagadas');
 }
 
-// ============================================
-// BÚSQUEDA Y FILTROS
-// ============================================
-
-function filtrarProveedores(query) {
-    const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    const filtrados = proveedores.filter(prov => prov.nombre.toLowerCase().includes(query));
-    
-    filtrados.forEach(prov => {
-        const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.onclick = () => showProveedorDetail(prov.id);
-        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
-        row.innerHTML = `
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
-            <td>${prov.servicio}</td>
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
-            <td>${primerContacto.telefono || '-'}</td>
-            <td>${primerContacto.email || '-'}</td>
-        `;
-    });
-    
-    if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron proveedores</td></tr>';
-    }
-}
-
-// ============================================
-// YEAR SELECTS
-// ============================================
-
-function populateProveedoresYearSelects() {
-    const currentYear = new Date().getFullYear();
-    ['provFactPagYear', 'provFactPorPagYear'].forEach(selectId => {
-        const select = document.getElementById(selectId);
-        if (select) {
-            select.innerHTML = '';
-            for (let year = currentYear - 5; year <= currentYear + 1; year++) {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                if (year === currentYear) option.selected = true;
-                select.appendChild(option);
-            }
-        }
-    });
-}
+console.log('✅ PROVEEDORES-UI.JS cargado');
