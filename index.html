@@ -824,10 +824,12 @@
 </div>
 
 <!-- Pagar Factura Modal -->
+<!-- Pagar Factura Modal -->
 <div id="pagarFacturaModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header modal-header-sticky">
             <h2 class="modal-title">Dar Factura X Pagada</h2>
+            <button class="btn-save-header" onclick="document.getElementById('pagarFacturaForm').dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}))" title="Guardar">💾</button>
             <button class="close-modal" onclick="closeModal('pagarFacturaModal')">×</button>
         </div>
         <form id="pagarFacturaForm" onsubmit="savePagoFactura(event)">
