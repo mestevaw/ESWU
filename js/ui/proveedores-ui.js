@@ -255,6 +255,7 @@ function showProveedorDetail(id) {
     } else {
         emailSpan.textContent = '-';
         emailLink.href = '#';
+        emailLink.onclick = (e) => e.preventDefault();
     }
     
     // RFC Y CLABE
@@ -269,7 +270,7 @@ function showProveedorDetail(id) {
             <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);margin-bottom:1.5rem;">
                 <div style="font-weight:600;color:var(--primary);margin-bottom:0.75rem;font-size:0.9rem;">Contactos Adicionales</div>
                 ${contactosAdicionales.map((c, index) => `
-                    <div style="padding:0.75rem;background:white;border-radius:4px;margin-bottom:0.5rem;box-shadow:var(--shadow);">
+                    <div style="padding:0.75rem;background:white;border-radius:4px;margin-bottom:0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
                         <div style="font-weight:600;margin-bottom:0.25rem;">${c.nombre}</div>
                         <div style="font-size:0.875rem;color:var(--text-light);">
                             📞 ${c.telefono || '-'} | ✉️ ${c.email || '-'}
@@ -282,7 +283,7 @@ function showProveedorDetail(id) {
         contactosSection.innerHTML = '';
     }
     
-    // ✅ FACTURAS PAGADAS CON SOMBRAS (IGUAL QUE INQUILINOS)
+    // ✅ FACTURAS PAGADAS - LAYOUT SIMPLE CON RECUADROS CLICKEABLES
     const facturasPagadasDiv = document.getElementById('facturasPagadas');
     const facturasPagadas = prov.facturas ? prov.facturas.filter(f => f.fecha_pago) : [];
     let totalPagadas = 0;
@@ -290,24 +291,39 @@ function showProveedorDetail(id) {
     if (facturasPagadas.length > 0) {
         facturasPagadasDiv.innerHTML = facturasPagadas.map(f => {
             totalPagadas += f.monto;
+            
+            // Determinar si hay documentos
+            const tieneFactura = f.documento_file;
+            const tienePago = f.pago_file;
+            
             return `
-                <div style="background:white;border:1px solid var(--border);border-radius:4px;padding:1rem;margin-bottom:0.75rem;box-shadow:var(--shadow);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='var(--shadow)'">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-                        <div style="font-weight:600;color:var(--primary);">Factura ${f.numero || 'S/N'}</div>
-                        <div style="font-size:1.1rem;font-weight:700;color:var(--success);">${formatCurrency(f.monto)}</div>
+                <div style="background:white;border:1px solid var(--border);border-radius:4px;padding:1rem;margin-bottom:0.75rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);display:flex;justify-content:space-between;align-items:center;">
+                    <div style="display:flex;gap:1rem;align-items:center;flex:1;">
+                        ${tieneFactura ? `
+                            <div onclick="viewDocumento('${f.documento_file}')" style="cursor:pointer;background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.1);" onmouseover="this.style.background='#e2e8f0';this.style.transform='translateY(-2px)';this.style.boxShadow='0 2px 4px rgba(0,0,0,0.15)'" onmouseout="this.style.background='var(--bg)';this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
+                                <div style="font-size:0.875rem;font-weight:600;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</div>
+                            </div>
+                        ` : `
+                            <div style="background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);opacity:0.6;">
+                                <div style="font-size:0.875rem;font-weight:600;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</div>
+                            </div>
+                        `}
+                        
+                        ${tienePago ? `
+                            <div onclick="viewDocumento('${f.pago_file}')" style="cursor:pointer;background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.1);" onmouseover="this.style.background='#e2e8f0';this.style.transform='translateY(-2px)';this.style.boxShadow='0 2px 4px rgba(0,0,0,0.15)'" onmouseout="this.style.background='var(--bg)';this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
+                                <div style="font-size:0.875rem;font-weight:600;">Pago del ${formatDate(f.fecha_pago)}</div>
+                            </div>
+                        ` : `
+                            <div style="background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);opacity:0.6;">
+                                <div style="font-size:0.875rem;font-weight:600;">Pago del ${formatDate(f.fecha_pago)}</div>
+                            </div>
+                        `}
                     </div>
-                    <div style="display:flex;gap:1rem;font-size:0.875rem;color:var(--text-light);margin-bottom:0.75rem;">
-                        <span>📅 Fecha: ${formatDate(f.fecha)}</span>
-                        <span>💰 Pagado: ${formatDate(f.fecha_pago)}</span>
-                    </div>
-                    <div style="display:flex;gap:0.5rem;">
-                        ${f.documento_file ? `<button class="btn btn-sm btn-secondary" onclick="viewFacturaDoc('${f.documento_file}')" style="box-shadow:var(--shadow);">📄 Ver Factura</button>` : ''}
-                        ${f.pago_file ? `<button class="btn btn-sm btn-secondary" onclick="viewFacturaDoc('${f.pago_file}')" style="box-shadow:var(--shadow);">💳 Ver Comprobante</button>` : ''}
-                    </div>
+                    <div style="font-size:1.1rem;font-weight:700;color:var(--success);margin-left:1rem;">${formatCurrency(f.monto)}</div>
                 </div>
             `;
         }).join('') + `
-            <div style="text-align:right;padding:1rem;background:#e6f7ed;border-radius:4px;font-weight:bold;margin-top:1rem;box-shadow:var(--shadow);">
+            <div style="text-align:right;padding:1rem;background:#e6f7ed;border-radius:4px;font-weight:bold;margin-top:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
                 TOTAL PAGADO: <span style="color:var(--success);font-size:1.2rem;">${formatCurrency(totalPagadas)}</span>
             </div>
         `;
@@ -315,7 +331,7 @@ function showProveedorDetail(id) {
         facturasPagadasDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem;background:var(--bg);border-radius:4px;">No hay facturas pagadas</p>';
     }
     
-    // ✅ FACTURAS POR PAGAR CON SOMBRAS (IGUAL QUE INQUILINOS)
+    // ✅ FACTURAS POR PAGAR CON SOMBRAS
     const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
     const facturasPorPagar = prov.facturas ? prov.facturas.filter(f => !f.fecha_pago) : [];
     let totalPorPagar = 0;
@@ -329,7 +345,7 @@ function showProveedorDetail(id) {
             const esProximo = vencimiento <= hoyMas7;
             
             return `
-                <div style="background:white;border:${esProximo ? '2px solid var(--danger)' : '1px solid var(--border)'};border-radius:4px;padding:1rem;margin-bottom:0.75rem;box-shadow:var(--shadow);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='var(--shadow)'">
+                <div style="background:white;border:${esProximo ? '2px solid var(--danger)' : '1px solid var(--border)'};border-radius:4px;padding:1rem;margin-bottom:0.75rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
                         <div style="font-weight:600;color:var(--primary);">Factura ${f.numero || 'S/N'}</div>
                         <div style="font-size:1.1rem;font-weight:700;color:var(--danger);">${formatCurrency(f.monto)}</div>
@@ -339,14 +355,14 @@ function showProveedorDetail(id) {
                         <span style="color:${esProximo ? 'var(--danger)' : 'var(--text-light)'};font-weight:${esProximo ? 'bold' : 'normal'};">⏰ Vence: ${formatDate(f.vencimiento)}</span>
                     </div>
                     <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                        ${f.documento_file ? `<button class="btn btn-sm btn-secondary" onclick="viewFacturaDoc('${f.documento_file}')" style="box-shadow:var(--shadow);">📄 Ver Factura</button>` : ''}
-                        <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})" style="box-shadow:var(--shadow);">✅ Dar X Pagada</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})" style="box-shadow:var(--shadow);">🗑️ Eliminar</button>
+                        ${f.documento_file ? `<button class="btn btn-sm btn-secondary" onclick="viewDocumento('${f.documento_file}')" style="box-shadow:0 1px 3px rgba(0,0,0,0.1);">Ver Factura</button>` : ''}
+                        <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})" style="box-shadow:0 1px 3px rgba(0,0,0,0.1);">Dar X Pagada</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})" style="box-shadow:0 1px 3px rgba(0,0,0,0.1);">Eliminar</button>
                     </div>
                 </div>
             `;
         }).join('') + `
-            <div style="text-align:right;padding:1rem;background:#fff3cd;border-radius:4px;font-weight:bold;margin-top:1rem;box-shadow:var(--shadow);">
+            <div style="text-align:right;padding:1rem;background:#fff3cd;border-radius:4px;font-weight:bold;margin-top:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
                 TOTAL POR PAGAR: <span style="color:var(--danger);font-size:1.2rem;">${formatCurrency(totalPorPagar)}</span>
             </div>
         `;
@@ -390,7 +406,6 @@ function showProveedorDetail(id) {
     document.getElementById('proveedorDetailModal').classList.add('active');
     switchTab('proveedor', 'pagadas');
 }
-
 // ============================================
 // MODALS
 // ============================================
