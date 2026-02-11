@@ -232,13 +232,18 @@ function renderProveedoresFacturasPorPagar() {
 
 function showProveedorDetail(id) {
     const prov = proveedores.find(p => p.id === id);
+    if (!prov) {
+        alert('Proveedor no encontrado');
+        return;
+    }
+    
     currentProveedorId = id;
     
     // ✅ NOMBRE + SERVICIO
     document.getElementById('proveedorDetailNombre').textContent = prov.nombre;
     document.getElementById('proveedorDetailServicio').textContent = prov.servicio;
     
-    // ✅ TELÉFONO Y EMAIL (primer contacto)
+    // ✅ TELÉFONO Y EMAIL (primer contacto) - COMPRIMIDOS CON SOMBRA
     const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
     const telefono = primerContacto.telefono || 'Sin teléfono';
     const email = primerContacto.email || 'Sin email';
@@ -249,14 +254,15 @@ function showProveedorDetail(id) {
     const emailLink = document.getElementById('proveedorEmailLink');
     if (email !== 'Sin email') {
         emailLink.href = `mailto:${email}`;
+        emailLink.style.pointerEvents = 'auto';
     } else {
         emailLink.href = '#';
-        emailLink.onclick = (e) => e.preventDefault();
+        emailLink.style.pointerEvents = 'none';
     }
     
     // ✅ RFC Y CLABE
-    document.getElementById('detailProvClabe').textContent = prov.clabe || '-';
     document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
+    document.getElementById('detailProvClabe').textContent = prov.clabe || '-';
     
     // ✅ CONTACTOS (todos)
     const contactosSection = document.getElementById('proveedorContactosSection');
@@ -265,12 +271,12 @@ function showProveedorDetail(id) {
             <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);margin-bottom:1.5rem;">
                 <div style="font-weight:600;color:var(--primary);margin-bottom:0.75rem;font-size:0.875rem;text-transform:uppercase;">Contactos</div>
                 ${prov.contactos.map(c => `
-                    <div style="padding:0.5rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-                        <div>
+                    <div style="padding:0.5rem 0;${prov.contactos.indexOf(c) < prov.contactos.length - 1 ? 'border-bottom:1px solid var(--border);' : ''}display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+                        <div style="flex:1;">
                             <strong>${c.nombre}</strong>
                             ${c.telefono ? `<span style="margin-left:1rem;color:var(--text-light);">📞 ${c.telefono}</span>` : ''}
                         </div>
-                        ${c.email ? `<a href="mailto:${c.email}" style="color:var(--primary);text-decoration:none;">✉️ ${c.email}</a>` : ''}
+                        ${c.email ? `<a href="mailto:${c.email}" style="color:var(--primary);text-decoration:none;white-space:nowrap;">✉️ ${c.email}</a>` : ''}
                     </div>
                 `).join('')}
             </div>
@@ -279,7 +285,7 @@ function showProveedorDetail(id) {
         contactosSection.innerHTML = '';
     }
     
-    // ✅ FACTURAS PAGADAS - DOS BOTONES
+    // ✅ FACTURAS PAGADAS - TODO EN UNA LÍNEA CON SOMBRA
     const facturasPagadasDiv = document.getElementById('facturasPagadas');
     const facturasPagadas = prov.facturas.filter(f => f.fecha_pago);
     let totalPagadas = 0;
@@ -288,20 +294,22 @@ function showProveedorDetail(id) {
         facturasPagadasDiv.innerHTML = facturasPagadas.map(f => {
             totalPagadas += f.monto;
             
-            const btnFactura = f.documento_file 
-                ? `<button class="btn btn-sm btn-secondary" onclick="viewFacturaDoc('${f.documento_file}')" style="flex:1;text-align:left;">📄 Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</button>`
-                : `<div style="flex:1;padding:0.5rem;color:var(--text-light);">📄 Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</div>`;
-            
-            const btnPago = f.pago_file 
-                ? `<button class="btn btn-sm btn-primary" onclick="viewFacturaDoc('${f.pago_file}')" style="flex:1;text-align:left;">💰 Pago del ${formatDate(f.fecha_pago)}</button>`
-                : `<div style="flex:1;padding:0.5rem;color:var(--text-light);">💰 Pago del ${formatDate(f.fecha_pago)}</div>`;
-            
             return `
                 <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;align-items:stretch;">
-                    ${btnFactura}
-                    ${btnPago}
-                    <div style="padding:0.5rem 1rem;background:var(--bg);border-radius:4px;font-weight:bold;min-width:120px;text-align:right;display:flex;align-items:center;justify-content:flex-end;">
-                        ${formatCurrency(f.monto)}
+                    <div style="flex:1;padding:0.75rem 1rem;background:white;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+                        <div style="display:flex;gap:1rem;flex:1;">
+                            ${f.documento_file 
+                                ? `<span style="cursor:pointer;color:var(--primary);text-decoration:underline;" onclick="viewFacturaDoc('${f.documento_file}')">📄 Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`
+                                : `<span style="color:var(--text-light);">📄 Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`
+                            }
+                            ${f.pago_file 
+                                ? `<span style="cursor:pointer;color:var(--primary);text-decoration:underline;" onclick="viewFacturaDoc('${f.pago_file}')">💰 Pago del ${formatDate(f.fecha_pago)}</span>`
+                                : `<span style="color:var(--text-light);">💰 Pago del ${formatDate(f.fecha_pago)}</span>`
+                            }
+                        </div>
+                        <div style="font-weight:bold;min-width:120px;text-align:right;">
+                            ${formatCurrency(f.monto)}
+                        </div>
                     </div>
                 </div>
             `;
@@ -377,7 +385,7 @@ function showProveedorDetail(id) {
     if (prov.documentos && prov.documentos.length > 0) {
         docsDiv.innerHTML = '<table style="width:100%;table-layout:fixed"><thead><tr><th style="width:50%">Nombre</th><th style="width:25%">Fecha</th><th style="width:25%">Usuario</th></tr></thead><tbody>' +
             prov.documentos.map(d => `
-                <tr class="doc-item" onclick="viewDocumento('${d.archivo}')">
+                <tr class="doc-item" style="cursor:pointer;" onclick="viewDocumento('${d.archivo}')">
                     <td style="word-wrap:break-word">${d.nombre}</td>
                     <td>${formatDate(d.fecha)}</td>
                     <td>${d.usuario}</td>
@@ -393,7 +401,6 @@ function showProveedorDetail(id) {
     document.getElementById('proveedorDetailModal').classList.add('active');
     switchTab('proveedor', 'pagadas');
 }
-
 // ============================================
 // MODALS
 // ============================================
