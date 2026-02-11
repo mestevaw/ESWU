@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESWU - Sistema de Administración</title>
     <link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/modals.css">
-<link rel="stylesheet" href="css/tables.css">
-<link rel="stylesheet" href="css/pages.css">
-<link rel="stylesheet" href="css/utilities.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/utilities.css">
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -56,11 +56,12 @@
                 <button id="btnRegresa" class="btn-regresa-simple hidden" onclick="handleRegresa()">✖</button>
             </div>
         </header>
+
         <!-- Loading Banner -->
-<div id="loadingBanner" class="loading-banner hidden">
-    <span class="loading-text">⏳ Cargando datos...</span>
-    <div class="loading-progress"></div>
-</div>
+        <div id="loadingBanner" class="loading-banner hidden">
+            <span class="loading-text">⏳ Cargando datos...</span>
+            <div class="loading-progress"></div>
+        </div>
         
         <!-- Main Content -->
         <div class="main-content">
@@ -72,17 +73,17 @@
                 <button class="menu-btn menu-btn-secondary" onclick="logout()">Salir</button>
             </div>
 
-<div id="inquilinosSubMenu" class="submenu-container">
-    <button class="submenu-btn" onclick="showInquilinosView('list')">Listado</button>
-    <button class="submenu-btn" onclick="showInquilinosView('rentasRecibidas')">Rentas</button>
-    <button class="submenu-btn" onclick="showInquilinosView('vencimientoContratos')">Contratos</button>
-</div>
+            <div id="inquilinosSubMenu" class="submenu-container">
+                <button class="submenu-btn" onclick="showInquilinosView('list')">Listado</button>
+                <button class="submenu-btn" onclick="showInquilinosView('rentasRecibidas')">Rentas</button>
+                <button class="submenu-btn" onclick="showInquilinosView('vencimientoContratos')">Contratos</button>
+            </div>
 
-<div id="proveedoresSubMenu" class="submenu-container">
-    <button class="submenu-btn" onclick="showProveedoresView('list')">Listado</button>
-    <button class="submenu-btn" onclick="showProveedoresView('facturasPagadas')">Facturas Pagadas</button>
-    <button class="submenu-btn" onclick="showProveedoresView('facturasPorPagar')">Facturas X Pagar</button>
-</div>
+            <div id="proveedoresSubMenu" class="submenu-container">
+                <button class="submenu-btn" onclick="showProveedoresView('list')">Listado</button>
+                <button class="submenu-btn" onclick="showProveedoresView('facturasPagadas')">Facturas Pagadas</button>
+                <button class="submenu-btn" onclick="showProveedoresView('facturasPorPagar')">Facturas X Pagar</button>
+            </div>
 
             <!-- Admin SubMenu -->
             <div id="adminSubMenu" class="submenu-container">
@@ -127,18 +128,18 @@
                                     <option value="11">Diciembre</option>
                                 </select>
                             </div>
-                            <div class="summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                                <div class="summary-card" onclick="toggleHomeTable('ingresos')" style="background: white; padding: 1.5rem; border-radius: 4px; box-shadow: var(--shadow); cursor: pointer; border: 1px solid var(--border);">
+                            <div class="summary-grid">
+                                <div class="summary-card" onclick="toggleHomeTable('ingresos')">
                                     <div style="font-size: 0.875rem; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">Ingresos del Periodo</div>
-                                    <div class="summary-value" id="summaryIngresos" style="font-size: 2rem; font-weight: 700; color: var(--primary);">$0.00</div>
+                                    <div class="summary-value" id="summaryIngresos">$0.00</div>
                                 </div>
-                                <div class="summary-card" onclick="toggleHomeTable('pagos')" style="background: white; padding: 1.5rem; border-radius: 4px; box-shadow: var(--shadow); cursor: pointer; border: 1px solid var(--border);">
+                                <div class="summary-card" onclick="toggleHomeTable('pagos')">
                                     <div style="font-size: 0.875rem; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">Pagos del Periodo</div>
-                                    <div class="summary-value" id="summaryGastos" style="font-size: 2rem; font-weight: 700; color: var(--primary);">$0.00</div>
+                                    <div class="summary-value" id="summaryGastos">$0.00</div>
                                 </div>
-                                <div class="summary-card" style="background: white; padding: 1.5rem; border-radius: 4px; box-shadow: var(--shadow); border: 1px solid var(--border);">
+                                <div class="summary-card">
                                     <div style="font-size: 0.875rem; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">Neto</div>
-                                    <div class="summary-value" id="summaryNeto" style="font-size: 2rem; font-weight: 700; color: var(--primary);">$0.00</div>
+                                    <div class="summary-value" id="summaryNeto">$0.00</div>
                                 </div>
                             </div>
                             <div id="homeIngresosContainer" class="hidden">
@@ -168,13 +169,13 @@
                     <!-- Listado de Inquilinos -->
                     <div id="inquilinosListView" class="hidden">
                         <div class="card">
-<div class="card-header">
-    <h2 class="card-title">Inquilinos</h2>
-    <div style="display:flex;gap:0.5rem;align-items:center">
-        <button class="btn-excel-icon" onclick="exportarInquilinosExcel()" title="Exportar a Excel">📊</button>
-        <button class="btn-icon-add btn-icon-add-green" onclick="showAddInquilinoModal()" title="Agregar Nuevo Inquilino">+</button>
-    </div>
-</div>
+                            <div class="card-header">
+                                <h2 class="card-title">Inquilinos</h2>
+                                <div style="display:flex;gap:0.5rem;align-items:center">
+                                    <button class="btn-excel-icon" onclick="exportarInquilinosExcel()" title="Exportar a Excel">📊</button>
+                                    <button class="btn-icon-add btn-icon-add-green" onclick="showAddInquilinoModal()" title="Agregar Nuevo Inquilino">+</button>
+                                </div>
+                            </div>
                             <div class="table-container">
                                 <table id="inquilinosTable" class="sticky-header-table">
                                     <thead><tr><th>Empresa</th><th>Renta Mensual</th><th>Vencimiento Contrato</th></tr></thead>
@@ -187,10 +188,10 @@
                     <!-- Rentas Recibidas -->
                     <div id="inquilinosRentasRecibidasView" class="hidden">
                         <div class="card">
-                 <div class="card-header">
-    <h2 class="card-title">Rentas</h2>
-    <button class="btn-excel-icon" onclick="exportarRentasExcel()" title="Exportar a Excel">📊</button>
-</div>
+                            <div class="card-header">
+                                <h2 class="card-title">Rentas</h2>
+                                <button class="btn-excel-icon" onclick="exportarRentasExcel()" title="Exportar a Excel">📊</button>
+                            </div>
                             <div style="padding: 1.5rem;">
                                 <div class="filter-section">
                                     <label>Filtro:</label>
@@ -208,16 +209,16 @@
                                     </select>
                                 </div>
                                 <div class="table-container">
-                                   <table id="inquilinosRentasRecibidasTable">
-    <thead>
-        <tr>
-            <th class="sortable" data-column="inquilino" onclick="sortRentasRecibidas('inquilino')">Inquilino</th>
-            <th>Monto</th>
-            <th class="sortable" data-column="fecha" onclick="sortRentasRecibidas('fecha')">Fecha</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+                                    <table id="inquilinosRentasRecibidasTable">
+                                        <thead>
+                                            <tr>
+                                                <th class="sortable" data-column="inquilino" onclick="sortRentasRecibidas('inquilino')">Inquilino</th>
+                                                <th>Monto</th>
+                                                <th class="sortable" data-column="fecha" onclick="sortRentasRecibidas('fecha')">Fecha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -226,10 +227,10 @@
                     <!-- Vencimiento de Contratos -->
                     <div id="inquilinosVencimientoContratosView" class="hidden">
                         <div class="card">
-                            <<div class="card-header">
-    <h2 class="card-title">Vencimiento de Contratos</h2>
-    <button class="btn-excel-icon" onclick="exportarContratosExcel()" title="Exportar a Excel">📊</button>
-</div>
+                            <div class="card-header">
+                                <h2 class="card-title">Vencimiento de Contratos</h2>
+                                <button class="btn-excel-icon" onclick="exportarContratosExcel()" title="Exportar a Excel">📊</button>
+                            </div>
                             <div class="table-container">
                                 <table id="inquilinosVencimientoContratosTable" class="sticky-header-table">
                                     <thead><tr><th>Empresa</th><th>Inicio</th><th>Vencimiento</th><th>Días Restantes</th><th>Estado</th></tr></thead>
@@ -242,33 +243,32 @@
 
                 <!-- Proveedores Page -->
                 <div id="proveedoresPage" class="page">
-
                     <!-- Listado de Proveedores -->
-<div id="proveedoresListView" class="hidden">
-    <div class="card">
-       <div class="card-header">
-    <h2 class="card-title">Proveedores</h2>
-    <div style="display:flex;gap:0.5rem;align-items:center">
-        <button class="btn-excel-icon" onclick="exportarProveedoresExcel()" title="Exportar a Excel">📊</button>
-        <button class="btn-icon-add" onclick="showAddProveedorModal()" title="Agregar Nuevo Proveedor">+</button>
-    </div>
-</div>
-        <div class="table-container">
-            <table id="proveedoresTable" class="sticky-header-table">
-                <thead><tr><th>Proveedor</th><th>Servicio</th><th>Contacto</th><th>Teléfono</th><th>Email</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-</div>
+                    <div id="proveedoresListView" class="hidden">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Proveedores</h2>
+                                <div style="display:flex;gap:0.5rem;align-items:center">
+                                    <button class="btn-excel-icon" onclick="exportarProveedoresExcel()" title="Exportar a Excel">📊</button>
+                                    <button class="btn-icon-add" onclick="showAddProveedorModal()" title="Agregar Nuevo Proveedor">+</button>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table id="proveedoresTable" class="sticky-header-table">
+                                    <thead><tr><th>Proveedor</th><th>Servicio</th><th>Contacto</th><th>Teléfono</th><th>Email</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Facturas Pagadas -->
                     <div id="proveedoresFacturasPagadasView" class="hidden">
                         <div class="card">
-                          <div class="card-header">
-    <h2 class="card-title">Facturas Pagadas</h2>
-    <button class="btn-excel-icon" onclick="exportarFacturasPagadasExcel()" title="Exportar a Excel">📊</button>
-</div>
+                            <div class="card-header">
+                                <h2 class="card-title">Facturas Pagadas</h2>
+                                <button class="btn-excel-icon" onclick="exportarFacturasPagadasExcel()" title="Exportar a Excel">📊</button>
+                            </div>
                             <div style="padding: 1.5rem;">
                                 <div class="filter-section">
                                     <label>Filtro:</label>
@@ -287,12 +287,14 @@
                                 </div>
                                 <div class="table-container">
                                     <table id="proveedoresFacturasPagadasTable">
-                                        <thead><tr>
-       <th class="sortable" data-column="proveedor" onclick="sortFacturasPagadas('proveedor')" style="cursor:pointer; width:35%">Proveedor</th>
-       <th style="width:20%">Número</th>
-       <th style="width:20%">Monto</th>
-       <th class="sortable" data-column="fecha" onclick="sortFacturasPagadas('fecha')" style="cursor:pointer; width:25%">Fecha Pago</th>
-   </tr></thead>
+                                        <thead>
+                                            <tr>
+                                                <th class="sortable" data-column="proveedor" onclick="sortFacturasPagadas('proveedor')" style="cursor:pointer; width:35%">Proveedor</th>
+                                                <th style="width:20%">Número</th>
+                                                <th style="width:20%">Monto</th>
+                                                <th class="sortable" data-column="fecha" onclick="sortFacturasPagadas('fecha')" style="cursor:pointer; width:25%">Fecha Pago</th>
+                                            </tr>
+                                        </thead>
                                         <tbody></tbody>
                                     </table>
                                 </div>
@@ -303,10 +305,10 @@
                     <!-- Facturas Por Pagar -->
                     <div id="proveedoresFacturasPorPagarView" class="hidden">
                         <div class="card">
-                           <div class="card-header">
-    <h2 class="card-title">Facturas Por Pagar</h2>
-    <button class="btn-excel-icon" onclick="exportarFacturasPorPagarExcel()" title="Exportar a Excel">📊</button>
-</div>
+                            <div class="card-header">
+                                <h2 class="card-title">Facturas Por Pagar</h2>
+                                <button class="btn-excel-icon" onclick="exportarFacturasPorPagarExcel()" title="Exportar a Excel">📊</button>
+                            </div>
                             <div style="padding: 1.5rem;">
                                 <div class="filter-section">
                                     <label>Filtro:</label>
@@ -323,14 +325,16 @@
                                         <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
                                     </select>
                                 </div>
-<div class="table-container">
-    <table id="proveedoresFacturasPorPagarTable" class="sticky-header-table">
-                                         <thead><tr>
-       <th class="sortable" data-column="proveedor" onclick="sortFacturasPorPagar('proveedor')" style="cursor:pointer; width:35%">Proveedor</th>
-       <th style="width:20%">Número</th>
-       <th style="width:20%">Monto</th>
-       <th class="sortable" data-column="vencimiento" onclick="sortFacturasPorPagar('vencimiento')" style="cursor:pointer; width:25%">Vencimiento</th>
-   </tr></thead>
+                                <div class="table-container">
+                                    <table id="proveedoresFacturasPorPagarTable" class="sticky-header-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="sortable" data-column="proveedor" onclick="sortFacturasPorPagar('proveedor')" style="cursor:pointer; width:35%">Proveedor</th>
+                                                <th style="width:20%">Número</th>
+                                                <th style="width:20%">Monto</th>
+                                                <th class="sortable" data-column="vencimiento" onclick="sortFacturasPorPagar('vencimiento')" style="cursor:pointer; width:25%">Vencimiento</th>
+                                            </tr>
+                                        </thead>
                                         <tbody></tbody>
                                     </table>
                                 </div>
@@ -343,10 +347,9 @@
                 <div id="activosPage" class="page">
                     <div class="card">
                         <div class="card-header">
-                        <h2 class="card-title">Activos</h2>
-                        <button class="btn btn-primary" onclick="showAddActivoModal()">+ Agregar</button>
-                    </div>
-                
+                            <h2 class="card-title">Activos</h2>
+                            <button class="btn btn-primary" onclick="showAddActivoModal()">+ Agregar</button>
+                        </div>
                         <div class="table-container">
                             <table id="activosTable" class="sticky-header-table">
                                 <thead><tr><th>Nombre</th><th>Último Mantenimiento</th><th>Próximo Mantenimiento</th><th>Proveedor</th></tr></thead>
@@ -359,11 +362,10 @@
                 <!-- Admin Usuarios Page -->
                 <div id="adminUsuariosPage" class="page">
                     <div class="card">
-                     <div class="card-header">
-    <h2 class="card-title">Usuarios</h2>
-    <button class="btn btn-primary" onclick="showAddUsuarioModal()">+ Agregar</button>
-</div>
-                    
+                        <div class="card-header">
+                            <h2 class="card-title">Usuarios</h2>
+                            <button class="btn btn-primary" onclick="showAddUsuarioModal()">+ Agregar</button>
+                        </div>
                         <div class="table-container">
                             <table id="usuariosTable" class="sticky-header-table">
                                 <thead><tr><th>Nombre</th><th>Password</th><th>Estado</th></tr></thead>
@@ -377,9 +379,9 @@
                 <div id="adminBancosPage" class="page">
                     <div class="card">
                         <div class="card-header">
-    <h2 class="card-title">Bancos - Documentos</h2>
-    <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
-</div>
+                            <h2 class="card-title">Bancos - Documentos</h2>
+                            <button class="btn btn-primary" onclick="showAddBancoModal()">+ Subir Documento</button>
+                        </div>
                         <div class="table-container">
                             <table id="bancosTable" class="sticky-header-table">
                                 <thead><tr><th>Tipo</th><th>Fecha</th></tr></thead>
@@ -392,9 +394,9 @@
                 <!-- Estacionamiento Page -->
                 <div id="estacionamientoPage" class="page">
                     <div class="card">
-                       <<div class="card-header">
-    <h2 class="card-title">Estacionamiento</h2>
-</div>
+                        <div class="card-header">
+                            <h2 class="card-title">Estacionamiento</h2>
+                        </div>
                         <div class="table-container">
                             <table id="estacionamientoTable" class="sticky-header-table">
                                 <thead>
@@ -413,15 +415,15 @@
                 <!-- Bitácora Page -->
                 <div id="bitacoraPage" class="page">
                     <div class="card">
-     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-    <h2 class="card-title" style="margin: 0;">Bitácora Semanal</h2>
-    <div class="dropdown">
-        <button class="dropdown-toggle" onclick="toggleDropdown('bitacoraMenuDropdown'); updateBitacoraMenu();" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
-        <div id="bitacoraMenuDropdown" class="dropdown-content" style="right: 0; left: auto;">
-            <a href="#" id="bitacoraMenuAgregar" onclick="event.preventDefault(); agregarNuevaSemana(); toggleDropdown('bitacoraMenuDropdown');">Agregar Semana</a>
-        </div>
-    </div>
-</div>
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h2 class="card-title" style="margin: 0;">Bitácora Semanal</h2>
+                            <div class="dropdown">
+                                <button class="dropdown-toggle" onclick="toggleDropdown('bitacoraMenuDropdown'); updateBitacoraMenu();" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
+                                <div id="bitacoraMenuDropdown" class="dropdown-content" style="right: 0; left: auto;">
+                                    <a href="#" id="bitacoraMenuAgregar" onclick="event.preventDefault(); agregarNuevaSemana(); toggleDropdown('bitacoraMenuDropdown');">Agregar Semana</a>
+                                </div>
+                            </div>
+                        </div>
                         <div class="table-container">
                             <table id="bitacoraTable" class="sticky-header-table">
                                 <thead><tr><th style="width:200px" class="sortable" onclick="sortBitacora()">Semana</th><th>Notas</th></tr></thead>
@@ -437,210 +439,167 @@
         <!-- MODALS -->
         
         <!-- Inquilino Detail Modal -->
-<div id="inquilinoDetailModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header modal-header-sticky">
-            <div class="modal-header-left">
-                <div class="dropdown">
-                    <button class="dropdown-toggle" onclick="toggleDropdown('inquilinoDetailDropdown')">☰</button>
-                    <div id="inquilinoDetailDropdown" class="dropdown-content">
-                        <a href="#" onclick="event.preventDefault(); showRegistrarPagoModal();">Registrar Pago</a>
-                        <a href="#" onclick="event.preventDefault(); showAgregarDocumentoModal();">Agregar Documento</a>
-                        <a href="#" onclick="event.preventDefault(); editInquilino();">Modificar Datos</a>
-                        <a href="#" onclick="event.preventDefault(); terminarContratoInquilino();">Terminar Contrato</a>
-                    </div>
-                </div>
-            </div>
-            <h2 class="modal-title" id="inquilinoDetailNombre"></h2>
-            <button class="close-modal" onclick="closeModal('inquilinoDetailModal')">×</button>
-        </div>
-        <div style="padding: 1.5rem; padding-top: 2.5rem;">
-            <!-- CONTACTOS -->
-            <div class="info-box">
-                <div id="detailContactosList"></div>
-            </div>
-            
-            <!-- RFC Y CLABE EN DOS RECUADROS SEPARADOS -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
-                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">RFC</div>
-                    <div style="font-size:1rem;font-weight:600;" id="detailRFC"></div>
-                </div>
-                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">CLABE</div>
-                    <div style="font-size:1rem;font-weight:600;" id="detailClabe"></div>
-                </div>
-            </div>
-            
-            <!-- DATOS DE RENTA EN UNA LÍNEA -->
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr 2fr;gap:1rem;margin-bottom:1.5rem;">
-                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Renta Mensual</div>
-                    <div class="currency" style="font-size:1.1rem;font-weight:600;" id="detailRenta"></div>
-                </div>
-                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">M²</div>
-                    <div style="font-size:1.1rem;font-weight:600;" id="detailM2"></div>
-                </div>
-                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Despacho</div>
-                    <div style="font-size:1.1rem;font-weight:600;" id="detailDespacho"></div>
-                </div>
-                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Fecha Inicio Renta</div>
-                    <div style="font-size:1.1rem;font-weight:600;" id="detailFechaInicio"></div>
-                </div>
-                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Fecha Vence Contrato</div>
-                    <div style="font-size:1.1rem;font-weight:600;" id="detailFechaVenc"></div>
-                </div>
-            </div>
-            
-            <!-- BOTÓN DE CONTRATO -->
-            <div id="contratoButtonSection" style="margin-bottom:1.5rem;"></div>
-            
-            <!-- PESTAÑAS (SIN DATOS DE RENTA NI CONTRATO) -->
-            <div class="tabs-container">
-                <div class="tabs">
-    <button class="tab active" onclick="switchTab('proveedor', 'pagadas')">Facturas Pagadas</button>
-    <button class="tab" onclick="switchTab('proveedor', 'porpagar')">
-        Facturas X Pagar 
-        <span class="btn-add-inline" onclick="event.stopPropagation(); showRegistrarFacturaModalFromDetail();" title="Agregar Factura">+</span>
-    </button>
-    <button class="tab" onclick="switchTab('proveedor', 'docs')">
-        Documentos
-        <span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoProveedorModal();" title="Agregar Documento">+</span>
-    </button>
-    <button class="tab" onclick="switchTab('proveedor', 'notas')">
-        Notas
-        <span class="btn-add-inline" onclick="event.stopPropagation(); showEditarNotasProveedorModal();" title="Editar Notas">+</span>
-    </button>
-</div>
-                <div id="inquilinoPagosTab" class="tab-content active">
-                    <div id="historialPagos"></div>
-                </div>
-                <div id="inquilinoDocsTab" class="tab-content">
-                    <div id="documentosAdicionales"></div>
-                </div>
-                <div id="inquilinoNotasTab" class="tab-content">
-                    <p id="notasInquilino"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Proveedor Detail Modal -->
-<div id="proveedorDetailModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header modal-header-sticky">
-            <div class="modal-header-left">
-                <div class="dropdown">
-                    <button class="dropdown-toggle" onclick="toggleDropdown('proveedorDetailDropdown')" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
-                    <div id="proveedorDetailDropdown" class="dropdown-content">
-                        <a href="#" onclick="event.preventDefault(); editProveedor();">Modificar Datos</a>
-                        <a href="#" onclick="event.preventDefault(); deleteProveedor();">Eliminar</a>
-                    </div>
-                </div>
-            </div>
-            <div style="flex:1;text-align:center;">
-                <h2 class="modal-title" id="proveedorDetailNombre" style="margin:0;"></h2>
-                <div id="proveedorDetailServicio" style="color:var(--text-light);font-size:0.9rem;margin-top:0.25rem;"></div>
-            </div>
-            <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
-        </div>
-        
-        <div style="padding: 1.5rem; padding-top: 2rem;">
-            
-           <!-- ✅ TELÉFONO Y EMAIL COMPRIMIDOS SIN ETIQUETAS -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
-    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.75rem;">
-        <span style="font-size:1.5rem;">📞</span>
-        <span style="font-weight:600;" id="proveedorTelefono">-</span>
-    </div>
-    <a id="proveedorEmailLink" href="#" style="text-decoration:none;color:inherit;">
-        <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:transform 0.2s;height:100%;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <span style="font-size:1.5rem;">✉️</span>
-            <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;" id="proveedorEmail">-</span>
-        </div>
-    </a>
-</div>
-
-<!-- ✅ RFC Y CLABE CON SOMBRA -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
-    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);">
-        <span style="color:var(--text-light);font-size:0.875rem;">RFC:</span>
-        <span style="font-weight:600;margin-left:0.5rem;" id="detailProvRFC">-</span>
-    </div>
-    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);">
-        <span style="color:var(--text-light);font-size:0.875rem;">CLABE:</span>
-        <span style="font-weight:600;margin-left:0.5rem;" id="detailProvClabe">-</span>
-    </div>
-</div>
-                <div style="background:white;padding:1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.75rem;">
-                    <span style="font-size:1.5rem;">📞</span>
-                    <div>
-                        <div style="font-size:0.75rem;color:var(--text-light);margin-bottom:0.25rem;">Teléfono</div>
-                        <div style="font-weight:600;" id="proveedorTelefono">-</div>
-                    </div>
-                </div>
-                <a id="proveedorEmailLink" href="#" style="text-decoration:none;color:inherit;">
-                    <div style="background:white;padding:1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                        <span style="font-size:1.5rem;">✉️</span>
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-size:0.75rem;color:var(--text-light);margin-bottom:0.25rem;">Email</div>
-                            <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="proveedorEmail">-</div>
+        <div id="inquilinoDetailModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header modal-header-sticky">
+                    <div class="modal-header-left">
+                        <div class="dropdown">
+                            <button class="dropdown-toggle" onclick="toggleDropdown('inquilinoDetailDropdown')">☰</button>
+                            <div id="inquilinoDetailDropdown" class="dropdown-content">
+                                <a href="#" onclick="event.preventDefault(); showRegistrarPagoModal();">Registrar Pago</a>
+                                <a href="#" onclick="event.preventDefault(); showAgregarDocumentoModal();">Agregar Documento</a>
+                                <a href="#" onclick="event.preventDefault(); editInquilino();">Modificar Datos</a>
+                                <a href="#" onclick="event.preventDefault(); terminarContratoInquilino();">Terminar Contrato</a>
+                            </div>
                         </div>
                     </div>
-                </a>
-            </div>
-            
-            <!-- ✅ RFC Y CLABE -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
-                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">RFC</div>
-                    <div style="font-size:1rem;font-weight:600;" id="detailProvRFC"></div>
+                    <h2 class="modal-title" id="inquilinoDetailNombre"></h2>
+                    <button class="close-modal" onclick="closeModal('inquilinoDetailModal')">×</button>
                 </div>
-                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
-                    <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">CLABE</div>
-                    <div style="font-size:1rem;font-weight:600;" id="detailProvClabe"></div>
-                </div>
-            </div>
-            
-            <!-- CONTACTOS ADICIONALES (si hay más de uno) -->
-            <div id="detailProvContactosList"></div>
-            
-            <!-- PESTAÑAS -->
-            <div class="tabs-container">
-                <div class="tabs">
-                    <button class="tab active" onclick="switchTab('proveedor', 'pagadas')">Facturas Pagadas</button>
-                    <button class="tab" onclick="switchTab('proveedor', 'porpagar')">
-                        Facturas X Pagar 
-                        <span onclick="event.stopPropagation(); showRegistrarFacturaModalFromDetail();" 
-                              style="color:var(--success);font-weight:bold;font-size:1.2rem;margin-left:0.5rem;cursor:pointer;transition:transform 0.2s;" 
-                              onmouseover="this.style.transform='scale(1.2)';this.title='Agregar Factura'" 
-                              onmouseout="this.style.transform='scale(1)'">+</span>
-                    </button>
-                    <button class="tab" onclick="switchTab('proveedor', 'docs')">Documentos Adicionales</button>
-                    <button class="tab" onclick="switchTab('proveedor', 'notas')">Notas</button>
-                </div>
-                <div id="proveedorPagadasTab" class="tab-content active">
-                    <div id="facturasPagadas"></div>
-                </div>
-                <div id="proveedorPorPagarTab" class="tab-content">
-                    <div id="facturasPorPagar"></div>
-                </div>
-                <div id="proveedorDocsTab" class="tab-content">
-                    <div id="proveedorDocumentosAdicionales"></div>
-                </div>
-                <div id="proveedorNotasTab" class="tab-content">
-                    <p id="notasProveedor"></p>
+                <div style="padding: 1.5rem; padding-top: 2.5rem;">
+                    <!-- CONTACTOS -->
+                    <div class="info-box">
+                        <div id="detailContactosList"></div>
+                    </div>
+                    
+                    <!-- RFC Y CLABE EN DOS RECUADROS SEPARADOS -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+                        <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                            <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">RFC</div>
+                            <div style="font-size:1rem;font-weight:600;" id="detailRFC"></div>
+                        </div>
+                        <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                            <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">CLABE</div>
+                            <div style="font-size:1rem;font-weight:600;" id="detailClabe"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- DATOS DE RENTA EN UNA LÍNEA -->
+                    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr 2fr;gap:1rem;margin-bottom:1.5rem;">
+                        <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                            <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Renta Mensual</div>
+                            <div class="currency" style="font-size:1.1rem;font-weight:600;" id="detailRenta"></div>
+                        </div>
+                        <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                            <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">M²</div>
+                            <div style="font-size:1.1rem;font-weight:600;" id="detailM2"></div>
+                        </div>
+                        <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                            <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Despacho</div>
+                            <div style="font-size:1.1rem;font-weight:600;" id="detailDespacho"></div>
+                        </div>
+                        <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                            <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Fecha Inicio Renta</div>
+                            <div style="font-size:1.1rem;font-weight:600;" id="detailFechaInicio"></div>
+                        </div>
+                        <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);">
+                            <div style="font-size:0.875rem;color:var(--text-light);margin-bottom:0.25rem;">Fecha Vence Contrato</div>
+                            <div style="font-size:1.1rem;font-weight:600;" id="detailFechaVenc"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- BOTÓN DE CONTRATO -->
+                    <div id="contratoButtonSection" style="margin-bottom:1.5rem;"></div>
+                    
+                    <!-- PESTAÑAS -->
+                    <div class="tabs-container">
+                        <div class="tabs">
+                            <button class="tab active" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos</button>
+                            <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos Adicionales</button>
+                            <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
+                        </div>
+                        <div id="inquilinoPagosTab" class="tab-content active">
+                            <div id="historialPagos"></div>
+                        </div>
+                        <div id="inquilinoDocsTab" class="tab-content">
+                            <div id="documentosAdicionales"></div>
+                        </div>
+                        <div id="inquilinoNotasTab" class="tab-content">
+                            <p id="notasInquilino"></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<!-- Add Inquilino Modal -->
+
+        <!-- Proveedor Detail Modal -->
+        <div id="proveedorDetailModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header modal-header-sticky">
+                    <div style="flex:1;text-align:center;">
+                        <h2 class="modal-title" id="proveedorDetailNombre" style="margin:0;"></h2>
+                        <div id="proveedorDetailServicio" style="color:var(--text-light);font-size:0.9rem;margin-top:0.25rem;"></div>
+                    </div>
+                    <button class="btn-icon-edit" onclick="editProveedor()" title="Editar Proveedor" style="margin-right:0.5rem;">✏️</button>
+                    <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
+                </div>
+                
+                <div style="padding: 1.5rem; padding-top: 2rem;">
+                    
+                    <!-- ✅ TELÉFONO Y EMAIL COMPRIMIDOS SIN ETIQUETAS -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+                        <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.75rem;">
+                            <span style="font-size:1.5rem;">📞</span>
+                            <span style="font-weight:600;" id="proveedorTelefono">-</span>
+                        </div>
+                        <a id="proveedorEmailLink" href="#" style="text-decoration:none;color:inherit;">
+                            <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.75rem;cursor:pointer;transition:transform 0.2s;height:100%;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                                <span style="font-size:1.5rem;">✉️</span>
+                                <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;" id="proveedorEmail">-</span>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- ✅ RFC Y CLABE CON SOMBRA -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+                        <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);">
+                            <span style="color:var(--text-light);font-size:0.875rem;">RFC:</span>
+                            <span style="font-weight:600;margin-left:0.5rem;" id="detailProvRFC">-</span>
+                        </div>
+                        <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);">
+                            <span style="color:var(--text-light);font-size:0.875rem;">CLABE:</span>
+                            <span style="font-weight:600;margin-left:0.5rem;" id="detailProvClabe">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- ✅ CONTACTOS ADICIONALES -->
+                    <div id="proveedorContactosSection"></div>
+                    
+                    <!-- PESTAÑAS -->
+                    <div class="tabs-container">
+                        <div class="tabs">
+                            <button class="tab active" onclick="switchTab('proveedor', 'pagadas')">Facturas Pagadas</button>
+                            <button class="tab" onclick="switchTab('proveedor', 'porpagar')">
+                                Facturas X Pagar 
+                                <span class="btn-add-inline" onclick="event.stopPropagation(); showRegistrarFacturaModalFromDetail();" title="Agregar Factura">+</span>
+                            </button>
+                            <button class="tab" onclick="switchTab('proveedor', 'docs')">
+                                Documentos
+                                <span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoProveedorModal();" title="Agregar Documento">+</span>
+                            </button>
+                            <button class="tab" onclick="switchTab('proveedor', 'notas')">
+                                Notas
+                                <span class="btn-add-inline" onclick="event.stopPropagation(); showEditarNotasProveedorModal();" title="Editar Notas">+</span>
+                            </button>
+                        </div>
+                        <div id="proveedorPagadasTab" class="tab-content active">
+                            <div id="facturasPagadas"></div>
+                        </div>
+                        <div id="proveedorPorPagarTab" class="tab-content">
+                            <div id="facturasPorPagar"></div>
+                        </div>
+                        <div id="proveedorDocsTab" class="tab-content">
+                            <div id="proveedorDocumentosAdicionales"></div>
+                        </div>
+                        <div id="proveedorNotasTab" class="tab-content">
+                            <p id="notasProveedor"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Inquilino Modal -->
         <div id="addInquilinoModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header modal-header-sticky">
@@ -699,142 +658,57 @@
             </div>
         </div>
 
-<!-- Proveedor Detail Modal -->
-<div id="proveedorDetailModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header modal-header-sticky">
-            <div class="modal-header-left">
-                <div class="dropdown">
-                    <button class="dropdown-toggle" onclick="toggleDropdown('proveedorDetailDropdown')" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
-                    <div id="proveedorDetailDropdown" class="dropdown-content">
-                        <a href="#" onclick="event.preventDefault(); editProveedor();">Modificar Datos</a>
-                        <a href="#" onclick="event.preventDefault(); deleteProveedor();">Eliminar</a>
+        <!-- Modal Agregar Documento Proveedor -->
+        <div id="agregarDocumentoProveedorModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Agregar Documento Adicional</h2>
+                    <button class="close-modal" onclick="closeModal('agregarDocumentoProveedorModal')">×</button>
+                </div>
+                <form id="documentoProveedorForm" onsubmit="saveDocumentoProveedor(event)">
+                    <div style="padding: 1.5rem;">
+                        <div class="form-group">
+                            <label>Nombre del Documento *</label>
+                            <input type="text" id="nuevoDocProveedorNombre" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Documento (PDF) *</label>
+                            <div class="file-upload" onclick="document.getElementById('nuevoDocProveedorPDF').click()">
+                                <input type="file" id="nuevoDocProveedorPDF" accept=".pdf" required>
+                                <p>Click para seleccionar PDF</p>
+                                <p id="nuevoDocProveedorPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('agregarDocumentoProveedorModal')">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
-            <div style="flex:1;text-align:center;">
-                <h2 class="modal-title" id="proveedorDetailNombre" style="margin:0;"></h2>
-                <div id="proveedorDetailServicio" style="color:var(--text-light);font-size:0.9rem;margin-top:0.25rem;"></div>
-            </div>
-            <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
         </div>
-        
-        <div style="padding: 1.5rem; padding-top: 2rem;">
-            
-          <!-- ✅ TELÉFONO Y EMAIL COMPRIMIDOS CON SOMBRA -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.5rem;">
-        <span style="font-size:1.3rem;">📞</span>
-        <span style="font-weight:600;" id="proveedorTelefono">-</span>
-    </div>
-    <a id="proveedorEmailLink" href="#" style="text-decoration:none;color:inherit;">
-        <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.5rem;cursor:pointer;transition:transform 0.2s;height:100%;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <span style="font-size:1.3rem;">✉️</span>
-            <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;" id="proveedorEmail">-</span>
-        </div>
-    </a>
-</div>
 
-<!-- ✅ RFC Y CLABE COMPRIMIDOS CON SOMBRA -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);">
-        <span style="color:var(--text-light);font-size:0.875rem;">RFC:</span>
-        <span style="font-weight:600;margin-left:0.5rem;" id="detailProvRFC">-</span>
-    </div>
-    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);">
-        <span style="color:var(--text-light);font-size:0.875rem;">CLABE:</span>
-        <span style="font-weight:600;margin-left:0.5rem;" id="detailProvClabe">-</span>
-    </div>
-</div>
-            
-            <!-- ✅ CONTACTOS -->
-            <div id="proveedorContactosSection"></div>
-            
-            <!-- PESTAÑAS -->
-            <div class="tabs-container">
-                <div class="tabs">
-                    <button class="tab active" onclick="switchTab('proveedor', 'pagadas')">Facturas Pagadas</button>
-                    <button class="tab" onclick="switchTab('proveedor', 'porpagar')">
-                        Facturas X Pagar 
-                        <span class="btn-add-inline" onclick="event.stopPropagation(); showRegistrarFacturaModalFromDetail();" title="Agregar Factura">+</span>
-                    </button>
-                    <button class="tab" onclick="switchTab('proveedor', 'docs')">
-                        Documentos Adicionales
-                        <span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoProveedorModal();" title="Agregar Documento">+</span>
-                    </button>
-                    <button class="tab" onclick="switchTab('proveedor', 'notas')">
-                        Notas
-                        <span class="btn-add-inline" onclick="event.stopPropagation(); showEditarNotasProveedorModal();" title="Editar Notas">+</span>
-                    </button>
+        <!-- Modal Editar Notas Proveedor -->
+        <div id="editarNotasProveedorModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Editar Notas</h2>
+                    <button class="close-modal" onclick="closeModal('editarNotasProveedorModal')">×</button>
                 </div>
-                <div id="proveedorPagadasTab" class="tab-content active">
-                    <div id="facturasPagadas"></div>
-                </div>
-                <div id="proveedorPorPagarTab" class="tab-content">
-                    <div id="facturasPorPagar"></div>
-                </div>
-                <div id="proveedorDocsTab" class="tab-content">
-                    <div id="proveedorDocumentosAdicionales"></div>
-                </div>
-                <div id="proveedorNotasTab" class="tab-content">
-                    <p id="notasProveedor"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Agregar Documento Proveedor -->
-<div id="agregarDocumentoProveedorModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 class="modal-title">Agregar Documento Adicional</h2>
-            <button class="close-modal" onclick="closeModal('agregarDocumentoProveedorModal')">×</button>
-        </div>
-        <form id="documentoProveedorForm" onsubmit="saveDocumentoProveedor(event)">
-            <div style="padding: 1.5rem;">
-                <div class="form-group">
-                    <label>Nombre del Documento *</label>
-                    <input type="text" id="nuevoDocProveedorNombre" required autocomplete="off">
-                </div>
-                <div class="form-group">
-                    <label>Documento (PDF) *</label>
-                    <div class="file-upload" onclick="document.getElementById('nuevoDocProveedorPDF').click()">
-                        <input type="file" id="nuevoDocProveedorPDF" accept=".pdf" required>
-                        <p>Click para seleccionar PDF</p>
-                        <p id="nuevoDocProveedorPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                <form id="notasProveedorForm" onsubmit="saveNotasProveedor(event)">
+                    <div style="padding: 1.5rem;">
+                        <div class="form-group">
+                            <label>Notas</label>
+                            <textarea id="editNotasProveedor" style="min-height: 200px"></textarea>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('editarNotasProveedorModal')">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('agregarDocumentoProveedorModal')">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                </div>
+                </form>
             </div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal Editar Notas Proveedor -->
-<div id="editarNotasProveedorModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 class="modal-title">Editar Notas</h2>
-            <button class="close-modal" onclick="closeModal('editarNotasProveedorModal')">×</button>
         </div>
-        <form id="notasProveedorForm" onsubmit="saveNotasProveedor(event)">
-            <div style="padding: 1.5rem;">
-                <div class="form-group">
-                    <label>Notas</label>
-                    <textarea id="editNotasProveedor" style="min-height: 200px"></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('editarNotasProveedorModal')">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
         
         <!-- Edit Estacionamiento Modal -->
         <div id="editEstacionamientoModal" class="modal">
@@ -921,32 +795,19 @@
     </div> <!-- app-container -->
 
     <!-- Scripts -->
-    
-<!-- Supabase Library -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- SheetJS (Excel export) -->
-<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
-
-<!-- Core Scripts -->
-<script src="js/config.js"></script>
-<script src="js/core/utils.js"></script>
-<script src="js/core/loaders.js"></script>
-<script src="js/core/saves.js"></script>
-
-<!-- UI Modules -->
-<script src="js/ui/navigation.js"></script>
-<script src="js/ui/inquilinos-ui.js"></script>
-<script src="js/ui/modals.js"></script>
-<script src="js/ui/proveedores-ui.js"></script>
-<script src="js/ui/admin-ui.js"></script>
-<script src="js/ui/tables.js"></script>
-
-<!-- UI Main (remaining functions) -->
-<script src="js/ui.js"></script>
-
-<!-- Authentication (loads last) -->
-<script src="js/core/auth.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/core/loaders.js"></script>
+    <script src="js/core/saves.js"></script>
+    <script src="js/ui/navigation.js"></script>
+    <script src="js/ui/inquilinos-ui.js"></script>
+    <script src="js/ui/modals.js"></script>
+    <script src="js/ui/proveedores-ui.js"></script>
+    <script src="js/ui/admin-ui.js"></script>
+    <script src="js/ui/tables.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/core/auth.js"></script>
 </body>
 </html>
