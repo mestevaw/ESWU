@@ -149,5 +149,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+// File input listeners - Proveedor documentos
+document.addEventListener('DOMContentLoaded', function() {
+    const docProveedorPDF = document.getElementById('nuevoDocProveedorPDF');
+    if (docProveedorPDF) {
+        docProveedorPDF.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('nuevoDocProveedorPDFFileName').textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+});
 
 console.log('✅ UI.JS cargado (funciones restantes)');
