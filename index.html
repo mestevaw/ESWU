@@ -666,214 +666,137 @@
             </div>
         </div>
 
-        <!-- Add Proveedor Modal -->
-        <div id="addProveedorModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header modal-header-sticky">
-                    <h2 class="modal-title" id="addProveedorTitle">Agregar Proveedor</h2>
-                    <button class="close-modal" onclick="closeModal('addProveedorModal')">×</button>
-                </div>
-                <div style="padding: 1.5rem;">
-                    <form id="proveedorForm" onsubmit="saveProveedor(event)">
-                        <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="proveedorNombre" required autocomplete="off"></div>
-                        <div class="form-group"><label>Servicio *</label><input type="text" id="proveedorServicio" required autocomplete="off"></div>
-                        <div class="form-group"><label>CLABE</label><input type="text" id="proveedorClabe" autocomplete="off"></div>
-                        <div class="form-group"><label>RFC</label><input type="text" id="proveedorRFC" autocomplete="off"></div>
-                        <div class="form-group"><label>Notas</label><textarea id="proveedorNotas"></textarea></div>
-                        <h3 style="margin: 1.5rem 0 1rem 0;">Contactos</h3>
-                        <div id="proveedorContactosList" style="margin-bottom: 1rem;"></div>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="showAddContactoProveedorModal()">+ Agregar Contacto</button>
-                        <div class="modal-actions">
-                            <button type="button" class="btn btn-secondary" onclick="closeModal('addProveedorModal')">Cancelar</button>
-                            <button type="submit" class="btn btn-success">Guardar</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Add Contacto Proveedor Modal -->
-        <div id="addContactoProveedorModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title">Agregar Contacto</h2>
-                    <button class="close-modal" onclick="closeModal('addContactoProveedorModal')">×</button>
-                </div>
-                <form id="contactoProveedorForm" onsubmit="saveContactoProveedor(event)">
-                    <div style="padding: 1.5rem;">
-                        <div class="form-group"><label>Nombre *</label><input type="text" id="contactoProveedorNombre" required autocomplete="off"></div>
-                        <div class="form-group"><label>Teléfono</label><input type="tel" id="contactoProveedorTelefono" autocomplete="off"></div>
-                        <div class="form-group"><label>Email</label><input type="email" id="contactoProveedorEmail" autocomplete="off"></div>
-                        <div class="modal-actions">
-                            <button type="button" class="btn btn-secondary" onclick="closeModal('addContactoProveedorModal')">Cancelar</button>
-                            <button type="submit" class="btn btn-success">Agregar</button>
-                        </div>
+<!-- Proveedor Detail Modal -->
+<div id="proveedorDetailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header modal-header-sticky">
+            <div class="modal-header-left">
+                <div class="dropdown">
+                    <button class="dropdown-toggle" onclick="toggleDropdown('proveedorDetailDropdown')" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
+                    <div id="proveedorDetailDropdown" class="dropdown-content">
+                        <a href="#" onclick="event.preventDefault(); editProveedor();">Modificar Datos</a>
+                        <a href="#" onclick="event.preventDefault(); deleteProveedor();">Eliminar</a>
                     </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Registrar Pago Modal -->
-        <div id="registrarPagoModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title">Registrar Pago de Renta</h2>
-                    <button class="close-modal" onclick="closeModal('registrarPagoModal')">×</button>
                 </div>
-                <form id="pagoForm" onsubmit="savePagoRenta(event)">
-                    <div style="padding: 1.5rem;">
-                        <div class="form-group"><label>Fecha de Pago *</label><input type="date" id="pagoFecha" required></div>
-                        <div class="form-group">
-                            <label>¿Pago completo?</label>
-                            <select id="pagoCompleto" onchange="toggleMontoInput()">
-                                <option value="si">Sí</option>
-                                <option value="no">No (pago parcial)</option>
-                            </select>
-                        </div>
-                        <div id="pagoMontoGroup" class="form-group hidden"><label>Monto del Pago *</label><input type="number" id="pagoMonto" step="0.01" autocomplete="off"></div>
-                        <div class="form-group">
-                            <label>Comprobante de Pago (PDF)</label>
-                            <div class="file-upload" onclick="document.getElementById('pagoPDF').click()">
-                                <input type="file" id="pagoPDF" accept=".pdf">
-                                <p>Click para seleccionar PDF</p>
-                                <p id="pagoPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
-                            </div>
-                        </div>
-                        <div class="modal-actions">
-                            <button type="button" class="btn btn-secondary" onclick="closeModal('registrarPagoModal')">Cancelar</button>
-                            <button type="submit" class="btn btn-success">Guardar</button>
-                        </div>
+            </div>
+            <div style="flex:1;text-align:center;">
+                <h2 class="modal-title" id="proveedorDetailNombre" style="margin:0;"></h2>
+                <div id="proveedorDetailServicio" style="color:var(--text-light);font-size:0.9rem;margin-top:0.25rem;"></div>
+            </div>
+            <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
+        </div>
+        
+        <div style="padding: 1.5rem; padding-top: 2rem;">
+            
+            <!-- ✅ TELÉFONO Y EMAIL COMPRIMIDOS -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.5rem;">
+                    <span style="font-size:1.3rem;">📞</span>
+                    <span style="font-weight:600;" id="proveedorTelefono">-</span>
+                </div>
+                <a id="proveedorEmailLink" href="#" style="text-decoration:none;color:inherit;">
+                    <div style="background:white;padding:0.75rem 1rem;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;gap:0.5rem;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <span style="font-size:1.3rem;">✉️</span>
+                        <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;" id="proveedorEmail">-</span>
                     </div>
-                </form>
+                </a>
+            </div>
+            
+            <!-- ✅ RFC Y CLABE COMPRIMIDOS -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                <div style="background:var(--bg);padding:0.75rem 1rem;border-radius:4px;border:1px solid var(--border);">
+                    <span style="color:var(--text-light);font-size:0.875rem;">RFC:</span>
+                    <span style="font-weight:600;margin-left:0.5rem;" id="detailProvRFC">-</span>
+                </div>
+                <div style="background:var(--bg);padding:0.75rem 1rem;border-radius:4px;border:1px solid var(--border);">
+                    <span style="color:var(--text-light);font-size:0.875rem;">CLABE:</span>
+                    <span style="font-weight:600;margin-left:0.5rem;" id="detailProvClabe">-</span>
+                </div>
+            </div>
+            
+            <!-- ✅ CONTACTOS -->
+            <div id="proveedorContactosSection"></div>
+            
+            <!-- PESTAÑAS -->
+            <div class="tabs-container">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('proveedor', 'pagadas')">Facturas Pagadas</button>
+                    <button class="tab" onclick="switchTab('proveedor', 'porpagar')">
+                        Facturas X Pagar 
+                        <span class="btn-add-inline" onclick="event.stopPropagation(); showRegistrarFacturaModalFromDetail();" title="Agregar Factura">+</span>
+                    </button>
+                    <button class="tab" onclick="switchTab('proveedor', 'docs')">
+                        Documentos Adicionales
+                        <span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoProveedorModal();" title="Agregar Documento">+</span>
+                    </button>
+                    <button class="tab" onclick="switchTab('proveedor', 'notas')">
+                        Notas
+                        <span class="btn-add-inline" onclick="event.stopPropagation(); showEditarNotasProveedorModal();" title="Editar Notas">+</span>
+                    </button>
+                </div>
+                <div id="proveedorPagadasTab" class="tab-content active">
+                    <div id="facturasPagadas"></div>
+                </div>
+                <div id="proveedorPorPagarTab" class="tab-content">
+                    <div id="facturasPorPagar"></div>
+                </div>
+                <div id="proveedorDocsTab" class="tab-content">
+                    <div id="proveedorDocumentosAdicionales"></div>
+                </div>
+                <div id="proveedorNotasTab" class="tab-content">
+                    <p id="notasProveedor"></p>
+                </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Agregar Documento Modal -->
-        <div id="agregarDocumentoModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title">Agregar Documento Adicional</h2>
-                    <button class="close-modal" onclick="closeModal('agregarDocumentoModal')">×</button>
-                </div>
-                <form id="documentoForm" onsubmit="saveDocumentoAdicional(event)">
-                    <div style="padding: 1.5rem;">
-                        <div class="form-group"><label>Nombre del Documento *</label><input type="text" id="nuevoDocNombre" required autocomplete="off"></div>
-                        <div class="form-group">
-                            <label>Documento (PDF) *</label>
-                            <div class="file-upload" onclick="document.getElementById('nuevoDocPDF').click()">
-                                <input type="file" id="nuevoDocPDF" accept=".pdf" required>
-                                <p>Click para seleccionar PDF</p>
-                                <p id="nuevoDocPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
-                            </div>
-                        </div>
-                        <div class="modal-actions">
-                            <button type="button" class="btn btn-secondary" onclick="closeModal('agregarDocumentoModal')">Cancelar</button>
-                            <button type="submit" class="btn btn-success">Guardar</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+<!-- Modal Agregar Documento Proveedor -->
+<div id="agregarDocumentoProveedorModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Agregar Documento Adicional</h2>
+            <button class="close-modal" onclick="closeModal('agregarDocumentoProveedorModal')">×</button>
         </div>
-
-        <!-- Registrar Factura Modal -->
-<div id="registrarFacturaModal" class="modal">
-    <div class="modal-content modal-content-compact">
-        <div class="modal-header-compact">
-            <h2 class="modal-title">Registrar Factura</h2>
-            <div class="modal-header-actions">
-                <button type="submit" form="facturaForm" class="btn-icon-save" title="Guardar">💾</button>
-                <button class="close-modal" onclick="closeModal('registrarFacturaModal')">×</button>
-            </div>
-        </div>
-        <form id="facturaForm" onsubmit="saveFactura(event)">
-            <div class="modal-body-compact">
-                <!-- Fila 1 -->
-                <div class="form-row-inline">
-                    <label>Número:</label>
-                    <input type="text" id="facturaNumero" autocomplete="off">
+        <form id="documentoProveedorForm" onsubmit="saveDocumentoProveedor(event)">
+            <div style="padding: 1.5rem;">
+                <div class="form-group">
+                    <label>Nombre del Documento *</label>
+                    <input type="text" id="nuevoDocProveedorNombre" required autocomplete="off">
                 </div>
-                
-                <!-- Fila 2 -->
-                <div class="form-row-inline form-row-alternate">
-                    <label>Fecha Factura *:</label>
-                    <input type="date" id="facturaFecha" required>
-                </div>
-                
-                <!-- Fila 3 -->
-                <div class="form-row-inline">
-                    <label>Vencimiento *:</label>
-                    <input type="date" id="facturaVencimiento" required>
-                </div>
-                
-                <!-- Fila 4 -->
-                <div class="form-row-inline form-row-alternate">
-                    <label>Monto *:</label>
-                    <input type="number" id="facturaMonto" step="0.01" required autocomplete="off" onchange="calculateIVA()">
-                </div>
-                
-                <!-- Fila 5 -->
-                <div class="form-row-inline">
-                    <label>IVA:</label>
-                    <input type="number" id="facturaIVA" step="0.01" autocomplete="off">
-                </div>
-                
-                <!-- Fila 6 - PDF -->
-                <div class="form-row-inline form-row-alternate">
-                    <label>Factura (PDF):</label>
-                    <div class="file-upload-compact" onclick="document.getElementById('facturaDocumento').click()">
-                        <input type="file" id="facturaDocumento" accept=".pdf">
-                        <span class="file-upload-text">Seleccionar PDF</span>
-                        <span id="facturaDocumentoFileName" class="file-upload-filename"></span>
+                <div class="form-group">
+                    <label>Documento (PDF) *</label>
+                    <div class="file-upload" onclick="document.getElementById('nuevoDocProveedorPDF').click()">
+                        <input type="file" id="nuevoDocProveedorPDF" accept=".pdf" required>
+                        <p>Click para seleccionar PDF</p>
+                        <p id="nuevoDocProveedorPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
                     </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('agregarDocumentoProveedorModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
-<!-- Pagar Factura Modal -->
-<div id="pagarFacturaModal" class="modal">
+
+<!-- Modal Editar Notas Proveedor -->
+<div id="editarNotasProveedorModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2 class="modal-title">Dar Factura X Pagada</h2>
-            <button class="close-modal" onclick="closeModal('pagarFacturaModal')">×</button>
+            <h2 class="modal-title">Editar Notas</h2>
+            <button class="close-modal" onclick="closeModal('editarNotasProveedorModal')">×</button>
         </div>
-        <form id="pagarFacturaForm" onsubmit="savePagoFactura(event)">
+        <form id="notasProveedorForm" onsubmit="saveNotasProveedor(event)">
             <div style="padding: 1.5rem;">
                 <div class="form-group">
-                    <label>Fecha de Pago *</label>
-                    <input type="date" id="fechaPagoFactura" required>
+                    <label>Notas</label>
+                    <textarea id="editNotasProveedor" style="min-height: 200px"></textarea>
                 </div>
-                
-                <!-- Tipo de pago -->
-                <div class="form-group">
-                    <label>¿Pago completo?</label>
-                    <select id="pagoFacturaCompleto" onchange="toggleMontoParcialFactura()">
-                        <option value="si">Sí - Pago completo</option>
-                        <option value="no">No - Pago parcial</option>
-                    </select>
-                </div>
-                
-                <!-- Monto parcial (oculto por defecto) -->
-                <div id="pagoFacturaParcialGroup" class="form-group hidden">
-                    <label>Monto del Pago Parcial *</label>
-                    <input type="number" id="montoPagoFacturaParcial" step="0.01" autocomplete="off">
-                    <small style="color:var(--text-light);display:block;margin-top:0.5rem;">
-                        Monto total de la factura: <span id="montoTotalFactura" style="font-weight:bold;">$0.00</span>
-                    </small>
-                </div>
-                
-                <div class="form-group">
-                    <label>Comprobante de Pago (PDF)</label>
-                    <div class="file-upload" onclick="document.getElementById('pagoPDFFactura').click()">
-                        <input type="file" id="pagoPDFFactura" accept=".pdf">
-                        <p>Click para seleccionar PDF del comprobante</p>
-                        <p id="pagoPDFFacturaFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
-                    </div>
-                </div>
-                
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('pagarFacturaModal')">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar Pago</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editarNotasProveedorModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
                 </div>
             </div>
         </form>
