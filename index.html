@@ -502,10 +502,20 @@
             <!-- PESTAÑAS (SIN DATOS DE RENTA NI CONTRATO) -->
             <div class="tabs-container">
                 <div class="tabs">
-                    <button class="tab active" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos</button>
-                    <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos Adicionales</button>
-                    <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
-                </div>
+    <button class="tab active" onclick="switchTab('proveedor', 'pagadas')">Facturas Pagadas</button>
+    <button class="tab" onclick="switchTab('proveedor', 'porpagar')">
+        Facturas X Pagar 
+        <span class="btn-add-inline" onclick="event.stopPropagation(); showRegistrarFacturaModalFromDetail();" title="Agregar Factura">+</span>
+    </button>
+    <button class="tab" onclick="switchTab('proveedor', 'docs')">
+        Documentos
+        <span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoProveedorModal();" title="Agregar Documento">+</span>
+    </button>
+    <button class="tab" onclick="switchTab('proveedor', 'notas')">
+        Notas
+        <span class="btn-add-inline" onclick="event.stopPropagation(); showEditarNotasProveedorModal();" title="Editar Notas">+</span>
+    </button>
+</div>
                 <div id="inquilinoPagosTab" class="tab-content active">
                     <div id="historialPagos"></div>
                 </div>
