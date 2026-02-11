@@ -1,250 +1,315 @@
 /* ========================================
-   UI-CORE.JS - Funciones básicas de navegación
+   UI.JS - Funciones de compatibilidad
+   Este archivo contiene funciones que aún no están 100% modularizadas
    ======================================== */
 
-let currentMenuContext = 'main';
-let currentSubContext = null;
-let currentSearchContext = null;
-
 // ============================================
-// NAVEGACIÓN PRINCIPAL
+// ESTACIONAMIENTO
 // ============================================
 
-function showSubMenu(menu) {
-    document.getElementById('menuInquilinos').classList.remove('active');
-    document.getElementById('menuProveedores').classList.remove('active');
-    document.getElementById('menuAdmin').classList.remove('active');
-    
-    document.getElementById('inquilinosSubMenu').classList.remove('active');
-    document.getElementById('proveedoresSubMenu').classList.remove('active');
-    document.getElementById('adminSubMenu').classList.remove('active');
-    
-    if (menu === 'inquilinos') {
-        document.getElementById('inquilinosSubMenu').classList.add('active');
-        document.getElementById('menuInquilinos').classList.add('active');
-        currentMenuContext = 'inquilinos';
-    } else if (menu === 'proveedores') {
-        document.getElementById('proveedoresSubMenu').classList.add('active');
-        document.getElementById('menuProveedores').classList.add('active');
-        currentMenuContext = 'proveedores';
-    } else if (menu === 'admin') {
-        document.getElementById('adminSubMenu').classList.add('active');
-        document.getElementById('menuAdmin').classList.add('active');
-        currentMenuContext = 'admin';
-    }
-    
-    document.getElementById('btnRegresa').classList.add('hidden');
-    document.getElementById('btnSearch').classList.add('hidden');
-    document.getElementById('contentArea').classList.add('with-submenu');
-}
+let estacionamientoSortOrder = { espacio: 'asc', inquilino: 'asc' };
 
-function handleRegresa() {
-    if (currentSubContext) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+function renderEstacionamientoTable() {
+    const tbody = document.getElementById('estacionamientoTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    estacionamiento.forEach(esp => {
+        const row = tbody.insertRow();
+        row.onclick = () => showEditEstacionamientoModal(esp.id);
+        row.style.cursor = 'pointer';
         
-        if (currentMenuContext === 'inquilinos') {
-            document.getElementById('inquilinosSubMenu').classList.add('active');
-        } else if (currentMenuContext === 'proveedores') {
-            document.getElementById('proveedoresSubMenu').classList.add('active');
-        } else if (currentMenuContext === 'admin') {
-            document.getElementById('adminSubMenu').classList.add('active');
-        }
+        const espacioCell = `<span class="estacionamiento-espacio" style="background: ${esp.color_asignado || '#ccc'}">${esp.numero_espacio}</span>`;
+        const inquilinoText = esp.inquilino_nombre || '-';
+        const despachoText = esp.numero_despacho || '-';
         
-        currentSubContext = null;
-        currentSearchContext = null;
-        document.getElementById('btnRegresa').classList.add('hidden');
-        document.getElementById('btnSearch').classList.add('hidden');
-        document.getElementById('menuSidebar').classList.remove('hidden');
-        document.getElementById('contentArea').classList.remove('fullwidth');
-        document.getElementById('contentArea').classList.add('with-submenu');
-    }
-}
-
-function showPageFromMenu(pageName) {
-    document.getElementById('inquilinosSubMenu').classList.remove('active');
-    document.getElementById('proveedoresSubMenu').classList.remove('active');
-    document.getElementById('adminSubMenu').classList.remove('active');
-    
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(pageName + 'Page').classList.add('active');
-    
-    currentSubContext = pageName;
-    
-    document.getElementById('btnRegresa').classList.remove('hidden');
-    
-    if (pageName === 'bitacora') {
-        document.getElementById('btnSearch').classList.remove('hidden');
-        currentSearchContext = 'bitacora';
-    }
-    
-    document.getElementById('contentArea').classList.remove('with-submenu');
-    document.getElementById('menuSidebar').classList.add('hidden');
-    document.getElementById('contentArea').classList.add('fullwidth');
-    
-    if (pageName === 'estacionamiento') renderEstacionamientoTable();
-    if (pageName === 'bitacora') renderBitacoraTable();
-}
-
-// ============================================
-// BÚSQUEDA
-// ============================================
-
-function toggleSearch() {
-    const searchBar = document.getElementById('headerSearchBar');
-    const btnSearch = document.getElementById('btnSearch');
-    
-    searchBar.classList.toggle('active');
-    
-    if (searchBar.classList.contains('active')) {
-        btnSearch.classList.add('hidden');
-        document.getElementById('searchInput').focus();
-    } else {
-        btnSearch.classList.remove('hidden');
-    }
-}
-
-function executeSearch() {
-    const query = document.getElementById('searchInput').value.toLowerCase().trim();
-    
-    if (!query) {
-        alert('Por favor ingresa un término de búsqueda');
-        return;
-    }
-    
-    if (currentSearchContext === 'bitacora') {
-        filtrarBitacora(query);
-    } else if (currentSearchContext === 'proveedores') {
-        filtrarProveedores(query);
-    } else if (currentSearchContext === 'inquilinos') {
-        filtrarInquilinos(query);
-    }
-    
-    document.getElementById('headerSearchBar').classList.remove('active');
-    document.getElementById('btnSearch').classList.remove('hidden');
-}
-
-function clearSearch() {
-    document.getElementById('searchInput').value = '';
-    
-    if (currentSearchContext === 'bitacora') {
-        renderBitacoraTable();
-    } else if (currentSearchContext === 'proveedores') {
-        renderProveedoresTable();
-    } else if (currentSearchContext === 'inquilinos') {
-        renderInquilinosTable();
-    }
-    
-    document.getElementById('headerSearchBar').classList.remove('active');
-    document.getElementById('btnSearch').classList.remove('hidden');
-}
-
-// ============================================
-// FORMATO
-// ============================================
-
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('es-MX', { 
-        style: 'currency', 
-        currency: 'MXN' 
-    }).format(amount);
-}
-
-function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString + 'T00:00:00');
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-}
-
-function formatDateVencimiento(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
-    const formatted = formatDate(dateString);
-    
-    if (diffDays <= 7 && diffDays >= 0) {
-        return `<span class="vencimiento-proximo">${formatted}</span>`;
-    }
-    return formatted;
-}
-
-// ============================================
-// TABS
-// ============================================
-
-function switchTab(type, tabName) {
-    if (type === 'inquilino') {
-        document.querySelectorAll('#inquilinoDetailModal .tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('#inquilinoDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
-        
-        if (tabName === 'renta') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(1)').classList.add('active');
-            document.getElementById('inquilinoRentaTab').classList.add('active');
-        } else if (tabName === 'pagos') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(2)').classList.add('active');
-            document.getElementById('inquilinoPagosTab').classList.add('active');
-        } else if (tabName === 'contrato') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(3)').classList.add('active');
-            document.getElementById('inquilinoContratoTab').classList.add('active');
-        } else if (tabName === 'docs') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(4)').classList.add('active');
-            document.getElementById('inquilinoDocsTab').classList.add('active');
-        } else if (tabName === 'notas') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(5)').classList.add('active');
-            document.getElementById('inquilinoNotasTab').classList.add('active');
-        }
-    } else if (type === 'proveedor') {
-        document.querySelectorAll('#proveedorDetailModal .tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('#proveedorDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
-        
-        if (tabName === 'pagadas') {
-            document.querySelector('#proveedorDetailModal .tab:nth-child(1)').classList.add('active');
-            document.getElementById('proveedorPagadasTab').classList.add('active');
-        } else if (tabName === 'porpagar') {
-            document.querySelector('#proveedorDetailModal .tab:nth-child(2)').classList.add('active');
-            document.getElementById('proveedorPorPagarTab').classList.add('active');
-        } else if (tabName === 'docs') {
-            document.querySelector('#proveedorDetailModal .tab:nth-child(3)').classList.add('active');
-            document.getElementById('proveedorDocsTab').classList.add('active');
-        }
-    }
-}
-
-// ============================================
-// DROPDOWNS
-// ============================================
-
-function toggleDropdown(dropdownId) {
-    const dropdown = document.getElementById(dropdownId);
-    document.querySelectorAll('.dropdown-content').forEach(dd => {
-        if (dd.id !== dropdownId) dd.classList.remove('show');
+        row.innerHTML = `<td>${espacioCell}</td><td>${inquilinoText}</td><td>${despachoText}</td>`;
     });
-    dropdown.classList.toggle('show');
 }
 
-window.addEventListener('click', function(e) {
-    if (!e.target.matches('.dropdown-toggle')) {
-        document.querySelectorAll('.dropdown-content').forEach(dropdown => {
-            dropdown.classList.remove('show');
+function showEditEstacionamientoModal(espacioId) {
+    const espacio = estacionamiento.find(e => e.id === espacioId);
+    currentEstacionamientoId = espacioId;
+    
+    document.getElementById('editEspacioNumero').textContent = espacio.numero_espacio;
+    
+    const select = document.getElementById('editEspacioInquilino');
+    select.innerHTML = '<option value="">-- Seleccione --</option><option value="VISITAS">VISITAS</option>';
+    inquilinos.forEach(inq => {
+        const option = document.createElement('option');
+        option.value = inq.nombre;
+        option.textContent = inq.nombre;
+        if (inq.nombre === espacio.inquilino_nombre) option.selected = true;
+        select.appendChild(option);
+    });
+    
+    document.getElementById('editEspacioDespacho').value = espacio.numero_despacho || '';
+    
+    select.onchange = function() {
+        const selectedInquilino = inquilinos.find(i => i.nombre === this.value);
+        document.getElementById('editEspacioDespacho').value = selectedInquilino?.numero_despacho || '';
+    };
+    
+    document.getElementById('editEstacionamientoModal').classList.add('active');
+}
+
+function sortEstacionamiento(columna) {
+    const tbody = document.getElementById('estacionamientoTable').querySelector('tbody');
+    
+    let sortedData = [...estacionamiento];
+    
+    if (columna === 'espacio') {
+        sortedData.sort((a, b) => {
+            const numA = parseInt(a.numero_espacio);
+            const numB = parseInt(b.numero_espacio);
+            return estacionamientoSortOrder.espacio === 'asc' ? numA - numB : numB - numA;
+        });
+        estacionamientoSortOrder.espacio = estacionamientoSortOrder.espacio === 'asc' ? 'desc' : 'asc';
+    } else if (columna === 'inquilino') {
+        sortedData.sort((a, b) => {
+            const nameA = (a.inquilino_nombre || '').toLowerCase();
+            const nameB = (b.inquilino_nombre || '').toLowerCase();
+            if (estacionamientoSortOrder.inquilino === 'asc') {
+                return nameA.localeCompare(nameB);
+            } else {
+                return nameB.localeCompare(nameA);
+            }
+        });
+        estacionamientoSortOrder.inquilino = estacionamientoSortOrder.inquilino === 'asc' ? 'desc' : 'asc';
+    }
+    
+    tbody.innerHTML = '';
+    sortedData.forEach(esp => {
+        const row = tbody.insertRow();
+        row.onclick = () => showEditEstacionamientoModal(esp.id);
+        row.style.cursor = 'pointer';
+        
+        const espacioCell = `<span class="estacionamiento-espacio" style="background: ${esp.color_asignado || '#ccc'}">${esp.numero_espacio}</span>`;
+        const inquilinoText = esp.inquilino_nombre || '-';
+        const despachoText = esp.numero_despacho || '-';
+        
+        row.innerHTML = `<td>${espacioCell}</td><td>${inquilinoText}</td><td>${despachoText}</td>`;
+    });
+}
+
+function saveEstacionamiento() {
+    showLoading();
+    const inquilinoSeleccionado = document.getElementById('editEspacioInquilino').value;
+    const despacho = document.getElementById('editEspacioDespacho').value;
+    
+    supabaseClient
+        .from('estacionamiento')
+        .update({
+            inquilino_nombre: inquilinoSeleccionado || null,
+            numero_despacho: despacho || null
+        })
+        .eq('id', currentEstacionamientoId)
+        .then(({ error }) => {
+            if (error) throw error;
+            return loadEstacionamiento();
+        })
+        .then(() => {
+            renderEstacionamientoTable();
+            closeModal('editEstacionamientoModal');
+            hideLoading();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al guardar: ' + error.message);
+            hideLoading();
+        });
+}
+
+// ============================================
+// BITÁCORA
+// ============================================
+
+let bitacoraSortOrder = 'desc';
+
+function renderBitacoraTable() {
+    const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    const sorted = [...bitacoraSemanal].sort((a, b) => {
+        const dateA = new Date(a.semana_inicio);
+        const dateB = new Date(b.semana_inicio);
+        return bitacoraSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    
+    sorted.forEach(sem => {
+        const row = tbody.insertRow();
+        row.onclick = () => showEditBitacoraModal(sem.id);
+        row.style.cursor = 'pointer';
+        
+        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
+        const notasCompletas = sem.notas || 'Sin notas';
+        
+        const semanaTexto = sem.semana_texto ? sem.semana_texto.replace('Semana del', 'al') : '';
+        
+        row.innerHTML = `<td><strong>${semanaTexto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
+    });
+    
+    const th = document.querySelector('#bitacoraTable th.sortable');
+    if (th) {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        th.classList.add(bitacoraSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    }
+}
+
+function sortBitacora() {
+    bitacoraSortOrder = bitacoraSortOrder === 'asc' ? 'desc' : 'asc';
+    renderBitacoraTable();
+}
+
+function filtrarBitacora(query) {
+    const tbody = document.getElementById('bitacoraTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    const filtradas = bitacoraSemanal.filter(sem => {
+        const notas = (sem.notas || '').toLowerCase();
+        return notas.includes(query);
+    });
+    
+    const sorted = [...filtradas].sort((a, b) => {
+        const dateA = new Date(a.semana_inicio);
+        const dateB = new Date(b.semana_inicio);
+        return bitacoraSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    
+    sorted.forEach(sem => {
+        const row = tbody.insertRow();
+        row.onclick = () => showEditBitacoraModal(sem.id);
+        row.style.cursor = 'pointer';
+        
+        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
+        const notasCompletas = sem.notas || 'Sin notas';
+        row.innerHTML = `<td><strong>${sem.semana_texto}</strong></td><td data-fulltext="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>`;
+    });
+    
+    if (sorted.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron resultados</td></tr>';
+    }
+}
+
+function showEditBitacoraModal(bitacoraId) {
+    const bitacora = bitacoraSemanal.find(b => b.id === bitacoraId);
+    currentBitacoraId = bitacoraId;
+    
+    let fechaBitacora = '';
+    if (bitacora.semana_inicio) {
+        fechaBitacora = bitacora.semana_inicio;
+    }
+    
+    document.getElementById('editBitacoraFecha').value = fechaBitacora;
+    document.getElementById('editBitacoraNotas').value = bitacora.notas || '';
+    
+    document.getElementById('editBitacoraModal').classList.add('active');
+}
+
+function saveBitacora() {
+    showLoading();
+    const fecha = document.getElementById('editBitacoraFecha').value;
+    const notas = document.getElementById('editBitacoraNotas').value;
+    
+    supabaseClient
+        .from('bitacora_semanal')
+        .update({
+            semana_inicio: fecha,
+            notas: notas
+        })
+        .eq('id', currentBitacoraId)
+        .then(({ error }) => {
+            if (error) throw error;
+            return loadBitacoraSemanal();
+        })
+        .then(() => {
+            renderBitacoraTable();
+            closeModal('editBitacoraModal');
+            hideLoading();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al guardar bitácora: ' + error.message);
+            hideLoading();
+        });
+}
+
+function updateBitacoraMenu() {
+    // Placeholder para menú de bitácora
+}
+
+function agregarNuevaSemana() {
+    alert('Función agregarNuevaSemana - pendiente de implementar');
+}
+
+// ============================================
+// FILE LISTENERS
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const inquilinoContrato = document.getElementById('inquilinoContrato');
+    if (inquilinoContrato) {
+        inquilinoContrato.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('contratoFileName').textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
+    const nuevoDocPDF = document.getElementById('nuevoDocPDF');
+    if (nuevoDocPDF) {
+        nuevoDocPDF.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('nuevoDocPDFFileName').textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
+    const proveedorDocAdicional = document.getElementById('proveedorDocAdicional');
+    if (proveedorDocAdicional) {
+        proveedorDocAdicional.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('provDocAdicionalFileName').textContent = fileName ? `Seleccionado: ${fileName}` : '';
+            
+            const nombreDocGroup = document.getElementById('nombreProvDocGroup');
+            if (fileName) {
+                nombreDocGroup.classList.remove('hidden');
+                document.getElementById('proveedorNombreDoc').required = true;
+            } else {
+                nombreDocGroup.classList.add('hidden');
+                document.getElementById('proveedorNombreDoc').required = false;
+            }
+        });
+    }
+    
+    const facturaDocumento = document.getElementById('facturaDocumento');
+    if (facturaDocumento) {
+        facturaDocumento.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('facturaDocumentoFileName').textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
+    const pagoPDFFactura = document.getElementById('pagoPDFFactura');
+    if (pagoPDFFactura) {
+        pagoPDFFactura.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('pagoPDFFacturaFileName').textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
+    const activoFotos = document.getElementById('activoFotos');
+    if (activoFotos) {
+        activoFotos.addEventListener('change', function() {
+            const count = this.files.length;
+            document.getElementById('activoFotosFileName').textContent = count > 0 ? `${count} foto(s) seleccionada(s)` : '';
+        });
+    }
+    
+    const bancoDocumento = document.getElementById('bancoDocumento');
+    if (bancoDocumento) {
+        bancoDocumento.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('bancoDocumentoFileName').textContent = fileName ? `Seleccionado: ${fileName}` : '';
         });
     }
 });
 
-// ============================================
-// LOGOUT
-// ============================================
-
-function logout() {
-    if (confirm('¿Cerrar sesión?')) {
-        document.getElementById('appContainer').classList.remove('active');
-        document.getElementById('loginContainer').classList.remove('hidden');
-        document.body.classList.remove('logged-in');
-        
-        currentMenuContext = 'main';
-        currentSubContext = null;
-    }
-}
-
-console.log('✅ UI-CORE.JS cargado');
+console.log('✅ UI.JS (compatibilidad) cargado');
