@@ -349,11 +349,13 @@
     cursor: pointer;
     transition: transform 0.2s;
     display: none; /* Oculto por defecto */
+    visibility: hidden; /* Doble seguridad */
 }
 
-/* Solo mostrar cuando la pestaña está activa */
+/* ✅ SOLO mostrar cuando la pestaña está activa */
 .tab.active .btn-add-inline {
     display: inline;
+    visibility: visible;
 }
 
 .btn-add-inline:hover {
