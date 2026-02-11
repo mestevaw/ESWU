@@ -302,46 +302,51 @@
                         </div>
                     </div>
 
-                    <!-- Facturas Por Pagar -->
-                    <div id="proveedoresFacturasPorPagarView" class="hidden">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">Facturas Por Pagar</h2>
-                                <button class="btn-excel-icon" onclick="exportarFacturasPorPagarExcel()" title="Exportar a Excel">📊</button>
-                            </div>
-                            <div style="padding: 1.5rem;">
-                                <div class="filter-section">
-                                    <label>Filtro:</label>
-                                    <select id="provFactPorPagFilter" onchange="renderProveedoresFacturasPorPagar()">
-                                        <option value="anual">Anual</option>
-                                        <option value="mensual">Mensual</option>
-                                    </select>
-                                    <label>Año:</label>
-                                    <select id="provFactPorPagYear" onchange="renderProveedoresFacturasPorPagar()"></select>
-                                    <select id="provFactPorPagMonth" class="hidden" onchange="renderProveedoresFacturasPorPagar()">
-                                        <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
-                                        <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
-                                        <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
-                                        <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
-                                    </select>
-                                </div>
-                               <table id="proveedoresFacturasPorPagarTable" class="sticky-header-table">
-    <thead>
-        <tr>
-            <th class="sortable" data-column="proveedor" onclick="sortFacturasPorPagar('proveedor')" style="cursor:pointer; width:25%">Proveedor</th>
-            <th style="width:15%">Número</th>
-            <th style="width:18%">CLABE</th>
-            <th style="width:15%">Monto</th>
-            <th class="sortable" data-column="vencimiento" onclick="sortFacturasPorPagar('vencimiento')" style="cursor:pointer; width:17%">Vencimiento</th>
-        </tr>
-    </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!-- ============================================
+     FACTURAS POR PAGAR - HEADER CORREGIDO
+     ============================================ -->
+
+<!-- Busca esta sección en tu index.html y reemplázala: -->
+
+<div id="proveedoresFacturasPorPagarView" class="hidden">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Facturas Por Pagar</h2>
+        </div>
+        <div style="padding: 1.5rem;">
+            <div class="filter-section">
+                <label>Filtro:</label>
+                <select id="provFactPorPagFilter" onchange="renderProveedoresFacturasPorPagar()">
+                    <option value="anual">Anual</option>
+                    <option value="mensual">Mensual</option>
+                </select>
+                <label>Año:</label>
+                <select id="provFactPorPagYear" onchange="renderProveedoresFacturasPorPagar()"></select>
+                <select id="provFactPorPagMonth" class="hidden" onchange="renderProveedoresFacturasPorPagar()">
+                    <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+                    <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+                    <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+                    <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+                </select>
+            </div>
+            <div class="table-container">
+                <!-- ✅ TABLA CORREGIDA -->
+                <table id="proveedoresFacturasPorPagarTable" class="sticky-header-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="proveedor" onclick="sortFacturasPorPagar('proveedor')" style="cursor:pointer; width:25%">Proveedor</th>
+                            <th style="width:12%">No. Fact.</th>
+                            <th style="width:20%">CLABE</th>
+                            <th style="width:18%">Vencimiento</th>
+                            <th style="width:15%">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
                 <!-- Activos Page -->
                 <div id="activosPage" class="page">
