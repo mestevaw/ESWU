@@ -1,5 +1,5 @@
 /* ========================================
-   PROVEEDORES-UI.JS - VERSIÓN FINAL CORREGIDA
+   PROVEEDORES-UI.JS - VERSIÓN CON VIEWFACTURADOC
    ======================================== */
 
 // ============================================
@@ -46,6 +46,24 @@ function ensureLoadingBanner() {
             const banner = document.getElementById('loadingBanner');
             if (banner) banner.classList.add('hidden');
         };
+    }
+}
+
+// ============================================
+// VIEW DOCUMENTO FUNCTION - CRÍTICA
+// ============================================
+
+function viewFacturaDoc(archivo) {
+    if (archivo) {
+        const newWindow = window.open();
+        newWindow.document.write(`<iframe width='100%' height='100%' src='${archivo}'></iframe>`);
+    }
+}
+
+function viewDocumento(archivo) {
+    if (archivo) {
+        const newWindow = window.open();
+        newWindow.document.write(`<iframe width='100%' height='100%' src='${archivo}'></iframe>`);
     }
 }
 
@@ -206,7 +224,7 @@ function renderProveedoresFacturasPagadas() {
 }
 
 // ============================================
-// RENDER FACTURAS POR PAGAR - CON CLABE EN TABLA
+// RENDER FACTURAS POR PAGAR - CORREGIDA
 // ============================================
 
 function renderProveedoresFacturasPorPagar() {
@@ -253,17 +271,18 @@ function renderProveedoresFacturasPorPagar() {
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     porPagar.forEach(f => {
         const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
+        row.style.cursor = f.documento_file ? 'pointer' : 'default';
         if (f.documento_file) {
             row.onclick = () => viewFacturaDoc(f.documento_file);
         }
         
+        // ORDEN CORREGIDO: Proveedor, No. Fact., CLABE, Vencimiento, Monto
         row.innerHTML = `
             <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
             <td>${f.numero}</td>
             <td style="font-family:monospace;font-size:0.85rem;">${f.clabe}</td>
-            <td class="currency">${formatCurrency(f.monto)}</td>
             <td>${formatDateVencimiento(f.vencimiento)}</td>
+            <td class="currency">${formatCurrency(f.monto)}</td>
         `;
     });
     
@@ -272,7 +291,7 @@ function renderProveedoresFacturasPorPagar() {
     } else {
         const row = tbody.insertRow();
         row.className = 'total-row';
-        row.innerHTML = `<td colspan="3" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
+        row.innerHTML = `<td colspan="4" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td>`;
     }
 }
 
@@ -498,7 +517,7 @@ function showProveedorDetail(id) {
 }
 
 // ============================================
-// MODALS & ACTIONS
+// MODALS & ACTIONS (continuación en siguiente mensaje por límite)
 // ============================================
 
 function showRegistrarFacturaModalFromDetail() {
@@ -743,7 +762,7 @@ function deleteProveedor() {
 }
 
 // ============================================
-// LAZY LOADING - SOLO 1 VEZ
+// LAZY LOADING - SOLO AL ENTRAR A PROVEEDORES
 // ============================================
 
 let proveedoresYaCargados = false;
@@ -759,11 +778,11 @@ async function cargarProveedoresSiNecesario() {
     }
 }
 
-// Interceptar showProveedoresView para agregar lazy loading
+// Interceptar showProveedoresView
 const originalShowProveedoresView = showProveedoresView;
 window.showProveedoresView = async function(view) {
     await cargarProveedoresSiNecesario();
     originalShowProveedoresView(view);
 };
 
-console.log('✅ PROVEEDORES-UI.JS cargado y listo');
+console.log('✅ PROVEEDORES-UI.JS cargado - viewFacturaDoc incluida');
