@@ -159,5 +159,106 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+// ============================================
+// MODALS PROVEEDOR - DOCUMENTOS Y NOTAS
+// ============================================
+
+function showAgregarDocumentoProveedorModal() {
+    if (!currentProveedorId) {
+        alert('Error: No hay proveedor seleccionado');
+        return;
+    }
+    
+    document.getElementById('nuevoDocProveedorNombre').value = '';
+    document.getElementById('nuevoDocProveedorPDF').value = '';
+    document.getElementById('nuevoDocProveedorPDFFileName').textContent = '';
+    document.getElementById('agregarDocumentoProveedorModal').classList.add('active');
+}
+
+function showEditarNotasProveedorModal() {
+    if (!currentProveedorId) {
+        alert('Error: No hay proveedor seleccionado');
+        return;
+    }
+    
+    const prov = proveedores.find(p => p.id === currentProveedorId);
+    document.getElementById('editNotasProveedor').value = prov?.notas || '';
+    document.getElementById('editarNotasProveedorModal').classList.add('active');
+}
+
+async function saveDocumentoProveedor(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const nombre = document.getElementById('nuevoDocProveedorNombre').value;
+        const file = document.getElementById('nuevoDocProveedorPDF').files[0];
+        
+        if (!file) {
+            throw new Error('Seleccione un archivo PDF');
+        }
+        
+        const pdfBase64 = await fileToBase64(file);
+        
+        const { error } = await supabaseClient
+            .from('proveedores_documentos')
+            .insert([{
+                proveedor_id: currentProveedorId,
+                nombre_documento: nombre,
+                archivo_pdf: pdfBase64,
+                fecha_guardado: new Date().toISOString().split('T')[0],
+                usuario_guardo: currentUser.nombre
+            }]);
+        
+        if (error) throw error;
+        
+        await ensureProveedoresFullLoaded();
+        showProveedorDetail(currentProveedorId);
+        closeModal('agregarDocumentoProveedorModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function saveNotasProveedor(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const notas = document.getElementById('editNotasProveedor').value;
+        
+        const { error } = await supabaseClient
+            .from('proveedores')
+            .update({ notas: notas })
+            .eq('id', currentProveedorId);
+        
+        if (error) throw error;
+        
+        await ensureProveedoresFullLoaded();
+        showProveedorDetail(currentProveedorId);
+        closeModal('editarNotasProveedorModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar notas: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// File input listener
+document.addEventListener('DOMContentLoaded', function() {
+    const docProveedorPDF = document.getElementById('nuevoDocProveedorPDF');
+    if (docProveedorPDF) {
+        docProveedorPDF.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('nuevoDocProveedorPDFFileName').textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+});
 
 console.log('✅ UI.JS cargado (funciones restantes)');
