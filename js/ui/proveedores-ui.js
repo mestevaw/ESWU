@@ -402,11 +402,20 @@ function showProveedorDetail(id) {
 // ============================================
 
 function showRegistrarFacturaModalFromDetail() {
+    if (!currentProveedorId) {
+        alert('Error: No hay proveedor seleccionado');
+        return;
+    }
+    
     isEditMode = false;
     currentFacturaId = null;
     
-    document.getElementById('facturaForm').reset();
-    document.getElementById('facturaDocumentoFileName').textContent = '';
+    const facturaForm = document.getElementById('facturaForm');
+    if (facturaForm) {
+        facturaForm.reset();
+        document.getElementById('facturaDocumentoFileName').textContent = '';
+    }
+    
     document.getElementById('registrarFacturaModal').classList.add('active');
 }
 
