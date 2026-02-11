@@ -239,68 +239,69 @@ function showProveedorDetail(id) {
     
     currentProveedorId = id;
     
+    // ============================================
     // HEADER
+    // ============================================
     document.getElementById('proveedorDetailNombre').textContent = prov.nombre;
     document.getElementById('proveedorDetailServicio').textContent = prov.servicio || '';
     
-    // TELÉFONO Y EMAIL (primer contacto)
+    // ============================================
+    // TELÉFONO Y EMAIL
+    // ============================================
     const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
     document.getElementById('proveedorTelefono').textContent = primerContacto.telefono || '-';
     
     const emailLink = document.getElementById('proveedorEmailLink');
     const emailSpan = document.getElementById('proveedorEmail');
     if (primerContacto.email) {
-        emailSpan.textContent = primerContacto.email;
         emailLink.href = `mailto:${primerContacto.email}`;
+        emailSpan.textContent = primerContacto.email;
     } else {
-        emailSpan.textContent = '-';
         emailLink.href = '#';
-        emailLink.onclick = (e) => e.preventDefault();
+        emailSpan.textContent = '-';
     }
     
+    // ============================================
     // RFC Y CLABE
+    // ============================================
     document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
     document.getElementById('detailProvClabe').textContent = prov.clabe || '-';
     
-    // CONTACTOS ADICIONALES (solo si hay más de 1)
-    const contactosSection = document.getElementById('proveedorContactosSection');
+    // ============================================
+    // CONTACTOS ADICIONALES
+    // ============================================
+    const contactosAdicionalesDiv = document.getElementById('proveedorContactosAdicionales');
     if (prov.contactos && prov.contactos.length > 1) {
-        const contactosAdicionales = prov.contactos.slice(1);
-        contactosSection.innerHTML = `
-            <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);margin-bottom:1.5rem;">
-                <div style="font-weight:600;color:var(--primary);margin-bottom:0.75rem;font-size:0.9rem;">Contactos Adicionales</div>
-                ${contactosAdicionales.map((c, index) => `
-                    <div style="padding:0.75rem;background:white;border-radius:4px;margin-bottom:0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-                        <div style="font-weight:600;margin-bottom:0.25rem;">${c.nombre}</div>
-                        <div style="font-size:0.875rem;color:var(--text-light);">
-                            📞 ${c.telefono || '-'} | ✉️ ${c.email || '-'}
-                        </div>
-                    </div>
-                `).join('')}
+        contactosAdicionalesDiv.style.display = 'block';
+        const contactosLista = document.getElementById('proveedorContactosAdicionalesList');
+        contactosLista.innerHTML = prov.contactos.slice(1).map(c => `
+            <div style="margin-bottom:0.5rem;padding:0.5rem;background:white;border-radius:4px;border:1px solid var(--border);">
+                <strong>${c.nombre}</strong><br>
+                <small><strong>Tel:</strong> ${c.telefono || '-'} | <strong>Email:</strong> ${c.email || '-'}</small>
             </div>
-        `;
+        `).join('');
     } else {
-        contactosSection.innerHTML = '';
+        contactosAdicionalesDiv.style.display = 'none';
     }
     
-    // ✅ FACTURAS PAGADAS - LAYOUT SIMPLE CON RECUADROS CLICKEABLES
+    // ============================================
+    // TAB: FACTURAS PAGADAS
+    // ============================================
     const facturasPagadasDiv = document.getElementById('facturasPagadas');
-    const facturasPagadas = prov.facturas ? prov.facturas.filter(f => f.fecha_pago) : [];
+    const facturasPagadas = prov.facturas.filter(f => f.fecha_pago);
     let totalPagadas = 0;
     
     if (facturasPagadas.length > 0) {
         facturasPagadasDiv.innerHTML = facturasPagadas.map(f => {
             totalPagadas += f.monto;
-            
-            // Determinar si hay documentos
-            const tieneFactura = f.documento_file;
-            const tienePago = f.pago_file;
+            const tieneFactura = !!f.documento_file;
+            const tienePago = !!f.pago_file;
             
             return `
                 <div style="background:white;border:1px solid var(--border);border-radius:4px;padding:1rem;margin-bottom:0.75rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);display:flex;justify-content:space-between;align-items:center;">
                     <div style="display:flex;gap:1rem;align-items:center;flex:1;">
                         ${tieneFactura ? `
-                            <div onclick="viewDocumento('${f.documento_file}')" style="cursor:pointer;background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.1);" onmouseover="this.style.background='#e2e8f0';this.style.transform='translateY(-2px)';this.style.boxShadow='0 2px 4px rgba(0,0,0,0.15)'" onmouseout="this.style.background='var(--bg)';this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
+                            <div onclick="viewDocumento('${f.documento_file}')" style="cursor:pointer;background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
                                 <div style="font-size:0.875rem;font-weight:600;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</div>
                             </div>
                         ` : `
@@ -308,9 +309,8 @@ function showProveedorDetail(id) {
                                 <div style="font-size:0.875rem;font-weight:600;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</div>
                             </div>
                         `}
-                        
                         ${tienePago ? `
-                            <div onclick="viewDocumento('${f.pago_file}')" style="cursor:pointer;background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.1);" onmouseover="this.style.background='#e2e8f0';this.style.transform='translateY(-2px)';this.style.boxShadow='0 2px 4px rgba(0,0,0,0.15)'" onmouseout="this.style.background='var(--bg)';this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
+                            <div onclick="viewDocumento('${f.pago_file}')" style="cursor:pointer;background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
                                 <div style="font-size:0.875rem;font-weight:600;">Pago del ${formatDate(f.fecha_pago)}</div>
                             </div>
                         ` : `
@@ -323,110 +323,187 @@ function showProveedorDetail(id) {
                 </div>
             `;
         }).join('') + `
-            <div style="text-align:right;padding:1rem;background:#e6f7ed;border-radius:4px;font-weight:bold;margin-top:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;border-top:2px solid var(--primary);">
                 TOTAL PAGADO: <span style="color:var(--success);font-size:1.2rem;">${formatCurrency(totalPagadas)}</span>
             </div>
         `;
     } else {
-        facturasPagadasDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem;background:var(--bg);border-radius:4px;">No hay facturas pagadas</p>';
+        facturasPagadasDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas pagadas</p>';
     }
     
-// ============================================
-// TAB: FACTURAS X PAGAR
-// ============================================
-
-const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
-const facturasPorPagar = prov.facturas.filter(f => !f.fecha_pago);
-let totalPorPagar = 0;
-
-if (facturasPorPagar.length > 0) {
-    facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
-        totalPorPagar += f.monto;
-        
-        // Link clickeable a factura si existe
-        const facturaTexto = f.documento_file 
-            ? `<span onclick="viewDocumento('${f.documento_file}')" style="cursor:pointer;color:var(--primary);text-decoration:underline;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`
-            : `<span>Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`;
-        
-        return `
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;border-bottom:1px solid var(--border);background:white;">
-                <div style="flex:1;">
-                    ${facturaTexto} - <strong>Vence:</strong> ${formatDate(f.vencimiento)}
-                </div>
-                <div style="display:flex;align-items:center;gap:1rem;">
-                    <button 
-                        class="btn-icon-action" 
-                        onclick="showEditFacturaModal(${f.id})" 
-                        title="Modificar datos factura"
-                        style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--primary);padding:0.25rem;">
-                        ✏️
-                    </button>
-                    <button 
-                        class="btn-icon-action" 
-                        onclick="showPagarFacturaModal(${f.id})" 
-                        title="Dar por pagada"
-                        style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--success);padding:0.25rem;">
-                        🏦
-                    </button>
-                    <button 
-                        class="btn-icon-action" 
-                        onclick="confirmDeleteFactura(${f.id}, '${(f.numero || 'S/N').replace(/'/g, "\\'")}', ${f.monto})" 
-                        title="Eliminar factura"
-                        style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--danger);padding:0.25rem;">
-                        ❌
-                    </button>
-                    <div style="font-size:1.1rem;font-weight:700;color:var(--danger);margin-left:1rem;min-width:100px;text-align:right;">
-                        ${formatCurrency(f.monto)}
+    // ============================================
+    // TAB: FACTURAS X PAGAR
+    // ============================================
+    const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
+    const facturasPorPagar = prov.facturas.filter(f => !f.fecha_pago);
+    let totalPorPagar = 0;
+    
+    if (facturasPorPagar.length > 0) {
+        facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
+            totalPorPagar += f.monto;
+            
+            const facturaTexto = f.documento_file 
+                ? `<span onclick="viewDocumento('${f.documento_file}')" style="cursor:pointer;color:var(--primary);text-decoration:underline;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`
+                : `<span>Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`;
+            
+            return `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;border-bottom:1px solid var(--border);background:white;">
+                    <div style="flex:1;">
+                        ${facturaTexto} - <strong>Vence:</strong> ${formatDate(f.vencimiento)}
+                    </div>
+                    <div style="display:flex;align-items:center;gap:1rem;">
+                        <button 
+                            class="btn-icon-action" 
+                            onclick="event.stopPropagation(); showEditFacturaModal(${f.id})" 
+                            title="Modificar datos factura"
+                            style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--primary);padding:0.25rem;transition:transform 0.2s;">
+                            ✏️
+                        </button>
+                        <button 
+                            class="btn-icon-action" 
+                            onclick="event.stopPropagation(); showPagarFacturaModal(${f.id})" 
+                            title="Dar por pagada"
+                            style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--success);padding:0.25rem;transition:transform 0.2s;">
+                            🏦
+                        </button>
+                        <button 
+                            class="btn-icon-action" 
+                            onclick="event.stopPropagation(); confirmDeleteFactura(${f.id}, '${(f.numero || 'S/N').replace(/'/g, "\\'")}', ${f.monto})" 
+                            title="Eliminar factura"
+                            style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--danger);padding:0.25rem;transition:transform 0.2s;">
+                            ❌
+                        </button>
+                        <div style="font-size:1.1rem;font-weight:700;color:var(--danger);margin-left:1rem;min-width:100px;text-align:right;">
+                            ${formatCurrency(f.monto)}
+                        </div>
                     </div>
                 </div>
+            `;
+        }).join('') + `
+            <div style="text-align:right;padding:1rem;background:#fff3cd;font-weight:bold;border-top:2px solid var(--warning);">
+                TOTAL POR PAGAR: <span style="color:var(--danger);font-size:1.2rem;">${formatCurrency(totalPorPagar)}</span>
             </div>
         `;
-    }).join('') + `
-        <div style="text-align:right;padding:1rem;background:#fff3cd;font-weight:bold;border-top:2px solid var(--warning);">
-            TOTAL POR PAGAR: <span style="color:var(--danger);font-size:1.2rem;">${formatCurrency(totalPorPagar)}</span>
-        </div>
-    `;
-} else {
-    facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
-}
+    } else {
+        facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
+    }
     
-// ============================================
-// TAB: DOCUMENTOS ADICIONALES
-// ============================================
-
-const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
-if (prov.documentos && prov.documentos.length > 0) {
-    docsDiv.innerHTML = `
-        <table style="width:100%;border-collapse:collapse;">
-            <thead>
-                <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
-                    <th style="padding:0.75rem;text-align:left;">Nombre</th>
-                    <th style="padding:0.75rem;text-align:left;">Fecha</th>
-                    <th style="padding:0.75rem;text-align:left;">Usuario</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${prov.documentos.map(d => `
-                    <tr onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.2s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">
-                        <td style="padding:0.75rem;">${d.nombre || 'Sin nombre'}</td>
-                        <td style="padding:0.75rem;">${formatDate(d.fecha) || '-'}</td>
-                        <td style="padding:0.75rem;">${d.usuario || 'Sistema'}</td>
+    // ============================================
+    // TAB: DOCUMENTOS ADICIONALES
+    // ============================================
+    const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
+    if (prov.documentos && prov.documentos.length > 0) {
+        docsDiv.innerHTML = `
+            <table style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+                        <th style="padding:0.75rem;text-align:left;">Nombre</th>
+                        <th style="padding:0.75rem;text-align:left;">Fecha</th>
+                        <th style="padding:0.75rem;text-align:left;">Usuario</th>
                     </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-} else {
-    docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
-}
+                </thead>
+                <tbody>
+                    ${prov.documentos.map(d => `
+                        <tr onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.2s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">
+                            <td style="padding:0.75rem;">${d.nombre || 'Sin nombre'}</td>
+                            <td style="padding:0.75rem;">${d.fecha ? formatDate(d.fecha) : '-'}</td>
+                            <td style="padding:0.75rem;">${d.usuario || 'Sistema'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    } else {
+        docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
+    }
     
-    // NOTAS
+    // ============================================
+    // TAB: NOTAS
+    // ============================================
     document.getElementById('notasProveedor').textContent = prov.notas || 'No hay notas para este proveedor.';
     
-    // Abrir modal y activar primera pestaña
+    // Mostrar modal
     document.getElementById('proveedorDetailModal').classList.add('active');
     switchTab('proveedor', 'pagadas');
 }
+
+// ============================================
+// EDIT FACTURA MODAL
+// ============================================
+
+function showEditFacturaModal(facturaId) {
+    const prov = proveedores.find(p => p.id === currentProveedorId);
+    if (!prov) return;
+    
+    const factura = prov.facturas.find(f => f.id === facturaId);
+    if (!factura) return;
+    
+    currentFacturaId = facturaId;
+    isEditMode = true;
+    
+    document.getElementById('facturaNumero').value = factura.numero || '';
+    document.getElementById('facturaFecha').value = factura.fecha;
+    document.getElementById('facturaVencimiento').value = factura.vencimiento;
+    document.getElementById('facturaMonto').value = factura.monto;
+    document.getElementById('facturaIVA').value = factura.iva || 0;
+    document.getElementById('facturaDocumentoFileName').textContent = factura.documento_file ? 'Archivo existente' : '';
+    
+    document.getElementById('registrarFacturaModal').classList.add('active');
+}
+
+// ============================================
+// PAGAR FACTURA
+// ============================================
+
+function showPagarFacturaModal(facturaId) {
+    currentFacturaId = facturaId;
+    
+    const form = document.getElementById('pagarFacturaForm');
+    if (form) {
+        form.reset();
+    }
+    
+    const fileName = document.getElementById('pagoPDFFacturaFileName');
+    if (fileName) {
+        fileName.textContent = '';
+    }
+    
+    document.getElementById('pagarFacturaModal').classList.add('active');
+}
+
+// ============================================
+// ELIMINAR FACTURA
+// ============================================
+
+function confirmDeleteFactura(facturaId, numeroFactura, monto) {
+    if (confirm(`¿Seguro quieres eliminar la factura ${numeroFactura} por ${formatCurrency(monto)}?`)) {
+        deleteFactura(facturaId);
+    }
+}
+
+async function deleteFactura(facturaId) {
+    showLoading();
+    try {
+        const { error } = await supabaseClient
+            .from('facturas')
+            .delete()
+            .eq('id', facturaId);
+        
+        if (error) throw error;
+        
+        alert('✅ Factura eliminada exitosamente');
+        
+        await ensureProveedoresFullLoaded();
+        showProveedorDetail(currentProveedorId);
+        
+    } catch (error) {
+        console.error('Error eliminando factura:', error);
+        alert('❌ Error al eliminar factura: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
 // ============================================
 // MODALS
 // ============================================
@@ -440,7 +517,6 @@ function showRegistrarFacturaModalFromDetail() {
     isEditMode = false;
     currentFacturaId = null;
     
-    // ✅ AGREGAR MODAL SI NO EXISTE
     let modal = document.getElementById('registrarFacturaModal');
     if (!modal) {
         console.error('❌ Modal registrarFacturaModal no existe en el HTML');
@@ -613,7 +689,10 @@ function showAddProveedorModal() {
 
 function editProveedor() {
     const prov = proveedores.find(p => p.id === currentProveedorId);
-    if (!prov) return;
+    if (!prov) {
+        alert('Error: Proveedor no encontrado');
+        return;
+    }
     
     isEditMode = true;
     tempProveedorContactos = [...(prov.contactos || [])];
@@ -625,7 +704,7 @@ function editProveedor() {
     document.getElementById('proveedorRFC').value = prov.rfc || '';
     document.getElementById('proveedorNotas').value = prov.notas || '';
     
-    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');  
+    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');
     
     closeModal('proveedorDetailModal');
     document.getElementById('addProveedorModal').classList.add('active');
@@ -643,7 +722,7 @@ function deleteProveedor() {
         .then(({ error }) => {
             if (error) throw error;
             
-            return loadProveedores();
+            return ensureProveedoresFullLoaded();
         })
         .then(() => {
             closeModal('proveedorDetailModal');
@@ -675,41 +754,5 @@ showProveedoresView = async function(view) {
     
     originalShowProveedoresView(view);
 };
-// ============================================
-// FUNCIONES DE FACTURAS X PAGAR
-// ============================================
-
-function showEditFacturaModal(facturaId) {
-    alert('Función showEditFacturaModal para factura ID: ' + facturaId + ' - Pendiente de implementar');
-}
-
-function confirmDeleteFactura(facturaId, numeroFactura, monto) {
-    if (confirm(`¿Seguro quieres eliminar la factura ${numeroFactura} por ${formatCurrency(monto)}?`)) {
-        deleteFactura(facturaId);
-    }
-}
-
-async function deleteFactura(facturaId) {
-    showLoading();
-    try {
-        const { error } = await supabaseClient
-            .from('facturas')
-            .delete()
-            .eq('id', facturaId);
-        
-        if (error) throw error;
-        
-        alert('✅ Factura eliminada exitosamente');
-        
-        await loadProveedores();
-        showProveedorDetail(currentProveedorId);
-        
-    } catch (error) {
-        console.error('Error eliminando factura:', error);
-        alert('❌ Error al eliminar factura: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
 
 console.log('✅ PROVEEDORES-UI.JS cargado');
