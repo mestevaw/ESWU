@@ -1,5 +1,5 @@
 /* ========================================
-   NAVIGATION.JS - Menu & Navigation Functions
+   NAVIGATION.JS - All navigation and UI helper functions
    ======================================== */
 
 // ============================================
@@ -11,21 +11,18 @@ let currentSubContext = null;
 let currentSearchContext = null;
 
 // ============================================
-// MAIN MENU NAVIGATION
+// MENU NAVIGATION
 // ============================================
 
 function showSubMenu(menu) {
-    // Quitar clase active de todos los botones del menú
     document.getElementById('menuInquilinos').classList.remove('active');
     document.getElementById('menuProveedores').classList.remove('active');
     document.getElementById('menuAdmin').classList.remove('active');
     
-    // Ocultar todos los submenús
     document.getElementById('inquilinosSubMenu').classList.remove('active');
     document.getElementById('proveedoresSubMenu').classList.remove('active');
     document.getElementById('adminSubMenu').classList.remove('active');
     
-    // Mostrar submenú correspondiente y marcar botón activo
     if (menu === 'inquilinos') {
         document.getElementById('inquilinosSubMenu').classList.add('active');
         document.getElementById('menuInquilinos').classList.add('active');
@@ -40,20 +37,15 @@ function showSubMenu(menu) {
         currentMenuContext = 'admin';
     }
     
-    // Ocultar botón Regresa y búsqueda
     document.getElementById('btnRegresa').classList.add('hidden');
     document.getElementById('btnSearch').classList.add('hidden');
-    
-    // Ajustar content-area
     document.getElementById('contentArea').classList.add('with-submenu');
 }
 
 function handleRegresa() {
     if (currentSubContext) {
-        // Ocultar todas las páginas
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         
-        // Mostrar el submenú correspondiente
         if (currentMenuContext === 'inquilinos') {
             document.getElementById('inquilinosSubMenu').classList.add('active');
         } else if (currentMenuContext === 'proveedores') {
@@ -67,47 +59,33 @@ function handleRegresa() {
         document.getElementById('btnRegresa').classList.add('hidden');
         document.getElementById('btnSearch').classList.add('hidden');
         document.getElementById('menuSidebar').classList.remove('hidden');
-        
         document.getElementById('contentArea').classList.remove('fullwidth');
         document.getElementById('contentArea').classList.add('with-submenu');
     }
 }
 
 function showPageFromMenu(pageName) {
-    // Ocultar submenús
     document.getElementById('inquilinosSubMenu').classList.remove('active');
     document.getElementById('proveedoresSubMenu').classList.remove('active');
     document.getElementById('adminSubMenu').classList.remove('active');
     
-    // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    
-    // Mostrar página solicitada
     document.getElementById(pageName + 'Page').classList.add('active');
     
     currentSubContext = pageName;
-    
-    // Mostrar botones header
     document.getElementById('btnRegresa').classList.remove('hidden');
     
-    // Mostrar búsqueda solo en páginas que la necesitan
     if (pageName === 'bitacora') {
         document.getElementById('btnSearch').classList.remove('hidden');
         currentSearchContext = 'bitacora';
     }
     
-    // Content-area a pantalla completa
     document.getElementById('contentArea').classList.remove('with-submenu');
     document.getElementById('menuSidebar').classList.add('hidden');
     document.getElementById('contentArea').classList.add('fullwidth');
     
-    // ✅ AGREGAR ESTO:
-    // Cargar contenido
-    if (pageName === 'estacionamiento') {
-        renderEstacionamientoTable();
-    } else if (pageName === 'bitacora') {
-        renderBitacoraTable(); // ← ESTA LÍNEA FALTABA
-    }
+    if (pageName === 'estacionamiento') renderEstacionamientoTable();
+    if (pageName === 'bitacora') renderBitacoraTable();
 }
 
 // ============================================
@@ -129,8 +107,7 @@ function toggleSearch() {
 }
 
 function executeSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const query = searchInput.value.toLowerCase().trim();
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
     
     if (!query) {
         alert('Por favor ingresa un término de búsqueda');
@@ -145,10 +122,6 @@ function executeSearch() {
         filtrarInquilinos(query);
     }
     
-    // NUEVO: Borrar búsqueda automáticamente
-    searchInput.value = '';
-    
-    // Ocultar barra de búsqueda después de buscar
     document.getElementById('headerSearchBar').classList.remove('active');
     document.getElementById('btnSearch').classList.remove('hidden');
 }
@@ -164,7 +137,6 @@ function clearSearch() {
         renderInquilinosTable();
     }
     
-    // Ocultar barra de búsqueda
     document.getElementById('headerSearchBar').classList.remove('active');
     document.getElementById('btnSearch').classList.remove('hidden');
 }
@@ -200,28 +172,33 @@ function formatDateVencimiento(dateString) {
     }
     return formatted;
 }
+
 // ============================================
 // TAB SWITCHING
 // ============================================
 
 function switchTab(type, tabName) {
     if (type === 'inquilino') {
-        // Remover active de todos
         document.querySelectorAll('#inquilinoDetailModal .tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('#inquilinoDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
         
-        if (tabName === 'pagos') {
+        if (tabName === 'renta') {
             document.querySelector('#inquilinoDetailModal .tab:nth-child(1)').classList.add('active');
-            document.getElementById('inquilinoPagosTab').classList.add('active');
-        } else if (tabName === 'docs') {
+            document.getElementById('inquilinoRentaTab').classList.add('active');
+        } else if (tabName === 'pagos') {
             document.querySelector('#inquilinoDetailModal .tab:nth-child(2)').classList.add('active');
+            document.getElementById('inquilinoPagosTab').classList.add('active');
+        } else if (tabName === 'contrato') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(3)').classList.add('active');
+            document.getElementById('inquilinoContratoTab').classList.add('active');
+        } else if (tabName === 'docs') {
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(4)').classList.add('active');
             document.getElementById('inquilinoDocsTab').classList.add('active');
         } else if (tabName === 'notas') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(3)').classList.add('active');
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(5)').classList.add('active');
             document.getElementById('inquilinoNotasTab').classList.add('active');
         }
     } else if (type === 'proveedor') {
-        // Remover active de todos
         document.querySelectorAll('#proveedorDetailModal .tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('#proveedorDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
         
@@ -238,6 +215,53 @@ function switchTab(type, tabName) {
     }
 }
 
-console.log('✅ switchTab function loaded');
+// ============================================
+// DROPDOWN
+// ============================================
 
+function toggleDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    document.querySelectorAll('.dropdown-content').forEach(dd => {
+        if (dd.id !== dropdownId) dd.classList.remove('show');
+    });
+    dropdown.classList.toggle('show');
+}
+
+window.addEventListener('click', function(e) {
+    if (!e.target.matches('.dropdown-toggle')) {
+        document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+            dropdown.classList.remove('show');
+        });
+    }
+});
+
+// ============================================
+// LOGOUT
+// ============================================
+
+function logout() {
+    if (confirm('¿Cerrar sesión?')) {
+        localStorage.removeItem('eswu_remembered_user');
+        localStorage.removeItem('eswu_remembered_pass');
+        
+        document.getElementById('appContainer').classList.remove('active');
+        document.getElementById('loginContainer').classList.remove('hidden');
+        document.body.classList.remove('logged-in');
+        
+        document.getElementById('menuSidebar').classList.remove('hidden');
+        document.getElementById('contentArea').classList.remove('fullwidth', 'with-submenu');
+        
+        document.getElementById('inquilinosSubMenu').classList.remove('active');
+        document.getElementById('proveedoresSubMenu').classList.remove('active');
+        document.getElementById('adminSubMenu').classList.remove('active');
+        
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        
+        currentUser = null;
+        currentMenuContext = 'main';
+        currentSubContext = null;
+    }
+}
+
+console.log('✅ switchTab function loaded');
 console.log('✅ NAVIGATION.JS cargado');
