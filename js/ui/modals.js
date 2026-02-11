@@ -258,5 +258,74 @@ function toggleMontoParcialFactura() {
     transform: scale(1.3);
     transition: transform 0.2s;
 }
+/* ========================================
+   MODALS.CSS - CORRECCIÓN LÁPIZ
+   ======================================== */
+
+/* BOTÓN LÁPIZ - MÁS CERCA DE LA X */
+.btn-icon-edit {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--primary);
+    font-size: 1.5rem;
+    padding: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 0.25rem !important;  /* ← Reducido de 0.75rem a 0.25rem */
+    margin-left: auto;  /* ← Empuja todo a la derecha */
+}
+
+.btn-icon-edit:hover {
+    transform: scale(1.2);
+    color: var(--primary-dark);
+}
+
+/* HOVER EN ICONOS DE ACCIÓN */
+.btn-icon-action:hover {
+    transform: scale(1.4) !important;
+}
+
+/* PESTAÑAS STICKY */
+.tabs {
+    position: sticky;
+    top: 80px;
+    background: white;
+    z-index: 50;
+    padding-top: 0.5rem;
+}
+
+/* BOTÓN + INLINE EN PESTAÑAS */
+.btn-add-inline {
+    background: var(--success);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    transition: all 0.2s;
+    vertical-align: middle;
+}
+
+.btn-add-inline:hover {
+    background: var(--primary);
+    transform: scale(1.1);
+}
+
+/* Mostrar botón + solo en pestaña activa */
+.tab .btn-add-inline {
+    display: none;
+}
+
+.tab.active .btn-add-inline {
+    display: inline-flex;
+}
 
 console.log('✅ MODALS.JS cargado');
