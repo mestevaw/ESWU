@@ -111,28 +111,69 @@ let proveedoresFullLoaded = false;
 
 async function loadProveedores() {
     try {
-        // Solo datos básicos
-        const { data, error } = await supabaseClient
+        const { data: proveedoresData, error: proveedoresError } = await supabaseClient
             .from('proveedores')
-            .select('id, nombre, servicio')
+            .select('*')
             .order('nombre');
         
-        if (error) throw error;
+        if (proveedoresError) throw proveedoresError;
         
-        proveedores = data.map(prov => ({
+        const { data: contactosData, error: contactosError } = await supabaseClient
+            .from('proveedores_contactos')
+            .select('*');
+        
+        if (contactosError) throw contactosError;
+        
+        const { data: facturasData, error: facturasError } = await supabaseClient
+            .from('facturas')
+            .select('*')
+            .order('fecha', { ascending: false });
+        
+        if (facturasError) throw facturasError;
+        
+        const { data: docsData, error: docsError } = await supabaseClient
+            .from('proveedores_documentos')
+            .select('*');
+        
+        if (docsError) throw docsError;
+        
+        proveedores = proveedoresData.map(prov => ({
             id: prov.id,
             nombre: prov.nombre,
             servicio: prov.servicio,
-            // Datos que se cargarán después
-            contactos: [],
-            facturas: [],
-            documentos: []
+            clabe: prov.clabe,
+            rfc: prov.rfc,
+            notas: prov.notas,
+            contactos: contactosData.filter(c => c.proveedor_id === prov.id).map(c => ({
+                id: c.id,
+                nombre: c.nombre,
+                telefono: c.telefono,
+                email: c.email
+            })),
+            facturas: facturasData.filter(f => f.proveedor_id === prov.id).map(f => ({
+                id: f.id,
+                numero: f.numero,
+                fecha: f.fecha,
+                vencimiento: f.vencimiento,
+                monto: parseFloat(f.monto),
+                iva: parseFloat(f.iva || 0),
+                fecha_pago: f.fecha_pago,
+                documento_file: f.documento_file,
+                pago_file: f.pago_file
+            })),
+            documentos: docsData.filter(d => d.proveedor_id === prov.id).map(d => ({
+                id: d.id,
+                nombre: d.nombre_documento || d.nombre || 'Documento',  // ✅ CORREGIDO
+                archivo: d.archivo_pdf || d.archivo,  // ✅ CORREGIDO
+                fecha: d.fecha_guardado || d.fecha || new Date().toISOString().split('T')[0],  // ✅ CORREGIDO
+                usuario: d.usuario_guardo || d.usuario || 'Sistema'  // ✅ CORREGIDO
+            }))
         }));
         
-        console.log(`✅ ${proveedores.length} proveedores cargados (básico)`);
+        console.log('✅ Proveedores cargados:', proveedores.length);
         
     } catch (error) {
-        console.error('Error loading proveedores:', error);
+        console.error('❌ Error loading proveedores:', error);
         throw error;
     }
 }
