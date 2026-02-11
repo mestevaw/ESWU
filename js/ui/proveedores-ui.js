@@ -243,7 +243,7 @@ function showProveedorDetail(id) {
     document.getElementById('proveedorDetailNombre').textContent = prov.nombre;
     document.getElementById('proveedorDetailServicio').textContent = prov.servicio;
     
-    // ✅ TELÉFONO Y EMAIL (primer contacto) - COMPRIMIDOS CON SOMBRA
+    // ✅ TELÉFONO Y EMAIL (primer contacto)
     const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
     const telefono = primerContacto.telefono || 'Sin teléfono';
     const email = primerContacto.email || 'Sin email';
@@ -264,14 +264,14 @@ function showProveedorDetail(id) {
     document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
     document.getElementById('detailProvClabe').textContent = prov.clabe || '-';
     
-    // ✅ CONTACTOS (todos)
+    // ✅ CONTACTOS (TODOS)
     const contactosSection = document.getElementById('proveedorContactosSection');
     if (prov.contactos && prov.contactos.length > 0) {
         contactosSection.innerHTML = `
             <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);margin-bottom:1.5rem;">
                 <div style="font-weight:600;color:var(--primary);margin-bottom:0.75rem;font-size:0.875rem;text-transform:uppercase;">Contactos</div>
-                ${prov.contactos.map(c => `
-                    <div style="padding:0.5rem 0;${prov.contactos.indexOf(c) < prov.contactos.length - 1 ? 'border-bottom:1px solid var(--border);' : ''}display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+                ${prov.contactos.map((c, index) => `
+                    <div style="padding:0.75rem 0;${index < prov.contactos.length - 1 ? 'border-bottom:1px solid var(--border);' : ''}display:flex;justify-content:space-between;align-items:center;gap:1rem;">
                         <div style="flex:1;">
                             <strong>${c.nombre}</strong>
                             ${c.telefono ? `<span style="margin-left:1rem;color:var(--text-light);">📞 ${c.telefono}</span>` : ''}
@@ -285,7 +285,7 @@ function showProveedorDetail(id) {
         contactosSection.innerHTML = '';
     }
     
-    // ✅ FACTURAS PAGADAS - TODO EN UNA LÍNEA CON SOMBRA
+    // ✅ FACTURAS PAGADAS - CLICKEABLES CON <a>
     const facturasPagadasDiv = document.getElementById('facturasPagadas');
     const facturasPagadas = prov.facturas.filter(f => f.fecha_pago);
     let totalPagadas = 0;
@@ -295,21 +295,19 @@ function showProveedorDetail(id) {
             totalPagadas += f.monto;
             
             return `
-                <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;align-items:stretch;">
-                    <div style="flex:1;padding:0.75rem 1rem;background:white;border-radius:4px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:1rem;">
-                        <div style="display:flex;gap:1rem;flex:1;">
-                            ${f.documento_file 
-                                ? `<span style="cursor:pointer;color:var(--primary);text-decoration:underline;" onclick="viewFacturaDoc('${f.documento_file}')">📄 Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`
-                                : `<span style="color:var(--text-light);">📄 Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`
-                            }
-                            ${f.pago_file 
-                                ? `<span style="cursor:pointer;color:var(--primary);text-decoration:underline;" onclick="viewFacturaDoc('${f.pago_file}')">💰 Pago del ${formatDate(f.fecha_pago)}</span>`
-                                : `<span style="color:var(--text-light);">💰 Pago del ${formatDate(f.fecha_pago)}</span>`
-                            }
-                        </div>
-                        <div style="font-weight:bold;min-width:120px;text-align:right;">
-                            ${formatCurrency(f.monto)}
-                        </div>
+                <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;padding:0.75rem 1rem;background:white;border-radius:4px;box-shadow:var(--shadow);align-items:center;justify-content:space-between;">
+                    <div style="display:flex;gap:1.5rem;flex:1;align-items:center;">
+                        ${f.documento_file 
+                            ? `<a href="#" onclick="event.preventDefault(); viewFacturaDoc('${f.documento_file}')" style="color:var(--primary);text-decoration:underline;white-space:nowrap;">📄 Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</a>`
+                            : `<span style="color:var(--text-light);white-space:nowrap;">📄 Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`
+                        }
+                        ${f.pago_file 
+                            ? `<a href="#" onclick="event.preventDefault(); viewFacturaDoc('${f.pago_file}')" style="color:var(--primary);text-decoration:underline;white-space:nowrap;">💰 Pago del ${formatDate(f.fecha_pago)}</a>`
+                            : `<span style="color:var(--text-light);white-space:nowrap;">💰 Pago del ${formatDate(f.fecha_pago)}</span>`
+                        }
+                    </div>
+                    <div style="font-weight:bold;min-width:120px;text-align:right;">
+                        ${formatCurrency(f.monto)}
                     </div>
                 </div>
             `;
@@ -318,7 +316,7 @@ function showProveedorDetail(id) {
         facturasPagadasDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas pagadas</p>';
     }
     
-    // ✅ FACTURAS POR PAGAR
+    // ✅ FACTURAS POR PAGAR (sin cambios)
     const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
     const facturasPorPagar = prov.facturas.filter(f => !f.fecha_pago);
     let totalPorPagar = 0;
