@@ -490,3 +490,19 @@
 .btn-add-inline:hover {
     transform: scale(1.3) !important;
 }
+/* ========================================
+   SEPARACIÓN BOTONES HEADER PROVEEDOR
+   ======================================== */
+
+.modal-header-sticky .btn-icon-edit {
+    margin-right: 1rem !important;
+}
+
+.modal-header-sticky .close-modal {
+    margin-left: 0 !important;
+}
+
+/* Asegurar que no se encimen */
+.modal-header-sticky {
+    gap: 1rem !important;
+}
