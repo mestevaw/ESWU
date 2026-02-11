@@ -213,6 +213,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    const pagoPDFFactura = document.getElementById('pagoPDFFactura');
+    if (pagoPDFFactura) {
+        pagoPDFFactura.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('pagoPDFFacturaFileName').textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
+    const nuevoDocProveedorPDF = document.getElementById('nuevoDocProveedorPDF');
+    if (nuevoDocProveedorPDF) {
+        nuevoDocProveedorPDF.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('nuevoDocProveedorPDFFileName').textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
     const activoFotos = document.getElementById('activoFotos');
     if (activoFotos) {
         activoFotos.addEventListener('change', function() {
@@ -229,34 +245,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-function toggleMontoParcialFactura() {
-    const completo = document.getElementById('pagoFacturaCompleto').value;
-    const montoGroup = document.getElementById('pagoFacturaParcialGroup');
-    const montoInput = document.getElementById('montoPagoFacturaParcial');
-    
-    if (completo === 'no') {
-        montoGroup.classList.remove('hidden');
-        montoInput.required = true;
-    } else {
-        montoGroup.classList.add('hidden');
-        montoInput.required = false;
-    }
-}
-/* ========================================
-   AJUSTE SPACING LÁPIZ
-   ======================================== */
-
-.btn-icon-edit {
-    margin-right: 0.75rem !important;
-}
-
-/* ========================================
-   HOVERS ÍCONOS FACTURAS
-   ======================================== */
-
-.btn-icon-action:hover {
-    transform: scale(1.3);
-    transition: transform 0.2s;
-}
 
 console.log('✅ MODALS.JS cargado');
