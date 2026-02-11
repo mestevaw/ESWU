@@ -657,7 +657,10 @@ async function saveFactura(event) {
 
 function editProveedor() {
     const prov = proveedores.find(p => p.id === currentProveedorId);
-    if (!prov) return;
+    if (!prov) {
+        alert('Error: Proveedor no encontrado');
+        return;
+    }
     
     isEditMode = true;
     tempProveedorContactos = [...(prov.contactos || [])];
@@ -669,7 +672,7 @@ function editProveedor() {
     document.getElementById('proveedorRFC').value = prov.rfc || '';
     document.getElementById('proveedorNotas').value = prov.notas || '';
     
-    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto');
+    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');
     
     closeModal('proveedorDetailModal');
     document.getElementById('addProveedorModal').classList.add('active');
