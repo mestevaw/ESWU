@@ -1,6 +1,59 @@
 /* ========================================
-   PROVEEDORES-UI.JS - Proveedores Interface
+   PROVEEDORES-UI.JS - VERSIÓN CORREGIDA
+   Todas las funciones de proveedores
    ======================================== */
+
+// ============================================
+// FUNCIONES AUXILIARES LOCALES
+// ============================================
+
+function ensureCloseModal() {
+    if (typeof closeModal === 'undefined') {
+        window.closeModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.remove('active');
+        };
+    }
+}
+
+function ensureShowLoading() {
+    if (typeof showLoading === 'undefined') {
+        window.showLoading = function() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.classList.remove('hidden');
+        };
+    }
+    if (typeof hideLoading === 'undefined') {
+        window.hideLoading = function() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.classList.add('hidden');
+        };
+    }
+}
+
+function ensureLoadingBanner() {
+    if (typeof showLoadingBanner === 'undefined') {
+        window.showLoadingBanner = function(text) {
+            const banner = document.getElementById('loadingBanner');
+            if (banner) {
+                const textEl = banner.querySelector('.loading-text');
+                if (textEl && text) textEl.textContent = text;
+                banner.classList.remove('hidden');
+            }
+        };
+    }
+    if (typeof hideLoadingBanner === 'undefined') {
+        window.hideLoadingBanner = function() {
+            const banner = document.getElementById('loadingBanner');
+            if (banner) banner.classList.add('hidden');
+        };
+    }
+}
+
+// Ejecutar al cargar
+ensureCloseModal();
+ensureShowLoading();
+ensureLoadingBanner();
 
 // ============================================
 // NAVIGATION - PROVEEDORES VIEWS
@@ -239,203 +292,254 @@ function showProveedorDetail(id) {
     
     currentProveedorId = id;
     
-    // ============================================
     // HEADER
-    // ============================================
-    document.getElementById('proveedorDetailNombre').textContent = prov.nombre;
-    document.getElementById('proveedorDetailServicio').textContent = prov.servicio || '';
+    const nombreEl = document.getElementById('proveedorDetailNombre');
+    const servicioEl = document.getElementById('proveedorDetailServicio');
+    if (nombreEl) nombreEl.textContent = prov.nombre;
+    if (servicioEl) servicioEl.textContent = prov.servicio || '';
     
-    // ============================================
     // TELÉFONO Y EMAIL
-    // ============================================
     const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
-    document.getElementById('proveedorTelefono').textContent = primerContacto.telefono || '-';
+    const telefonoEl = document.getElementById('proveedorTelefono');
+    if (telefonoEl) telefonoEl.textContent = primerContacto.telefono || '-';
     
     const emailLink = document.getElementById('proveedorEmailLink');
     const emailSpan = document.getElementById('proveedorEmail');
-    if (primerContacto.email) {
-        emailLink.href = `mailto:${primerContacto.email}`;
-        emailSpan.textContent = primerContacto.email;
-    } else {
-        emailLink.href = '#';
-        emailSpan.textContent = '-';
+    if (emailLink && emailSpan) {
+        if (primerContacto.email) {
+            emailLink.href = `mailto:${primerContacto.email}`;
+            emailSpan.textContent = primerContacto.email;
+        } else {
+            emailLink.href = '#';
+            emailSpan.textContent = '-';
+        }
     }
     
-    // ============================================
     // RFC Y CLABE
-    // ============================================
-    document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
-    document.getElementById('detailProvClabe').textContent = prov.clabe || '-';
+    const rfcEl = document.getElementById('detailProvRFC');
+    const clabeEl = document.getElementById('detailProvClabe');
+    if (rfcEl) rfcEl.textContent = prov.rfc || '-';
+    if (clabeEl) clabeEl.textContent = prov.clabe || '-';
     
-// ============================================
-// CONTACTOS ADICIONALES
-// ============================================
-const contactosSection = document.getElementById('proveedorContactosSection');
-if (contactosSection && prov.contactos && prov.contactos.length > 1) {
-    const contactosAdicionales = prov.contactos.slice(1);
-    contactosSection.innerHTML = `
-        <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);margin-bottom:1.5rem;">
-            <div style="font-weight:600;color:var(--primary);margin-bottom:0.75rem;font-size:0.9rem;">Contactos Adicionales</div>
-            ${contactosAdicionales.map((c, index) => `
-                <div style="padding:0.75rem;background:white;border-radius:4px;margin-bottom:0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-                    <div style="font-weight:600;margin-bottom:0.25rem;">${c.nombre}</div>
-                    <div style="font-size:0.875rem;color:var(--text-light);">
-                        📞 ${c.telefono || '-'} | ✉️ ${c.email || '-'}
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-} else if (contactosSection) {
-    contactosSection.innerHTML = '';
-}
-    
-    // ============================================
-    // TAB: FACTURAS PAGADAS
-    // ============================================
-    const facturasPagadasDiv = document.getElementById('facturasPagadas');
-    const facturasPagadas = prov.facturas.filter(f => f.fecha_pago);
-    let totalPagadas = 0;
-    
-    if (facturasPagadas.length > 0) {
-        facturasPagadasDiv.innerHTML = facturasPagadas.map(f => {
-            totalPagadas += f.monto;
-            const tieneFactura = !!f.documento_file;
-            const tienePago = !!f.pago_file;
-            
-            return `
-                <div style="background:white;border:1px solid var(--border);border-radius:4px;padding:1rem;margin-bottom:0.75rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);display:flex;justify-content:space-between;align-items:center;">
-                    <div style="display:flex;gap:1rem;align-items:center;flex:1;">
-                        ${tieneFactura ? `
-                            <div onclick="viewDocumento('${f.documento_file}')" style="cursor:pointer;background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
-                                <div style="font-size:0.875rem;font-weight:600;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</div>
+    // CONTACTOS ADICIONALES
+    const contactosSection = document.getElementById('proveedorContactosSection');
+    if (contactosSection) {
+        if (prov.contactos && prov.contactos.length > 1) {
+            const contactosAdicionales = prov.contactos.slice(1);
+            contactosSection.innerHTML = `
+                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);margin-bottom:1.5rem;">
+                    <div style="font-weight:600;color:var(--primary);margin-bottom:0.75rem;font-size:0.9rem;">Contactos Adicionales</div>
+                    ${contactosAdicionales.map(c => `
+                        <div style="padding:0.75rem;background:white;border-radius:4px;margin-bottom:0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                            <div style="font-weight:600;margin-bottom:0.25rem;">${c.nombre}</div>
+                            <div style="font-size:0.875rem;color:var(--text-light);">
+                                📞 ${c.telefono || '-'} | ✉️ ${c.email || '-'}
                             </div>
-                        ` : `
-                            <div style="background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);opacity:0.6;">
-                                <div style="font-size:0.875rem;font-weight:600;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</div>
-                            </div>
-                        `}
-                        ${tienePago ? `
-                            <div onclick="viewDocumento('${f.pago_file}')" style="cursor:pointer;background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
-                                <div style="font-size:0.875rem;font-weight:600;">Pago del ${formatDate(f.fecha_pago)}</div>
-                            </div>
-                        ` : `
-                            <div style="background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);opacity:0.6;">
-                                <div style="font-size:0.875rem;font-weight:600;">Pago del ${formatDate(f.fecha_pago)}</div>
-                            </div>
-                        `}
-                    </div>
-                    <div style="font-size:1.1rem;font-weight:700;color:var(--success);margin-left:1rem;">${formatCurrency(f.monto)}</div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
-        }).join('') + `
-            <div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;border-top:2px solid var(--primary);">
-                TOTAL PAGADO: <span style="color:var(--success);font-size:1.2rem;">${formatCurrency(totalPagadas)}</span>
-            </div>
-        `;
-    } else {
-        facturasPagadasDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas pagadas</p>';
+        } else {
+            contactosSection.innerHTML = '';
+        }
     }
     
-    // ============================================
-    // TAB: FACTURAS X PAGAR
-    // ============================================
-    const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
-    const facturasPorPagar = prov.facturas.filter(f => !f.fecha_pago);
-    let totalPorPagar = 0;
-    
-    if (facturasPorPagar.length > 0) {
-        facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
-            totalPorPagar += f.monto;
-            
-            const facturaTexto = f.documento_file 
-                ? `<span onclick="viewDocumento('${f.documento_file}')" style="cursor:pointer;color:var(--primary);text-decoration:underline;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`
-                : `<span>Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`;
-            
-            return `
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;border-bottom:1px solid var(--border);background:white;">
-                    <div style="flex:1;">
-                        ${facturaTexto} - <strong>Vence:</strong> ${formatDate(f.vencimiento)}
+    // FACTURAS PAGADAS
+    const facturasPagadasDiv = document.getElementById('facturasPagadas');
+    if (facturasPagadasDiv) {
+        const facturasPagadas = prov.facturas ? prov.facturas.filter(f => f.fecha_pago) : [];
+        let totalPagadas = 0;
+        
+        if (facturasPagadas.length > 0) {
+            facturasPagadasDiv.innerHTML = facturasPagadas.map(f => {
+                totalPagadas += f.monto;
+                const tieneFactura = !!f.documento_file;
+                const tienePago = !!f.pago_file;
+                
+                return `
+                    <div style="background:white;border:1px solid var(--border);border-radius:4px;padding:1rem;margin-bottom:0.75rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);display:flex;justify-content:space-between;align-items:center;">
+                        <div style="display:flex;gap:1rem;align-items:center;flex:1;">
+                            ${tieneFactura ? `
+                                <div onclick="viewDocumento('${f.documento_file}')" style="cursor:pointer;background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
+                                    <div style="font-size:0.875rem;font-weight:600;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</div>
+                                </div>
+                            ` : `
+                                <div style="background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);opacity:0.6;">
+                                    <div style="font-size:0.875rem;font-weight:600;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</div>
+                                </div>
+                            `}
+                            ${tienePago ? `
+                                <div onclick="viewDocumento('${f.pago_file}')" style="cursor:pointer;background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
+                                    <div style="font-size:0.875rem;font-weight:600;">Pago del ${formatDate(f.fecha_pago)}</div>
+                                </div>
+                            ` : `
+                                <div style="background:var(--bg);padding:0.5rem 1rem;border-radius:4px;border:1px solid var(--border);opacity:0.6;">
+                                    <div style="font-size:0.875rem;font-weight:600;">Pago del ${formatDate(f.fecha_pago)}</div>
+                                </div>
+                            `}
+                        </div>
+                        <div style="font-size:1.1rem;font-weight:700;color:var(--success);margin-left:1rem;">${formatCurrency(f.monto)}</div>
                     </div>
-                    <div style="display:flex;align-items:center;gap:1rem;">
-                        <button 
-                            class="btn-icon-action" 
-                            onclick="event.stopPropagation(); showEditFacturaModal(${f.id})" 
-                            title="Modificar datos factura"
-                            style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--primary);padding:0.25rem;transition:transform 0.2s;">
-                            ✏️
-                        </button>
-                        <button 
-                            class="btn-icon-action" 
-                            onclick="event.stopPropagation(); showPagarFacturaModal(${f.id})" 
-                            title="Dar por pagada"
-                            style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--success);padding:0.25rem;transition:transform 0.2s;">
-                            🏦
-                        </button>
-                        <button 
-                            class="btn-icon-action" 
-                            onclick="event.stopPropagation(); confirmDeleteFactura(${f.id}, '${(f.numero || 'S/N').replace(/'/g, "\\'")}', ${f.monto})" 
-                            title="Eliminar factura"
-                            style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--danger);padding:0.25rem;transition:transform 0.2s;">
-                            ❌
-                        </button>
-                        <div style="font-size:1.1rem;font-weight:700;color:var(--danger);margin-left:1rem;min-width:100px;text-align:right;">
-                            ${formatCurrency(f.monto)}
+                `;
+            }).join('') + `
+                <div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;border-top:2px solid var(--primary);">
+                    TOTAL PAGADO: <span style="color:var(--success);font-size:1.2rem;">${formatCurrency(totalPagadas)}</span>
+                </div>
+            `;
+        } else {
+            facturasPagadasDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas pagadas</p>';
+        }
+    }
+    
+    // FACTURAS X PAGAR
+    const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
+    if (facturasPorPagarDiv) {
+        const facturasPorPagar = prov.facturas ? prov.facturas.filter(f => !f.fecha_pago) : [];
+        let totalPorPagar = 0;
+        
+        if (facturasPorPagar.length > 0) {
+            facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
+                totalPorPagar += f.monto;
+                
+                const facturaTexto = f.documento_file 
+                    ? `<span onclick="viewDocumento('${f.documento_file}')" style="cursor:pointer;color:var(--primary);text-decoration:underline;">Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`
+                    : `<span>Factura ${f.numero || 'S/N'} del ${formatDate(f.fecha)}</span>`;
+                
+                return `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;border-bottom:1px solid var(--border);background:white;">
+                        <div style="flex:1;">
+                            ${facturaTexto} - <strong>Vence:</strong> ${formatDate(f.vencimiento)}
+                        </div>
+                        <div style="display:flex;align-items:center;gap:1rem;">
+                            <button 
+                                class="btn-icon-action" 
+                                onclick="event.stopPropagation(); showEditFacturaModal(${f.id})" 
+                                title="Modificar datos factura"
+                                style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--primary);padding:0.25rem;transition:transform 0.2s;">
+                                ✏️
+                            </button>
+                            <button 
+                                class="btn-icon-action" 
+                                onclick="event.stopPropagation(); showPagarFacturaModal(${f.id})" 
+                                title="Dar por pagada"
+                                style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--success);padding:0.25rem;transition:transform 0.2s;">
+                                🏦
+                            </button>
+                            <button 
+                                class="btn-icon-action" 
+                                onclick="event.stopPropagation(); confirmDeleteFactura(${f.id}, '${(f.numero || 'S/N').replace(/'/g, "\\'")}', ${f.monto})" 
+                                title="Eliminar factura"
+                                style="font-size:1.25rem;cursor:pointer;border:none;background:transparent;color:var(--danger);padding:0.25rem;transition:transform 0.2s;">
+                                ❌
+                            </button>
+                            <div style="font-size:1.1rem;font-weight:700;color:var(--danger);margin-left:1rem;min-width:100px;text-align:right;">
+                                ${formatCurrency(f.monto)}
+                            </div>
                         </div>
                     </div>
+                `;
+            }).join('') + `
+                <div style="text-align:right;padding:1rem;background:#fff3cd;font-weight:bold;border-top:2px solid var(--warning);">
+                    TOTAL POR PAGAR: <span style="color:var(--danger);font-size:1.2rem;">${formatCurrency(totalPorPagar)}</span>
                 </div>
             `;
-        }).join('') + `
-            <div style="text-align:right;padding:1rem;background:#fff3cd;font-weight:bold;border-top:2px solid var(--warning);">
-                TOTAL POR PAGAR: <span style="color:var(--danger);font-size:1.2rem;">${formatCurrency(totalPorPagar)}</span>
-            </div>
-        `;
-    } else {
-        facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
+        } else {
+            facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
+        }
     }
     
-    // ============================================
-    // TAB: DOCUMENTOS ADICIONALES
-    // ============================================
+    // DOCUMENTOS
     const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
-    if (prov.documentos && prov.documentos.length > 0) {
-        docsDiv.innerHTML = `
-            <table style="width:100%;border-collapse:collapse;">
-                <thead>
-                    <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
-                        <th style="padding:0.75rem;text-align:left;">Nombre</th>
-                        <th style="padding:0.75rem;text-align:left;">Fecha</th>
-                        <th style="padding:0.75rem;text-align:left;">Usuario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${prov.documentos.map(d => `
-                        <tr onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.2s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">
-                            <td style="padding:0.75rem;">${d.nombre || 'Sin nombre'}</td>
-                            <td style="padding:0.75rem;">${d.fecha ? formatDate(d.fecha) : '-'}</td>
-                            <td style="padding:0.75rem;">${d.usuario || 'Sistema'}</td>
+    if (docsDiv) {
+        if (prov.documentos && prov.documentos.length > 0) {
+            docsDiv.innerHTML = `
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+                            <th style="padding:0.75rem;text-align:left;">Nombre</th>
+                            <th style="padding:0.75rem;text-align:left;">Fecha</th>
+                            <th style="padding:0.75rem;text-align:left;">Usuario</th>
+                            <th style="padding:0.75rem;text-align:center;width:50px;"></th>
                         </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    } else {
-        docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
+                    </thead>
+                    <tbody>
+                        ${prov.documentos.map(d => `
+                            <tr style="border-bottom:1px solid var(--border);transition:background 0.2s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">
+                                <td onclick="viewDocumento('${d.archivo}')" style="padding:0.75rem;cursor:pointer;">${d.nombre || 'Sin nombre'}</td>
+                                <td onclick="viewDocumento('${d.archivo}')" style="padding:0.75rem;cursor:pointer;">${d.fecha ? formatDate(d.fecha) : '-'}</td>
+                                <td onclick="viewDocumento('${d.archivo}')" style="padding:0.75rem;cursor:pointer;">${d.usuario || 'Sistema'}</td>
+                                <td style="padding:0.75rem;text-align:center;">
+                                    <button 
+                                        onclick="event.stopPropagation(); confirmDeleteDocumentoProveedor(${d.id}, '${(d.nombre || 'este documento').replace(/'/g, "\\'")}')" 
+                                        style="background:transparent;border:none;color:var(--danger);font-size:1.25rem;cursor:pointer;padding:0.25rem;"
+                                        title="Eliminar documento">
+                                        ❌
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        } else {
+            docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
+        }
     }
     
-    // ============================================
-    // TAB: NOTAS
-    // ============================================
-    document.getElementById('notasProveedor').textContent = prov.notas || 'No hay notas para este proveedor.';
+    // NOTAS
+    const notasEl = document.getElementById('notasProveedor');
+    if (notasEl) notasEl.textContent = prov.notas || 'No hay notas para este proveedor.';
     
-    // Mostrar modal
-    document.getElementById('proveedorDetailModal').classList.add('active');
-    switchTab('proveedor', 'pagadas');
+    // Abrir modal
+    const modal = document.getElementById('proveedorDetailModal');
+    if (modal) modal.classList.add('active');
+    
+    // Activar primera pestaña
+    if (typeof switchTab === 'function') {
+        switchTab('proveedor', 'pagadas');
+    }
 }
 
 // ============================================
-// EDIT FACTURA MODAL
+// MODALS & ACTIONS
 // ============================================
+
+function showRegistrarFacturaModalFromDetail() {
+    // Resetear formulario
+    const form = document.getElementById('facturaForm');
+    if (form) form.reset();
+    
+    isEditMode = false;
+    currentFacturaId = null;
+    
+    const fileNameEl = document.getElementById('facturaDocumentoFileName');
+    if (fileNameEl) fileNameEl.textContent = '';
+    
+    const modal = document.getElementById('registrarFacturaModal');
+    if (modal) modal.classList.add('active');
+}
+
+function showAgregarDocumentoProveedorModal() {
+    const form = document.getElementById('documentoProveedorForm');
+    if (form) form.reset();
+    
+    const fileNameEl = document.getElementById('nuevoDocProveedorPDFFileName');
+    if (fileNameEl) fileNameEl.textContent = '';
+    
+    const modal = document.getElementById('agregarDocumentoProveedorModal');
+    if (modal) modal.classList.add('active');
+}
+
+function showEditarNotasProveedorModal() {
+    const prov = proveedores.find(p => p.id === currentProveedorId);
+    if (!prov) return;
+    
+    const notasEl = document.getElementById('editNotasProveedor');
+    if (notasEl) notasEl.value = prov.notas || '';
+    
+    const modal = document.getElementById('editarNotasProveedorModal');
+    if (modal) modal.classList.add('active');
+}
 
 function showEditFacturaModal(facturaId) {
     const prov = proveedores.find(p => p.id === currentProveedorId);
@@ -447,39 +551,36 @@ function showEditFacturaModal(facturaId) {
     currentFacturaId = facturaId;
     isEditMode = true;
     
-    document.getElementById('facturaNumero').value = factura.numero || '';
-    document.getElementById('facturaFecha').value = factura.fecha;
-    document.getElementById('facturaVencimiento').value = factura.vencimiento;
-    document.getElementById('facturaMonto').value = factura.monto;
-    document.getElementById('facturaIVA').value = factura.iva || 0;
-    document.getElementById('facturaDocumentoFileName').textContent = factura.documento_file ? 'Archivo existente' : '';
+    const numeroEl = document.getElementById('facturaNumero');
+    const fechaEl = document.getElementById('facturaFecha');
+    const vencEl = document.getElementById('facturaVencimiento');
+    const montoEl = document.getElementById('facturaMonto');
+    const ivaEl = document.getElementById('facturaIVA');
+    const fileNameEl = document.getElementById('facturaDocumentoFileName');
     
-    document.getElementById('registrarFacturaModal').classList.add('active');
+    if (numeroEl) numeroEl.value = factura.numero || '';
+    if (fechaEl) fechaEl.value = factura.fecha;
+    if (vencEl) vencEl.value = factura.vencimiento;
+    if (montoEl) montoEl.value = factura.monto;
+    if (ivaEl) ivaEl.value = factura.iva || 0;
+    if (fileNameEl) fileNameEl.textContent = factura.documento_file ? 'Archivo existente' : '';
+    
+    const modal = document.getElementById('registrarFacturaModal');
+    if (modal) modal.classList.add('active');
 }
-
-// ============================================
-// PAGAR FACTURA
-// ============================================
 
 function showPagarFacturaModal(facturaId) {
     currentFacturaId = facturaId;
     
     const form = document.getElementById('pagarFacturaForm');
-    if (form) {
-        form.reset();
-    }
+    if (form) form.reset();
     
     const fileName = document.getElementById('pagoPDFFacturaFileName');
-    if (fileName) {
-        fileName.textContent = '';
-    }
+    if (fileName) fileName.textContent = '';
     
-    document.getElementById('pagarFacturaModal').classList.add('active');
+    const modal = document.getElementById('pagarFacturaModal');
+    if (modal) modal.classList.add('active');
 }
-
-// ============================================
-// ELIMINAR FACTURA
-// ============================================
 
 function confirmDeleteFactura(facturaId, numeroFactura, monto) {
     if (confirm(`¿Seguro quieres eliminar la factura ${numeroFactura} por ${formatCurrency(monto)}?`)) {
@@ -499,7 +600,12 @@ async function deleteFactura(facturaId) {
         
         alert('✅ Factura eliminada exitosamente');
         
-        await ensureProveedoresFullLoaded();
+        if (typeof ensureProveedoresFullLoaded === 'function') {
+            await ensureProveedoresFullLoaded();
+        } else {
+            await loadProveedores();
+        }
+        
         showProveedorDetail(currentProveedorId);
         
     } catch (error) {
@@ -510,173 +616,38 @@ async function deleteFactura(facturaId) {
     }
 }
 
-// ============================================
-// MODALS
-// ============================================
-
-function showRegistrarFacturaModalFromDetail() {
-    if (!currentProveedorId) {
-        alert('Error: No hay proveedor seleccionado');
-        return;
+function confirmDeleteDocumentoProveedor(docId, nombreDoc) {
+    if (confirm(`¿Seguro quieres eliminar el documento "${nombreDoc}"?`)) {
+        deleteDocumentoProveedor(docId);
     }
-    
-    isEditMode = false;
-    currentFacturaId = null;
-    
-    let modal = document.getElementById('registrarFacturaModal');
-    if (!modal) {
-        console.error('❌ Modal registrarFacturaModal no existe en el HTML');
-        alert('Error: Modal de factura no encontrado. Por favor recarga la página.');
-        return;
-    }
-    
-    const facturaForm = document.getElementById('facturaForm');
-    if (facturaForm) {
-        facturaForm.reset();
-    }
-    
-    const fileName = document.getElementById('facturaDocumentoFileName');
-    if (fileName) {
-        fileName.textContent = '';
-    }
-    
-    modal.classList.add('active');
 }
 
-function showAgregarDocumentoProveedorModal() {
-    document.getElementById('nuevoDocProveedorNombre').value = '';
-    document.getElementById('nuevoDocProveedorPDF').value = '';
-    document.getElementById('nuevoDocProveedorPDFFileName').textContent = '';
-    document.getElementById('agregarDocumentoProveedorModal').classList.add('active');
-}
-
-function showEditarNotasProveedorModal() {
-    const prov = proveedores.find(p => p.id === currentProveedorId);
-    document.getElementById('editNotasProveedor').value = prov?.notas || '';
-    document.getElementById('editarNotasProveedorModal').classList.add('active');
-}
-
-async function saveDocumentoProveedor(event) {
-    event.preventDefault();
+async function deleteDocumentoProveedor(docId) {
     showLoading();
-    
     try {
-        const nombre = document.getElementById('nuevoDocProveedorNombre').value;
-        const file = document.getElementById('nuevoDocProveedorPDF').files[0];
-        
-        if (!file) {
-            throw new Error('Seleccione un archivo PDF');
-        }
-        
-        const pdfBase64 = await fileToBase64(file);
-        
         const { error } = await supabaseClient
             .from('proveedores_documentos')
-            .insert([{
-                proveedor_id: currentProveedorId,
-                nombre_documento: nombre,
-                archivo_pdf: pdfBase64,
-                fecha_guardado: new Date().toISOString().split('T')[0],
-                usuario_guardo: currentUser.nombre
-            }]);
+            .delete()
+            .eq('id', docId);
         
         if (error) throw error;
         
-        await ensureProveedoresFullLoaded();
-        showProveedorDetail(currentProveedorId);
-        closeModal('agregarDocumentoProveedorModal');
+        alert('✅ Documento eliminado exitosamente');
         
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al guardar documento: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-async function saveNotasProveedor(event) {
-    event.preventDefault();
-    showLoading();
-    
-    try {
-        const notas = document.getElementById('editNotasProveedor').value;
-        
-        const { error } = await supabaseClient
-            .from('proveedores')
-            .update({ notas: notas })
-            .eq('id', currentProveedorId);
-        
-        if (error) throw error;
-        
-        await ensureProveedoresFullLoaded();
-        showProveedorDetail(currentProveedorId);
-        closeModal('editarNotasProveedorModal');
-        
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al guardar notas: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-function showRegistrarFacturaModalGlobal() {
-    const select = document.createElement('select');
-    select.style.cssText = 'width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 4px; font-size: 1rem; margin-bottom: 1rem;';
-    select.innerHTML = '<option value="">-- Seleccione Proveedor --</option>' + 
-        proveedores.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
-    
-    const modalContent = document.querySelector('#registrarFacturaModal .modal-content');
-    const formContainer = modalContent.querySelector('form').parentElement;
-    const existingSelect = formContainer.querySelector('select[data-proveedor-select]');
-    if (existingSelect) existingSelect.remove();
-    
-    select.setAttribute('data-proveedor-select', 'true');
-    select.onchange = () => { currentProveedorId = parseInt(select.value); };
-    
-    const firstFormGroup = formContainer.querySelector('.form-group');
-    formContainer.insertBefore(select, firstFormGroup);
-    
-    isEditMode = false;
-    currentFacturaId = null;
-    currentProveedorId = null;
-    
-    document.getElementById('facturaForm').reset();
-    document.getElementById('facturaDocumentoFileName').textContent = '';
-    document.getElementById('registrarFacturaModal').classList.add('active');
-}
-
-function editFactura(facturaId) {
-    let factura = null;
-    let proveedorId = null;
-    
-    for (const prov of proveedores) {
-        if (prov.facturas) {
-            factura = prov.facturas.find(f => f.id === facturaId);
-            if (factura) {
-                proveedorId = prov.id;
-                break;
-            }
+        if (typeof ensureProveedoresFullLoaded === 'function') {
+            await ensureProveedoresFullLoaded();
+        } else {
+            await loadProveedores();
         }
+        
+        showProveedorDetail(currentProveedorId);
+        
+    } catch (error) {
+        console.error('Error eliminando documento:', error);
+        alert('❌ Error al eliminar documento: ' + error.message);
+    } finally {
+        hideLoading();
     }
-    
-    if (!factura) {
-        alert('Factura no encontrada');
-        return;
-    }
-    
-    isEditMode = true;
-    currentFacturaId = facturaId;
-    currentProveedorId = proveedorId;
-    
-    document.getElementById('facturaNumero').value = factura.numero || '';
-    document.getElementById('facturaFecha').value = factura.fecha;
-    document.getElementById('facturaVencimiento').value = factura.vencimiento;
-    document.getElementById('facturaMonto').value = factura.monto;
-    document.getElementById('facturaIVA').value = factura.iva || '';
-    document.getElementById('facturaDocumentoFileName').textContent = factura.documento_file ? 'Archivo existente' : '';
-    
-    document.getElementById('registrarFacturaModal').classList.add('active');
 }
 
 function showAddProveedorModal() {
@@ -684,13 +655,23 @@ function showAddProveedorModal() {
     currentProveedorId = null;
     tempProveedorContactos = [];
     
-    document.getElementById('addProveedorTitle').textContent = 'Agregar Proveedor';
-    document.getElementById('proveedorForm').reset();
-    document.getElementById('proveedorContactosList').innerHTML = '<p style="color:var(--text-light);font-size:0.875rem">No hay contactos agregados</p>';
-    document.getElementById('provDocAdicionalFileName').textContent = '';
-    document.getElementById('nombreProvDocGroup').classList.add('hidden');
+    const titleEl = document.getElementById('addProveedorTitle');
+    if (titleEl) titleEl.textContent = 'Agregar Proveedor';
     
-    document.getElementById('addProveedorModal').classList.add('active');
+    const form = document.getElementById('proveedorForm');
+    if (form) form.reset();
+    
+    const listaEl = document.getElementById('proveedorContactosList');
+    if (listaEl) listaEl.innerHTML = '<p style="color:var(--text-light);font-size:0.875rem">No hay contactos agregados</p>';
+    
+    const fileNameEl = document.getElementById('provDocAdicionalFileName');
+    if (fileNameEl) fileNameEl.textContent = '';
+    
+    const docGroupEl = document.getElementById('nombreProvDocGroup');
+    if (docGroupEl) docGroupEl.classList.add('hidden');
+    
+    const modal = document.getElementById('addProveedorModal');
+    if (modal) modal.classList.add('active');
 }
 
 function editProveedor() {
@@ -703,17 +684,32 @@ function editProveedor() {
     isEditMode = true;
     tempProveedorContactos = [...(prov.contactos || [])];
     
-    document.getElementById('addProveedorTitle').textContent = 'Editar Proveedor';
-    document.getElementById('proveedorNombre').value = prov.nombre;
-    document.getElementById('proveedorServicio').value = prov.servicio;
-    document.getElementById('proveedorClabe').value = prov.clabe || '';
-    document.getElementById('proveedorRFC').value = prov.rfc || '';
-    document.getElementById('proveedorNotas').value = prov.notas || '';
+    const titleEl = document.getElementById('addProveedorTitle');
+    if (titleEl) titleEl.textContent = 'Editar Proveedor';
     
-    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');
+    const nombreEl = document.getElementById('proveedorNombre');
+    if (nombreEl) nombreEl.value = prov.nombre;
+    
+    const servicioEl = document.getElementById('proveedorServicio');
+    if (servicioEl) servicioEl.value = prov.servicio;
+    
+    const clabeEl = document.getElementById('proveedorClabe');
+    if (clabeEl) clabeEl.value = prov.clabe || '';
+    
+    const rfcEl = document.getElementById('proveedorRFC');
+    if (rfcEl) rfcEl.value = prov.rfc || '';
+    
+    const notasEl = document.getElementById('proveedorNotas');
+    if (notasEl) notasEl.value = prov.notas || '';
+    
+    if (typeof renderContactosList === 'function') {
+        renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');
+    }
     
     closeModal('proveedorDetailModal');
-    document.getElementById('addProveedorModal').classList.add('active');
+    
+    const modal = document.getElementById('addProveedorModal');
+    if (modal) modal.classList.add('active');
 }
 
 function deleteProveedor() {
@@ -728,7 +724,11 @@ function deleteProveedor() {
         .then(({ error }) => {
             if (error) throw error;
             
-            return ensureProveedoresFullLoaded();
+            if (typeof ensureProveedoresFullLoaded === 'function') {
+                return ensureProveedoresFullLoaded();
+            } else {
+                return loadProveedores();
+            }
         })
         .then(() => {
             closeModal('proveedorDetailModal');
@@ -747,24 +747,27 @@ function deleteProveedor() {
 }
 
 // ============================================
-// FORCE LOAD ON VIEW - OPTIMIZADO
+// LAZY LOADING - SOLO 1 VEZ
 // ============================================
 
-const originalShowProveedoresView = showProveedoresView;
-showProveedoresView = async function(view) {
-    // Solo cargar si no hay datos o si pasó más de 30 segundos
-    const needsLoad = proveedores.length === 0 || 
-                      !window.lastProveedoresLoad || 
-                      (Date.now() - window.lastProveedoresLoad > 30000);
-    
-    if (needsLoad) {
+let proveedoresYaCargados = false;
+
+async function cargarProveedoresSiNecesario() {
+    if (!proveedoresYaCargados) {
         showLoadingBanner('Cargando proveedores...');
-        await ensureProveedoresFullLoaded();
-        window.lastProveedoresLoad = Date.now();
+        if (typeof ensureProveedoresFullLoaded === 'function') {
+            await ensureProveedoresFullLoaded();
+        }
+        proveedoresYaCargados = true;
         hideLoadingBanner();
     }
-    
+}
+
+// Interceptar showProveedoresView para agregar lazy loading
+const originalShowProveedoresView = showProveedoresView;
+window.showProveedoresView = async function(view) {
+    await cargarProveedoresSiNecesario();
     originalShowProveedoresView(view);
 };
 
-console.log('✅ PROVEEDORES-UI.JS cargado');
+console.log('✅ PROVEEDORES-UI.JS cargado y listo');
