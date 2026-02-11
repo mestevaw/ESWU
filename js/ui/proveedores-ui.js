@@ -267,22 +267,28 @@ function showProveedorDetail(id) {
     document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
     document.getElementById('detailProvClabe').textContent = prov.clabe || '-';
     
-    // ============================================
-    // CONTACTOS ADICIONALES
-    // ============================================
-    const contactosAdicionalesDiv = document.getElementById('proveedorContactosAdicionales');
-    if (prov.contactos && prov.contactos.length > 1) {
-        contactosAdicionalesDiv.style.display = 'block';
-        const contactosLista = document.getElementById('proveedorContactosAdicionalesList');
-        contactosLista.innerHTML = prov.contactos.slice(1).map(c => `
-            <div style="margin-bottom:0.5rem;padding:0.5rem;background:white;border-radius:4px;border:1px solid var(--border);">
-                <strong>${c.nombre}</strong><br>
-                <small><strong>Tel:</strong> ${c.telefono || '-'} | <strong>Email:</strong> ${c.email || '-'}</small>
-            </div>
-        `).join('');
-    } else {
-        contactosAdicionalesDiv.style.display = 'none';
-    }
+// ============================================
+// CONTACTOS ADICIONALES
+// ============================================
+const contactosSection = document.getElementById('proveedorContactosSection');
+if (contactosSection && prov.contactos && prov.contactos.length > 1) {
+    const contactosAdicionales = prov.contactos.slice(1);
+    contactosSection.innerHTML = `
+        <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);margin-bottom:1.5rem;">
+            <div style="font-weight:600;color:var(--primary);margin-bottom:0.75rem;font-size:0.9rem;">Contactos Adicionales</div>
+            ${contactosAdicionales.map((c, index) => `
+                <div style="padding:0.75rem;background:white;border-radius:4px;margin-bottom:0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                    <div style="font-weight:600;margin-bottom:0.25rem;">${c.nombre}</div>
+                    <div style="font-size:0.875rem;color:var(--text-light);">
+                        📞 ${c.telefono || '-'} | ✉️ ${c.email || '-'}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+} else if (contactosSection) {
+    contactosSection.innerHTML = '';
+}
     
     // ============================================
     // TAB: FACTURAS PAGADAS
