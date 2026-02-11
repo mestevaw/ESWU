@@ -337,3 +337,25 @@
 .doc-item:hover {
     background: #e2e8f0;
 }
+/* ========================================
+   BOTÓN + VERDE EN PESTAÑAS
+   ======================================== */
+
+.btn-add-inline {
+    color: var(--success);
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    display: none; /* Oculto por defecto */
+}
+
+/* Solo mostrar cuando la pestaña está activa */
+.tab.active .btn-add-inline {
+    display: inline;
+}
+
+.btn-add-inline:hover {
+    transform: scale(1.3);
+}
