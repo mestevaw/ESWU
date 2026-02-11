@@ -253,3 +253,10 @@
     font-weight: 600;
     color: var(--text);
 }
+/* ========================================
+   HOVER ÍCONOS FACTURAS
+   ======================================== */
+
+.btn-icon-action:hover {
+    transform: scale(1.4) !important;
+}
