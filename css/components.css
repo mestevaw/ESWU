@@ -2,7 +2,7 @@
    COMPONENTS.CSS - Buttons, Forms, Cards
    ======================================== */
 
-.btn {
+..btn {
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 4px;
@@ -12,6 +12,18 @@
     transition: all 0.2s;
     text-decoration: none;
     display: inline-block;
+    box-shadow: var(--shadow); /* ← AGREGA ESTA LÍNEA */
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15); /* ← AGREGA ESTA LÍNEA */
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    box-shadow: var(--shadow); /* ← AGREGA ESTA LÍNEA */
 }
 
 .btn-primary {
