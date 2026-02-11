@@ -371,33 +371,33 @@ function showProveedorDetail(id) {
     }
     
     // DOCUMENTOS ADICIONALES
-    const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
-    if (prov.documentos && prov.documentos.length > 0) {
-        docsDiv.innerHTML = `
-            <div style="overflow-x:auto;">
-                <table style="width:100%;border-collapse:collapse;">
-                    <thead>
-                        <tr style="background:var(--bg);">
-                            <th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Nombre</th>
-                            <th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Fecha</th>
-                            <th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Usuario</th>
+const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
+if (prov.documentos && prov.documentos.length > 0) {
+    docsDiv.innerHTML = `
+        <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr style="background:var(--bg);">
+                        <th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Nombre</th>
+                        <th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Fecha</th>
+                        <th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${prov.documentos.map(d => `
+                        <tr style="cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'" onclick="viewDocumento('${d.archivo}')">
+                            <td style="padding:0.75rem;border-bottom:1px solid var(--border);">${d.nombre || 'Documento'}</td>
+                            <td style="padding:0.75rem;border-bottom:1px solid var(--border);">${formatDate(d.fecha)}</td>
+                            <td style="padding:0.75rem;border-bottom:1px solid var(--border);">${d.usuario || 'Sistema'}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        ${prov.documentos.map(d => `
-                            <tr style="cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'" onclick="viewDocumento('${d.archivo}')">
-                                <td style="padding:0.75rem;border-bottom:1px solid var(--border);">${d.nombre}</td>
-                                <td style="padding:0.75rem;border-bottom:1px solid var(--border);">${formatDate(d.fecha)}</td>
-                                <td style="padding:0.75rem;border-bottom:1px solid var(--border);">${d.usuario}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
-    } else {
-        docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem;background:var(--bg);border-radius:4px;">No hay documentos adicionales</p>';
-    }
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+} else {
+    docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem;background:var(--bg);border-radius:4px;">No hay documentos adicionales</p>';
+}
     
     // NOTAS
     document.getElementById('notasProveedor').textContent = prov.notas || 'No hay notas para este proveedor.';
