@@ -747,16 +747,22 @@ function deleteProveedor() {
 }
 
 // ============================================
-// FORCE LOAD ON VIEW
+// FORCE LOAD ON VIEW - OPTIMIZADO
 // ============================================
 
 const originalShowProveedoresView = showProveedoresView;
 showProveedoresView = async function(view) {
-    showLoadingBanner('Cargando proveedores...');
+    // Solo cargar si no hay datos o si pasó más de 30 segundos
+    const needsLoad = proveedores.length === 0 || 
+                      !window.lastProveedoresLoad || 
+                      (Date.now() - window.lastProveedoresLoad > 30000);
     
-    await ensureProveedoresFullLoaded();
-    
-    hideLoadingBanner();
+    if (needsLoad) {
+        showLoadingBanner('Cargando proveedores...');
+        await ensureProveedoresFullLoaded();
+        window.lastProveedoresLoad = Date.now();
+        hideLoadingBanner();
+    }
     
     originalShowProveedoresView(view);
 };
