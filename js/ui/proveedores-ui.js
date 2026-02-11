@@ -1,6 +1,5 @@
 /* ========================================
-   PROVEEDORES-COMPLETE.JS - Consolidado
-   Todas las funciones de proveedores en un solo archivo
+   PROVEEDORES-UI.JS - VERSIÓN FINAL CORREGIDA
    ======================================== */
 
 // ============================================
@@ -207,7 +206,7 @@ function renderProveedoresFacturasPagadas() {
 }
 
 // ============================================
-// RENDER FACTURAS POR PAGAR
+// RENDER FACTURAS POR PAGAR - CON CLABE EN TABLA
 // ============================================
 
 function renderProveedoresFacturasPorPagar() {
@@ -238,7 +237,7 @@ function renderProveedoresFacturasPorPagar() {
                             provId: prov.id,
                             factId: f.id,
                             proveedor: prov.nombre,
-                            clabe: prov.clabe,
+                            clabe: prov.clabe || '-',
                             numero: f.numero || 'S/N',
                             monto: f.monto,
                             vencimiento: f.vencimiento,
@@ -259,23 +258,21 @@ function renderProveedoresFacturasPorPagar() {
             row.onclick = () => viewFacturaDoc(f.documento_file);
         }
         
-        const clabeAttr = f.clabe ? `data-clabe="CLABE: ${f.clabe}"` : '';
-        const clabeClass = f.clabe ? 'proveedor-clabe-hover' : '';
-        
         row.innerHTML = `
-            <td class="${clabeClass}" ${clabeAttr} style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
             <td>${f.numero}</td>
+            <td style="font-family:monospace;font-size:0.85rem;">${f.clabe}</td>
             <td class="currency">${formatCurrency(f.monto)}</td>
             <td>${formatDateVencimiento(f.vencimiento)}</td>
         `;
     });
     
     if (porPagar.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
     } else {
         const row = tbody.insertRow();
         row.className = 'total-row';
-        row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
+        row.innerHTML = `<td colspan="3" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
     }
 }
 
@@ -327,7 +324,7 @@ function showProveedorDetail(id) {
         if (prov.contactos && prov.contactos.length > 1) {
             const contactosAdicionales = prov.contactos.slice(1);
             contactosSection.innerHTML = `
-                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);margin-bottom:1.5rem;">
+                <div style="background:var(--bg);padding:1rem;border-radius:4px;border:1px solid var(--border);margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
                     <div style="font-weight:600;color:var(--primary);margin-bottom:0.75rem;font-size:0.9rem;">Contactos Adicionales</div>
                     ${contactosAdicionales.map(c => `
                         <div style="padding:0.75rem;background:white;border-radius:4px;margin-bottom:0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
@@ -459,14 +456,23 @@ function showProveedorDetail(id) {
                             <th style="padding:0.75rem;text-align:left;">Nombre</th>
                             <th style="padding:0.75rem;text-align:left;">Fecha</th>
                             <th style="padding:0.75rem;text-align:left;">Usuario</th>
+                            <th style="padding:0.75rem;text-align:center;width:50px;"></th>
                         </tr>
                     </thead>
                     <tbody>
                         ${prov.documentos.map(d => `
-                            <tr onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.2s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">
-                                <td style="padding:0.75rem;">${d.nombre || 'Sin nombre'}</td>
-                                <td style="padding:0.75rem;">${d.fecha ? formatDate(d.fecha) : '-'}</td>
-                                <td style="padding:0.75rem;">${d.usuario || 'Sistema'}</td>
+                            <tr style="border-bottom:1px solid var(--border);transition:background 0.2s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">
+                                <td onclick="viewDocumento('${d.archivo}')" style="padding:0.75rem;cursor:pointer;">${d.nombre || 'Sin nombre'}</td>
+                                <td onclick="viewDocumento('${d.archivo}')" style="padding:0.75rem;cursor:pointer;">${d.fecha ? formatDate(d.fecha) : '-'}</td>
+                                <td onclick="viewDocumento('${d.archivo}')" style="padding:0.75rem;cursor:pointer;">${d.usuario || 'Sistema'}</td>
+                                <td style="padding:0.75rem;text-align:center;">
+                                    <button 
+                                        onclick="event.stopPropagation(); confirmDeleteDocumentoProveedor(${d.id}, '${(d.nombre || 'este documento').replace(/'/g, "\\'")}')" 
+                                        style="background:transparent;border:none;color:var(--danger);font-size:1.25rem;cursor:pointer;padding:0.25rem;"
+                                        title="Eliminar documento">
+                                        ❌
+                                    </button>
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -494,6 +500,42 @@ function showProveedorDetail(id) {
 // ============================================
 // MODALS & ACTIONS
 // ============================================
+
+function showRegistrarFacturaModalFromDetail() {
+    const form = document.getElementById('facturaForm');
+    if (form) form.reset();
+    
+    isEditMode = false;
+    currentFacturaId = null;
+    
+    const fileNameEl = document.getElementById('facturaDocumentoFileName');
+    if (fileNameEl) fileNameEl.textContent = '';
+    
+    const modal = document.getElementById('registrarFacturaModal');
+    if (modal) modal.classList.add('active');
+}
+
+function showAgregarDocumentoProveedorModal() {
+    const form = document.getElementById('documentoProveedorForm');
+    if (form) form.reset();
+    
+    const fileNameEl = document.getElementById('nuevoDocProveedorPDFFileName');
+    if (fileNameEl) fileNameEl.textContent = '';
+    
+    const modal = document.getElementById('agregarDocumentoProveedorModal');
+    if (modal) modal.classList.add('active');
+}
+
+function showEditarNotasProveedorModal() {
+    const prov = proveedores.find(p => p.id === currentProveedorId);
+    if (!prov) return;
+    
+    const notasEl = document.getElementById('editNotasProveedor');
+    if (notasEl) notasEl.value = prov.notas || '';
+    
+    const modal = document.getElementById('editarNotasProveedorModal');
+    if (modal) modal.classList.add('active');
+}
 
 function showEditFacturaModal(facturaId) {
     const prov = proveedores.find(p => p.id === currentProveedorId);
@@ -565,6 +607,40 @@ async function deleteFactura(facturaId) {
     } catch (error) {
         console.error('Error eliminando factura:', error);
         alert('❌ Error al eliminar factura: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function confirmDeleteDocumentoProveedor(docId, nombreDoc) {
+    if (confirm(`¿Seguro quieres eliminar el documento "${nombreDoc}"?`)) {
+        deleteDocumentoProveedor(docId);
+    }
+}
+
+async function deleteDocumentoProveedor(docId) {
+    showLoading();
+    try {
+        const { error } = await supabaseClient
+            .from('proveedores_documentos')
+            .delete()
+            .eq('id', docId);
+        
+        if (error) throw error;
+        
+        alert('✅ Documento eliminado exitosamente');
+        
+        if (typeof ensureProveedoresFullLoaded === 'function') {
+            await ensureProveedoresFullLoaded();
+        } else {
+            await loadProveedores();
+        }
+        
+        showProveedorDetail(currentProveedorId);
+        
+    } catch (error) {
+        console.error('Error eliminando documento:', error);
+        alert('❌ Error al eliminar documento: ' + error.message);
     } finally {
         hideLoading();
     }
@@ -690,4 +766,4 @@ window.showProveedoresView = async function(view) {
     originalShowProveedoresView(view);
 };
 
-console.log('✅ PROVEEDORES-COMPLETE.JS cargado');
+console.log('✅ PROVEEDORES-UI.JS cargado y listo');
