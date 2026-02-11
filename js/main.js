@@ -95,20 +95,30 @@ window.addEventListener('DOMContentLoaded', function() {
 // ============================================
 
 async function initializeApp() {
+    showLoadingBanner('Cargando datos...');
+    
     try {
-        // SOLO cargar lo MÍNIMO para mostrar el menú
         await Promise.all([
-            loadInquilinosBasico(),
-            loadProveedoresBasico()
+            loadInquilinos(),
+            loadProveedores(),
+            loadActivos(),
+            loadUsuarios(),
+            loadBancosDocumentos(),
+            loadEstacionamiento(),
+            loadBitacoraSemanal()
         ]);
         
         populateYearSelect();
         populateInquilinosYearSelects();
         populateProveedoresYearSelects();
         
+        console.log('✅ App inicializada correctamente');
+        
     } catch (error) {
-        console.error('Error inicializando app:', error);
+        console.error('❌ Error inicializando app:', error);
         alert('Error cargando datos: ' + error.message);
+    } finally {
+        hideLoadingBanner();
     }
 }
 
