@@ -114,11 +114,21 @@ function updateDespachoField() {
 // LOADING BANNER FUNCTIONS
 // ============================================
 
-function showLoadingBanner(text) {
+function showLoadingBanner(mensaje = 'Cargando...') {
+    const banner = document.getElementById('loadingBanner');
+    if (!banner) return;
+    
+    const textElement = banner.querySelector('.loading-text');
+    if (textElement) {
+        textElement.textContent = `⏳ ${mensaje}`;
+    }
+    banner.classList.remove('hidden');
+}
+
+function hideLoadingBanner() {
     const banner = document.getElementById('loadingBanner');
     if (banner) {
-        banner.querySelector('.loading-text').textContent = `⏳ ${text}`;
-        banner.classList.remove('hidden');
+        banner.classList.add('hidden');
     }
 }
 
