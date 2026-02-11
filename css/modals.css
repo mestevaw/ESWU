@@ -385,3 +385,54 @@
 .btn-add-inline:hover {
     transform: scale(1.3) !important;
 }
+/* ========================================
+   BOTÓN EDITAR EN MODAL HEADER
+   ======================================== */
+
+.btn-icon-edit {
+    background: white;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+}
+
+.btn-icon-edit:hover {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* ========================================
+   BOTÓN + VERDE EN PESTAÑAS (CORREGIDO)
+   ======================================== */
+
+.btn-add-inline {
+    color: var(--success) !important;
+    font-weight: bold !important;
+    font-size: 1.2rem !important;
+    margin-left: 0.5rem !important;
+    cursor: pointer !important;
+    transition: transform 0.2s !important;
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* ✅ Solo mostrar en pestaña activa */
+.tab.active .btn-add-inline {
+    display: inline !important;
+    visibility: visible !important;
+}
+
+.btn-add-inline:hover {
+    transform: scale(1.3) !important;
+}
