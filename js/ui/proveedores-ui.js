@@ -73,9 +73,8 @@ function renderProveedoresTable() {
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
         
         const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.onclick = () => showProveedorDetail(prov.id);
         
+        // ← PRIMERO: innerHTML
         row.innerHTML = `
             <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
             <td>${prov.servicio}</td>
@@ -83,6 +82,10 @@ function renderProveedoresTable() {
             <td>${primerContacto.telefono || '-'}</td>
             <td>${primerContacto.email || '-'}</td>
         `;
+        
+        // ← DESPUÉS: onclick y cursor
+        row.style.cursor = 'pointer';
+        row.onclick = () => showProveedorDetail(prov.id);
     });
     
     if (proveedores.length === 0) {
@@ -98,10 +101,18 @@ function filtrarProveedores(query) {
     
     filtrados.forEach(prov => {
         const row = tbody.insertRow();
+        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
+        
+        row.innerHTML = `
+            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
+            <td>${prov.servicio}</td>
+            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
+            <td>${primerContacto.telefono || '-'}</td>
+            <td>${primerContacto.email || '-'}</td>
+        `;
+        
         row.style.cursor = 'pointer';
         row.onclick = () => showProveedorDetail(prov.id);
-        const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
-        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td><td>${prov.servicio}</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td><td>${primerContacto.telefono || '-'}</td><td>${primerContacto.email || '-'}</td>`;
     });
     
     if (filtrados.length === 0) {
@@ -152,8 +163,6 @@ function renderProveedoresFacturasPagadas() {
     pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     pagadas.forEach(f => {
         const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.onclick = () => showProveedorDetail(f.proveedorId);
         
         const facturaCell = f.documento_file 
             ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" onclick="event.stopPropagation(); viewFacturaDoc('${f.documento_file}')">${f.numero}</td>`
@@ -161,7 +170,12 @@ function renderProveedoresFacturasPagadas() {
         const fechaCell = f.pago_file
             ? `<td style="cursor:pointer;color:var(--primary)" onclick="event.stopPropagation(); viewFacturaDoc('${f.pago_file}')">${formatDate(f.fecha)}</td>`
             : `<td>${formatDate(f.fecha)}</td>`;
+        
         row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
+        
+        // ← DESPUÉS de innerHTML
+        row.style.cursor = 'pointer';
+        row.onclick = () => showProveedorDetail(f.proveedorId);
     });
     
     if (pagadas.length === 0) {
@@ -216,11 +230,12 @@ function renderProveedoresFacturasPorPagar() {
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     porPagar.forEach(f => {
         const row = tbody.insertRow();
+        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
+        
         row.style.cursor = 'pointer';
         if (f.documento_file) {
             row.onclick = () => viewFacturaDoc(f.documento_file);
         }
-        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
     });
     
     if (porPagar.length === 0) {
