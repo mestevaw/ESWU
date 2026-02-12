@@ -301,6 +301,98 @@
 }
 
 /* ============================================
+   FICHA PROVEEDOR - NOMBRE AUTO-SIZE
+   ============================================ */
+
+.prov-nombre-auto {
+    font-size: 1.35rem;
+    line-height: 1.25;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Si el nombre es muy largo (más de ~30 chars), reducir fuente */
+.prov-nombre-auto.nombre-largo {
+    font-size: 1.05rem;
+}
+
+/* ============================================
+   FICHA PROVEEDOR - RECUADROS SOMBREADOS
+   ============================================ */
+
+.prov-info-box {
+    flex: 1;
+    min-width: 120px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.prov-info-box a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.prov-info-box a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================
+   FICHA PROVEEDOR - DROPDOWN CONTACTOS
+   ============================================ */
+
+.prov-contacts-toggle {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    transition: background 0.2s;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.prov-contacts-toggle:hover {
+    background: #e2e8f0;
+}
+
+.prov-contacts-toggle .chevron {
+    transition: transform 0.2s;
+    font-size: 0.75rem;
+}
+
+.prov-contacts-toggle.open .chevron {
+    transform: rotate(180deg);
+}
+
+.prov-contacts-list {
+    display: none;
+    margin-bottom: 0.5rem;
+}
+
+.prov-contacts-list.open {
+    display: block;
+}
+
+.prov-contacts-list .contact-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.85rem;
+}
+
+/* ============================================
    HOVER EN ICONOS DE ACCIÓN
    ============================================ */
 
