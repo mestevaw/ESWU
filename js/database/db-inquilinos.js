@@ -1,6 +1,7 @@
 /* ========================================
    DB-INQUILINOS.JS - Database operations for inquilinos
    OPTIMIZADO: No carga PDFs en memoria
+   Última actualización: 2026-02-12 13:30 CST
    ======================================== */
 
 async function loadInquilinos() {
