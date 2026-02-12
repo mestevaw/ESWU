@@ -162,17 +162,19 @@ function renderProveedoresFacturasPagadas() {
     pagadas.forEach(f => {
         const row = tbody.insertRow();
         
-        const facturaCell = f.documento_file 
-            ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" onclick="event.stopPropagation(); viewFacturaDoc('${f.documento_file}')">${f.numero}</td>`
-            : `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.numero}</td>`;
-        const fechaCell = f.pago_file
-            ? `<td style="cursor:pointer;color:var(--primary)" onclick="event.stopPropagation(); viewFacturaDoc('${f.pago_file}')">${formatDate(f.fecha)}</td>`
-            : `<td>${formatDate(f.fecha)}</td>`;
+        // Click en la fila → abre PDF de la factura (no ficha del proveedor)
+        if (f.documento_file) {
+            row.style.cursor = 'pointer';
+            row.onclick = () => viewFacturaDoc(f.documento_file);
+        }
         
-        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
-        
-        row.style.cursor = 'pointer';
-        row.onclick = () => showProveedorDetail(f.proveedorId);
+        // Orden: Proveedor | No. Factura | Pagada en | Monto
+        row.innerHTML = `
+            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
+            <td>${f.numero}</td>
+            <td>${formatDate(f.fecha)}</td>
+            <td class="currency">${formatCurrency(f.monto)}</td>
+        `;
     });
     
     if (pagadas.length === 0) {
@@ -180,7 +182,7 @@ function renderProveedoresFacturasPagadas() {
     } else {
         const row = tbody.insertRow();
         row.className = 'total-row';
-        row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
+        row.innerHTML = `<td colspan="3" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td>`;
     }
 }
 
@@ -213,6 +215,7 @@ function renderProveedoresFacturasPorPagar() {
                             factId: f.id,
                             proveedor: prov.nombre,
                             numero: f.numero || 'S/N',
+                            clabe: prov.clabe || '-',
                             monto: f.monto,
                             vencimiento: f.vencimiento,
                             documento_file: f.documento_file
@@ -227,7 +230,13 @@ function renderProveedoresFacturasPorPagar() {
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     porPagar.forEach(f => {
         const row = tbody.insertRow();
-        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
+        row.innerHTML = `
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.proveedor}</td>
+            <td style="white-space:nowrap">${f.numero}</td>
+            <td style="white-space:nowrap; font-size:0.85rem;">${f.clabe}</td>
+            <td style="white-space:nowrap">${formatDateVencimiento(f.vencimiento)}</td>
+            <td class="currency" style="white-space:nowrap">${formatCurrency(f.monto)}</td>
+        `;
         
         row.style.cursor = 'pointer';
         if (f.documento_file) {
@@ -236,11 +245,11 @@ function renderProveedoresFacturasPorPagar() {
     });
     
     if (porPagar.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
     } else {
         const row = tbody.insertRow();
         row.className = 'total-row';
-        row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
+        row.innerHTML = `<td colspan="4" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td>`;
     }
 }
 
