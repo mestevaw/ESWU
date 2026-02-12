@@ -202,12 +202,29 @@ function switchTab(type, tabName) {
         document.querySelectorAll('#proveedorDetailModal .tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('#proveedorDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
         
+        // Siempre limpiar el + verde de la pestaña porpagar
+        const tabPorPagar = document.querySelector('#proveedorDetailModal .tab:nth-child(2)');
+        const existingPlus = tabPorPagar.querySelector('.tab-plus-icon');
+        if (existingPlus) existingPlus.remove();
+        
         if (tabName === 'pagadas') {
             document.querySelector('#proveedorDetailModal .tab:nth-child(1)').classList.add('active');
             document.getElementById('proveedorPagadasTab').classList.add('active');
         } else if (tabName === 'porpagar') {
-            document.querySelector('#proveedorDetailModal .tab:nth-child(2)').classList.add('active');
+            tabPorPagar.classList.add('active');
             document.getElementById('proveedorPorPagarTab').classList.add('active');
+            
+            // Agregar + verde solo cuando esta pestaña está activa
+            const plusSpan = document.createElement('span');
+            plusSpan.className = 'tab-plus-icon';
+            plusSpan.textContent = ' +';
+            plusSpan.title = 'Agregar factura';
+            plusSpan.style.cssText = 'color:var(--success); font-weight:700; font-size:1.2rem; cursor:pointer; margin-left:0.25rem;';
+            plusSpan.onclick = function(e) {
+                e.stopPropagation();
+                showRegistrarFacturaModal();
+            };
+            tabPorPagar.appendChild(plusSpan);
         } else if (tabName === 'docs') {
             document.querySelector('#proveedorDetailModal .tab:nth-child(3)').classList.add('active');
             document.getElementById('proveedorDocsTab').classList.add('active');
