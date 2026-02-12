@@ -17,6 +17,15 @@
         <div class="loading-spinner"></div>
     </div>
 
+    <!-- PDF Viewer Overlay (móvil) -->
+    <div id="pdfViewerOverlay" class="pdf-viewer-overlay">
+        <div class="pdf-viewer-header">
+            <span style="font-weight:600; color:var(--primary);">Documento</span>
+            <button class="pdf-viewer-close" onclick="closePDFViewer()">✕</button>
+        </div>
+        <iframe id="pdfViewerIframe" class="pdf-viewer-iframe" src=""></iframe>
+    </div>
+
     <div id="loginContainer" class="login-container">
         <div class="login-box">
             <h1>ESWU</h1>
