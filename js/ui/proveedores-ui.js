@@ -97,7 +97,8 @@ function filtrarProveedores(query) {
     
     const filtrados = proveedores.filter(prov => 
         prov.nombre.toLowerCase().includes(query) || 
-        (prov.servicio || '').toLowerCase().includes(query)
+        (prov.servicio || '').toLowerCase().includes(query) ||
+        (prov.contactos || []).some(c => (c.nombre || '').toLowerCase().includes(query))
     );
     
     filtrados.forEach(prov => {
