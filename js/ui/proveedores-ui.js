@@ -6,12 +6,22 @@
 // FUNCIONES AUXILIARES PARA VER DOCUMENTOS
 // ============================================
 
-function viewFacturaDoc(archivo) {
-    openPDFViewer(archivo);
+function viewFacturaDoc(facturaIdOrArchivo, tipo) {
+    // Si es un número, es un ID → usar fetch on-demand
+    if (typeof facturaIdOrArchivo === 'number') {
+        fetchAndViewFactura(facturaIdOrArchivo, tipo || 'documento');
+    } else if (facturaIdOrArchivo) {
+        // Fallback legacy (base64 directo)
+        openPDFViewer(facturaIdOrArchivo);
+    }
 }
 
-function viewDocumento(archivo) {
-    openPDFViewer(archivo);
+function viewDocumento(docIdOrArchivo) {
+    if (typeof docIdOrArchivo === 'number') {
+        fetchAndViewDocProveedor(docIdOrArchivo);
+    } else if (docIdOrArchivo) {
+        openPDFViewer(docIdOrArchivo);
+    }
 }
 
 // ============================================
@@ -68,6 +78,7 @@ function renderProveedoresTable() {
         
         const row = tbody.insertRow();
         
+        // ← PRIMERO: innerHTML
         row.innerHTML = `
             <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
             <td>${prov.servicio}</td>
@@ -76,6 +87,7 @@ function renderProveedoresTable() {
             <td>${primerContacto.email || '-'}</td>
         `;
         
+        // ← DESPUÉS: onclick y cursor
         row.style.cursor = 'pointer';
         row.onclick = () => showProveedorDetail(prov.id);
     });
@@ -89,11 +101,7 @@ function filtrarProveedores(query) {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
     tbody.innerHTML = '';
     
-    const filtrados = proveedores.filter(prov => 
-        prov.nombre.toLowerCase().includes(query) || 
-        (prov.servicio || '').toLowerCase().includes(query) ||
-        (prov.contactos || []).some(c => (c.nombre || '').toLowerCase().includes(query))
-    );
+    const filtrados = proveedores.filter(prov => prov.nombre.toLowerCase().includes(query));
     
     filtrados.forEach(prov => {
         const row = tbody.insertRow();
@@ -143,11 +151,12 @@ function renderProveedoresFacturasPagadas() {
                         pagadas.push({
                             proveedor: prov.nombre,
                             proveedorId: prov.id,
+                            facturaId: f.id,
                             numero: f.numero || 'S/N',
                             monto: f.monto,
                             fecha: f.fecha_pago,
-                            documento_file: f.documento_file,
-                            pago_file: f.pago_file
+                            has_documento: f.has_documento,
+                            has_pago: f.has_pago
                         });
                         totalPagadas += f.monto;
                     }
@@ -160,19 +169,17 @@ function renderProveedoresFacturasPagadas() {
     pagadas.forEach(f => {
         const row = tbody.insertRow();
         
-        // Click en la fila → abre PDF de la factura (no ficha del proveedor)
-        if (f.documento_file) {
-            row.style.cursor = 'pointer';
-            row.onclick = () => viewFacturaDoc(f.documento_file);
-        }
+        const facturaCell = f.has_documento 
+            ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" onclick="event.stopPropagation(); viewFacturaDoc(${f.facturaId}, 'documento')">${f.numero}</td>`
+            : `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.numero}</td>`;
+        const fechaCell = f.has_pago
+            ? `<td style="cursor:pointer;color:var(--primary)" onclick="event.stopPropagation(); viewFacturaDoc(${f.facturaId}, 'pago')">${formatDate(f.fecha)}</td>`
+            : `<td>${formatDate(f.fecha)}</td>`;
         
-        // Orden: Proveedor | No. Factura | Pagada en | Monto
-        row.innerHTML = `
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
-            <td>${f.numero}</td>
-            <td>${formatDate(f.fecha)}</td>
-            <td class="currency">${formatCurrency(f.monto)}</td>
-        `;
+        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
+        
+        row.style.cursor = 'pointer';
+        row.onclick = () => showProveedorDetail(f.proveedorId);
     });
     
     if (pagadas.length === 0) {
@@ -180,7 +187,7 @@ function renderProveedoresFacturasPagadas() {
     } else {
         const row = tbody.insertRow();
         row.className = 'total-row';
-        row.innerHTML = `<td colspan="3" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td>`;
+        row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
     }
 }
 
@@ -213,10 +220,9 @@ function renderProveedoresFacturasPorPagar() {
                             factId: f.id,
                             proveedor: prov.nombre,
                             numero: f.numero || 'S/N',
-                            clabe: prov.clabe || '-',
                             monto: f.monto,
                             vencimiento: f.vencimiento,
-                            documento_file: f.documento_file
+                            has_documento: f.has_documento
                         });
                         totalPorPagar += f.monto;
                     }
@@ -228,26 +234,20 @@ function renderProveedoresFacturasPorPagar() {
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     porPagar.forEach(f => {
         const row = tbody.insertRow();
-        row.innerHTML = `
-            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.proveedor}</td>
-            <td style="white-space:nowrap">${f.numero}</td>
-            <td style="white-space:nowrap; font-size:0.85rem;">${f.clabe}</td>
-            <td style="white-space:nowrap">${formatDateVencimiento(f.vencimiento)}</td>
-            <td class="currency" style="white-space:nowrap">${formatCurrency(f.monto)}</td>
-        `;
+        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td><td>${f.numero}</td><td class="currency">${formatCurrency(f.monto)}</td><td>${formatDateVencimiento(f.vencimiento)}</td>`;
         
         row.style.cursor = 'pointer';
-        if (f.documento_file) {
-            row.onclick = () => viewFacturaDoc(f.documento_file);
+        if (f.has_documento) {
+            row.onclick = () => viewFacturaDoc(f.factId, 'documento');
         }
     });
     
     if (porPagar.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay facturas por pagar</td></tr>';
     } else {
         const row = tbody.insertRow();
         row.className = 'total-row';
-        row.innerHTML = `<td colspan="4" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td>`;
+        row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPorPagar)}</strong></td><td></td>`;
     }
 }
 
@@ -264,65 +264,24 @@ function showProveedorDetail(id) {
     
     currentProveedorId = id;
     
-    // ── 1. Nombre con auto-sizing ──
-    const nombreEl = document.getElementById('proveedorDetailNombre');
-    nombreEl.textContent = prov.nombre;
-    if (prov.nombre.length > 40) {
-        nombreEl.style.fontSize = '1rem';
-    } else if (prov.nombre.length > 25) {
-        nombreEl.style.fontSize = '1.2rem';
-    } else {
-        nombreEl.style.fontSize = '1.5rem';
-    }
-    
-    // ── 2. Servicio debajo del nombre ──
+    document.getElementById('proveedorDetailNombre').textContent = prov.nombre;
     document.getElementById('detailServicio').textContent = prov.servicio;
     
-    // ── 3. Teléfono y Email del contacto principal ──
-    const contactInfo = document.getElementById('provDetailContactInfo');
-    const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : null;
-    
-    const telefono = primerContacto?.telefono || '-';
-    const email = primerContacto?.email || '-';
-    const emailContent = email !== '-' 
-        ? `<a href="mailto:${email}" style="color:var(--primary); text-decoration:none;">${email}</a>` 
-        : '-';
-    
-    contactInfo.innerHTML = `
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.75rem; display:flex; align-items:center; gap:0.5rem;">
-            <span style="font-size:1.1rem;">📞</span> <span>${telefono}</span>
-        </div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.75rem; display:flex; align-items:center; gap:0.5rem;">
-            <span style="font-size:1.1rem;">✉️</span> <span>${emailContent}</span>
-        </div>
-    `;
-    
-    // ── 4. RFC y CLABE (se llenan vía IDs en el HTML) ──
-    document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
-    document.getElementById('detailProvClabe').textContent = prov.clabe || '-';
-    
-    // ── 5. Contactos adicionales en dropdown ──
-    const additionalSection = document.getElementById('provAdditionalContactsSection');
-    if (prov.contactos && prov.contactos.length > 1) {
-        const additional = prov.contactos.slice(1);
-        document.getElementById('provAdditionalContactsCount').textContent = additional.length;
-        document.getElementById('provAdditionalContactsList').innerHTML = additional.map(c => {
-            const cEmail = c.email 
-                ? `<a href="mailto:${c.email}" style="color:var(--primary);text-decoration:none;">✉️ ${c.email}</a>` 
-                : '✉️ -';
-            return `
-                <div style="margin-bottom:0.5rem; padding:0.75rem; background:white; border:1px solid var(--border); border-radius:4px;">
-                    <strong>${c.nombre}</strong><br>
-                    <small>📞 ${c.telefono || '-'} &nbsp;|&nbsp; ${cEmail}</small>
-                </div>
-            `;
-        }).join('');
-        additionalSection.style.display = 'block';
+    const contactosList = document.getElementById('detailProvContactosList');
+    if (prov.contactos && prov.contactos.length > 0) {
+        contactosList.innerHTML = prov.contactos.map(c => `
+            <div style="margin-bottom:0.5rem;padding:0.5rem;background:white;border-radius:4px">
+                <strong>${c.nombre}</strong><br>
+                <small><strong>Tel:</strong> ${c.telefono || '-'} | <strong>Email:</strong> ${c.email || '-'}</small>
+            </div>
+        `).join('');
     } else {
-        additionalSection.style.display = 'none';
+        contactosList.innerHTML = '<p style="color:var(--text-light)">No hay contactos</p>';
     }
     
-    // ── Pestaña: Facturas Pagadas ──
+    document.getElementById('detailProvClabe').textContent = prov.clabe || '-';
+    document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
+    
     const facturasPagadasDiv = document.getElementById('facturasPagadas');
     const facturasPagadas = prov.facturas.filter(f => f.fecha_pago);
     let totalPagadas = 0;
@@ -330,32 +289,19 @@ function showProveedorDetail(id) {
     if (facturasPagadas.length > 0) {
         facturasPagadasDiv.innerHTML = facturasPagadas.map(f => {
             totalPagadas += f.monto;
-            
-            // Recuadro 1: "Factura X del fecha" — clickeable si hay PDF
-            const facturaBox = f.documento_file
-                ? `<div onclick="viewFacturaDoc('${f.documento_file}')" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
-                       <strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}
-                   </div>`
-                : `<div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; color:var(--text-light);">
-                       <strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}
-                   </div>`;
-            
-            // Recuadro 2: "Pago del: fecha" — clickeable si hay comprobante PDF
-            const pagoBox = f.pago_file
-                ? `<div onclick="viewFacturaDoc('${f.pago_file}')" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
-                       <strong>Pago del:</strong> ${formatDate(f.fecha_pago)}
-                   </div>`
-                : `<div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; color:var(--text-light);">
-                       <strong>Pago del:</strong> ${formatDate(f.fecha_pago)}
-                   </div>`;
-            
+            const facturaLink = f.has_documento 
+                ? `<a href="#" class="pdf-link" onclick="event.preventDefault(); fetchAndViewFactura(${f.id}, 'documento')">Factura</a>` 
+                : '';
+            const pagoLink = f.has_pago 
+                ? `<a href="#" class="pdf-link" onclick="event.preventDefault(); fetchAndViewFactura(${f.id}, 'pago')">Pago</a>` 
+                : '';
             return `
-                <div style="border:1px solid var(--border); border-radius:6px; padding:0.75rem; margin-bottom:0.5rem; background:white;">
-                    <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
-                        ${facturaBox}
-                        ${pagoBox}
-                        <div style="margin-left:auto; font-weight:700; color:var(--primary); white-space:nowrap;">${formatCurrency(f.monto)}</div>
+                <div class="payment-item">
+                    <div class="payment-item-content">
+                        <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong> pagada el <strong>${formatDate(f.fecha_pago)}</strong></div>
+                        <div style="margin-top:0.5rem">${facturaLink} ${pagoLink}</div>
                     </div>
+                    <div style="text-align:right"><strong>${formatCurrency(f.monto)}</strong></div>
                 </div>
             `;
         }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPagadas)}</strong></div>`;
@@ -363,164 +309,77 @@ function showProveedorDetail(id) {
         facturasPagadasDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas pagadas</p>';
     }
     
-    // ── Pestaña: Facturas Por Pagar ──
     const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
     const facturasPorPagar = prov.facturas.filter(f => !f.fecha_pago);
     let totalPorPagar = 0;
+    const isMobile = window.innerWidth <= 768;
     
     if (facturasPorPagar.length > 0) {
-        facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
-            totalPorPagar += f.monto;
-            const clickPDF = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
-            const cursorPDF = f.documento_file ? 'cursor:pointer;' : '';
-            const escapedNumero = (f.numero || 'S/N').replace(/'/g, "\\'");
-            
-            return `
-                <div style="border:1px solid var(--border); border-radius:6px; padding:0; margin-bottom:0.5rem; background:white; position:relative;">
-                    <!-- Iconos esquina superior derecha -->
-                    <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.25rem; z-index:2;">
-                        <span onclick="event.stopPropagation(); showEditFacturaModal(${f.id})" title="Modificar datos factura" style="cursor:pointer; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
-                        <span onclick="event.stopPropagation(); showPagarFacturaModal(${f.id})" title="Dar factura x pagada" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏦</span>
-                        <span onclick="event.stopPropagation(); deleteFacturaConConfirm(${f.id}, '${escapedNumero}')" title="Eliminar factura" style="cursor:pointer; color:var(--danger); font-size:1.1rem; font-weight:700; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
-                    </div>
-                    <!-- Contenido clickeable -->
-                    <div style="display:flex; align-items:stretch;">
-                        <div ${clickPDF} style="flex:1; background:var(--bg); border-radius:6px 0 0 6px; padding:0.75rem; ${cursorPDF} transition:background 0.2s;" onmouseover="if(this.onclick||this.getAttribute('onclick'))this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
-                            <div><strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}</div>
-                            <div style="margin-top:0.25rem; color:var(--text-light);">A ser pagada el <strong>${formatDate(f.vencimiento)}</strong></div>
+        if (isMobile) {
+            facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
+                totalPorPagar += f.monto;
+                const clickAction = f.has_documento ? `onclick="fetchAndViewFactura(${f.id}, 'documento')"` : '';
+                const cursorStyle = f.has_documento ? 'cursor:pointer;' : '';
+                return `
+                    <div class="factura-box" ${clickAction} style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white; ${cursorStyle}">
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong>
                         </div>
-                        <div style="display:flex; align-items:flex-end; padding:0.75rem; min-width:120px; justify-content:flex-end;">
-                            <span style="font-weight:700; color:var(--primary); font-size:1.05rem;">${formatCurrency(f.monto)}</span>
+                        <div style="margin-bottom: 0.5rem;">
+                            Vence: <strong>${formatDate(f.vencimiento)}</strong>
+                        </div>
+                        <div style="text-align:right; font-size: 1.1rem; color: var(--primary);">
+                            <strong>${formatCurrency(f.monto)}</strong>
+                        </div>
+                        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;" onclick="event.stopPropagation()">
+                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
                         </div>
                     </div>
-                </div>
-            `;
-        }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
+                `;
+            }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
+        } else {
+            facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
+                totalPorPagar += f.monto;
+                const verLink = f.has_documento 
+                    ? `<button class="btn btn-sm btn-secondary" onclick="fetchAndViewFactura(${f.id}, 'documento')">Ver</button>` 
+                    : '';
+                return `
+                    <div class="payment-item">
+                        <div class="payment-item-content">
+                            <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
+                            <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
+                            <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
+                        </div>
+                        <div class="payment-item-actions">
+                            ${verLink}
+                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+            }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
+        }
     } else {
         facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
     }
     
-    // ── Pestaña: Documentos Adicionales ──
     const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
     if (prov.documentos && prov.documentos.length > 0) {
-        const escapedDocs = prov.documentos.map(d => {
-            const escapedNombre = (d.nombre || '').replace(/'/g, "\\'");
-            return `
-                <tr class="doc-item">
-                    <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer; word-wrap:break-word">${d.nombre}</td>
-                    <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${formatDate(d.fecha)}</td>
-                    <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${d.usuario}</td>
-                    <td style="width:40px; text-align:center;">
-                        <span onclick="event.stopPropagation(); deleteProveedorDocConConfirm(${d.id}, '${escapedNombre}')" title="Eliminar documento" style="cursor:pointer; color:var(--danger); font-weight:700; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
-                    </td>
+        docsDiv.innerHTML = '<table style="width:100%;table-layout:fixed"><thead><tr><th style="width:50%">Nombre</th><th style="width:25%">Fecha</th><th style="width:25%">Usuario</th></tr></thead><tbody>' +
+            prov.documentos.map(d => `
+                <tr class="doc-item" onclick="fetchAndViewDocProveedor(${d.id})">
+                    <td style="word-wrap:break-word">${d.nombre}</td>
+                    <td>${formatDate(d.fecha)}</td>
+                    <td>${d.usuario}</td>
                 </tr>
-            `;
-        }).join('');
-        docsDiv.innerHTML = '<table style="width:100%;table-layout:fixed"><thead><tr><th style="width:40%">Nombre</th><th style="width:22%">Fecha</th><th style="width:22%">Usuario</th><th style="width:40px"></th></tr></thead><tbody>' + escapedDocs + '</tbody></table>';
+            `).join('') + '</tbody></table>';
     } else {
         docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
     }
     
-    // ── Altura fija: que el modal no cambie de tamaño entre pestañas ──
-    // Equivalente a ~3 filas de contenido
-    document.getElementById('proveedorPagadasTab').style.minHeight = '220px';
-    document.getElementById('proveedorPorPagarTab').style.minHeight = '220px';
-    document.getElementById('proveedorDocsTab').style.minHeight = '220px';
-    
-    // ── Abrir modal y activar primera pestaña ──
     document.getElementById('proveedorDetailModal').classList.add('active');
     switchTab('proveedor', 'pagadas');
-}
-
-// ============================================
-// DELETE FACTURA WITH CUSTOM CONFIRM
-// ============================================
-
-function deleteFacturaConConfirm(facturaId, numeroFactura) {
-    if (confirm('¿Seguro quiere eliminar la factura ' + numeroFactura + '?')) {
-        deleteFactura(facturaId);
-    }
-    // Si dice "no", simplemente no hace nada y el usuario sigue en la ficha del proveedor
-}
-
-// ============================================
-// DOCUMENTOS ADICIONALES PROVEEDOR
-// ============================================
-
-function showAgregarDocumentoProveedorModal() {
-    document.getElementById('nuevoDocProvNombre').value = '';
-    document.getElementById('nuevoDocProvPDF').value = '';
-    document.getElementById('nuevoDocProvPDFFileName').textContent = '';
-    document.getElementById('agregarDocumentoProveedorModal').classList.add('active');
-}
-
-async function saveDocumentoAdicionalProveedor(event) {
-    event.preventDefault();
-    showLoading();
-    
-    try {
-        const nombre = document.getElementById('nuevoDocProvNombre').value;
-        const file = document.getElementById('nuevoDocProvPDF').files[0];
-        
-        if (!file) {
-            throw new Error('Seleccione un archivo PDF');
-        }
-        
-        const pdfBase64 = await fileToBase64(file);
-        
-        const { error } = await supabaseClient
-            .from('proveedores_documentos')
-            .insert([{
-                proveedor_id: currentProveedorId,
-                nombre_documento: nombre,
-                archivo_pdf: pdfBase64,
-                fecha_guardado: new Date().toISOString().split('T')[0],
-                usuario_guardo: currentUser.nombre
-            }]);
-        
-        if (error) throw error;
-        
-        await loadProveedores();
-        closeModal('agregarDocumentoProveedorModal');
-        showProveedorDetail(currentProveedorId);
-        // Ir directo a la pestaña de docs
-        setTimeout(() => switchTab('proveedor', 'docs'), 100);
-        
-    } catch (error) {
-        console.error('Error:', error);
-        alert('❌ Error al guardar documento: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-function deleteProveedorDocConConfirm(docId, nombreDoc) {
-    if (confirm('¿Seguro quiere eliminar el documento ' + nombreDoc + '?')) {
-        deleteProveedorDocumento(docId);
-    }
-}
-
-async function deleteProveedorDocumento(docId) {
-    showLoading();
-    try {
-        const { error } = await supabaseClient
-            .from('proveedores_documentos')
-            .delete()
-            .eq('id', docId);
-        
-        if (error) throw error;
-        
-        await loadProveedores();
-        showProveedorDetail(currentProveedorId);
-        // Ir directo a la pestaña de docs
-        setTimeout(() => switchTab('proveedor', 'docs'), 100);
-        
-    } catch (error) {
-        console.error('Error:', error);
-        alert('❌ Error al eliminar documento: ' + error.message);
-    } finally {
-        hideLoading();
-    }
 }
 
 console.log('✅ PROVEEDORES-UI.JS cargado');
