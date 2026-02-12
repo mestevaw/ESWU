@@ -330,7 +330,7 @@ if (inq.contactos && inq.contactos.length > 0) {
         document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
         
         // BOTÓN DE CONTRATO
-        const contratoButtonSection = document.getElementById('contratoOriginalSection');
+        const contratoButtonSection = document.getElementById('contratoButtonSection');
         if (inq.contrato_file) {
             contratoButtonSection.innerHTML = `
                 <button class="btn btn-primary" onclick="viewContrato()" style="width:100%;font-size:1.1rem;padding:1rem;">
@@ -477,16 +477,12 @@ function showEditContactoInquilinoModal(index) {
 function viewContrato() {
     const inq = inquilinos.find(i => i.id === currentInquilinoId);
     if (inq && inq.contrato_file) {
-        const newWindow = window.open();
-        newWindow.document.write(`<iframe width='100%' height='100%' src='${inq.contrato_file}'></iframe>`);
+        openPDFViewer(inq.contrato_file);
     }
 }
 
 function viewDocumento(archivo) {
-    if (archivo) {
-        const newWindow = window.open();
-        newWindow.document.write(`<iframe width='100%' height='100%' src='${archivo}'></iframe>`);
-    }
+    openPDFViewer(archivo);
 }
 
 async function deleteDocumentoAdicional(docId) {
