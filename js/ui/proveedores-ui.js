@@ -1,7 +1,7 @@
 /* ========================================
    PROVEEDORES UI - TODAS LAS FUNCIONES
    Diseño restaurado sesiones 3-6 + optimización sesiones 7-8
-   Última actualización: 2026-02-12 18:00 CST
+   Última actualización: 2026-02-12 18:30 CST
    ======================================== */
 
 // ============================================
@@ -353,12 +353,19 @@ function showProveedorDetail(id) {
     if (facturasPagadas.length > 0) {
         const rows = facturasPagadas.map(f => {
             totalPagadas += f.monto;
-            const clickDoc = f.has_documento ? `onclick="fetchAndViewFactura(${f.id}, 'documento')" title="Ver PDF" style="cursor:pointer; color:var(--primary);"` : '';
-            const clickPago = f.has_pago ? `onclick="fetchAndViewFactura(${f.id}, 'pago')" title="Ver PDF" style="cursor:pointer; color:var(--primary);"` : '';
+            
+            // Icono 📄 clickeable si hay PDF, gris si no hay
+            const docIcon = f.has_documento 
+                ? `<span onclick="fetchAndViewFactura(${f.id}, 'documento')" title="Ver factura PDF" style="cursor:pointer; margin-right:0.35rem; font-size:0.9rem;">📄</span>`
+                : '';
+            const pagoIcon = f.has_pago
+                ? `<span onclick="fetchAndViewFactura(${f.id}, 'pago')" title="Ver comprobante PDF" style="cursor:pointer; margin-right:0.35rem; font-size:0.9rem;">📄</span>`
+                : '';
+            
             return `<tr>
-                <td ${clickDoc}><strong>${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}</td>
-                <td ${clickPago}>${formatDate(f.fecha_pago)}</td>
-                <td class="currency">${formatCurrency(f.monto)}</td>
+                <td style="padding:0.4rem 0.5rem;">${docIcon}<strong>${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}</td>
+                <td style="padding:0.4rem 0.5rem;">${pagoIcon}${formatDate(f.fecha_pago)}</td>
+                <td class="currency" style="padding:0.4rem 0.5rem;">${formatCurrency(f.monto)}</td>
             </tr>`;
         }).join('');
         
@@ -611,4 +618,49 @@ function replaceProveedorDoc(docId) {
     input.click();
 }
 
-console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 18:00 CST)');
+// ============================================
+// EXPORTAR PROVEEDORES A EXCEL
+// ============================================
+
+function exportProveedoresToExcel() {
+    if (!proveedores || proveedores.length === 0) {
+        alert('No hay proveedores para exportar');
+        return;
+    }
+    
+    const data = proveedores.map(prov => {
+        const first = (prov.contactos && prov.contactos.length > 0) ? prov.contactos[0] : {};
+        return {
+            'Proveedor': prov.nombre,
+            'Servicio': prov.servicio || '',
+            'Contacto': first.nombre || '',
+            'Teléfono': first.telefono || '',
+            'Email': first.email || '',
+            'RFC': prov.rfc || '',
+            'CLABE': prov.clabe || '',
+            'Notas': prov.notas || ''
+        };
+    });
+    
+    const ws = XLSX.utils.json_to_sheet(data);
+    
+    // Ajustar anchos de columna
+    ws['!cols'] = [
+        { wch: 30 }, // Proveedor
+        { wch: 20 }, // Servicio
+        { wch: 25 }, // Contacto
+        { wch: 15 }, // Teléfono
+        { wch: 25 }, // Email
+        { wch: 15 }, // RFC
+        { wch: 20 }, // CLABE
+        { wch: 30 }  // Notas
+    ];
+    
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Proveedores');
+    
+    const fecha = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `Proveedores_${fecha}.xlsx`);
+}
+
+console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 18:30 CST)');
