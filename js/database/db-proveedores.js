@@ -115,6 +115,21 @@ async function saveProveedor(event) {
             proveedorId = data[0].id;
         }
         
+        // Recoger contacto inline (primer contacto)
+        const inlineNombre = document.getElementById('proveedorContactoNombreInline').value.trim();
+        const inlineTel = document.getElementById('proveedorContactoTelInline').value.trim();
+        const inlineEmail = document.getElementById('proveedorContactoEmailInline').value.trim();
+        
+        // Si hay nombre inline, actualizar/agregar como primer contacto
+        if (inlineNombre) {
+            const inlineContacto = { nombre: inlineNombre, telefono: inlineTel, email: inlineEmail };
+            if (tempProveedorContactos.length > 0) {
+                tempProveedorContactos[0] = inlineContacto;
+            } else {
+                tempProveedorContactos.unshift(inlineContacto);
+            }
+        }
+        
         if (tempProveedorContactos.length > 0) {
             const contactosToInsert = tempProveedorContactos.map(c => ({
                 proveedor_id: proveedorId,
@@ -150,8 +165,6 @@ async function saveProveedor(event) {
         if (currentSubContext === 'proveedores-list') {
             renderProveedoresTable();
         }
-        
-        alert('✅ Proveedor guardado correctamente');
         
     } catch (error) {
         console.error('Error:', error);
@@ -204,7 +217,15 @@ function editProveedor() {
     document.getElementById('proveedorRFC').value = prov.rfc || '';
     document.getElementById('proveedorNotas').value = prov.notas || '';
     
-    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');
+    // Llenar contacto inline (primer contacto)
+    const first = (prov.contactos && prov.contactos.length > 0) ? prov.contactos[0] : {};
+    document.getElementById('proveedorContactoNombreInline').value = first.nombre || '';
+    document.getElementById('proveedorContactoTelInline').value = first.telefono || '';
+    document.getElementById('proveedorContactoEmailInline').value = first.email || '';
+    
+    // Contactos adicionales (sin el primero, que ya está inline)
+    const extraContactos = tempProveedorContactos.length > 1 ? tempProveedorContactos.slice(1) : [];
+    renderContactosList(extraContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');
     
     closeModal('proveedorDetailModal');
     document.getElementById('addProveedorModal').classList.add('active');
