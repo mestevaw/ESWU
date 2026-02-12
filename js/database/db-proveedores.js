@@ -1,69 +1,73 @@
 /* ========================================
    DB-PROVEEDORES.JS - Database operations for proveedores
-   CORREGIDO: queries separadas (no nested selects)
+   Usa queries separadas (NO nested selects)
    ======================================== */
 
 async function loadProveedores() {
     try {
-        // Queries separadas - nested selects dan error 500
-        const { data: proveedoresData, error: proveedoresError } = await supabaseClient
+        // Query 1: Solo proveedores
+        var r1 = await supabaseClient
             .from('proveedores')
             .select('*')
             .order('nombre');
         
-        if (proveedoresError) throw proveedoresError;
+        if (r1.error) throw r1.error;
         
-        const { data: contactosData, error: contactosError } = await supabaseClient
+        // Query 2: Todos los contactos
+        var r2 = await supabaseClient
             .from('proveedores_contactos')
             .select('*');
         
-        if (contactosError) throw contactosError;
+        if (r2.error) throw r2.error;
         
-        const { data: facturasData, error: facturasError } = await supabaseClient
+        // Query 3: Todas las facturas
+        var r3 = await supabaseClient
             .from('facturas')
-            .select('*')
-            .order('fecha', { ascending: false });
+            .select('*');
         
-        if (facturasError) throw facturasError;
+        if (r3.error) throw r3.error;
         
-        const { data: docsData, error: docsError } = await supabaseClient
+        // Query 4: Todos los documentos
+        var r4 = await supabaseClient
             .from('proveedores_documentos')
             .select('*');
         
-        if (docsError) throw docsError;
+        if (r4.error) throw r4.error;
         
-        proveedores = proveedoresData.map(prov => ({
-            id: prov.id,
-            nombre: prov.nombre,
-            servicio: prov.servicio,
-            clabe: prov.clabe,
-            rfc: prov.rfc,
-            notas: prov.notas,
-            contactos: (contactosData || []).filter(c => c.proveedor_id === prov.id).map(c => ({
-                id: c.id,
-                nombre: c.nombre,
-                telefono: c.telefono,
-                email: c.email
-            })),
-            facturas: (facturasData || []).filter(f => f.proveedor_id === prov.id).map(f => ({
-                id: f.id,
-                numero: f.numero,
-                fecha: f.fecha,
-                vencimiento: f.vencimiento,
-                monto: parseFloat(f.monto),
-                iva: parseFloat(f.iva || 0),
-                fecha_pago: f.fecha_pago,
-                documento_file: f.documento_file,
-                pago_file: f.pago_file
-            })).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)),
-            documentos: (docsData || []).filter(d => d.proveedor_id === prov.id).map(d => ({
-                id: d.id,
-                nombre: d.nombre_documento,
-                archivo: d.archivo_pdf,
-                fecha: d.fecha_guardado,
-                usuario: d.usuario_guardo
-            })).sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
-        }));
+        var contactosData = r2.data || [];
+        var facturasData = r3.data || [];
+        var docsData = r4.data || [];
+        
+        // Combinar en JavaScript
+        proveedores = r1.data.map(function(prov) {
+            return {
+                id: prov.id,
+                nombre: prov.nombre,
+                servicio: prov.servicio,
+                clabe: prov.clabe,
+                rfc: prov.rfc,
+                notas: prov.notas,
+                contactos: contactosData.filter(function(c) { return c.proveedor_id === prov.id; }).map(function(c) {
+                    return { id: c.id, nombre: c.nombre, telefono: c.telefono, email: c.email };
+                }),
+                facturas: facturasData.filter(function(f) { return f.proveedor_id === prov.id; }).map(function(f) {
+                    return {
+                        id: f.id,
+                        numero: f.numero,
+                        fecha: f.fecha,
+                        vencimiento: f.vencimiento,
+                        monto: parseFloat(f.monto),
+                        iva: parseFloat(f.iva || 0),
+                        fecha_pago: f.fecha_pago,
+                        documento_file: f.documento_file,
+                        pago_file: f.pago_file
+                    };
+                }).sort(function(a, b) { return new Date(b.fecha) - new Date(a.fecha); }),
+                documentos: docsData.filter(function(d) { return d.proveedor_id === prov.id; }).map(function(d) {
+                    return { id: d.id, nombre: d.nombre_documento, archivo: d.archivo_pdf, fecha: d.fecha_guardado, usuario: d.usuario_guardo };
+                }).sort(function(a, b) { return (a.nombre || '').localeCompare(b.nombre || ''); })
+            };
+        });
         
         console.log('✅ Proveedores cargados:', proveedores.length);
     } catch (error) {
@@ -77,16 +81,16 @@ async function saveProveedor(event) {
     showLoading();
     
     try {
-        const docFile = document.getElementById('proveedorDocAdicional').files[0];
-        let docURL = null;
-        let docNombre = null;
+        var docFile = document.getElementById('proveedorDocAdicional').files[0];
+        var docURL = null;
+        var docNombre = null;
         
         if (docFile) {
             docURL = await fileToBase64(docFile);
             docNombre = document.getElementById('proveedorNombreDoc').value;
         }
         
-        const proveedorData = {
+        var proveedorData = {
             nombre: document.getElementById('proveedorNombre').value,
             servicio: document.getElementById('proveedorServicio').value,
             clabe: document.getElementById('proveedorClabe').value || null,
@@ -94,15 +98,15 @@ async function saveProveedor(event) {
             notas: document.getElementById('proveedorNotas').value || null
         };
         
-        let proveedorId;
+        var proveedorId;
         
         if (isEditMode && currentProveedorId) {
-            const { error } = await supabaseClient
+            var result1 = await supabaseClient
                 .from('proveedores')
                 .update(proveedorData)
                 .eq('id', currentProveedorId);
             
-            if (error) throw error;
+            if (result1.error) throw result1.error;
             
             await supabaseClient
                 .from('proveedores_contactos')
@@ -111,32 +115,34 @@ async function saveProveedor(event) {
             
             proveedorId = currentProveedorId;
         } else {
-            const { data, error } = await supabaseClient
+            var result2 = await supabaseClient
                 .from('proveedores')
                 .insert([proveedorData])
                 .select();
             
-            if (error) throw error;
-            proveedorId = data[0].id;
+            if (result2.error) throw result2.error;
+            proveedorId = result2.data[0].id;
         }
         
         if (tempProveedorContactos.length > 0) {
-            const contactosToInsert = tempProveedorContactos.map(c => ({
-                proveedor_id: proveedorId,
-                nombre: c.nombre,
-                telefono: c.telefono || null,
-                email: c.email || null
-            }));
+            var contactosToInsert = tempProveedorContactos.map(function(c) {
+                return {
+                    proveedor_id: proveedorId,
+                    nombre: c.nombre,
+                    telefono: c.telefono || null,
+                    email: c.email || null
+                };
+            });
             
-            const { error: contactosError } = await supabaseClient
+            var result3 = await supabaseClient
                 .from('proveedores_contactos')
                 .insert(contactosToInsert);
             
-            if (contactosError) throw contactosError;
+            if (result3.error) throw result3.error;
         }
         
         if (docURL && docNombre) {
-            const { error: docError } = await supabaseClient
+            var result4 = await supabaseClient
                 .from('proveedores_documentos')
                 .insert([{
                     proveedor_id: proveedorId,
@@ -146,7 +152,7 @@ async function saveProveedor(event) {
                     usuario_guardo: currentUser.nombre
                 }]);
             
-            if (docError) throw docError;
+            if (result4.error) throw result4.error;
         }
         
         await loadProveedores();
@@ -174,12 +180,12 @@ async function deleteProveedor() {
     showLoading();
     
     try {
-        const { error } = await supabaseClient
+        var result = await supabaseClient
             .from('proveedores')
             .delete()
             .eq('id', currentProveedorId);
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
         await loadProveedores();
         closeModal('proveedorDetailModal');
@@ -196,11 +202,11 @@ async function deleteProveedor() {
 }
 
 function editProveedor() {
-    const prov = proveedores.find(p => p.id === currentProveedorId);
+    var prov = proveedores.find(function(p) { return p.id === currentProveedorId; });
     if (!prov) return;
     
     isEditMode = true;
-    tempProveedorContactos = [...(prov.contactos || [])];
+    tempProveedorContactos = [].concat(prov.contactos || []);
     
     document.getElementById('addProveedorTitle').textContent = 'Editar Proveedor';
     document.getElementById('proveedorNombre').value = prov.nombre;
