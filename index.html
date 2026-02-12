@@ -590,6 +590,35 @@
         </div>
     </div>
 
+        <!-- Agregar Documento Adicional Proveedor Modal -->
+    <div id="agregarDocumentoProveedorModal" class="modal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar Documento</h2>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button type="submit" form="docProveedorForm" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
+                    <button class="close-modal" onclick="closeModal('agregarDocumentoProveedorModal')" title="Cancelar">×</button>
+                </div>
+            </div>
+            <div style="padding:1.25rem;">
+                <form id="docProveedorForm" onsubmit="saveDocumentoAdicionalProveedor(event)">
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
+                        <label style="min-width:110px; font-weight:500; white-space:nowrap;">Nombre *</label>
+                        <input type="text" id="nuevoDocProvNombre" required autocomplete="off" style="flex:1; padding:0.5rem; border:2px solid var(--border); border-radius:4px; font-size:1rem;">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+                        <label style="min-width:110px; font-weight:500; white-space:nowrap;">PDF *</label>
+                        <div onclick="document.getElementById('nuevoDocProvPDF').click()" style="flex:1; padding:0.5rem 0.75rem; border:2px dashed var(--border); border-radius:4px; cursor:pointer; text-align:center; font-size:0.9rem; color:var(--text-light); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+                            <input type="file" id="nuevoDocProvPDF" accept=".pdf" required style="display:none;" onchange="document.getElementById('nuevoDocProvPDFFileName').textContent=this.files[0]?this.files[0].name:''">
+                            <span>Click para seleccionar PDF</span>
+                            <span id="nuevoDocProvPDFFileName" style="color:var(--success); margin-left:0.5rem;"></span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
     <!-- Modal Proveedor Detail -->
   <!-- =============================================
          REEMPLAZAR EN index.html LÍNEAS 594-641
