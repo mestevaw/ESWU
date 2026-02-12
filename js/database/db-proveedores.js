@@ -1,75 +1,65 @@
 /* ========================================
    DB-PROVEEDORES.JS - Database operations for proveedores
-   Usa queries separadas (NO nested selects)
+   OPTIMIZADO: No carga PDFs en memoria
    ======================================== */
 
 async function loadProveedores() {
     try {
-        // Query 1: Solo proveedores
-        var r1 = await supabaseClient
+        // SELECT sin campos pesados (documento_file, pago_file, archivo_pdf)
+        const { data, error } = await supabaseClient
             .from('proveedores')
-            .select('*')
+            .select('id, nombre, servicio, clabe, rfc, notas, facturas(id, proveedor_id, numero, fecha, vencimiento, monto, iva, fecha_pago), proveedores_documentos(id, proveedor_id, nombre_documento, fecha_guardado, usuario_guardo), proveedores_contactos(*)')
             .order('nombre');
         
-        if (r1.error) throw r1.error;
+        if (error) throw error;
         
-        // Query 2: Todos los contactos
-        var r2 = await supabaseClient
-            .from('proveedores_contactos')
-            .select('*');
-        
-        if (r2.error) throw r2.error;
-        
-        // Query 3: Todas las facturas
-        var r3 = await supabaseClient
+        // Verificar cuáles facturas tienen documento (sin cargar el PDF)
+        const { data: conDocumento } = await supabaseClient
             .from('facturas')
-            .select('*');
+            .select('id')
+            .not('documento_file', 'is', null);
+        const docSet = new Set((conDocumento || []).map(f => f.id));
         
-        if (r3.error) throw r3.error;
+        // Verificar cuáles facturas tienen comprobante de pago (sin cargar el PDF)
+        const { data: conPago } = await supabaseClient
+            .from('facturas')
+            .select('id')
+            .not('pago_file', 'is', null);
+        const pagoSet = new Set((conPago || []).map(f => f.id));
         
-        // Query 4: Todos los documentos
-        var r4 = await supabaseClient
-            .from('proveedores_documentos')
-            .select('*');
+        proveedores = data.map(prov => ({
+            id: prov.id,
+            nombre: prov.nombre,
+            servicio: prov.servicio,
+            clabe: prov.clabe,
+            rfc: prov.rfc,
+            notas: prov.notas,
+            contactos: prov.proveedores_contactos ? prov.proveedores_contactos.map(c => ({
+                id: c.id,
+                nombre: c.nombre,
+                telefono: c.telefono,
+                email: c.email
+            })) : [],
+            facturas: prov.facturas ? prov.facturas.map(f => ({
+                id: f.id,
+                numero: f.numero,
+                fecha: f.fecha,
+                vencimiento: f.vencimiento,
+                monto: parseFloat(f.monto),
+                iva: parseFloat(f.iva || 0),
+                fecha_pago: f.fecha_pago,
+                has_documento: docSet.has(f.id),
+                has_pago: pagoSet.has(f.id)
+            })).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)) : [],
+            documentos: prov.proveedores_documentos ? prov.proveedores_documentos.map(d => ({
+                id: d.id,
+                nombre: d.nombre_documento,
+                fecha: d.fecha_guardado,
+                usuario: d.usuario_guardo
+            })).sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '')) : []
+        }));
         
-        if (r4.error) throw r4.error;
-        
-        var contactosData = r2.data || [];
-        var facturasData = r3.data || [];
-        var docsData = r4.data || [];
-        
-        // Combinar en JavaScript
-        proveedores = r1.data.map(function(prov) {
-            return {
-                id: prov.id,
-                nombre: prov.nombre,
-                servicio: prov.servicio,
-                clabe: prov.clabe,
-                rfc: prov.rfc,
-                notas: prov.notas,
-                contactos: contactosData.filter(function(c) { return c.proveedor_id === prov.id; }).map(function(c) {
-                    return { id: c.id, nombre: c.nombre, telefono: c.telefono, email: c.email };
-                }),
-                facturas: facturasData.filter(function(f) { return f.proveedor_id === prov.id; }).map(function(f) {
-                    return {
-                        id: f.id,
-                        numero: f.numero,
-                        fecha: f.fecha,
-                        vencimiento: f.vencimiento,
-                        monto: parseFloat(f.monto),
-                        iva: parseFloat(f.iva || 0),
-                        fecha_pago: f.fecha_pago,
-                        documento_file: f.documento_file,
-                        pago_file: f.pago_file
-                    };
-                }).sort(function(a, b) { return new Date(b.fecha) - new Date(a.fecha); }),
-                documentos: docsData.filter(function(d) { return d.proveedor_id === prov.id; }).map(function(d) {
-                    return { id: d.id, nombre: d.nombre_documento, archivo: d.archivo_pdf, fecha: d.fecha_guardado, usuario: d.usuario_guardo };
-                }).sort(function(a, b) { return (a.nombre || '').localeCompare(b.nombre || ''); })
-            };
-        });
-        
-        console.log('✅ Proveedores cargados:', proveedores.length);
+        console.log('✅ Proveedores cargados:', proveedores.length, '(sin PDFs)');
     } catch (error) {
         console.error('❌ Error loading proveedores:', error);
         throw error;
@@ -81,16 +71,16 @@ async function saveProveedor(event) {
     showLoading();
     
     try {
-        var docFile = document.getElementById('proveedorDocAdicional').files[0];
-        var docURL = null;
-        var docNombre = null;
+        const docFile = document.getElementById('proveedorDocAdicional').files[0];
+        let docURL = null;
+        let docNombre = null;
         
         if (docFile) {
             docURL = await fileToBase64(docFile);
             docNombre = document.getElementById('proveedorNombreDoc').value;
         }
         
-        var proveedorData = {
+        const proveedorData = {
             nombre: document.getElementById('proveedorNombre').value,
             servicio: document.getElementById('proveedorServicio').value,
             clabe: document.getElementById('proveedorClabe').value || null,
@@ -98,15 +88,15 @@ async function saveProveedor(event) {
             notas: document.getElementById('proveedorNotas').value || null
         };
         
-        var proveedorId;
+        let proveedorId;
         
         if (isEditMode && currentProveedorId) {
-            var result1 = await supabaseClient
+            const { error } = await supabaseClient
                 .from('proveedores')
                 .update(proveedorData)
                 .eq('id', currentProveedorId);
             
-            if (result1.error) throw result1.error;
+            if (error) throw error;
             
             await supabaseClient
                 .from('proveedores_contactos')
@@ -115,34 +105,32 @@ async function saveProveedor(event) {
             
             proveedorId = currentProveedorId;
         } else {
-            var result2 = await supabaseClient
+            const { data, error } = await supabaseClient
                 .from('proveedores')
                 .insert([proveedorData])
                 .select();
             
-            if (result2.error) throw result2.error;
-            proveedorId = result2.data[0].id;
+            if (error) throw error;
+            proveedorId = data[0].id;
         }
         
         if (tempProveedorContactos.length > 0) {
-            var contactosToInsert = tempProveedorContactos.map(function(c) {
-                return {
-                    proveedor_id: proveedorId,
-                    nombre: c.nombre,
-                    telefono: c.telefono || null,
-                    email: c.email || null
-                };
-            });
+            const contactosToInsert = tempProveedorContactos.map(c => ({
+                proveedor_id: proveedorId,
+                nombre: c.nombre,
+                telefono: c.telefono || null,
+                email: c.email || null
+            }));
             
-            var result3 = await supabaseClient
+            const { error: contactosError } = await supabaseClient
                 .from('proveedores_contactos')
                 .insert(contactosToInsert);
             
-            if (result3.error) throw result3.error;
+            if (contactosError) throw contactosError;
         }
         
         if (docURL && docNombre) {
-            var result4 = await supabaseClient
+            const { error: docError } = await supabaseClient
                 .from('proveedores_documentos')
                 .insert([{
                     proveedor_id: proveedorId,
@@ -152,7 +140,7 @@ async function saveProveedor(event) {
                     usuario_guardo: currentUser.nombre
                 }]);
             
-            if (result4.error) throw result4.error;
+            if (docError) throw docError;
         }
         
         await loadProveedores();
@@ -180,12 +168,12 @@ async function deleteProveedor() {
     showLoading();
     
     try {
-        var result = await supabaseClient
+        const { error } = await supabaseClient
             .from('proveedores')
             .delete()
             .eq('id', currentProveedorId);
         
-        if (result.error) throw result.error;
+        if (error) throw error;
         
         await loadProveedores();
         closeModal('proveedorDetailModal');
@@ -202,11 +190,11 @@ async function deleteProveedor() {
 }
 
 function editProveedor() {
-    var prov = proveedores.find(function(p) { return p.id === currentProveedorId; });
+    const prov = proveedores.find(p => p.id === currentProveedorId);
     if (!prov) return;
     
     isEditMode = true;
-    tempProveedorContactos = [].concat(prov.contactos || []);
+    tempProveedorContactos = [...(prov.contactos || [])];
     
     document.getElementById('addProveedorTitle').textContent = 'Editar Proveedor';
     document.getElementById('proveedorNombre').value = prov.nombre;
@@ -221,4 +209,4 @@ function editProveedor() {
     document.getElementById('addProveedorModal').classList.add('active');
 }
 
-console.log('✅ DB-PROVEEDORES.JS cargado');
+console.log('✅ DB-PROVEEDORES.JS cargado (optimizado)');
