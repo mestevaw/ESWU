@@ -275,39 +275,62 @@ function showProveedorDetail(id) {
     
     currentProveedorId = id;
     
-    document.getElementById('proveedorDetailNombre').textContent = prov.nombre;
-    document.getElementById('proveedorDetailServicio').textContent = prov.servicio || '';
-    
-    // Contactos
-    const primaryDiv = document.getElementById('provDetailContactPrimary');
-    const additionalDiv = document.getElementById('provDetailAdditionalContacts');
-    
-    if (prov.contactos && prov.contactos.length > 0) {
-        const first = prov.contactos[0];
-        primaryDiv.innerHTML = `
-            <div style="margin-bottom:0.5rem;padding:0.5rem;background:white;border-radius:4px">
-                <strong>${first.nombre}</strong><br>
-                <small><strong>Tel:</strong> ${first.telefono || '-'} | <strong>Email:</strong> ${first.email || '-'}</small>
-            </div>
-        `;
-        
-        if (prov.contactos.length > 1) {
-            additionalDiv.innerHTML = prov.contactos.slice(1).map(c => `
-                <div style="margin-bottom:0.5rem;padding:0.5rem;background:var(--bg);border-radius:4px">
-                    <strong>${c.nombre}</strong><br>
-                    <small><strong>Tel:</strong> ${c.telefono || '-'} | <strong>Email:</strong> ${c.email || '-'}</small>
-                </div>
-            `).join('');
-        } else {
-            additionalDiv.innerHTML = '';
-        }
-    } else {
-        primaryDiv.innerHTML = '<p style="color:var(--text-light)">No hay contactos</p>';
-        additionalDiv.innerHTML = '';
+    // ── Nombre con auto-size ──
+    const nombreEl = document.getElementById('proveedorDetailNombre');
+    nombreEl.textContent = prov.nombre;
+    nombreEl.classList.remove('nombre-largo');
+    if (prov.nombre.length > 30) {
+        nombreEl.classList.add('nombre-largo');
     }
     
+    document.getElementById('proveedorDetailServicio').textContent = prov.servicio || '';
+    
+    // ── Teléfono y Email (recuadros sombreados) ──
+    const primaryDiv = document.getElementById('provDetailContactPrimary');
+    const first = (prov.contactos && prov.contactos.length > 0) ? prov.contactos[0] : {};
+    
+    const telDisplay = first.telefono || '-';
+    const emailDisplay = first.email || '-';
+    const emailLink = first.email 
+        ? `<a href="mailto:${first.email}">${first.email}</a>` 
+        : '-';
+    
+    primaryDiv.innerHTML = `
+        <div class="prov-info-box">📞 ${telDisplay}</div>
+        <div class="prov-info-box">✉️ ${emailLink}</div>
+    `;
+    
+    // ── RFC y CLABE ──
     document.getElementById('detailProvClabe').textContent = prov.clabe || '-';
     document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
+    
+    // ── Contactos adicionales (dropdown colapsable) ──
+    const additionalDiv = document.getElementById('provDetailAdditionalContacts');
+    
+    if (prov.contactos && prov.contactos.length > 1) {
+        const extras = prov.contactos.slice(1);
+        const contactCards = extras.map(c => {
+            const cEmail = c.email ? `<a href="mailto:${c.email}" style="color:var(--primary);text-decoration:none;">${c.email}</a>` : '-';
+            return `
+                <div class="contact-card">
+                    <strong>${c.nombre}</strong><br>
+                    <small>📞 ${c.telefono || '-'} &nbsp;|&nbsp; ✉️ ${cEmail}</small>
+                </div>
+            `;
+        }).join('');
+        
+        additionalDiv.innerHTML = `
+            <div class="prov-contacts-toggle" onclick="this.classList.toggle('open'); this.nextElementSibling.classList.toggle('open');">
+                <span>👥 ${extras.length} contacto${extras.length > 1 ? 's' : ''} adicional${extras.length > 1 ? 'es' : ''}</span>
+                <span class="chevron">▼</span>
+            </div>
+            <div class="prov-contacts-list">
+                ${contactCards}
+            </div>
+        `;
+    } else {
+        additionalDiv.innerHTML = '';
+    }
     
     // Notas
     const notasDiv = document.getElementById('proveedorNotasContent');
