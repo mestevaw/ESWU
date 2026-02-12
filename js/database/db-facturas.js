@@ -20,21 +20,41 @@ async function saveFactura(event) {
             fecha: document.getElementById('facturaFecha').value,
             vencimiento: document.getElementById('facturaVencimiento').value,
             monto: parseFloat(document.getElementById('facturaMonto').value),
-            iva: parseFloat(document.getElementById('facturaIVA').value) || 0,
-            documento_file: docURL
+            iva: parseFloat(document.getElementById('facturaIVA').value) || 0
         };
         
-        const { error } = await supabaseClient
-            .from('facturas')
-            .insert([facturaData]);
+        // Solo incluir documento_file si se subió uno nuevo
+        if (docURL) {
+            facturaData.documento_file = docURL;
+        }
         
-        if (error) throw error;
+        if (window.isEditingFactura && currentFacturaId) {
+            // Modo edición: UPDATE
+            const { error } = await supabaseClient
+                .from('facturas')
+                .update(facturaData)
+                .eq('id', currentFacturaId);
+            
+            if (error) throw error;
+        } else {
+            // Modo nuevo: INSERT
+            if (!docURL) facturaData.documento_file = null;
+            
+            const { error } = await supabaseClient
+                .from('facturas')
+                .insert([facturaData]);
+            
+            if (error) throw error;
+        }
         
         await loadProveedores();
-        showProveedorDetail(currentProveedorId);
         closeModal('registrarFacturaModal');
+        showProveedorDetail(currentProveedorId);
+        // Ir a pestaña facturas x pagar
+        setTimeout(() => switchTab('proveedor', 'porpagar'), 100);
         
-        alert('✅ Factura registrada correctamente');
+        window.isEditingFactura = false;
+        currentFacturaId = null;
         
     } catch (error) {
         console.error('Error:', error);
@@ -69,10 +89,9 @@ async function savePagoFactura(event) {
         if (error) throw error;
         
         await loadProveedores();
-        showProveedorDetail(currentProveedorId);
         closeModal('pagarFacturaModal');
-        
-        alert('✅ Factura marcada como pagada');
+        showProveedorDetail(currentProveedorId);
+        setTimeout(() => switchTab('proveedor', 'pagadas'), 100);
         
     } catch (error) {
         console.error('Error:', error);
@@ -83,10 +102,6 @@ async function savePagoFactura(event) {
 }
 
 async function deleteFactura(facturaId) {
-    if (!confirm('¿Está seguro de eliminar esta factura? Esta acción no se puede deshacer.')) {
-        return;
-    }
-    
     showLoading();
     
     try {
@@ -99,8 +114,7 @@ async function deleteFactura(facturaId) {
         
         await loadProveedores();
         showProveedorDetail(currentProveedorId);
-        
-        alert('✅ Factura eliminada correctamente');
+        setTimeout(() => switchTab('proveedor', 'porpagar'), 100);
         
     } catch (error) {
         console.error('Error:', error);
