@@ -17,15 +17,6 @@
         <div class="loading-spinner"></div>
     </div>
 
-    <!-- PDF Viewer Overlay (móvil) -->
-   <div id="pdfViewerOverlay" class="pdf-viewer-overlay hidden">
-        <div class="pdf-viewer-header">
-            <span style="font-weight:600; color:var(--primary);">Documento</span>
-            <button class="pdf-viewer-close" onclick="closePDFViewer()">✕</button>
-        </div>
-        <iframe id="pdfViewerIframe" class="pdf-viewer-iframe" src=""></iframe>
-    </div>
-
     <div id="loginContainer" class="login-container">
         <div class="login-box">
             <h1>ESWU</h1>
@@ -242,7 +233,7 @@
                     <div class="card">
                        <div class="card-header">
     <h2 class="card-title">Listado de Proveedores</h2>
-  <span onclick="showAddProveedorModal()" title="Agregar proveedor" style="color:var(--success); font-size:1.8rem; font-weight:700; cursor:pointer; line-height:1; transition:opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">+</span>
+    <button class="btn btn-primary" onclick="showAddProveedorModal()">+ Agregar</button>
 </div>
                         <div class="table-container">
                             <table id="proveedoresTable" class="sticky-header-table">
@@ -276,10 +267,10 @@
                                 </select>
                             </div>
                             <div class="table-container">
-                                <table id="proveedoresFacturasPagadasTable" class="sticky-header-table">
-  <thead><tr><th>Proveedor</th><th>No. Factura</th><th>Pagada en</th><th style="text-align:right">Monto</th></tr></thead>
-    <tbody></tbody>
-</table>
+                                <table id="proveedoresFacturasPagadasTable">
+                                    <thead><tr><th>Proveedor</th><th>Número</th><th>Monto</th><th>Fecha Pago</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -308,8 +299,8 @@
                                 </select>
                             </div>
                             <div class="table-container">
-                            <table id="proveedoresFacturasPorPagarTable" class="sticky-header-table">
-  <thead><tr><th>Proveedor</th><th>No. Fact.</th><th>CLABE</th><th>Fecha Pago</th><th style="text-align:right">Monto</th></tr></thead>
+                             <table id="proveedoresFacturasPorPagarTable">
+    <thead><tr><th>Proveedor</th><th>Número</th><th>Monto</th><th>Vencimiento</th></tr></thead>
     <tbody></tbody>
 </table>
                             </div>
@@ -599,87 +590,34 @@
         </div>
     </div>
 
-        <!-- Agregar Documento Adicional Proveedor Modal -->
-    <div id="agregarDocumentoProveedorModal" class="modal">
-        <div class="modal-content" style="max-width:500px;">
-            <div class="modal-header">
-                <h2 class="modal-title">Agregar Documento</h2>
-                <div style="display:flex; align-items:center; gap:0.25rem;">
-                    <button type="submit" form="docProveedorForm" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
-                    <button class="close-modal" onclick="closeModal('agregarDocumentoProveedorModal')" title="Cancelar">×</button>
-                </div>
-            </div>
-            <div style="padding:1.25rem;">
-                <form id="docProveedorForm" onsubmit="saveDocumentoAdicionalProveedor(event)">
-                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
-                        <label style="min-width:110px; font-weight:500; white-space:nowrap;">Nombre *</label>
-                        <input type="text" id="nuevoDocProvNombre" required autocomplete="off" style="flex:1; padding:0.5rem; border:2px solid var(--border); border-radius:4px; font-size:1rem;">
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
-                        <label style="min-width:110px; font-weight:500; white-space:nowrap;">PDF *</label>
-                        <div onclick="document.getElementById('nuevoDocProvPDF').click()" style="flex:1; padding:0.5rem 0.75rem; border:2px dashed var(--border); border-radius:4px; cursor:pointer; text-align:center; font-size:0.9rem; color:var(--text-light); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
-                            <input type="file" id="nuevoDocProvPDF" accept=".pdf" required style="display:none;" onchange="document.getElementById('nuevoDocProvPDFFileName').textContent=this.files[0]?this.files[0].name:''">
-                            <span>Click para seleccionar PDF</span>
-                            <span id="nuevoDocProvPDFFileName" style="color:var(--success); margin-left:0.5rem;"></span>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Proveedor Detail -->
-  <!-- =============================================
-         REEMPLAZAR EN index.html LÍNEAS 594-641
-         (desde <div id="proveedorDetailModal"> hasta su cierre)
-         ============================================= -->
-
+    <!-- Modal Proveedor Detail (REDISEÑADO) -->
     <div id="proveedorDetailModal" class="modal">
-        <div class="modal-content modal-wide">
-            <div class="modal-header modal-header-sticky" style="display:flex; align-items:flex-start; gap:0.75rem;">
-               
-                <!-- Nombre + Servicio centrados -->
-                <div style="flex:1; min-width:0; text-align:center; padding-top:0.25rem;">
-                    <h2 class="modal-title" id="proveedorDetailNombre" style="margin:0; line-height:1.3;"></h2>
-                    <div id="detailServicio" style="font-size:0.85rem; color:var(--text-light); font-weight:400; margin-top:0.15rem;"></div>
+        <div class="modal-content">
+            <div class="modal-header modal-header-sticky">
+                <div style="flex:1; min-width:0; overflow:hidden;">
+                    <h2 class="modal-title" id="proveedorDetailNombre" style="text-align:left; padding:0; margin:0;"></h2>
+                    <div id="proveedorDetailServicio" class="prov-detail-servicio"></div>
                 </div>
-                <!-- Lápiz + X -->
-                <div style="display:flex; align-items:center; gap:0.25rem;">
-                    <button onclick="editProveedor()" title="Modificar datos" style="background:none; border:none; font-size:1.3rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;">✏️</button>
-                    <button class="close-modal" onclick="closeModal('proveedorDetailModal')">×</button>
-                </div>
+                <button class="btn-icon-edit" onclick="editProveedor()" title="Modificar datos">✏️</button>
+                <button class="close-modal" onclick="closeModal('proveedorDetailModal')" style="position:static;">×</button>
             </div>
-
-            <div style="padding: 1.5rem; padding-top: 5rem;">
+            <div style="padding: 1.5rem;">
                 <!-- Teléfono y Email -->
-                <div id="provDetailContactInfo" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;"></div>
-
+                <div id="provDetailContactPrimary" class="prov-detail-contact-row"></div>
                 <!-- RFC y CLABE -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
-                    <div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.75rem;">
-                        <strong>RFC:</strong> <span id="detailProvRFC">-</span>
-                    </div>
-                    <div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.75rem;">
-                        <strong>CLABE:</strong> <span id="detailProvClabe">-</span>
-                    </div>
+                <div class="prov-detail-info-row">
+                    <div class="prov-detail-info-box"><strong>RFC:</strong> <span id="detailProvRFC">-</span></div>
+                    <div class="prov-detail-info-box"><strong>CLABE:</strong> <span id="detailProvClabe">-</span></div>
                 </div>
-
-                <!-- Contactos adicionales (dropdown) -->
-                <div id="provAdditionalContactsSection" style="margin-bottom:1rem; display:none;">
-                    <details>
-                        <summary style="cursor:pointer; font-weight:600; color:var(--primary); padding:0.5rem 0; user-select:none;">
-                            Contactos adicionales (<span id="provAdditionalContactsCount">0</span>)
-                        </summary>
-                        <div id="provAdditionalContactsList" style="padding:0.5rem 0;"></div>
-                    </details>
-                </div>
-
+                <!-- Contactos adicionales -->
+                <div id="provDetailAdditionalContacts"></div>
                 <!-- Pestañas -->
                 <div class="tabs-container">
-                    <div class="tabs">
+                    <div class="tabs" id="proveedorTabs">
                         <button class="tab active" onclick="switchTab('proveedor', 'pagadas')">Facturas Pagadas</button>
-                        <button class="tab" onclick="switchTab('proveedor', 'porpagar')">Facturas X Pagar</button>
-                        <button class="tab" onclick="switchTab('proveedor', 'docs')">Documentos Adicionales</button>
+                        <button class="tab" onclick="switchTab('proveedor', 'porpagar')">Facturas X Pagar<span class="btn-add-inline" onclick="event.stopPropagation(); showRegistrarFacturaModal();" title="Agregar factura">+</span></button>
+                        <button class="tab" onclick="switchTab('proveedor', 'docs')">Documentos Adicionales<span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoProveedorModal();" title="Agregar documento">+</span></button>
+                        <button class="tab" onclick="switchTab('proveedor', 'notas')">Notas<span class="btn-add-inline" onclick="event.stopPropagation(); showEditNotasProveedorModal();" title="Editar notas">+</span></button>
                     </div>
                     <div id="proveedorPagadasTab" class="tab-content active">
                         <div id="facturasPagadas"></div>
@@ -690,22 +628,72 @@
                     <div id="proveedorDocsTab" class="tab-content">
                         <div id="proveedorDocumentosAdicionales"></div>
                     </div>
+                    <div id="proveedorNotasTab" class="tab-content">
+                        <div id="proveedorNotasContent"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
- <!-- Modal Add/Edit Proveedor -->
+    <!-- Modal Agregar Documento Proveedor -->
+    <div id="agregarDocumentoProveedorModal" class="modal">
+        <div class="modal-content" style="max-width:500px">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar Documento</h2>
+                <button class="close-modal" onclick="closeModal('agregarDocumentoProveedorModal')" style="position:static">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <form onsubmit="saveDocumentoProveedor(event)">
+                    <div class="form-group"><label>Nombre del Documento *</label><input type="text" id="provNuevoDocNombre" required autocomplete="off"></div>
+                    <div class="form-group">
+                        <label>Documento (PDF) *</label>
+                        <div class="file-upload" onclick="document.getElementById('provNuevoDocPDF').click()">
+                            <input type="file" id="provNuevoDocPDF" accept=".pdf" required>
+                            <p>Click para seleccionar PDF</p>
+                            <p id="provNuevoDocPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('agregarDocumentoProveedorModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Notas Proveedor -->
+    <div id="editNotasProveedorModal" class="modal">
+        <div class="modal-content" style="max-width:600px">
+            <div class="modal-header">
+                <h2 class="modal-title">Editar Notas del Proveedor</h2>
+                <button class="close-modal" onclick="closeModal('editNotasProveedorModal')" style="position:static">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <div class="form-group">
+                    <textarea id="proveedorNotasEdit" style="min-height: 200px"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editNotasProveedorModal')">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="saveNotasProveedor()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Add/Edit Proveedor -->
     <div id="addProveedorModal" class="modal">
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
                 <h2 class="modal-title" id="addProveedorTitle">Agregar Proveedor</h2>
-                <div style="display:flex; align-items:center; gap:0.25rem;">
-                    <button type="submit" form="proveedorForm" title="Guardar" style="background:none; border:none; font-size:1.4rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;">💾</button>
-                    <button class="close-modal" onclick="closeModal('addProveedorModal')">×</button>
-                </div>
+                <button class="close-modal" onclick="closeModal('addProveedorModal')">×</button>
             </div>
             <div style="padding: 1.5rem;">
+                <div class="modal-actions-top">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addProveedorModal')" title="Cancelar">✖️ Cancelar</button>
+                    <button type="submit" form="proveedorForm" class="btn btn-success" title="Guardar">✔️ Guardar</button>
+                </div>
                 <form id="proveedorForm" onsubmit="saveProveedor(event)">
                     <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="proveedorNombre" required autocomplete="off"></div>
                     <div class="form-group"><label>Servicio *</label><input type="text" id="proveedorServicio" required autocomplete="off"></div>
@@ -754,44 +742,30 @@
     </div>
 
     <!-- Modal Registrar Factura -->
-  <div id="registrarFacturaModal" class="modal">
-        <div class="modal-content" style="max-width:600px;">
+    <div id="registrarFacturaModal" class="modal">
+        <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">Registrar Factura</h2>
-                <div style="display:flex; align-items:center; gap:0.25rem;">
-                    <button type="submit" form="facturaForm" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
-                    <button class="close-modal" onclick="closeModal('registrarFacturaModal')" title="Cancelar">×</button>
-                </div>
+                <button class="close-modal" onclick="closeModal('registrarFacturaModal')">×</button>
             </div>
-            <div style="padding:1.25rem;">
-                <form id="facturaForm" onsubmit="saveFactura(event)">
-                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
-                        <label style="min-width:110px; font-weight:500; white-space:nowrap;">Factura</label>
-                        <input type="text" id="facturaNumero" autocomplete="off" placeholder="Número" style="flex:1; padding:0.5rem; border:2px solid var(--border); border-radius:4px; font-size:1rem;">
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
-                        <label style="min-width:110px; font-weight:500; white-space:nowrap;">Fecha *</label>
-                        <input type="date" id="facturaFecha" required style="flex:1; padding:0.5rem; border:2px solid var(--border); border-radius:4px; font-size:1rem;">
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
-                        <label style="min-width:110px; font-weight:500; white-space:nowrap;">Vencimiento *</label>
-                        <input type="date" id="facturaVencimiento" required style="flex:1; padding:0.5rem; border:2px solid var(--border); border-radius:4px; font-size:1rem;">
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
-                        <label style="min-width:110px; font-weight:500; white-space:nowrap;">Monto *</label>
-                        <input type="number" id="facturaMonto" step="0.01" required autocomplete="off" onchange="calculateIVA()" style="flex:1; padding:0.5rem; border:2px solid var(--border); border-radius:4px; font-size:1rem;">
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
-                        <label style="min-width:110px; font-weight:500; white-space:nowrap;">IVA</label>
-                        <input type="number" id="facturaIVA" step="0.01" autocomplete="off" style="flex:1; padding:0.5rem; border:2px solid var(--border); border-radius:4px; font-size:1rem;">
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
-                        <label style="min-width:110px; font-weight:500; white-space:nowrap;">PDF</label>
-                        <div onclick="document.getElementById('facturaDocumento').click()" style="flex:1; padding:0.5rem 0.75rem; border:2px dashed var(--border); border-radius:4px; cursor:pointer; text-align:center; font-size:0.9rem; color:var(--text-light); transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
-                            <input type="file" id="facturaDocumento" accept=".pdf" style="display:none;">
-                            <span>Click para seleccionar PDF</span>
-                            <span id="facturaDocumentoFileName" style="color:var(--success); margin-left:0.5rem;"></span>
+            <div style="padding: 1.5rem;">
+                <form onsubmit="saveFactura(event)">
+                    <div class="form-group"><label>Número de Factura</label><input type="text" id="facturaNumero" autocomplete="off"></div>
+                    <div class="form-group"><label>Fecha Factura *</label><input type="date" id="facturaFecha" required></div>
+                    <div class="form-group"><label>Vencimiento *</label><input type="date" id="facturaVencimiento" required></div>
+                    <div class="form-group"><label>Monto *</label><input type="number" id="facturaMonto" step="0.01" required autocomplete="off" onchange="calculateIVA()"></div>
+                    <div class="form-group"><label>IVA</label><input type="number" id="facturaIVA" step="0.01" autocomplete="off"></div>
+                    <div class="form-group">
+                        <label>Factura (PDF)</label>
+                        <div class="file-upload" onclick="document.getElementById('facturaDocumento').click()">
+                            <input type="file" id="facturaDocumento" accept=".pdf">
+                            <p>Click para seleccionar PDF de la factura</p>
+                            <p id="facturaDocumentoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
                         </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('registrarFacturaModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
                     </div>
                 </form>
             </div>
@@ -999,6 +973,7 @@
     <script src="js/database/db-inquilinos.js"></script>
     <script src="js/database/db-proveedores.js"></script>
     <script src="js/database/db-facturas.js"></script>
+    <script src="js/database/db-fetch-docs.js"></script>
     <script src="js/ui/navigation.js"></script>
     <script src="js/ui/tables.js"></script>
     <script src="js/ui/inquilinos-ui.js"></script>
@@ -1011,6 +986,3 @@
     <script src="js/main.js"></script>
 </body>
 </html>
-
-<!-- ========== FIN PARTE 3 ========== -->
-<!-- YA PUEDES GUARDAR EL ARCHIVO -->
