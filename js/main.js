@@ -1,5 +1,6 @@
 /* ========================================
    ESWU - MAIN.JS COMPLETO
+   Última actualización: 2026-02-12 13:30 CST
    Todas las funciones de guardado
    ======================================== */
 
