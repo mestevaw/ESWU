@@ -1,40 +1,22 @@
 /* ========================================
-   ESWU - MAIN.JS COMPLETO
-   Todas las funciones de guardado
+   ESWU - MAIN.JS (LIMPIO)
+   Solo funciones únicas que NO están en otros archivos.
+   
+   Funciones delegadas a archivos modulares:
+     showLoading/hideLoading → db-core.js
+     saveInquilino/editInquilino/deleteInquilino → db-inquilinos.js
+     saveProveedor/editProveedor/deleteProveedor → db-proveedores.js
+     saveFactura/savePagoFactura/deleteFactura → db-facturas.js
+     contactos inquilino → inquilino-modals.js
+     contactos proveedor → proveedor-modals.js
+     fileToBase64 → db-core.js
+     populateInquilinosYearSelects → tables.js
+     populateProveedoresYearSelects → tables.js
    ======================================== */
 
 // ============================================
 // LOGIN
 // ============================================
-
-// ============================================
-// AGREGAR ESTO AL INICIO DE main.js
-// (Después de los comentarios, ANTES de document.getElementById)
-// ============================================
-
-// Funciones de loading (necesarias para login)
-
-// ============================================
-// NOTA: Funciones duplicadas eliminadas.
-// Ahora están en sus archivos modulares:
-//   showLoading/hideLoading → db-core.js
-//   saveInquilino/editInquilino/deleteInquilino → db-inquilinos.js
-//   saveProveedor/editProveedor/deleteProveedor → db-proveedores.js
-//   saveFactura/savePagoFactura/deleteFactura → db-facturas.js
-//   contactos inquilino → inquilino-modals.js
-//   contactos proveedor → proveedor-modals.js
-//   loadInquilinos → db-inquilinos.js
-//   loadProveedores → db-proveedores.js
-//   populateInquilinosYearSelects/populateProveedoresYearSelects → tables.js
-//   fileToBase64 → db-core.js
-// ============================================
-
-
-// ============================================
-// DESPUÉS DE ESTO, CONTINÚA CON:
-// document.getElementById('loginForm')...
-// ============================================
-
 
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -129,7 +111,7 @@ async function initializeApp() {
     }
 }
 
-// Variables de control de carga
+// Variables de control de carga lazy
 let inquilinosFullLoaded = false;
 let proveedoresFullLoaded = false;
 let activosLoaded = false;
@@ -148,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         inquilinoContrato.addEventListener('change', function() {
             const fileName = this.files[0]?.name || '';
             const display = document.getElementById('contratoFileName');
-            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
+            if (display) display.textContent = fileName ? 'Seleccionado: ' + fileName : '';
         });
     }
     
@@ -157,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
         nuevoDocPDF.addEventListener('change', function() {
             const fileName = this.files[0]?.name || '';
             const display = document.getElementById('nuevoDocPDFFileName');
-            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
+            if (display) display.textContent = fileName ? 'Seleccionado: ' + fileName : '';
         });
     }
     
@@ -166,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
         pagoPDF.addEventListener('change', function() {
             const fileName = this.files[0]?.name || '';
             const display = document.getElementById('pagoPDFFileName');
-            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
+            if (display) display.textContent = fileName ? 'Seleccionado: ' + fileName : '';
         });
     }
     
@@ -175,12 +157,10 @@ document.addEventListener('DOMContentLoaded', function() {
         facturaDocumento.addEventListener('change', function() {
             const fileName = this.files[0]?.name || '';
             const display = document.getElementById('facturaDocumentoFileName');
-            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
+            if (display) display.textContent = fileName ? 'Seleccionado: ' + fileName : '';
         });
     }
 });
-
-console.log('✅ MAIN.JS COMPLETO cargado correctamente');
 
 // ============================================
 // ELIMINAR PROVEEDORES MIGRADOS
@@ -218,7 +198,7 @@ async function eliminarProveedoresMigrados() {
         await loadProveedores();
         renderProveedoresTable();
         
-        alert(`✅ Se eliminaron ${ids.length} proveedores migrados correctamente`);
+        alert('✅ Se eliminaron ' + ids.length + ' proveedores migrados correctamente');
         
     } catch (error) {
         console.error('Error:', error);
@@ -226,14 +206,17 @@ async function eliminarProveedoresMigrados() {
     } finally {
         hideLoading();
     }
-   }
-   
-   async function terminarContratoInquilino() {
+}
+
+// ============================================
+// TERMINAR CONTRATO INQUILINO
+// ============================================
+
+async function terminarContratoInquilino() {
     const fechaTerminacion = prompt('Ingresa la fecha de terminación del contrato (YYYY-MM-DD):');
     
     if (!fechaTerminacion) return;
     
-    // Validar formato de fecha
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaTerminacion)) {
         alert('Formato de fecha inválido. Usa YYYY-MM-DD (ejemplo: 2026-02-15)');
         return;
@@ -272,9 +255,9 @@ async function eliminarProveedoresMigrados() {
         hideLoading();
     }
 }
-   
-   // ============================================
-// CARGA BÁSICA (RÁPIDA)
+
+// ============================================
+// CARGA BÁSICA (RÁPIDA) - para listados
 // ============================================
 
 async function loadInquilinosBasico() {
@@ -409,6 +392,9 @@ async function ensureBitacoraLoaded() {
     }
 }
 
+// ============================================
+// LOAD ACTIVOS (con fotos)
+// ============================================
 
 async function loadActivos() {
     try {
@@ -427,7 +413,7 @@ async function loadActivos() {
         
         activos = activosData.map(act => ({
             ...act,
-            fotos: fotosData.filter(f => f.activo_id === act.id)
+            fotos: (fotosData || []).filter(f => f.activo_id === act.id)
         }));
         
     } catch (error) {
@@ -435,6 +421,10 @@ async function loadActivos() {
         throw error;
     }
 }
+
+// ============================================
+// LOAD ESTACIONAMIENTO
+// ============================================
 
 async function loadEstacionamiento() {
     try {
@@ -452,6 +442,10 @@ async function loadEstacionamiento() {
         throw error;
     }
 }
+
+// ============================================
+// LOAD BITÁCORA SEMANAL
+// ============================================
 
 async function loadBitacoraSemanal() {
     try {
@@ -471,6 +465,10 @@ async function loadBitacoraSemanal() {
     }
 }
 
+// ============================================
+// LOAD USUARIOS
+// ============================================
+
 async function loadUsuarios() {
     try {
         const { data, error } = await supabaseClient
@@ -487,6 +485,10 @@ async function loadUsuarios() {
         throw error;
     }
 }
+
+// ============================================
+// LOAD BANCOS DOCUMENTOS
+// ============================================
 
 async function loadBancosDocumentos() {
     try {
@@ -505,6 +507,10 @@ async function loadBancosDocumentos() {
         bancosDocumentos = [];
     }
 }
+
+// ============================================
+// SAVE ESTACIONAMIENTO
+// ============================================
 
 async function saveEstacionamiento() {
     showLoading();
@@ -534,6 +540,10 @@ async function saveEstacionamiento() {
     }
 }
 
+// ============================================
+// SAVE BITÁCORA
+// ============================================
+
 async function saveBitacora() {
     showLoading();
     try {
@@ -561,6 +571,10 @@ async function saveBitacora() {
         hideLoading();
     }
 }
+
+// ============================================
+// SAVE BANCO DOCUMENTO
+// ============================================
 
 async function saveBancoDoc(event) {
     event.preventDefault();
@@ -597,9 +611,9 @@ async function saveBancoDoc(event) {
         hideLoading();
     }
 }
+
 // ============================================
-// AGREGAR ESTAS FUNCIONES AL FINAL DE main.js
-// (Copiar y pegar después de saveBancoDoc)
+// POPULATE YEAR SELECT (Números page)
 // ============================================
 
 function populateYearSelect() {
@@ -619,4 +633,4 @@ function populateYearSelect() {
     }
 }
 
-console.log('✅ MAIN.JS LIMPIO cargado correctamente');
+console.log('✅ MAIN.JS cargado correctamente');
