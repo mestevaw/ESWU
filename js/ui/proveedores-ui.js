@@ -332,19 +332,30 @@ function showProveedorDetail(id) {
     if (facturasPagadas.length > 0) {
         facturasPagadasDiv.innerHTML = facturasPagadas.map(f => {
             totalPagadas += f.monto;
-            const facturaLink = f.documento_file 
-                ? `<a href="#" class="pdf-link" onclick="event.preventDefault(); viewFacturaDoc('${f.documento_file}')">Factura</a>` 
-                : '';
-            const pagoLink = f.pago_file 
-                ? `<a href="#" class="pdf-link" onclick="event.preventDefault(); viewFacturaDoc('${f.pago_file}')">Pago</a>` 
-                : '';
+            
+            // Recuadro 1: "Factura X del fecha" — clickeable si hay PDF
+            const facturaBox = f.documento_file
+                ? `<div onclick="viewFacturaDoc('${f.documento_file}')" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
+                       <strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}
+                   </div>`
+                : `<div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; color:var(--text-light);">
+                       <strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}
+                   </div>`;
+            
+            // Recuadro 2: "Pago del: fecha" — clickeable si hay comprobante PDF
+            const pagoBox = f.pago_file
+                ? `<div onclick="viewFacturaDoc('${f.pago_file}')" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
+                       <strong>Pago del:</strong> ${formatDate(f.fecha_pago)}
+                   </div>`
+                : `<div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; color:var(--text-light);">
+                       <strong>Pago del:</strong> ${formatDate(f.fecha_pago)}
+                   </div>`;
+            
             return `
-                <div class="payment-item">
-                    <div class="payment-item-content">
-                        <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong> pagada el <strong>${formatDate(f.fecha_pago)}</strong></div>
-                        <div style="margin-top:0.5rem">${facturaLink} ${pagoLink}</div>
-                    </div>
-                    <div style="text-align:right"><strong>${formatCurrency(f.monto)}</strong></div>
+                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem; flex-wrap:wrap;">
+                    ${facturaBox}
+                    ${pagoBox}
+                    <div style="margin-left:auto; font-weight:700; color:var(--primary); white-space:nowrap;">${formatCurrency(f.monto)}</div>
                 </div>
             `;
         }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPagadas)}</strong></div>`;
