@@ -1,17 +1,38 @@
 /* ========================================
    DB-INQUILINOS.JS - Database operations for inquilinos
+   CORREGIDO: queries separadas (no nested selects)
    ======================================== */
 
 async function loadInquilinos() {
     try {
-        const { data, error } = await supabaseClient
+        // Queries separadas - nested selects dan error 500
+        const { data: inquilinosData, error: inquilinosError } = await supabaseClient
             .from('inquilinos')
-            .select('*, pagos_inquilinos(*), inquilinos_documentos(*), inquilinos_contactos(*)')
+            .select('*')
             .order('nombre');
         
-        if (error) throw error;
+        if (inquilinosError) throw inquilinosError;
         
-        inquilinos = data.map(inq => ({
+        const { data: contactosData, error: contactosError } = await supabaseClient
+            .from('inquilinos_contactos')
+            .select('*');
+        
+        if (contactosError) throw contactosError;
+        
+        const { data: pagosData, error: pagosError } = await supabaseClient
+            .from('pagos_inquilinos')
+            .select('*')
+            .order('fecha', { ascending: false });
+        
+        if (pagosError) throw pagosError;
+        
+        const { data: docsData, error: docsError } = await supabaseClient
+            .from('inquilinos_documentos')
+            .select('*');
+        
+        if (docsError) throw docsError;
+        
+        inquilinos = inquilinosData.map(inq => ({
             id: inq.id,
             nombre: inq.nombre,
             clabe: inq.clabe,
@@ -23,26 +44,27 @@ async function loadInquilinos() {
             notas: inq.notas,
             numero_despacho: inq.numero_despacho,
             contrato_file: inq.contrato_file,
-            contactos: inq.inquilinos_contactos ? inq.inquilinos_contactos.map(c => ({
+            contrato_activo: inq.contrato_activo,
+            contactos: (contactosData || []).filter(c => c.inquilino_id === inq.id).map(c => ({
                 id: c.id,
                 nombre: c.nombre,
                 telefono: c.telefono,
                 email: c.email
-            })) : [],
-            pagos: inq.pagos_inquilinos ? inq.pagos_inquilinos.map(p => ({
+            })),
+            pagos: (pagosData || []).filter(p => p.inquilino_id === inq.id).map(p => ({
                 id: p.id,
                 fecha: p.fecha,
                 monto: parseFloat(p.monto),
                 completo: p.completo,
                 pago_file: p.pago_file
-            })).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)) : [],
-            documentos: inq.inquilinos_documentos ? inq.inquilinos_documentos.map(d => ({
+            })).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)),
+            documentos: (docsData || []).filter(d => d.inquilino_id === inq.id).map(d => ({
                 id: d.id,
                 nombre: d.nombre_documento,
                 archivo: d.archivo_pdf,
                 fecha: d.fecha_guardado,
                 usuario: d.usuario_guardo
-            })).sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '')) : []
+            })).sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
         }));
         
         console.log('✅ Inquilinos cargados:', inquilinos.length);
