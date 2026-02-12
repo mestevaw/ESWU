@@ -595,21 +595,21 @@
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
                 <div style="flex:1; min-width:0; overflow:hidden;">
-                    <h2 class="modal-title" id="proveedorDetailNombre" style="text-align:left; padding:0; margin:0;"></h2>
-                    <div id="proveedorDetailServicio" class="prov-detail-servicio"></div>
+                    <h2 class="modal-title prov-nombre-auto" id="proveedorDetailNombre" style="text-align:left; padding:0; margin:0;"></h2>
+                    <div id="proveedorDetailServicio" style="font-size:0.85rem; color:var(--text-light); font-weight:normal; margin-top:0.15rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
                 </div>
                 <button class="btn-icon-edit" onclick="editProveedor()" title="Modificar datos">✏️</button>
                 <button class="close-modal" onclick="closeModal('proveedorDetailModal')" style="position:static;">×</button>
             </div>
-            <div style="padding: 1.5rem;">
+            <div style="padding: 1.25rem;">
                 <!-- Teléfono y Email -->
-                <div id="provDetailContactPrimary" class="prov-detail-contact-row"></div>
+                <div id="provDetailContactPrimary" style="display:flex; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap;"></div>
                 <!-- RFC y CLABE -->
-                <div class="prov-detail-info-row">
-                    <div class="prov-detail-info-box"><strong>RFC:</strong> <span id="detailProvRFC">-</span></div>
-                    <div class="prov-detail-info-box"><strong>CLABE:</strong> <span id="detailProvClabe">-</span></div>
+                <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap;">
+                    <div class="prov-info-box"><strong>RFC:</strong> <span id="detailProvRFC">-</span></div>
+                    <div class="prov-info-box"><strong>CLABE:</strong> <span id="detailProvClabe">-</span></div>
                 </div>
-                <!-- Contactos adicionales -->
+                <!-- Contactos adicionales (dropdown) -->
                 <div id="provDetailAdditionalContacts"></div>
                 <!-- Pestañas -->
                 <div class="tabs-container">
