@@ -1,71 +1,69 @@
 /* ========================================
    DB-INQUILINOS.JS - Database operations for inquilinos
-   CORREGIDO: queries separadas (no nested selects)
+   Usa queries separadas (NO nested selects)
    ======================================== */
 
 async function loadInquilinos() {
     try {
-        // Queries separadas - nested selects dan error 500
-        const { data: inquilinosData, error: inquilinosError } = await supabaseClient
+        // Query 1: Solo inquilinos
+        var r1 = await supabaseClient
             .from('inquilinos')
             .select('*')
             .order('nombre');
         
-        if (inquilinosError) throw inquilinosError;
+        if (r1.error) throw r1.error;
         
-        const { data: contactosData, error: contactosError } = await supabaseClient
+        // Query 2: Todos los contactos
+        var r2 = await supabaseClient
             .from('inquilinos_contactos')
             .select('*');
         
-        if (contactosError) throw contactosError;
+        if (r2.error) throw r2.error;
         
-        const { data: pagosData, error: pagosError } = await supabaseClient
+        // Query 3: Todos los pagos
+        var r3 = await supabaseClient
             .from('pagos_inquilinos')
-            .select('*')
-            .order('fecha', { ascending: false });
+            .select('*');
         
-        if (pagosError) throw pagosError;
+        if (r3.error) throw r3.error;
         
-        const { data: docsData, error: docsError } = await supabaseClient
+        // Query 4: Todos los documentos
+        var r4 = await supabaseClient
             .from('inquilinos_documentos')
             .select('*');
         
-        if (docsError) throw docsError;
+        if (r4.error) throw r4.error;
         
-        inquilinos = inquilinosData.map(inq => ({
-            id: inq.id,
-            nombre: inq.nombre,
-            clabe: inq.clabe,
-            rfc: inq.rfc,
-            m2: inq.m2,
-            renta: parseFloat(inq.renta || 0),
-            fecha_inicio: inq.fecha_inicio,
-            fecha_vencimiento: inq.fecha_vencimiento,
-            notas: inq.notas,
-            numero_despacho: inq.numero_despacho,
-            contrato_file: inq.contrato_file,
-            contrato_activo: inq.contrato_activo,
-            contactos: (contactosData || []).filter(c => c.inquilino_id === inq.id).map(c => ({
-                id: c.id,
-                nombre: c.nombre,
-                telefono: c.telefono,
-                email: c.email
-            })),
-            pagos: (pagosData || []).filter(p => p.inquilino_id === inq.id).map(p => ({
-                id: p.id,
-                fecha: p.fecha,
-                monto: parseFloat(p.monto),
-                completo: p.completo,
-                pago_file: p.pago_file
-            })).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)),
-            documentos: (docsData || []).filter(d => d.inquilino_id === inq.id).map(d => ({
-                id: d.id,
-                nombre: d.nombre_documento,
-                archivo: d.archivo_pdf,
-                fecha: d.fecha_guardado,
-                usuario: d.usuario_guardo
-            })).sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
-        }));
+        var contactosData = r2.data || [];
+        var pagosData = r3.data || [];
+        var docsData = r4.data || [];
+        
+        // Combinar en JavaScript
+        inquilinos = r1.data.map(function(inq) {
+            return {
+                id: inq.id,
+                nombre: inq.nombre,
+                clabe: inq.clabe,
+                rfc: inq.rfc,
+                m2: inq.m2,
+                renta: parseFloat(inq.renta || 0),
+                fecha_inicio: inq.fecha_inicio,
+                fecha_vencimiento: inq.fecha_vencimiento,
+                notas: inq.notas,
+                numero_despacho: inq.numero_despacho,
+                contrato_file: inq.contrato_file,
+                contrato_activo: inq.contrato_activo,
+                contactos: contactosData.filter(function(c) { return c.inquilino_id === inq.id; }).map(function(c) {
+                    return { id: c.id, nombre: c.nombre, telefono: c.telefono, email: c.email };
+                }),
+                pagos: pagosData.filter(function(p) { return p.inquilino_id === inq.id; }).map(function(p) {
+                    return { id: p.id, fecha: p.fecha, monto: parseFloat(p.monto), completo: p.completo, pago_file: p.pago_file };
+                }).sort(function(a, b) { return new Date(b.fecha) - new Date(a.fecha); }),
+                documentos: docsData.filter(function(d) { return d.inquilino_id === inq.id; }).map(function(d) {
+                    return { id: d.id, nombre: d.nombre_documento, archivo: d.archivo_pdf, fecha: d.fecha_guardado, usuario: d.usuario_guardo };
+                }).sort(function(a, b) { return (a.nombre || '').localeCompare(b.nombre || ''); })
+            };
+        });
         
         console.log('✅ Inquilinos cargados:', inquilinos.length);
     } catch (error) {
@@ -79,14 +77,14 @@ async function saveInquilino(event) {
     showLoading();
     
     try {
-        const contratoFile = document.getElementById('inquilinoContrato').files[0];
-        let contratoURL = null;
+        var contratoFile = document.getElementById('inquilinoContrato').files[0];
+        var contratoURL = null;
         
         if (contratoFile) {
             contratoURL = await fileToBase64(contratoFile);
         }
         
-        const inquilinoData = {
+        var inquilinoData = {
             nombre: document.getElementById('inquilinoNombre').value,
             clabe: document.getElementById('inquilinoClabe').value || null,
             rfc: document.getElementById('inquilinoRFC').value || null,
@@ -102,15 +100,15 @@ async function saveInquilino(event) {
             inquilinoData.contrato_file = contratoURL;
         }
         
-        let inquilinoId;
+        var inquilinoId;
         
         if (isEditMode && currentInquilinoId) {
-            const { error } = await supabaseClient
+            var result1 = await supabaseClient
                 .from('inquilinos')
                 .update(inquilinoData)
                 .eq('id', currentInquilinoId);
             
-            if (error) throw error;
+            if (result1.error) throw result1.error;
             
             await supabaseClient
                 .from('inquilinos_contactos')
@@ -119,28 +117,30 @@ async function saveInquilino(event) {
             
             inquilinoId = currentInquilinoId;
         } else {
-            const { data, error } = await supabaseClient
+            var result2 = await supabaseClient
                 .from('inquilinos')
                 .insert([inquilinoData])
                 .select();
             
-            if (error) throw error;
-            inquilinoId = data[0].id;
+            if (result2.error) throw result2.error;
+            inquilinoId = result2.data[0].id;
         }
         
         if (tempInquilinoContactos.length > 0) {
-            const contactosToInsert = tempInquilinoContactos.map(c => ({
-                inquilino_id: inquilinoId,
-                nombre: c.nombre,
-                telefono: c.telefono || null,
-                email: c.email || null
-            }));
+            var contactosToInsert = tempInquilinoContactos.map(function(c) {
+                return {
+                    inquilino_id: inquilinoId,
+                    nombre: c.nombre,
+                    telefono: c.telefono || null,
+                    email: c.email || null
+                };
+            });
             
-            const { error: contactosError } = await supabaseClient
+            var result3 = await supabaseClient
                 .from('inquilinos_contactos')
                 .insert(contactosToInsert);
             
-            if (contactosError) throw contactosError;
+            if (result3.error) throw result3.error;
         }
         
         await loadInquilinos();
@@ -165,20 +165,20 @@ async function savePagoRenta(event) {
     showLoading();
     
     try {
-        const inq = inquilinos.find(i => i.id === currentInquilinoId);
+        var inq = inquilinos.find(function(i) { return i.id === currentInquilinoId; });
         if (!inq) throw new Error('Inquilino no encontrado');
         
-        const pagoCompleto = document.getElementById('pagoCompleto').value === 'si';
-        const monto = pagoCompleto ? inq.renta : parseFloat(document.getElementById('pagoMonto').value);
+        var pagoCompleto = document.getElementById('pagoCompleto').value === 'si';
+        var monto = pagoCompleto ? inq.renta : parseFloat(document.getElementById('pagoMonto').value);
         
-        const pagoFile = document.getElementById('pagoPDF').files[0];
-        let pagoURL = null;
+        var pagoFile = document.getElementById('pagoPDF').files[0];
+        var pagoURL = null;
         
         if (pagoFile) {
             pagoURL = await fileToBase64(pagoFile);
         }
         
-        const pagoData = {
+        var pagoData = {
             inquilino_id: currentInquilinoId,
             fecha: document.getElementById('pagoFecha').value,
             monto: monto,
@@ -186,11 +186,11 @@ async function savePagoRenta(event) {
             pago_file: pagoURL
         };
         
-        const { error } = await supabaseClient
+        var result = await supabaseClient
             .from('pagos_inquilinos')
             .insert([pagoData]);
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
         await loadInquilinos();
         showInquilinoDetail(currentInquilinoId);
@@ -211,16 +211,16 @@ async function saveDocumentoAdicional(event) {
     showLoading();
     
     try {
-        const nombre = document.getElementById('nuevoDocNombre').value;
-        const file = document.getElementById('nuevoDocPDF').files[0];
+        var nombre = document.getElementById('nuevoDocNombre').value;
+        var file = document.getElementById('nuevoDocPDF').files[0];
         
         if (!file) {
             throw new Error('Seleccione un archivo PDF');
         }
         
-        const pdfBase64 = await fileToBase64(file);
+        var pdfBase64 = await fileToBase64(file);
         
-        const { error } = await supabaseClient
+        var result = await supabaseClient
             .from('inquilinos_documentos')
             .insert([{
                 inquilino_id: currentInquilinoId,
@@ -230,7 +230,7 @@ async function saveDocumentoAdicional(event) {
                 usuario_guardo: currentUser.nombre
             }]);
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
         await loadInquilinos();
         showInquilinoDetail(currentInquilinoId);
@@ -254,12 +254,12 @@ async function deleteInquilino() {
     showLoading();
     
     try {
-        const { error } = await supabaseClient
+        var result = await supabaseClient
             .from('inquilinos')
             .delete()
             .eq('id', currentInquilinoId);
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
         await loadInquilinos();
         closeModal('inquilinoDetailModal');
@@ -280,12 +280,12 @@ async function deleteDocumentoAdicional(docId) {
     
     showLoading();
     try {
-        const { error } = await supabaseClient
+        var result = await supabaseClient
             .from('inquilinos_documentos')
             .delete()
             .eq('id', docId);
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
         await loadInquilinos();
         showInquilinoDetail(currentInquilinoId);
@@ -301,11 +301,11 @@ async function deleteDocumentoAdicional(docId) {
 }
 
 function editInquilino() {
-    const inq = inquilinos.find(i => i.id === currentInquilinoId);
+    var inq = inquilinos.find(function(i) { return i.id === currentInquilinoId; });
     if (!inq) return;
     
     isEditMode = true;
-    tempInquilinoContactos = [...(inq.contactos || [])];
+    tempInquilinoContactos = [].concat(inq.contactos || []);
     
     document.getElementById('addInquilinoTitle').textContent = 'Editar Inquilino';
     document.getElementById('inquilinoNombre').value = inq.nombre;
