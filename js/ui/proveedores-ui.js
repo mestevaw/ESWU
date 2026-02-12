@@ -7,17 +7,11 @@
 // ============================================
 
 function viewFacturaDoc(archivo) {
-    if (archivo) {
-        const newWindow = window.open();
-        newWindow.document.write(`<iframe width='100%' height='100%' src='${archivo}'></iframe>`);
-    }
+    openPDFViewer(archivo);
 }
 
 function viewDocumento(archivo) {
-    if (archivo) {
-        const newWindow = window.open();
-        newWindow.document.write(`<iframe width='100%' height='100%' src='${archivo}'></iframe>`);
-    }
+    openPDFViewer(archivo);
 }
 
 // ============================================
