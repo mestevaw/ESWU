@@ -173,10 +173,15 @@ function renderProveedoresFacturasPagadas() {
             ? `<td style="cursor:pointer;color:var(--primary)" title="Ver PDF" onclick="event.stopPropagation(); viewFacturaDoc(${f.facturaId}, 'pago')">${formatDate(f.fecha)}</td>`
             : `<td>${formatDate(f.fecha)}</td>`;
         
-        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
+        // Orden: Proveedor | No. Factura | Pagada en | Monto
+        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}${fechaCell}<td class="currency">${formatCurrency(f.monto)}</td>`;
         
-        row.style.cursor = 'pointer';
-        row.onclick = () => showProveedorDetail(f.proveedorId);
+        // Click en la fila → PDF de la factura (no ficha proveedor)
+        if (f.has_documento) {
+            row.style.cursor = 'pointer';
+            row.title = 'Ver PDF';
+            row.onclick = () => viewFacturaDoc(f.facturaId, 'documento');
+        }
     });
     
     if (pagadas.length === 0) {
@@ -184,7 +189,7 @@ function renderProveedoresFacturasPagadas() {
     } else {
         const row = tbody.insertRow();
         row.className = 'total-row';
-        row.innerHTML = `<td colspan="2" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td><td></td>`;
+        row.innerHTML = `<td colspan="3" style="text-align:right;padding:1rem"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td>`;
     }
 }
 
@@ -242,6 +247,7 @@ function renderProveedoresFacturasPorPagar() {
             <td class="currency">${formatCurrency(f.monto)}</td>
             <td>${formatDateVencimiento(f.vencimiento)}</td>
             <td style="white-space:nowrap;" onclick="event.stopPropagation()">
+                <span onclick="currentProveedorId=${f.provId}; showEditFacturaModal(${f.factId})" title="Modificar factura" style="cursor:pointer; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
                 <span onclick="showPagarFacturaModal(${f.factId})" title="Dar factura x pagada" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏦</span>
                 <span onclick="deleteFacturaConConfirm(${f.factId}, '${escapedNum}')" title="Eliminar factura" style="cursor:pointer; color:var(--danger); font-size:1.1rem; font-weight:700; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
             </td>
@@ -393,6 +399,7 @@ function showProveedorDetail(id) {
             return `
                 <div style="border:1px solid var(--border); border-radius:6px; padding:0; margin-bottom:0.5rem; background:white; position:relative;">
                     <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.25rem; z-index:2;">
+                        <span onclick="event.stopPropagation(); showEditFacturaModal(${f.id})" title="Modificar factura" style="cursor:pointer; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
                         <span onclick="event.stopPropagation(); showPagarFacturaModal(${f.id})" title="Dar factura x pagada" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏦</span>
                         <span onclick="event.stopPropagation(); deleteFacturaConConfirm(${f.id}, '${escapedNumero}')" title="Eliminar factura" style="cursor:pointer; color:var(--danger); font-size:1.1rem; font-weight:700; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
                     </div>
