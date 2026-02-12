@@ -330,7 +330,7 @@ if (inq.contactos && inq.contactos.length > 0) {
         document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
         
         // BOTÓN DE CONTRATO
-        const contratoButtonSection = document.getElementById('contratoButtonSection');
+        const contratoButtonSection = document.getElementById('contratoOriginalSection');
         if (inq.contrato_file) {
             contratoButtonSection.innerHTML = `
                 <button class="btn btn-primary" onclick="viewContrato()" style="width:100%;font-size:1.1rem;padding:1rem;">
