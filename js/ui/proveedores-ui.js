@@ -1,6 +1,7 @@
 /* ========================================
    PROVEEDORES UI - TODAS LAS FUNCIONES
-   Última actualización: 2026-02-12 15:00 CST
+   Diseño restaurado sesiones 3-6 + optimización sesiones 7-8
+   Última actualización: 2026-02-12 16:00 CST
    ======================================== */
 
 // ============================================
@@ -95,7 +96,11 @@ function filtrarProveedores(query) {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
     tbody.innerHTML = '';
     
-    const filtrados = proveedores.filter(prov => prov.nombre.toLowerCase().includes(query));
+    const filtrados = proveedores.filter(prov => 
+        prov.nombre.toLowerCase().includes(query) || 
+        (prov.servicio || '').toLowerCase().includes(query) ||
+        (prov.contactos || []).some(c => (c.nombre || '').toLowerCase().includes(query))
+    );
     
     filtrados.forEach(prov => {
         const row = tbody.insertRow();
@@ -230,6 +235,7 @@ function renderProveedoresFacturasPorPagar() {
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
     porPagar.forEach(f => {
         const row = tbody.insertRow();
+        const escapedNum = (f.numero).replace(/'/g, "\\'");
         row.innerHTML = `
             <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
             <td>${f.numero}</td>
@@ -237,7 +243,7 @@ function renderProveedoresFacturasPorPagar() {
             <td>${formatDateVencimiento(f.vencimiento)}</td>
             <td style="white-space:nowrap;" onclick="event.stopPropagation()">
                 <span onclick="showPagarFacturaModal(${f.factId})" title="Dar factura x pagada" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏦</span>
-                <span onclick="deleteFacturaConConfirm(${f.factId}, '${(f.numero).replace(/'/g, "\\'")}')" title="Eliminar factura" style="cursor:pointer; color:var(--danger); font-size:1.1rem; font-weight:700; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
+                <span onclick="deleteFacturaConConfirm(${f.factId}, '${escapedNum}')" title="Eliminar factura" style="cursor:pointer; color:var(--danger); font-size:1.1rem; font-weight:700; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
             </td>
         `;
         
@@ -309,7 +315,7 @@ function showProveedorDetail(id) {
         notasDiv.textContent = prov.notas || 'Sin notas';
     }
     
-    // ── Pestaña: Facturas Pagadas (diseño con 2 recuadros) ──
+    // ── Pestaña: Facturas Pagadas (dos recuadros clickeables) ──
     const facturasPagadasDiv = document.getElementById('facturasPagadas');
     const facturasPagadas = prov.facturas.filter(f => f.fecha_pago);
     let totalPagadas = 0;
@@ -318,7 +324,6 @@ function showProveedorDetail(id) {
         facturasPagadasDiv.innerHTML = facturasPagadas.map(f => {
             totalPagadas += f.monto;
             
-            // Recuadro 1: "Factura X del fecha" — clickeable si hay PDF
             const facturaBox = f.has_documento
                 ? `<div onclick="fetchAndViewFactura(${f.id}, 'documento')" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
                        <strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}
@@ -327,7 +332,6 @@ function showProveedorDetail(id) {
                        <strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}
                    </div>`;
             
-            // Recuadro 2: "Pago del: fecha" — clickeable si hay comprobante PDF
             const pagoBox = f.has_pago
                 ? `<div onclick="fetchAndViewFactura(${f.id}, 'pago')" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
                        <strong>Pago del:</strong> ${formatDate(f.fecha_pago)}
@@ -350,7 +354,7 @@ function showProveedorDetail(id) {
         facturasPagadasDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas pagadas</p>';
     }
     
-    // ── Pestaña: Facturas Por Pagar (diseño con iconos 🏦 y ✕) ──
+    // ── Pestaña: Facturas Por Pagar (iconos 🏦 y ✕) ──
     const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
     const facturasPorPagar = prov.facturas.filter(f => !f.fecha_pago);
     let totalPorPagar = 0;
@@ -364,12 +368,10 @@ function showProveedorDetail(id) {
             
             return `
                 <div style="border:1px solid var(--border); border-radius:6px; padding:0; margin-bottom:0.5rem; background:white; position:relative;">
-                    <!-- Iconos esquina superior derecha -->
                     <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.25rem; z-index:2;">
                         <span onclick="event.stopPropagation(); showPagarFacturaModal(${f.id})" title="Dar factura x pagada" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏦</span>
                         <span onclick="event.stopPropagation(); deleteFacturaConConfirm(${f.id}, '${escapedNumero}')" title="Eliminar factura" style="cursor:pointer; color:var(--danger); font-size:1.1rem; font-weight:700; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
                     </div>
-                    <!-- Contenido clickeable -->
                     <div style="display:flex; align-items:stretch;">
                         <div ${clickPDF} style="flex:1; background:var(--bg); border-radius:6px 0 0 6px; padding:0.75rem; ${cursorPDF} transition:background 0.2s;" onmouseover="if(this.getAttribute('onclick'))this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
                             <div><strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}</div>
@@ -386,20 +388,32 @@ function showProveedorDetail(id) {
         facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
     }
     
-    // ── Pestaña: Documentos Adicionales ──
+    // ── Pestaña: Documentos Adicionales (con ✕ para eliminar) ──
     const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
     if (prov.documentos && prov.documentos.length > 0) {
-        docsDiv.innerHTML = '<table style="width:100%;table-layout:fixed"><thead><tr><th style="width:50%">Nombre</th><th style="width:25%">Fecha</th><th style="width:25%">Usuario</th></tr></thead><tbody>' +
-            prov.documentos.map(d => `
-                <tr class="doc-item" onclick="fetchAndViewDocProveedor(${d.id})">
-                    <td style="word-wrap:break-word">${d.nombre}</td>
-                    <td>${formatDate(d.fecha)}</td>
-                    <td>${d.usuario}</td>
+        const escapedDocs = prov.documentos.map(d => {
+            const escapedNombre = (d.nombre || '').replace(/'/g, "\\'");
+            return `
+                <tr class="doc-item">
+                    <td onclick="fetchAndViewDocProveedor(${d.id})" style="cursor:pointer; word-wrap:break-word">${d.nombre}</td>
+                    <td onclick="fetchAndViewDocProveedor(${d.id})" style="cursor:pointer;">${formatDate(d.fecha)}</td>
+                    <td onclick="fetchAndViewDocProveedor(${d.id})" style="cursor:pointer;">${d.usuario}</td>
+                    <td style="width:40px; text-align:center;">
+                        <span onclick="event.stopPropagation(); deleteProveedorDocConConfirm(${d.id}, '${escapedNombre}')" title="Eliminar documento" style="cursor:pointer; color:var(--danger); font-weight:700; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
+                    </td>
                 </tr>
-            `).join('') + '</tbody></table>';
+            `;
+        }).join('');
+        docsDiv.innerHTML = '<table style="width:100%;table-layout:fixed"><thead><tr><th style="width:40%">Nombre</th><th style="width:22%">Fecha</th><th style="width:22%">Usuario</th><th style="width:40px"></th></tr></thead><tbody>' + escapedDocs + '</tbody></table>';
     } else {
         docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
     }
+    
+    // ── Altura fija: que el modal no cambie de tamaño entre pestañas ──
+    document.getElementById('proveedorPagadasTab').style.minHeight = '220px';
+    document.getElementById('proveedorPorPagarTab').style.minHeight = '220px';
+    document.getElementById('proveedorDocsTab').style.minHeight = '220px';
+    document.getElementById('proveedorNotasTab').style.minHeight = '220px';
     
     // ── Abrir modal y activar primera pestaña ──
     document.getElementById('proveedorDetailModal').classList.add('active');
@@ -416,4 +430,120 @@ function deleteFacturaConConfirm(facturaId, numeroFactura) {
     }
 }
 
-console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 15:00 CST)');
+// ============================================
+// DOCUMENTOS ADICIONALES PROVEEDOR
+// ============================================
+
+function showAgregarDocumentoProveedorModal() {
+    document.getElementById('provNuevoDocNombre').value = '';
+    document.getElementById('provNuevoDocPDF').value = '';
+    const fileName = document.getElementById('provNuevoDocPDFFileName');
+    if (fileName) fileName.textContent = '';
+    document.getElementById('agregarDocumentoProveedorModal').classList.add('active');
+}
+
+async function saveDocumentoProveedor(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const nombre = document.getElementById('provNuevoDocNombre').value;
+        const file = document.getElementById('provNuevoDocPDF').files[0];
+        
+        if (!file) {
+            throw new Error('Seleccione un archivo PDF');
+        }
+        
+        const pdfBase64 = await fileToBase64(file);
+        
+        const { error } = await supabaseClient
+            .from('proveedores_documentos')
+            .insert([{
+                proveedor_id: currentProveedorId,
+                nombre_documento: nombre,
+                archivo_pdf: pdfBase64,
+                fecha_guardado: new Date().toISOString().split('T')[0],
+                usuario_guardo: currentUser.nombre
+            }]);
+        
+        if (error) throw error;
+        
+        await loadProveedores();
+        closeModal('agregarDocumentoProveedorModal');
+        showProveedorDetail(currentProveedorId);
+        setTimeout(() => switchTab('proveedor', 'docs'), 100);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function deleteProveedorDocConConfirm(docId, nombreDoc) {
+    if (confirm('¿Seguro quiere eliminar el documento ' + nombreDoc + '?')) {
+        deleteProveedorDocumento(docId);
+    }
+}
+
+async function deleteProveedorDocumento(docId) {
+    showLoading();
+    try {
+        const { error } = await supabaseClient
+            .from('proveedores_documentos')
+            .delete()
+            .eq('id', docId);
+        
+        if (error) throw error;
+        
+        await loadProveedores();
+        showProveedorDetail(currentProveedorId);
+        setTimeout(() => switchTab('proveedor', 'docs'), 100);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error al eliminar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// NOTAS PROVEEDOR
+// ============================================
+
+function showEditNotasProveedorModal() {
+    const prov = proveedores.find(p => p.id === currentProveedorId);
+    if (prov) {
+        document.getElementById('proveedorNotasEdit').value = prov.notas || '';
+    }
+    document.getElementById('editNotasProveedorModal').classList.add('active');
+}
+
+async function saveNotasProveedor() {
+    showLoading();
+    try {
+        const notas = document.getElementById('proveedorNotasEdit').value;
+        
+        const { error } = await supabaseClient
+            .from('proveedores')
+            .update({ notas: notas })
+            .eq('id', currentProveedorId);
+        
+        if (error) throw error;
+        
+        await loadProveedores();
+        closeModal('editNotasProveedorModal');
+        showProveedorDetail(currentProveedorId);
+        setTimeout(() => switchTab('proveedor', 'notas'), 100);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error al guardar notas: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 16:00 CST)');
