@@ -352,10 +352,12 @@ function showProveedorDetail(id) {
                    </div>`;
             
             return `
-                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem; flex-wrap:wrap;">
-                    ${facturaBox}
-                    ${pagoBox}
-                    <div style="margin-left:auto; font-weight:700; color:var(--primary); white-space:nowrap;">${formatCurrency(f.monto)}</div>
+                <div style="border:1px solid var(--border); border-radius:6px; padding:0.75rem; margin-bottom:0.5rem; background:white;">
+                    <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                        ${facturaBox}
+                        ${pagoBox}
+                        <div style="margin-left:auto; font-weight:700; color:var(--primary); white-space:nowrap;">${formatCurrency(f.monto)}</div>
+                    </div>
                 </div>
             `;
         }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPagadas)}</strong></div>`;
@@ -367,54 +369,34 @@ function showProveedorDetail(id) {
     const facturasPorPagarDiv = document.getElementById('facturasPorPagar');
     const facturasPorPagar = prov.facturas.filter(f => !f.fecha_pago);
     let totalPorPagar = 0;
-    const isMobile = window.innerWidth <= 768;
     
     if (facturasPorPagar.length > 0) {
-        if (isMobile) {
-            facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
-                totalPorPagar += f.monto;
-                const clickAction = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
-                const cursorStyle = f.documento_file ? 'cursor:pointer;' : '';
-                return `
-                    <div class="factura-box" ${clickAction} style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white; ${cursorStyle}">
-                        <div style="margin-bottom: 0.5rem;">
-                            <strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong>
+        facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
+            totalPorPagar += f.monto;
+            const clickPDF = f.documento_file ? `onclick="viewFacturaDoc('${f.documento_file}')"` : '';
+            const cursorPDF = f.documento_file ? 'cursor:pointer;' : '';
+            const escapedNumero = (f.numero || 'S/N').replace(/'/g, "\\'");
+            
+            return `
+                <div style="border:1px solid var(--border); border-radius:6px; padding:0; margin-bottom:0.5rem; background:white; position:relative;">
+                    <!-- Iconos esquina superior derecha -->
+                    <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.25rem; z-index:2;">
+                        <span onclick="event.stopPropagation(); showPagarFacturaModal(${f.id})" title="Dar factura x pagada" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏦</span>
+                        <span onclick="event.stopPropagation(); deleteFacturaConConfirm(${f.id}, '${escapedNumero}')" title="Eliminar factura" style="cursor:pointer; color:var(--danger); font-size:1.1rem; font-weight:700; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
+                    </div>
+                    <!-- Contenido clickeable -->
+                    <div style="display:flex; align-items:stretch;">
+                        <div ${clickPDF} style="flex:1; background:var(--bg); border-radius:6px 0 0 6px; padding:0.75rem; ${cursorPDF} transition:background 0.2s;" onmouseover="if(this.onclick||this.getAttribute('onclick'))this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
+                            <div><strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}</div>
+                            <div style="margin-top:0.25rem; color:var(--text-light);">A ser pagada el <strong>${formatDate(f.vencimiento)}</strong></div>
                         </div>
-                        <div style="margin-bottom: 0.5rem;">
-                            Vence: <strong>${formatDate(f.vencimiento)}</strong>
-                        </div>
-                        <div style="text-align:right; font-size: 1.1rem; color: var(--primary);">
-                            <strong>${formatCurrency(f.monto)}</strong>
-                        </div>
-                        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;" onclick="event.stopPropagation()">
-                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
+                        <div style="display:flex; align-items:flex-end; padding:0.75rem; min-width:120px; justify-content:flex-end;">
+                            <span style="font-weight:700; color:var(--primary); font-size:1.05rem;">${formatCurrency(f.monto)}</span>
                         </div>
                     </div>
-                `;
-            }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
-        } else {
-            facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
-                totalPorPagar += f.monto;
-                const verLink = f.documento_file 
-                    ? `<button class="btn btn-sm btn-secondary" onclick="viewFacturaDoc('${f.documento_file}')">Ver</button>` 
-                    : '';
-                return `
-                    <div class="payment-item">
-                        <div class="payment-item-content">
-                            <div><strong>Factura ${f.numero || 'S/N'}</strong> del <strong>${formatDate(f.fecha)}</strong></div>
-                            <div>Vence: ${formatDateVencimiento(f.vencimiento)}</div>
-                            <div style="margin-top:0.5rem"><strong>${formatCurrency(f.monto)}</strong></div>
-                        </div>
-                        <div class="payment-item-actions">
-                            ${verLink}
-                            <button class="btn btn-sm btn-primary" onclick="showPagarFacturaModal(${f.id})">Dar X Pagada</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteFactura(${f.id})">Eliminar</button>
-                        </div>
-                    </div>
-                `;
-            }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
-        }
+                </div>
+            `;
+        }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPorPagar)}</strong></div>`;
     } else {
         facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
     }
@@ -437,6 +419,17 @@ function showProveedorDetail(id) {
     // ── Abrir modal y activar primera pestaña ──
     document.getElementById('proveedorDetailModal').classList.add('active');
     switchTab('proveedor', 'pagadas');
+}
+
+// ============================================
+// DELETE FACTURA WITH CUSTOM CONFIRM
+// ============================================
+
+function deleteFacturaConConfirm(facturaId, numeroFactura) {
+    if (confirm('¿Seguro quiere eliminar la factura ' + numeroFactura + '?')) {
+        deleteFactura(facturaId);
+    }
+    // Si dice "no", simplemente no hace nada y el usuario sigue en la ficha del proveedor
 }
 
 console.log('✅ PROVEEDORES-UI.JS cargado');
