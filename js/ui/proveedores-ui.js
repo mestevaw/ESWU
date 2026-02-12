@@ -167,10 +167,10 @@ function renderProveedoresFacturasPagadas() {
         const row = tbody.insertRow();
         
         const facturaCell = f.has_documento 
-            ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" onclick="event.stopPropagation(); viewFacturaDoc(${f.facturaId}, 'documento')">${f.numero}</td>`
+            ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" title="Ver PDF" onclick="event.stopPropagation(); viewFacturaDoc(${f.facturaId}, 'documento')">${f.numero}</td>`
             : `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.numero}</td>`;
         const fechaCell = f.has_pago
-            ? `<td style="cursor:pointer;color:var(--primary)" onclick="event.stopPropagation(); viewFacturaDoc(${f.facturaId}, 'pago')">${formatDate(f.fecha)}</td>`
+            ? `<td style="cursor:pointer;color:var(--primary)" title="Ver PDF" onclick="event.stopPropagation(); viewFacturaDoc(${f.facturaId}, 'pago')">${formatDate(f.fecha)}</td>`
             : `<td>${formatDate(f.fecha)}</td>`;
         
         row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}<td class="currency">${formatCurrency(f.monto)}</td>${fechaCell}`;
@@ -249,6 +249,7 @@ function renderProveedoresFacturasPorPagar() {
         
         row.style.cursor = 'pointer';
         if (f.has_documento) {
+            row.title = 'Ver PDF';
             row.onclick = () => viewFacturaDoc(f.factId, 'documento');
         }
     });
@@ -348,7 +349,7 @@ function showProveedorDetail(id) {
             totalPagadas += f.monto;
             
             const facturaBox = f.has_documento
-                ? `<div onclick="fetchAndViewFactura(${f.id}, 'documento')" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
+                ? `<div onclick="fetchAndViewFactura(${f.id}, 'documento')" title="Ver PDF" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
                        <strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}
                    </div>`
                 : `<div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; color:var(--text-light);">
@@ -356,7 +357,7 @@ function showProveedorDetail(id) {
                    </div>`;
             
             const pagoBox = f.has_pago
-                ? `<div onclick="fetchAndViewFactura(${f.id}, 'pago')" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
+                ? `<div onclick="fetchAndViewFactura(${f.id}, 'pago')" title="Ver PDF" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
                        <strong>Pago del:</strong> ${formatDate(f.fecha_pago)}
                    </div>`
                 : `<div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; color:var(--text-light);">
@@ -385,7 +386,7 @@ function showProveedorDetail(id) {
     if (facturasPorPagar.length > 0) {
         facturasPorPagarDiv.innerHTML = facturasPorPagar.map(f => {
             totalPorPagar += f.monto;
-            const clickPDF = f.has_documento ? `onclick="fetchAndViewFactura(${f.id}, 'documento')"` : '';
+            const clickPDF = f.has_documento ? `onclick="fetchAndViewFactura(${f.id}, 'documento')" title="Ver PDF"` : '';
             const cursorPDF = f.has_documento ? 'cursor:pointer;' : '';
             const escapedNumero = (f.numero || 'S/N').replace(/'/g, "\\'");
             
@@ -418,9 +419,9 @@ function showProveedorDetail(id) {
             const escapedNombre = (d.nombre || '').replace(/'/g, "\\'");
             return `
                 <tr class="doc-item">
-                    <td onclick="fetchAndViewDocProveedor(${d.id})" style="cursor:pointer; word-wrap:break-word">${d.nombre}</td>
-                    <td onclick="fetchAndViewDocProveedor(${d.id})" style="cursor:pointer;">${formatDate(d.fecha)}</td>
-                    <td onclick="fetchAndViewDocProveedor(${d.id})" style="cursor:pointer;">${d.usuario}</td>
+                    <td onclick="fetchAndViewDocProveedor(${d.id})" title="Ver PDF" style="cursor:pointer; word-wrap:break-word">${d.nombre}</td>
+                    <td onclick="fetchAndViewDocProveedor(${d.id})" title="Ver PDF" style="cursor:pointer;">${formatDate(d.fecha)}</td>
+                    <td onclick="fetchAndViewDocProveedor(${d.id})" title="Ver PDF" style="cursor:pointer;">${d.usuario}</td>
                     <td style="width:40px; text-align:center;">
                         <span onclick="event.stopPropagation(); deleteProveedorDocConConfirm(${d.id}, '${escapedNombre}')" title="Eliminar documento" style="cursor:pointer; color:var(--danger); font-weight:700; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
                     </td>
@@ -569,4 +570,4 @@ async function saveNotasProveedor() {
     }
 }
 
-console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 16:00 CST)');
+console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 17:00 CST)');
