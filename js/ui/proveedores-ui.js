@@ -265,22 +265,44 @@ function showProveedorDetail(id) {
     currentProveedorId = id;
     
     document.getElementById('proveedorDetailNombre').textContent = prov.nombre;
-    document.getElementById('detailServicio').textContent = prov.servicio;
+    document.getElementById('proveedorDetailServicio').textContent = prov.servicio || '';
     
-    const contactosList = document.getElementById('detailProvContactosList');
+    // Contacto primario (teléfono y email del primer contacto)
+    const primaryDiv = document.getElementById('provDetailContactPrimary');
+    const additionalDiv = document.getElementById('provDetailAdditionalContacts');
+    
     if (prov.contactos && prov.contactos.length > 0) {
-        contactosList.innerHTML = prov.contactos.map(c => `
+        const first = prov.contactos[0];
+        primaryDiv.innerHTML = `
             <div style="margin-bottom:0.5rem;padding:0.5rem;background:white;border-radius:4px">
-                <strong>${c.nombre}</strong><br>
-                <small><strong>Tel:</strong> ${c.telefono || '-'} | <strong>Email:</strong> ${c.email || '-'}</small>
+                <strong>${first.nombre}</strong><br>
+                <small><strong>Tel:</strong> ${first.telefono || '-'} | <strong>Email:</strong> ${first.email || '-'}</small>
             </div>
-        `).join('');
+        `;
+        
+        if (prov.contactos.length > 1) {
+            additionalDiv.innerHTML = prov.contactos.slice(1).map(c => `
+                <div style="margin-bottom:0.5rem;padding:0.5rem;background:var(--bg);border-radius:4px">
+                    <strong>${c.nombre}</strong><br>
+                    <small><strong>Tel:</strong> ${c.telefono || '-'} | <strong>Email:</strong> ${c.email || '-'}</small>
+                </div>
+            `).join('');
+        } else {
+            additionalDiv.innerHTML = '';
+        }
     } else {
-        contactosList.innerHTML = '<p style="color:var(--text-light)">No hay contactos</p>';
+        primaryDiv.innerHTML = '<p style="color:var(--text-light)">No hay contactos</p>';
+        additionalDiv.innerHTML = '';
     }
     
     document.getElementById('detailProvClabe').textContent = prov.clabe || '-';
     document.getElementById('detailProvRFC').textContent = prov.rfc || '-';
+    
+    // Notas
+    const notasDiv = document.getElementById('proveedorNotasContent');
+    if (notasDiv) {
+        notasDiv.textContent = prov.notas || 'Sin notas';
+    }
     
     const facturasPagadasDiv = document.getElementById('facturasPagadas');
     const facturasPagadas = prov.facturas.filter(f => f.fecha_pago);
