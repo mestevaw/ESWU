@@ -95,7 +95,10 @@ function filtrarProveedores(query) {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
     tbody.innerHTML = '';
     
-    const filtrados = proveedores.filter(prov => prov.nombre.toLowerCase().includes(query));
+    const filtrados = proveedores.filter(prov => 
+        prov.nombre.toLowerCase().includes(query) || 
+        (prov.servicio || '').toLowerCase().includes(query)
+    );
     
     filtrados.forEach(prov => {
         const row = tbody.insertRow();
