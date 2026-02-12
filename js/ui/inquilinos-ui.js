@@ -331,9 +331,9 @@ if (inq.contactos && inq.contactos.length > 0) {
         
         // BOTÓN DE CONTRATO
         const contratoButtonSection = document.getElementById('contratoButtonSection');
-        if (inq.contrato_file) {
+        if (inq.has_contrato) {
             contratoButtonSection.innerHTML = `
-                <button class="btn btn-primary" onclick="viewContrato()" style="width:100%;font-size:1.1rem;padding:1rem;">
+                <button class="btn btn-primary" onclick="fetchAndViewContrato(${inq.id})" style="width:100%;font-size:1.1rem;padding:1rem;">
                     📄 Ver Contrato Original
                 </button>
             `;
@@ -364,9 +364,9 @@ if (inq.contactos && inq.contactos.length > 0) {
             docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:50px;"></th></tr></thead><tbody>' +
                 inq.documentos.map(d => `
                     <tr class="doc-item">
-                        <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${d.nombre}</td>
-                        <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${formatDate(d.fecha)}</td>
-                        <td onclick="viewDocumento('${d.archivo}')" style="cursor:pointer;">${d.usuario}</td>
+                        <td onclick="fetchAndViewDocInquilino(${d.id})" style="cursor:pointer;">${d.nombre}</td>
+                        <td onclick="fetchAndViewDocInquilino(${d.id})" style="cursor:pointer;">${formatDate(d.fecha)}</td>
+                        <td onclick="fetchAndViewDocInquilino(${d.id})" style="cursor:pointer;">${d.usuario}</td>
                         <td><button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteDocumentoAdicional(${d.id})">×</button></td>
                     </tr>
                 `).join('') + '</tbody></table>';
@@ -471,18 +471,24 @@ function showEditContactoInquilinoModal(index) {
 }
 
 // ============================================
-// VIEW DOCUMENTS
+// VIEW DOCUMENTS (on-demand via loaders.js)
 // ============================================
 
 function viewContrato() {
-    const inq = inquilinos.find(i => i.id === currentInquilinoId);
-    if (inq && inq.contrato_file) {
-        openPDFViewer(inq.contrato_file);
+    // Usa la función on-demand de loaders.js
+    if (currentInquilinoId) {
+        fetchAndViewContrato(currentInquilinoId);
     }
 }
 
-function viewDocumento(archivo) {
-    openPDFViewer(archivo);
+function viewDocumento(docIdOrArchivo) {
+    // Si es un número, es un ID → usar fetch on-demand
+    if (typeof docIdOrArchivo === 'number') {
+        fetchAndViewDocInquilino(docIdOrArchivo);
+    } else if (docIdOrArchivo) {
+        // Fallback: si es base64 directo (legacy)
+        openPDFViewer(docIdOrArchivo);
+    }
 }
 
 async function deleteDocumentoAdicional(docId) {
