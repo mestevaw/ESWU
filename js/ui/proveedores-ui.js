@@ -416,6 +416,12 @@ function showProveedorDetail(id) {
         docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
     }
     
+    // ── Altura fija: que el modal no cambie de tamaño entre pestañas ──
+    // Equivalente a ~3 filas de contenido
+    document.getElementById('proveedorPagadasTab').style.minHeight = '220px';
+    document.getElementById('proveedorPorPagarTab').style.minHeight = '220px';
+    document.getElementById('proveedorDocsTab').style.minHeight = '220px';
+    
     // ── Abrir modal y activar primera pestaña ──
     document.getElementById('proveedorDetailModal').classList.add('active');
     switchTab('proveedor', 'pagadas');
