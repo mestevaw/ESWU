@@ -11,6 +11,38 @@ let currentSubContext = null;
 let currentSearchContext = null;
 
 // ============================================
+// PDF VIEWER (OVERLAY EN MÓVIL, VENTANA EN DESKTOP)
+// ============================================
+
+function openPDFViewer(src) {
+    if (!src) return;
+    
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+        // Mostrar overlay con iframe
+        const overlay = document.getElementById('pdfViewerOverlay');
+        const iframe = document.getElementById('pdfViewerIframe');
+        iframe.src = src;
+        overlay.classList.add('active');
+        // Bloquear scroll del body
+        document.body.style.overflow = 'hidden';
+    } else {
+        // Desktop: abrir en nueva ventana
+        const newWindow = window.open();
+        newWindow.document.write(`<iframe width='100%' height='100%' src='${src}' style='border:none;'></iframe>`);
+    }
+}
+
+function closePDFViewer() {
+    const overlay = document.getElementById('pdfViewerOverlay');
+    const iframe = document.getElementById('pdfViewerIframe');
+    iframe.src = '';
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// ============================================
 // MENU NAVIGATION
 // ============================================
 
