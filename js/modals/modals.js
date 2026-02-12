@@ -26,9 +26,14 @@ function showAddProveedorModal() {
     
     document.getElementById('addProveedorTitle').textContent = 'Agregar Proveedor';
     document.getElementById('proveedorForm').reset();
-    document.getElementById('proveedorContactosList').innerHTML = '<p style="color:var(--text-light);font-size:0.875rem">No hay contactos agregados</p>';
+    document.getElementById('proveedorContactosList').innerHTML = '';
     document.getElementById('provDocAdicionalFileName').textContent = '';
     document.getElementById('nombreProvDocGroup').classList.add('hidden');
+    
+    // Limpiar contacto inline
+    document.getElementById('proveedorContactoNombreInline').value = '';
+    document.getElementById('proveedorContactoTelInline').value = '';
+    document.getElementById('proveedorContactoEmailInline').value = '';
     
     document.getElementById('addProveedorModal').classList.add('active');
 }
