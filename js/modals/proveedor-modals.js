@@ -47,6 +47,15 @@ function showEditContactoProveedorModal(index) {
 }
 
 function showRegistrarFacturaModal() {
+    // Limpiar todos los campos
+    document.getElementById('facturaNumero').value = '';
+    document.getElementById('facturaFecha').value = '';
+    document.getElementById('facturaVencimiento').value = '';
+    document.getElementById('facturaMonto').value = '';
+    document.getElementById('facturaIVA').value = '';
+    document.getElementById('facturaDocumento').value = '';
+    document.getElementById('facturaDocumentoFileName').textContent = '';
+    
     document.getElementById('registrarFacturaModal').classList.add('active');
 }
 
