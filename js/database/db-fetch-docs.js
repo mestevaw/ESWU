@@ -1,7 +1,7 @@
 /* ========================================
    DB-FETCH-DOCS.JS - Carga de documentos bajo demanda
    Obtiene PDFs/fotos base64 solo cuando el usuario los necesita
-   Última actualización: 2026-02-12 15:00 CST
+   Última actualización: 2026-02-12 17:00 CST
    ======================================== */
 
 // ============================================
@@ -14,27 +14,49 @@ function openPDFViewer(base64Data) {
         return;
     }
     
-    // Intentar usar overlay (funciona en mobile y desktop)
-    const overlay = document.getElementById('pdfViewerOverlay');
-    const iframe = document.getElementById('pdfViewerIframe');
-    
-    if (overlay && iframe) {
-        try {
-            iframe.src = base64Data;
+    try {
+        // Convertir base64 data URI a Blob URL (Safari iOS no soporta data URIs en iframes)
+        let blobUrl;
+        if (base64Data.startsWith('data:')) {
+            const parts = base64Data.split(',');
+            const mime = parts[0].match(/:(.*?);/)[1];
+            const byteString = atob(parts[1]);
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: mime });
+            blobUrl = URL.createObjectURL(blob);
+        } else {
+            blobUrl = base64Data;
+        }
+        
+        // Intentar overlay (funciona en mobile y desktop con blob URL)
+        const overlay = document.getElementById('pdfViewerOverlay');
+        const iframe = document.getElementById('pdfViewerIframe');
+        
+        if (overlay && iframe) {
+            // Guardar blob URL para liberar memoria al cerrar
+            overlay.dataset.blobUrl = blobUrl;
+            iframe.src = blobUrl;
             overlay.style.display = 'block';
             document.body.style.overflow = 'hidden';
             return;
-        } catch (e) {
-            console.warn('Error con overlay PDF, intentando window.open:', e);
         }
-    }
-    
-    // Fallback: window.open (desktop)
-    const newWindow = window.open();
-    if (newWindow) {
-        newWindow.document.write(`<iframe width='100%' height='100%' src='${base64Data}' style='border:none;position:fixed;top:0;left:0;right:0;bottom:0;'></iframe>`);
-    } else {
-        alert('No se pudo abrir la ventana. Verifica que el navegador no bloquee pop-ups.');
+        
+        // Fallback: abrir blob URL directamente
+        window.open(blobUrl, '_blank');
+        
+    } catch (e) {
+        console.error('Error abriendo PDF:', e);
+        // Último fallback: intentar window.open con data URI original
+        const w = window.open();
+        if (w) {
+            w.document.write(`<iframe width='100%' height='100%' src='${base64Data}' style='border:none;position:fixed;top:0;left:0;right:0;bottom:0;'></iframe>`);
+        } else {
+            alert('No se pudo abrir el documento.');
+        }
     }
 }
 
@@ -42,12 +64,17 @@ function closePDFViewer() {
     const overlay = document.getElementById('pdfViewerOverlay');
     const iframe = document.getElementById('pdfViewerIframe');
     
+    if (iframe) {
+        iframe.src = 'about:blank';
+    }
     if (overlay) {
         overlay.style.display = 'none';
         document.body.style.overflow = '';
-    }
-    if (iframe) {
-        iframe.src = 'about:blank';
+        // Liberar memoria del blob URL
+        if (overlay.dataset.blobUrl) {
+            URL.revokeObjectURL(overlay.dataset.blobUrl);
+            delete overlay.dataset.blobUrl;
+        }
     }
 }
 
@@ -153,4 +180,4 @@ async function fetchActivoFotos(activoId) {
     }
 }
 
-console.log('✅ DB-FETCH-DOCS.JS cargado (2026-02-12 15:00 CST)');
+console.log('✅ DB-FETCH-DOCS.JS cargado (2026-02-12 17:00 CST)');
