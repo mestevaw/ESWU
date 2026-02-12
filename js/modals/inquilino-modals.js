@@ -91,8 +91,7 @@ function showAgregarDocumentoModal() {
 function viewContrato() {
     const inq = inquilinos.find(i => i.id === currentInquilinoId);
     if (inq && inq.contrato_file) {
-        const newWindow = window.open();
-        newWindow.document.write(`<iframe width='100%' height='100%' src='${inq.contrato_file}'></iframe>`);
+        openPDFViewer(inq.contrato_file);
     }
 }
 
