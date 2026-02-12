@@ -1,7 +1,7 @@
 /* ========================================
    PROVEEDORES UI - TODAS LAS FUNCIONES
    Diseño restaurado sesiones 3-6 + optimización sesiones 7-8
-   Última actualización: 2026-02-12 16:00 CST
+   Última actualización: 2026-02-12 18:00 CST
    ======================================== */
 
 // ============================================
@@ -345,41 +345,34 @@ function showProveedorDetail(id) {
         notasDiv.textContent = prov.notas || 'Sin notas';
     }
     
-    // ── Pestaña: Facturas Pagadas (dos recuadros clickeables) ──
+    // ── Pestaña: Facturas Pagadas (tabla 3 columnas con encabezado sticky) ──
     const facturasPagadasDiv = document.getElementById('facturasPagadas');
     const facturasPagadas = prov.facturas.filter(f => f.fecha_pago);
     let totalPagadas = 0;
     
     if (facturasPagadas.length > 0) {
-        facturasPagadasDiv.innerHTML = facturasPagadas.map(f => {
+        const rows = facturasPagadas.map(f => {
             totalPagadas += f.monto;
-            
-            const facturaBox = f.has_documento
-                ? `<div onclick="fetchAndViewFactura(${f.id}, 'documento')" title="Ver PDF" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
-                       <strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}
-                   </div>`
-                : `<div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; color:var(--text-light);">
-                       <strong>Factura ${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}
-                   </div>`;
-            
-            const pagoBox = f.has_pago
-                ? `<div onclick="fetchAndViewFactura(${f.id}, 'pago')" title="Ver PDF" style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
-                       <strong>Pago del:</strong> ${formatDate(f.fecha_pago)}
-                   </div>`
-                : `<div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:0.5rem 0.75rem; color:var(--text-light);">
-                       <strong>Pago del:</strong> ${formatDate(f.fecha_pago)}
-                   </div>`;
-            
-            return `
-                <div style="border:1px solid var(--border); border-radius:6px; padding:0.75rem; margin-bottom:0.5rem; background:white;">
-                    <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
-                        ${facturaBox}
-                        ${pagoBox}
-                        <div style="margin-left:auto; font-weight:700; color:var(--primary); white-space:nowrap;">${formatCurrency(f.monto)}</div>
-                    </div>
-                </div>
-            `;
-        }).join('') + `<div style="text-align:right;padding:1rem;background:#e6f2ff;font-weight:bold;margin-top:1rem">TOTAL: <strong>${formatCurrency(totalPagadas)}</strong></div>`;
+            const clickDoc = f.has_documento ? `onclick="fetchAndViewFactura(${f.id}, 'documento')" title="Ver PDF" style="cursor:pointer; color:var(--primary);"` : '';
+            const clickPago = f.has_pago ? `onclick="fetchAndViewFactura(${f.id}, 'pago')" title="Ver PDF" style="cursor:pointer; color:var(--primary);"` : '';
+            return `<tr>
+                <td ${clickDoc}><strong>${f.numero || 'S/N'}</strong> del ${formatDate(f.fecha)}</td>
+                <td ${clickPago}>${formatDate(f.fecha_pago)}</td>
+                <td class="currency">${formatCurrency(f.monto)}</td>
+            </tr>`;
+        }).join('');
+        
+        facturasPagadasDiv.innerHTML = `
+            <table style="width:100%; border-collapse:collapse;">
+                <thead><tr style="background:var(--bg); position:sticky; top:0; z-index:1;">
+                    <th style="text-align:left; padding:0.5rem; border-bottom:2px solid var(--border); font-size:0.85rem;">Factura No. y Fecha</th>
+                    <th style="text-align:left; padding:0.5rem; border-bottom:2px solid var(--border); font-size:0.85rem;">Pagada en</th>
+                    <th style="text-align:right; padding:0.5rem; border-bottom:2px solid var(--border); font-size:0.85rem;">Monto</th>
+                </tr></thead>
+                <tbody>${rows}
+                <tr style="background:#e6f2ff;"><td colspan="2" style="text-align:right;padding:0.5rem;"><strong>TOTAL:</strong></td><td class="currency"><strong>${formatCurrency(totalPagadas)}</strong></td></tr>
+                </tbody>
+            </table>`;
     } else {
         facturasPagadasDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas pagadas</p>';
     }
@@ -419,7 +412,7 @@ function showProveedorDetail(id) {
         facturasPorPagarDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay facturas por pagar</p>';
     }
     
-    // ── Pestaña: Documentos Adicionales (con ✕ para eliminar) ──
+    // ── Pestaña: Documentos Adicionales (con ✏️ y ✕) ──
     const docsDiv = document.getElementById('proveedorDocumentosAdicionales');
     if (prov.documentos && prov.documentos.length > 0) {
         const escapedDocs = prov.documentos.map(d => {
@@ -429,22 +422,26 @@ function showProveedorDetail(id) {
                     <td onclick="fetchAndViewDocProveedor(${d.id})" title="Ver PDF" style="cursor:pointer; word-wrap:break-word">${d.nombre}</td>
                     <td onclick="fetchAndViewDocProveedor(${d.id})" title="Ver PDF" style="cursor:pointer;">${formatDate(d.fecha)}</td>
                     <td onclick="fetchAndViewDocProveedor(${d.id})" title="Ver PDF" style="cursor:pointer;">${d.usuario}</td>
-                    <td style="width:40px; text-align:center;">
+                    <td style="width:60px; text-align:center; white-space:nowrap;">
+                        <span onclick="event.stopPropagation(); replaceProveedorDoc(${d.id})" title="Cambiar PDF" style="cursor:pointer; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
                         <span onclick="event.stopPropagation(); deleteProveedorDocConConfirm(${d.id}, '${escapedNombre}')" title="Eliminar documento" style="cursor:pointer; color:var(--danger); font-weight:700; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
                     </td>
                 </tr>
             `;
         }).join('');
-        docsDiv.innerHTML = '<table style="width:100%;table-layout:fixed"><thead><tr><th style="width:40%">Nombre</th><th style="width:22%">Fecha</th><th style="width:22%">Usuario</th><th style="width:40px"></th></tr></thead><tbody>' + escapedDocs + '</tbody></table>';
+        docsDiv.innerHTML = '<table style="width:100%;table-layout:fixed"><thead><tr><th style="width:38%">Nombre</th><th style="width:20%">Fecha</th><th style="width:20%">Usuario</th><th style="width:60px"></th></tr></thead><tbody>' + escapedDocs + '</tbody></table>';
     } else {
         docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
     }
     
-    // ── Altura fija: que el modal no cambie de tamaño entre pestañas ──
-    document.getElementById('proveedorPagadasTab').style.minHeight = '220px';
-    document.getElementById('proveedorPorPagarTab').style.minHeight = '220px';
-    document.getElementById('proveedorDocsTab').style.minHeight = '220px';
-    document.getElementById('proveedorNotasTab').style.minHeight = '220px';
+    // ── Altura fija con scroll: header y pestañas no se mueven ──
+    const tabHeight = '260px';
+    ['proveedorPagadasTab','proveedorPorPagarTab','proveedorDocsTab','proveedorNotasTab'].forEach(id => {
+        const el = document.getElementById(id);
+        el.style.minHeight = tabHeight;
+        el.style.maxHeight = tabHeight;
+        el.style.overflowY = 'auto';
+    });
     
     // ── Abrir modal y activar primera pestaña ──
     document.getElementById('proveedorDetailModal').classList.add('active');
@@ -577,4 +574,41 @@ async function saveNotasProveedor() {
     }
 }
 
-console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 17:00 CST)');
+// ============================================
+// REEMPLAZAR PDF DE DOCUMENTO
+// ============================================
+
+function replaceProveedorDoc(docId) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf';
+    input.onchange = async function() {
+        if (!this.files[0]) return;
+        showLoading();
+        try {
+            const pdfBase64 = await fileToBase64(this.files[0]);
+            const { error } = await supabaseClient
+                .from('proveedores_documentos')
+                .update({
+                    archivo_pdf: pdfBase64,
+                    fecha_guardado: new Date().toISOString().split('T')[0],
+                    usuario_guardo: currentUser.nombre
+                })
+                .eq('id', docId);
+            
+            if (error) throw error;
+            
+            await loadProveedores();
+            showProveedorDetail(currentProveedorId);
+            setTimeout(() => switchTab('proveedor', 'docs'), 100);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Error al reemplazar PDF: ' + error.message);
+        } finally {
+            hideLoading();
+        }
+    };
+    input.click();
+}
+
+console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 18:00 CST)');
