@@ -267,10 +267,10 @@
                                 </select>
                             </div>
                             <div class="table-container">
-                                <table id="proveedoresFacturasPagadasTable">
-                                    <thead><tr><th>Proveedor</th><th>Número</th><th>Monto</th><th>Fecha Pago</th></tr></thead>
-                                    <tbody></tbody>
-                                </table>
+                                <table id="proveedoresFacturasPagadasTable" class="sticky-header-table">
+    <thead><tr><th>Proveedor</th><th>No. Factura</th><th>Pagada en</th><th>Monto</th></tr></thead>
+    <tbody></tbody>
+</table>
                             </div>
                         </div>
                     </div>
@@ -299,8 +299,8 @@
                                 </select>
                             </div>
                             <div class="table-container">
-                             <table id="proveedoresFacturasPorPagarTable">
-    <thead><tr><th>Proveedor</th><th>Número</th><th>Monto</th><th>Vencimiento</th></tr></thead>
+                            <table id="proveedoresFacturasPorPagarTable" class="sticky-header-table">
+    <thead><tr><th>Proveedor</th><th>No. Fact.</th><th>CLABE</th><th>Fecha Pago</th><th>Monto</th></tr></thead>
     <tbody></tbody>
 </table>
                             </div>
@@ -667,18 +667,17 @@
         </div>
     </div>
 
-    <!-- Modal Add/Edit Proveedor -->
+ <!-- Modal Add/Edit Proveedor -->
     <div id="addProveedorModal" class="modal">
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
                 <h2 class="modal-title" id="addProveedorTitle">Agregar Proveedor</h2>
-                <button class="close-modal" onclick="closeModal('addProveedorModal')">×</button>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button type="submit" form="proveedorForm" title="Guardar" style="background:none; border:none; font-size:1.4rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;">💾</button>
+                    <button class="close-modal" onclick="closeModal('addProveedorModal')">×</button>
+                </div>
             </div>
             <div style="padding: 1.5rem;">
-                <div class="modal-actions-top">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addProveedorModal')" title="Cancelar">✖️ Cancelar</button>
-                    <button type="submit" form="proveedorForm" class="btn btn-success" title="Guardar">✔️ Guardar</button>
-                </div>
                 <form id="proveedorForm" onsubmit="saveProveedor(event)">
                     <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="proveedorNombre" required autocomplete="off"></div>
                     <div class="form-group"><label>Servicio *</label><input type="text" id="proveedorServicio" required autocomplete="off"></div>
