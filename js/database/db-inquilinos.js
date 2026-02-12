@@ -1,57 +1,60 @@
 /* ========================================
-   DB-PROVEEDORES.JS - Database operations for proveedores
+   DB-INQUILINOS.JS - Database operations for inquilinos
    OPTIMIZADO: No carga PDFs en memoria
    ======================================== */
 
-async function loadProveedores() {
+async function loadInquilinos() {
     try {
-        // SELECT sin campos pesados (documento_file, pago_file, archivo_pdf)
+        // SELECT sin campos pesados (contrato_file, pago_file, archivo_pdf)
         const { data, error } = await supabaseClient
-            .from('proveedores')
-            .select('id, nombre, servicio, clabe, rfc, notas, facturas(id, proveedor_id, numero, fecha, vencimiento, monto, iva, fecha_pago), proveedores_documentos(id, proveedor_id, nombre_documento, fecha_guardado, usuario_guardo), proveedores_contactos(*)')
+            .from('inquilinos')
+            .select('id, nombre, clabe, rfc, m2, renta, fecha_inicio, fecha_vencimiento, notas, numero_despacho, contrato_activo, fecha_terminacion, pagos_inquilinos(id, inquilino_id, fecha, monto, completo), inquilinos_documentos(id, inquilino_id, nombre_documento, fecha_guardado, usuario_guardo), inquilinos_contactos(*)')
             .order('nombre');
         
         if (error) throw error;
         
-        // Verificar cuáles facturas tienen documento (sin cargar el PDF)
-        const { data: conDocumento } = await supabaseClient
-            .from('facturas')
+        // Verificar cuáles tienen contrato (sin cargar el PDF)
+        const { data: conContrato } = await supabaseClient
+            .from('inquilinos')
             .select('id')
-            .not('documento_file', 'is', null);
-        const docSet = new Set((conDocumento || []).map(f => f.id));
+            .not('contrato_file', 'is', null);
+        const contratoSet = new Set((conContrato || []).map(i => i.id));
         
-        // Verificar cuáles facturas tienen comprobante de pago (sin cargar el PDF)
-        const { data: conPago } = await supabaseClient
-            .from('facturas')
+        // Verificar cuáles pagos tienen comprobante (sin cargar el PDF)
+        const { data: conPagoFile } = await supabaseClient
+            .from('pagos_inquilinos')
             .select('id')
             .not('pago_file', 'is', null);
-        const pagoSet = new Set((conPago || []).map(f => f.id));
+        const pagoFileSet = new Set((conPagoFile || []).map(p => p.id));
         
-        proveedores = data.map(prov => ({
-            id: prov.id,
-            nombre: prov.nombre,
-            servicio: prov.servicio,
-            clabe: prov.clabe,
-            rfc: prov.rfc,
-            notas: prov.notas,
-            contactos: prov.proveedores_contactos ? prov.proveedores_contactos.map(c => ({
+        inquilinos = data.map(inq => ({
+            id: inq.id,
+            nombre: inq.nombre,
+            clabe: inq.clabe,
+            rfc: inq.rfc,
+            m2: inq.m2,
+            renta: parseFloat(inq.renta || 0),
+            fecha_inicio: inq.fecha_inicio,
+            fecha_vencimiento: inq.fecha_vencimiento,
+            notas: inq.notas,
+            numero_despacho: inq.numero_despacho,
+            contrato_activo: inq.contrato_activo,
+            fecha_terminacion: inq.fecha_terminacion,
+            has_contrato: contratoSet.has(inq.id),
+            contactos: inq.inquilinos_contactos ? inq.inquilinos_contactos.map(c => ({
                 id: c.id,
                 nombre: c.nombre,
                 telefono: c.telefono,
                 email: c.email
             })) : [],
-            facturas: prov.facturas ? prov.facturas.map(f => ({
-                id: f.id,
-                numero: f.numero,
-                fecha: f.fecha,
-                vencimiento: f.vencimiento,
-                monto: parseFloat(f.monto),
-                iva: parseFloat(f.iva || 0),
-                fecha_pago: f.fecha_pago,
-                has_documento: docSet.has(f.id),
-                has_pago: pagoSet.has(f.id)
+            pagos: inq.pagos_inquilinos ? inq.pagos_inquilinos.map(p => ({
+                id: p.id,
+                fecha: p.fecha,
+                monto: parseFloat(p.monto),
+                completo: p.completo,
+                has_pago_file: pagoFileSet.has(p.id)
             })).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)) : [],
-            documentos: prov.proveedores_documentos ? prov.proveedores_documentos.map(d => ({
+            documentos: inq.inquilinos_documentos ? inq.inquilinos_documentos.map(d => ({
                 id: d.id,
                 nombre: d.nombre_documento,
                 fecha: d.fecha_guardado,
@@ -59,109 +62,187 @@ async function loadProveedores() {
             })).sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '')) : []
         }));
         
-        console.log('✅ Proveedores cargados:', proveedores.length, '(sin PDFs)');
+        console.log('✅ Inquilinos cargados:', inquilinos.length, '(sin PDFs)');
     } catch (error) {
-        console.error('❌ Error loading proveedores:', error);
+        console.error('❌ Error loading inquilinos:', error);
         throw error;
     }
 }
 
-async function saveProveedor(event) {
+async function saveInquilino(event) {
     event.preventDefault();
     showLoading();
     
     try {
-        const docFile = document.getElementById('proveedorDocAdicional').files[0];
-        let docURL = null;
-        let docNombre = null;
+        const contratoFile = document.getElementById('inquilinoContrato').files[0];
+        let contratoURL = null;
         
-        if (docFile) {
-            docURL = await fileToBase64(docFile);
-            docNombre = document.getElementById('proveedorNombreDoc').value;
+        if (contratoFile) {
+            contratoURL = await fileToBase64(contratoFile);
         }
         
-        const proveedorData = {
-            nombre: document.getElementById('proveedorNombre').value,
-            servicio: document.getElementById('proveedorServicio').value,
-            clabe: document.getElementById('proveedorClabe').value || null,
-            rfc: document.getElementById('proveedorRFC').value || null,
-            notas: document.getElementById('proveedorNotas').value || null
+        const inquilinoData = {
+            nombre: document.getElementById('inquilinoNombre').value,
+            clabe: document.getElementById('inquilinoClabe').value || null,
+            rfc: document.getElementById('inquilinoRFC').value || null,
+            m2: document.getElementById('inquilinoM2').value || null,
+            numero_despacho: document.getElementById('inquilinoDespacho').value || null,
+            renta: parseFloat(document.getElementById('inquilinoRenta').value),
+            fecha_inicio: document.getElementById('inquilinoFechaInicio').value,
+            fecha_vencimiento: document.getElementById('inquilinoFechaVenc').value,
+            notas: document.getElementById('inquilinoNotas').value || null
         };
         
-        let proveedorId;
+        if (contratoURL) {
+            inquilinoData.contrato_file = contratoURL;
+        }
         
-        if (isEditMode && currentProveedorId) {
+        let inquilinoId;
+        
+        if (isEditMode && currentInquilinoId) {
             const { error } = await supabaseClient
-                .from('proveedores')
-                .update(proveedorData)
-                .eq('id', currentProveedorId);
+                .from('inquilinos')
+                .update(inquilinoData)
+                .eq('id', currentInquilinoId);
             
             if (error) throw error;
             
             await supabaseClient
-                .from('proveedores_contactos')
+                .from('inquilinos_contactos')
                 .delete()
-                .eq('proveedor_id', currentProveedorId);
+                .eq('inquilino_id', currentInquilinoId);
             
-            proveedorId = currentProveedorId;
+            inquilinoId = currentInquilinoId;
         } else {
             const { data, error } = await supabaseClient
-                .from('proveedores')
-                .insert([proveedorData])
+                .from('inquilinos')
+                .insert([inquilinoData])
                 .select();
             
             if (error) throw error;
-            proveedorId = data[0].id;
+            inquilinoId = data[0].id;
         }
         
-        if (tempProveedorContactos.length > 0) {
-            const contactosToInsert = tempProveedorContactos.map(c => ({
-                proveedor_id: proveedorId,
+        if (tempInquilinoContactos.length > 0) {
+            const contactosToInsert = tempInquilinoContactos.map(c => ({
+                inquilino_id: inquilinoId,
                 nombre: c.nombre,
                 telefono: c.telefono || null,
                 email: c.email || null
             }));
             
             const { error: contactosError } = await supabaseClient
-                .from('proveedores_contactos')
+                .from('inquilinos_contactos')
                 .insert(contactosToInsert);
             
             if (contactosError) throw contactosError;
         }
         
-        if (docURL && docNombre) {
-            const { error: docError } = await supabaseClient
-                .from('proveedores_documentos')
-                .insert([{
-                    proveedor_id: proveedorId,
-                    nombre_documento: docNombre,
-                    archivo_pdf: docURL,
-                    fecha_guardado: new Date().toISOString().split('T')[0],
-                    usuario_guardo: currentUser.nombre
-                }]);
-            
-            if (docError) throw docError;
+        await loadInquilinos();
+        closeModal('addInquilinoModal');
+        
+        if (currentSubContext === 'inquilinos-list') {
+            renderInquilinosTable();
         }
         
-        await loadProveedores();
-        closeModal('addProveedorModal');
-        
-        if (currentSubContext === 'proveedores-list') {
-            renderProveedoresTable();
-        }
-        
-        alert('✅ Proveedor guardado correctamente');
+        alert('✅ Inquilino guardado correctamente');
         
     } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error al guardar proveedor: ' + error.message);
+        alert('❌ Error al guardar inquilino: ' + error.message);
     } finally {
         hideLoading();
     }
 }
 
-async function deleteProveedor() {
-    if (!confirm('¿Está seguro de eliminar este proveedor? Esta acción no se puede deshacer.')) {
+async function savePagoRenta(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const inq = inquilinos.find(i => i.id === currentInquilinoId);
+        if (!inq) throw new Error('Inquilino no encontrado');
+        
+        const pagoCompleto = document.getElementById('pagoCompleto').value === 'si';
+        const monto = pagoCompleto ? inq.renta : parseFloat(document.getElementById('pagoMonto').value);
+        
+        const pagoFile = document.getElementById('pagoPDF').files[0];
+        let pagoURL = null;
+        
+        if (pagoFile) {
+            pagoURL = await fileToBase64(pagoFile);
+        }
+        
+        const pagoData = {
+            inquilino_id: currentInquilinoId,
+            fecha: document.getElementById('pagoFecha').value,
+            monto: monto,
+            completo: pagoCompleto,
+            pago_file: pagoURL
+        };
+        
+        const { error } = await supabaseClient
+            .from('pagos_inquilinos')
+            .insert([pagoData]);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        showInquilinoDetail(currentInquilinoId);
+        closeModal('registrarPagoModal');
+        
+        alert('✅ Pago registrado correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error al registrar pago: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function saveDocumentoAdicional(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const nombre = document.getElementById('nuevoDocNombre').value;
+        const file = document.getElementById('nuevoDocPDF').files[0];
+        
+        if (!file) {
+            throw new Error('Seleccione un archivo PDF');
+        }
+        
+        const pdfBase64 = await fileToBase64(file);
+        
+        const { error } = await supabaseClient
+            .from('inquilinos_documentos')
+            .insert([{
+                inquilino_id: currentInquilinoId,
+                nombre_documento: nombre,
+                archivo_pdf: pdfBase64,
+                fecha_guardado: new Date().toISOString().split('T')[0],
+                usuario_guardo: currentUser.nombre
+            }]);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        showInquilinoDetail(currentInquilinoId);
+        closeModal('agregarDocumentoModal');
+        
+        alert('✅ Documento agregado correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function deleteInquilino() {
+    if (!confirm('¿Está seguro de eliminar este inquilino? Esta acción no se puede deshacer.')) {
         return;
     }
     
@@ -169,44 +250,73 @@ async function deleteProveedor() {
     
     try {
         const { error } = await supabaseClient
-            .from('proveedores')
+            .from('inquilinos')
             .delete()
-            .eq('id', currentProveedorId);
+            .eq('id', currentInquilinoId);
         
         if (error) throw error;
         
-        await loadProveedores();
-        closeModal('proveedorDetailModal');
-        renderProveedoresTable();
+        await loadInquilinos();
+        closeModal('inquilinoDetailModal');
+        renderInquilinosTable();
         
-        alert('✅ Proveedor eliminado correctamente');
+        alert('✅ Inquilino eliminado correctamente');
         
     } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error al eliminar proveedor: ' + error.message);
+        alert('❌ Error al eliminar inquilino: ' + error.message);
     } finally {
         hideLoading();
     }
 }
 
-function editProveedor() {
-    const prov = proveedores.find(p => p.id === currentProveedorId);
-    if (!prov) return;
+async function deleteDocumentoAdicional(docId) {
+    if (!confirm('¿Eliminar este documento?')) return;
     
-    isEditMode = true;
-    tempProveedorContactos = [...(prov.contactos || [])];
-    
-    document.getElementById('addProveedorTitle').textContent = 'Editar Proveedor';
-    document.getElementById('proveedorNombre').value = prov.nombre;
-    document.getElementById('proveedorServicio').value = prov.servicio;
-    document.getElementById('proveedorClabe').value = prov.clabe || '';
-    document.getElementById('proveedorRFC').value = prov.rfc || '';
-    document.getElementById('proveedorNotas').value = prov.notas || '';
-    
-    renderContactosList(tempProveedorContactos, 'proveedorContactosList', 'deleteProveedorContacto', 'showEditContactoProveedorModal');
-    
-    closeModal('proveedorDetailModal');
-    document.getElementById('addProveedorModal').classList.add('active');
+    showLoading();
+    try {
+        const { error } = await supabaseClient
+            .from('inquilinos_documentos')
+            .delete()
+            .eq('id', docId);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        showInquilinoDetail(currentInquilinoId);
+        
+        alert('✅ Documento eliminado');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error al eliminar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
 }
 
-console.log('✅ DB-PROVEEDORES.JS cargado (optimizado)');
+function editInquilino() {
+    const inq = inquilinos.find(i => i.id === currentInquilinoId);
+    if (!inq) return;
+    
+    isEditMode = true;
+    tempInquilinoContactos = [...(inq.contactos || [])];
+    
+    document.getElementById('addInquilinoTitle').textContent = 'Editar Inquilino';
+    document.getElementById('inquilinoNombre').value = inq.nombre;
+    document.getElementById('inquilinoClabe').value = inq.clabe || '';
+    document.getElementById('inquilinoRFC').value = inq.rfc || '';
+    document.getElementById('inquilinoM2').value = inq.m2 || '';
+    document.getElementById('inquilinoDespacho').value = inq.numero_despacho || '';
+    document.getElementById('inquilinoRenta').value = inq.renta;
+    document.getElementById('inquilinoFechaInicio').value = inq.fecha_inicio;
+    document.getElementById('inquilinoFechaVenc').value = inq.fecha_vencimiento;
+    document.getElementById('inquilinoNotas').value = inq.notas || '';
+    
+    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto', 'showEditContactoInquilinoModal');
+    
+    closeModal('inquilinoDetailModal');
+    document.getElementById('addInquilinoModal').classList.add('active');
+}
+
+console.log('✅ DB-INQUILINOS.JS cargado (optimizado)');
