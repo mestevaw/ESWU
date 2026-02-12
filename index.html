@@ -649,7 +649,7 @@
                     <div class="form-group">
                         <label>Documento (PDF) *</label>
                         <div class="file-upload" onclick="document.getElementById('provNuevoDocPDF').click()">
-                            <input type="file" id="provNuevoDocPDF" accept=".pdf" required>
+                            <input type="file" id="provNuevoDocPDF" accept=".pdf" required onchange="document.getElementById('provNuevoDocPDFFileName').textContent=this.files[0]?this.files[0].name:''">
                             <p>Click para seleccionar PDF</p>
                             <p id="provNuevoDocPDFFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
                         </div>
