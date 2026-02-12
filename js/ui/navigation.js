@@ -204,19 +204,18 @@ function switchTab(type, tabName) {
         document.querySelectorAll('#proveedorDetailModal .tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('#proveedorDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
         
-        // Siempre limpiar el + verde de la pestaña porpagar
-        const tabPorPagar = document.querySelector('#proveedorDetailModal .tab:nth-child(2)');
-        const existingPlus = tabPorPagar.querySelector('.tab-plus-icon');
-        if (existingPlus) existingPlus.remove();
+        // Siempre limpiar todos los + verdes de las pestañas
+        document.querySelectorAll('#proveedorDetailModal .tab-plus-icon').forEach(el => el.remove());
         
         if (tabName === 'pagadas') {
             document.querySelector('#proveedorDetailModal .tab:nth-child(1)').classList.add('active');
             document.getElementById('proveedorPagadasTab').classList.add('active');
         } else if (tabName === 'porpagar') {
+            const tabPorPagar = document.querySelector('#proveedorDetailModal .tab:nth-child(2)');
             tabPorPagar.classList.add('active');
             document.getElementById('proveedorPorPagarTab').classList.add('active');
             
-            // Agregar + verde solo cuando esta pestaña está activa
+            // Agregar + verde para facturas
             const plusSpan = document.createElement('span');
             plusSpan.className = 'tab-plus-icon';
             plusSpan.textContent = ' +';
@@ -228,8 +227,21 @@ function switchTab(type, tabName) {
             };
             tabPorPagar.appendChild(plusSpan);
         } else if (tabName === 'docs') {
-            document.querySelector('#proveedorDetailModal .tab:nth-child(3)').classList.add('active');
+            const tabDocs = document.querySelector('#proveedorDetailModal .tab:nth-child(3)');
+            tabDocs.classList.add('active');
             document.getElementById('proveedorDocsTab').classList.add('active');
+            
+            // Agregar + verde para documentos
+            const plusSpan = document.createElement('span');
+            plusSpan.className = 'tab-plus-icon';
+            plusSpan.textContent = ' +';
+            plusSpan.title = 'Agregar documento';
+            plusSpan.style.cssText = 'color:var(--success); font-weight:700; font-size:1.2rem; cursor:pointer; margin-left:0.25rem;';
+            plusSpan.onclick = function(e) {
+                e.stopPropagation();
+                showAgregarDocumentoProveedorModal();
+            };
+            tabDocs.appendChild(plusSpan);
         }
     }
 }
