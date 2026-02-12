@@ -1,6 +1,7 @@
 /* ========================================
    DB-FETCH-DOCS.JS - Carga de documentos bajo demanda
    Obtiene PDFs/fotos base64 solo cuando el usuario los necesita
+   Última actualización: 2026-02-12 13:30 CST
    ======================================== */
 
 // ============================================
@@ -129,4 +130,4 @@ async function fetchActivoFotos(activoId) {
     }
 }
 
-console.log('✅ DB-FETCH-DOCS.JS cargado');
+console.log('✅ DB-FETCH-DOCS.JS cargado (2026-02-12 13:30 CST)');
