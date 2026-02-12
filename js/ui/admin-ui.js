@@ -338,7 +338,7 @@ function renderBancosTable() {
     
     bancosDocumentos.forEach(b => {
         tbody.innerHTML += `
-            <tr class="banco-clickable" onclick="viewDocumento('${b.archivo_pdf}')">
+            <tr class="banco-clickable" onclick="fetchAndViewBancoDoc(${b.id})">
                 <td>${b.tipo || 'Documento'}</td>
                 <td>${formatDate(b.fecha_subida)}</td>
             </tr>
@@ -384,13 +384,11 @@ function showActivoDetail(id) {
     document.getElementById('detailActivoProveedor').textContent = act.proveedor || '-';
     document.getElementById('detailActivoNotas').textContent = act.notas || '-';
     
+    // Fotos: cargar bajo demanda
     const gallery = document.getElementById('photoGallery');
     if (act.fotos && act.fotos.length > 0) {
-        gallery.innerHTML = act.fotos.map(f => `
-            <div class="photo-item">
-                <img src="${f.data}" alt="${f.name}">
-            </div>
-        `).join('');
+        gallery.innerHTML = '<p style="color:var(--text-light);text-align:center">Cargando ' + act.fotos.length + ' foto(s)...</p>';
+        fetchActivoFotos(act.id);
     } else {
         gallery.innerHTML = '<p style="color:var(--text-light);text-align:center">No hay fotos</p>';
     }
