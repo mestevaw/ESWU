@@ -122,6 +122,8 @@ function executeSearch() {
         filtrarInquilinos(query);
     }
     
+    // Limpiar barra de búsqueda
+    document.getElementById('searchInput').value = '';
     document.getElementById('headerSearchBar').classList.remove('active');
     document.getElementById('btnSearch').classList.remove('hidden');
 }
