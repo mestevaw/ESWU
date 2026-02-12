@@ -1,17 +1,6 @@
 /* ========================================
    ESWU - MAIN.JS (LIMPIO)
    Solo funciones únicas que NO están en otros archivos.
-   
-   Funciones delegadas a archivos modulares:
-     showLoading/hideLoading → db-core.js
-     saveInquilino/editInquilino/deleteInquilino → db-inquilinos.js
-     saveProveedor/editProveedor/deleteProveedor → db-proveedores.js
-     saveFactura/savePagoFactura/deleteFactura → db-facturas.js
-     contactos inquilino → inquilino-modals.js
-     contactos proveedor → proveedor-modals.js
-     fileToBase64 → db-core.js
-     populateInquilinosYearSelects → tables.js
-     populateProveedoresYearSelects → tables.js
    ======================================== */
 
 // ============================================
@@ -21,13 +10,13 @@
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    var username = document.getElementById('username').value;
+    var password = document.getElementById('password').value;
     
     showLoading();
     
     try {
-        const { data, error } = await supabaseClient
+        var result = await supabaseClient
             .from('usuarios')
             .select('*')
             .eq('nombre', username)
@@ -35,11 +24,11 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             .eq('activo', true)
             .single();
         
-        if (error || !data) {
+        if (result.error || !result.data) {
             throw new Error('Usuario o contraseña incorrectos');
         }
         
-        currentUser = data;
+        currentUser = result.data;
         
         localStorage.setItem('eswu_remembered_user', username);
         localStorage.setItem('eswu_remembered_pass', password);
@@ -62,8 +51,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 // ============================================
 
 window.addEventListener('DOMContentLoaded', function() {
-    const rememberedUser = localStorage.getItem('eswu_remembered_user');
-    const rememberedPass = localStorage.getItem('eswu_remembered_pass');
+    var rememberedUser = localStorage.getItem('eswu_remembered_user');
+    var rememberedPass = localStorage.getItem('eswu_remembered_pass');
     
     if (rememberedUser && rememberedPass) {
         document.getElementById('username').value = rememberedUser;
@@ -71,31 +60,38 @@ window.addEventListener('DOMContentLoaded', function() {
         document.getElementById('loginForm').dispatchEvent(new Event('submit'));
     }
     
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.modal').forEach(function(m) { m.classList.remove('active'); });
     
-    setTimeout(() => {
-        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    setTimeout(function() {
+        document.querySelectorAll('.modal').forEach(function(m) { m.classList.remove('active'); });
     }, 1000);
 });
 
 // ============================================
-// INITIALIZE APP
+// INITIALIZE APP - Carga secuencial para evitar timeouts
 // ============================================
 
 async function initializeApp() {
     showLoadingBanner('Cargando datos...');
     
     try {
+        // Primero: inquilinos y proveedores (las más importantes)
+        await loadInquilinos();
+        console.log('  → Inquilinos OK');
+        
+        await loadProveedores();
+        console.log('  → Proveedores OK');
+        
+        // Segundo: el resto en paralelo (son queries simples)
         await Promise.all([
-            loadInquilinos(),
-            loadProveedores(),
             loadActivos(),
             loadUsuarios(),
             loadBancosDocumentos(),
             loadEstacionamiento(),
             loadBitacoraSemanal()
         ]);
+        console.log('  → Resto de datos OK');
         
         populateYearSelect();
         populateInquilinosYearSelects();
@@ -112,51 +108,51 @@ async function initializeApp() {
 }
 
 // Variables de control de carga lazy
-let inquilinosFullLoaded = false;
-let proveedoresFullLoaded = false;
-let activosLoaded = false;
-let usuariosLoaded = false;
-let bancosLoaded = false;
-let estacionamientoLoaded = false;
-let bitacoraLoaded = false;
+var inquilinosFullLoaded = false;
+var proveedoresFullLoaded = false;
+var activosLoaded = false;
+var usuariosLoaded = false;
+var bancosLoaded = false;
+var estacionamientoLoaded = false;
+var bitacoraLoaded = false;
 
 // ============================================
 // FILE INPUT LISTENERS
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    const inquilinoContrato = document.getElementById('inquilinoContrato');
+    var inquilinoContrato = document.getElementById('inquilinoContrato');
     if (inquilinoContrato) {
         inquilinoContrato.addEventListener('change', function() {
-            const fileName = this.files[0]?.name || '';
-            const display = document.getElementById('contratoFileName');
+            var fileName = this.files[0] ? this.files[0].name : '';
+            var display = document.getElementById('contratoFileName');
             if (display) display.textContent = fileName ? 'Seleccionado: ' + fileName : '';
         });
     }
     
-    const nuevoDocPDF = document.getElementById('nuevoDocPDF');
+    var nuevoDocPDF = document.getElementById('nuevoDocPDF');
     if (nuevoDocPDF) {
         nuevoDocPDF.addEventListener('change', function() {
-            const fileName = this.files[0]?.name || '';
-            const display = document.getElementById('nuevoDocPDFFileName');
+            var fileName = this.files[0] ? this.files[0].name : '';
+            var display = document.getElementById('nuevoDocPDFFileName');
             if (display) display.textContent = fileName ? 'Seleccionado: ' + fileName : '';
         });
     }
     
-    const pagoPDF = document.getElementById('pagoPDF');
+    var pagoPDF = document.getElementById('pagoPDF');
     if (pagoPDF) {
         pagoPDF.addEventListener('change', function() {
-            const fileName = this.files[0]?.name || '';
-            const display = document.getElementById('pagoPDFFileName');
+            var fileName = this.files[0] ? this.files[0].name : '';
+            var display = document.getElementById('pagoPDFFileName');
             if (display) display.textContent = fileName ? 'Seleccionado: ' + fileName : '';
         });
     }
     
-    const facturaDocumento = document.getElementById('facturaDocumento');
+    var facturaDocumento = document.getElementById('facturaDocumento');
     if (facturaDocumento) {
         facturaDocumento.addEventListener('change', function() {
-            const fileName = this.files[0]?.name || '';
-            const display = document.getElementById('facturaDocumentoFileName');
+            var fileName = this.files[0] ? this.files[0].name : '';
+            var display = document.getElementById('facturaDocumentoFileName');
             if (display) display.textContent = fileName ? 'Seleccionado: ' + fileName : '';
         });
     }
@@ -173,27 +169,27 @@ async function eliminarProveedoresMigrados() {
     
     showLoading();
     try {
-        const { data: proveedoresMigrados, error: searchError } = await supabaseClient
+        var result = await supabaseClient
             .from('proveedores')
             .select('id')
             .ilike('servicio', '%migrado desde histórico%');
         
-        if (searchError) throw searchError;
+        if (result.error) throw result.error;
         
-        if (!proveedoresMigrados || proveedoresMigrados.length === 0) {
+        if (!result.data || result.data.length === 0) {
             alert('No se encontraron proveedores con "migrado desde histórico"');
             hideLoading();
             return;
         }
         
-        const ids = proveedoresMigrados.map(p => p.id);
+        var ids = result.data.map(function(p) { return p.id; });
         
-        const { error: deleteError } = await supabaseClient
+        var delResult = await supabaseClient
             .from('proveedores')
             .delete()
             .in('id', ids);
         
-        if (deleteError) throw deleteError;
+        if (delResult.error) throw delResult.error;
         
         await loadProveedores();
         renderProveedoresTable();
@@ -213,7 +209,7 @@ async function eliminarProveedoresMigrados() {
 // ============================================
 
 async function terminarContratoInquilino() {
-    const fechaTerminacion = prompt('Ingresa la fecha de terminación del contrato (YYYY-MM-DD):');
+    var fechaTerminacion = prompt('Ingresa la fecha de terminación del contrato (YYYY-MM-DD):');
     
     if (!fechaTerminacion) return;
     
@@ -229,7 +225,7 @@ async function terminarContratoInquilino() {
     showLoading();
     
     try {
-        const { error } = await supabaseClient
+        var result = await supabaseClient
             .from('inquilinos')
             .update({
                 contrato_activo: false,
@@ -237,7 +233,7 @@ async function terminarContratoInquilino() {
             })
             .eq('id', currentInquilinoId);
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
         await loadInquilinos();
         closeModal('inquilinoDetailModal');
@@ -262,23 +258,25 @@ async function terminarContratoInquilino() {
 
 async function loadInquilinosBasico() {
     try {
-        const { data, error } = await supabaseClient
+        var result = await supabaseClient
             .from('inquilinos')
             .select('id, nombre, renta, fecha_vencimiento, contrato_activo')
             .order('nombre');
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
-        inquilinos = data.map(inq => ({
-            id: inq.id,
-            nombre: inq.nombre,
-            renta: parseFloat(inq.renta || 0),
-            fecha_vencimiento: inq.fecha_vencimiento,
-            contrato_activo: inq.contrato_activo,
-            contactos: [],
-            pagos: [],
-            documentos: []
-        }));
+        inquilinos = result.data.map(function(inq) {
+            return {
+                id: inq.id,
+                nombre: inq.nombre,
+                renta: parseFloat(inq.renta || 0),
+                fecha_vencimiento: inq.fecha_vencimiento,
+                contrato_activo: inq.contrato_activo,
+                contactos: [],
+                pagos: [],
+                documentos: []
+            };
+        });
         
     } catch (error) {
         console.error('Error loading inquilinos básico:', error);
@@ -288,21 +286,23 @@ async function loadInquilinosBasico() {
 
 async function loadProveedoresBasico() {
     try {
-        const { data, error } = await supabaseClient
+        var result = await supabaseClient
             .from('proveedores')
             .select('id, nombre, servicio')
             .order('nombre');
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
-        proveedores = data.map(prov => ({
-            id: prov.id,
-            nombre: prov.nombre,
-            servicio: prov.servicio,
-            contactos: [],
-            facturas: [],
-            documentos: []
-        }));
+        proveedores = result.data.map(function(prov) {
+            return {
+                id: prov.id,
+                nombre: prov.nombre,
+                servicio: prov.servicio,
+                contactos: [],
+                facturas: [],
+                documentos: []
+            };
+        });
         
     } catch (error) {
         console.error('Error loading proveedores básico:', error);
@@ -398,23 +398,32 @@ async function ensureBitacoraLoaded() {
 
 async function loadActivos() {
     try {
-        const { data: activosData, error: activosError } = await supabaseClient
+        var r1 = await supabaseClient
             .from('activos')
             .select('*')
             .order('nombre');
         
-        if (activosError) throw activosError;
+        if (r1.error) throw r1.error;
         
-        const { data: fotosData, error: fotosError } = await supabaseClient
+        var r2 = await supabaseClient
             .from('activos_fotos')
             .select('*');
         
-        if (fotosError) throw fotosError;
+        if (r2.error) throw r2.error;
         
-        activos = activosData.map(act => ({
-            ...act,
-            fotos: (fotosData || []).filter(f => f.activo_id === act.id)
-        }));
+        var fotosData = r2.data || [];
+        
+        activos = r1.data.map(function(act) {
+            return {
+                id: act.id,
+                nombre: act.nombre,
+                ultimo_mant: act.ultimo_mant,
+                proximo_mant: act.proximo_mant,
+                proveedor: act.proveedor,
+                notas: act.notas,
+                fotos: fotosData.filter(function(f) { return f.activo_id === act.id; })
+            };
+        });
         
     } catch (error) {
         console.error('Error loading activos:', error);
@@ -428,14 +437,14 @@ async function loadActivos() {
 
 async function loadEstacionamiento() {
     try {
-        const { data, error } = await supabaseClient
+        var result = await supabaseClient
             .from('estacionamiento')
             .select('*')
             .order('numero_espacio');
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
-        estacionamiento = data;
+        estacionamiento = result.data;
         
     } catch (error) {
         console.error('Error loading estacionamiento:', error);
@@ -449,15 +458,15 @@ async function loadEstacionamiento() {
 
 async function loadBitacoraSemanal() {
     try {
-        const { data, error } = await supabaseClient
+        var result = await supabaseClient
             .from('bitacora_semanal')
             .select('id, semana_inicio, semana_texto, notas')
             .order('semana_inicio', { ascending: false })
             .limit(100);
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
-        bitacoraSemanal = data || [];
+        bitacoraSemanal = result.data || [];
         
     } catch (error) {
         console.error('Error loading bitacora:', error);
@@ -471,14 +480,14 @@ async function loadBitacoraSemanal() {
 
 async function loadUsuarios() {
     try {
-        const { data, error } = await supabaseClient
+        var result = await supabaseClient
             .from('usuarios')
             .select('*')
             .order('nombre');
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
-        usuarios = data;
+        usuarios = result.data;
         
     } catch (error) {
         console.error('Error loading usuarios:', error);
@@ -492,15 +501,15 @@ async function loadUsuarios() {
 
 async function loadBancosDocumentos() {
     try {
-        const { data, error } = await supabaseClient
+        var result = await supabaseClient
             .from('bancos_documentos')
             .select('id, tipo, archivo_pdf, fecha_subida')
             .order('fecha_subida', { ascending: false })
             .limit(100);
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
-        bancosDocumentos = data || [];
+        bancosDocumentos = result.data || [];
         
     } catch (error) {
         console.error('Error loading bancos:', error);
@@ -515,10 +524,10 @@ async function loadBancosDocumentos() {
 async function saveEstacionamiento() {
     showLoading();
     try {
-        const inquilinoSeleccionado = document.getElementById('editEspacioInquilino').value;
-        const despacho = document.getElementById('editEspacioDespacho').value;
+        var inquilinoSeleccionado = document.getElementById('editEspacioInquilino').value;
+        var despacho = document.getElementById('editEspacioDespacho').value;
         
-        const { error } = await supabaseClient
+        var result = await supabaseClient
             .from('estacionamiento')
             .update({
                 inquilino_nombre: inquilinoSeleccionado || null,
@@ -526,7 +535,7 @@ async function saveEstacionamiento() {
             })
             .eq('id', currentEstacionamientoId);
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
         await loadEstacionamiento();
         renderEstacionamientoTable();
@@ -547,10 +556,10 @@ async function saveEstacionamiento() {
 async function saveBitacora() {
     showLoading();
     try {
-        const fecha = document.getElementById('editBitacoraFecha').value;
-        const notas = document.getElementById('editBitacoraNotas').value;
+        var fecha = document.getElementById('editBitacoraFecha').value;
+        var notas = document.getElementById('editBitacoraNotas').value;
         
-        const { error } = await supabaseClient
+        var result = await supabaseClient
             .from('bitacora_semanal')
             .update({
                 semana_inicio: fecha,
@@ -558,7 +567,7 @@ async function saveBitacora() {
             })
             .eq('id', currentBitacoraId);
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
         await loadBitacoraSemanal();
         renderBitacoraTable();
@@ -581,16 +590,16 @@ async function saveBancoDoc(event) {
     showLoading();
     
     try {
-        const tipo = document.getElementById('bancoTipo').value;
-        const file = document.getElementById('bancoDocumento').files[0];
+        var tipo = document.getElementById('bancoTipo').value;
+        var file = document.getElementById('bancoDocumento').files[0];
         
         if (!file) {
             throw new Error('Seleccione un archivo PDF');
         }
         
-        const pdfBase64 = await fileToBase64(file);
+        var pdfBase64 = await fileToBase64(file);
         
-        const { error } = await supabaseClient
+        var result = await supabaseClient
             .from('bancos_documentos')
             .insert([{
                 tipo: tipo,
@@ -598,7 +607,7 @@ async function saveBancoDoc(event) {
                 fecha_subida: new Date().toISOString().split('T')[0]
             }]);
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
         await loadBancosDocumentos();
         renderBancosTable();
@@ -617,15 +626,15 @@ async function saveBancoDoc(event) {
 // ============================================
 
 function populateYearSelect() {
-    const currentYear = new Date().getFullYear();
-    const yearSelect = document.getElementById('homeYear');
+    var currentYear = new Date().getFullYear();
+    var yearSelect = document.getElementById('homeYear');
     
     if (!yearSelect) return;
     
     yearSelect.innerHTML = '';
     
-    for (let year = currentYear - 5; year <= currentYear + 1; year++) {
-        const option = document.createElement('option');
+    for (var year = currentYear - 5; year <= currentYear + 1; year++) {
+        var option = document.createElement('option');
         option.value = year;
         option.textContent = year;
         if (year === currentYear) option.selected = true;
