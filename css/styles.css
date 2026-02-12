@@ -1297,7 +1297,7 @@ th.sorted-desc::after {
 }
 
 .pdf-viewer-overlay.active {
-    display: flex;
+    display: flex !important;
 }
 
 .pdf-viewer-header {
