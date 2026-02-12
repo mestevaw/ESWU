@@ -1,6 +1,7 @@
 /* ========================================
    DB-PROVEEDORES.JS - Database operations for proveedores
    OPTIMIZADO: No carga PDFs en memoria
+   Última actualización: 2026-02-12 13:30 CST
    ======================================== */
 
 async function loadProveedores() {
