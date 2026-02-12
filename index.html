@@ -233,7 +233,7 @@
                     <div class="card">
                        <div class="card-header">
     <h2 class="card-title">Listado de Proveedores</h2>
-    <button class="btn btn-primary" onclick="showAddProveedorModal()">+ Agregar</button>
+    <span class="btn-add-inline" onclick="showAddProveedorModal()" title="Agregar proveedor" style="font-size:1.5rem; cursor:pointer;">+</span>
 </div>
                         <div class="table-container">
                             <table id="proveedoresTable" class="sticky-header-table">
@@ -268,7 +268,7 @@
                             </div>
                             <div class="table-container">
                                 <table id="proveedoresFacturasPagadasTable">
-                                    <thead><tr><th>Proveedor</th><th>Número</th><th>Monto</th><th>Fecha Pago</th></tr></thead>
+                                    <thead><tr><th>Proveedor</th><th>No. Factura</th><th>Pagada en</th><th>Monto</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -687,33 +687,65 @@
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
                 <h2 class="modal-title" id="addProveedorTitle">Agregar Proveedor</h2>
-                <button class="close-modal" onclick="closeModal('addProveedorModal')">×</button>
-            </div>
-            <div style="padding: 1.5rem;">
-                <div class="modal-actions-top">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addProveedorModal')" title="Cancelar">✖️ Cancelar</button>
-                    <button type="submit" form="proveedorForm" class="btn btn-success" title="Guardar">✔️ Guardar</button>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button type="submit" form="proveedorForm" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
+                    <button class="close-modal" onclick="closeModal('addProveedorModal')">×</button>
                 </div>
+            </div>
+            <div style="padding: 1rem 1.25rem;">
                 <form id="proveedorForm" onsubmit="saveProveedor(event)">
-                    <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="proveedorNombre" required autocomplete="off"></div>
-                    <div class="form-group"><label>Servicio *</label><input type="text" id="proveedorServicio" required autocomplete="off"></div>
-                    <div class="form-group"><label>CLABE</label><input type="text" id="proveedorClabe" autocomplete="off"></div>
-                    <div class="form-group"><label>RFC</label><input type="text" id="proveedorRFC" autocomplete="off"></div>
-                    <div class="form-group"><label>Notas</label><textarea id="proveedorNotas"></textarea></div>
-                    <h3 style="margin: 1.5rem 0 1rem 0;">Contactos</h3>
-                    <div id="proveedorContactosList" style="margin-bottom: 1rem;"></div>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="showAddContactoProveedorModal()">+ Agregar Contacto</button>
-                    <div class="form-group" style="margin-top: 1.5rem;">
-                        <label>Documento Adicional (PDF Opcional)</label>
-                        <div class="file-upload" onclick="document.getElementById('proveedorDocAdicional').click()">
-                            <input type="file" id="proveedorDocAdicional" accept=".pdf">
-                            <p>Click para seleccionar PDF</p>
-                            <p id="provDocAdicionalFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="min-width:120px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Nombre/Empresa *</label>
+                        <input type="text" id="proveedorNombre" required autocomplete="off" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="min-width:120px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Servicio *</label>
+                        <input type="text" id="proveedorServicio" required autocomplete="off" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="min-width:120px; font-weight:500; white-space:nowrap; font-size:0.9rem;">CLABE</label>
+                        <input type="text" id="proveedorClabe" autocomplete="off" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="min-width:120px; font-weight:500; white-space:nowrap; font-size:0.9rem;">RFC</label>
+                        <input type="text" id="proveedorRFC" autocomplete="off" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="min-width:120px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Notas</label>
+                        <textarea id="proveedorNotas" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem; min-height:50px;"></textarea>
+                    </div>
+                    <div style="border-top:1px solid var(--border); margin:0.75rem 0 0.5rem 0; padding-top:0.75rem;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+                            <strong style="font-size:0.9rem;">📞 Contacto</strong>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                            <label style="min-width:120px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Nombre</label>
+                            <input type="text" id="proveedorContactoNombreInline" autocomplete="off" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                            <label style="min-width:120px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Teléfono</label>
+                            <input type="tel" id="proveedorContactoTelInline" autocomplete="off" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                            <label style="min-width:120px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Email</label>
+                            <input type="email" id="proveedorContactoEmailInline" autocomplete="off" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
                         </div>
                     </div>
-                    <div id="nombreProvDocGroup" class="form-group hidden">
-                        <label>Nombre del Documento *</label>
-                        <input type="text" id="proveedorNombreDoc" autocomplete="off">
+                    <div id="proveedorContactosList" style="margin-bottom:0.5rem;"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="showAddContactoProveedorModal()" style="font-size:0.8rem; padding:0.25rem 0.5rem;">+ Más Contactos</button>
+                    <div style="border-top:1px solid var(--border); margin:0.75rem 0 0.5rem 0; padding-top:0.75rem;">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <label style="min-width:120px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Doc. Adicional</label>
+                            <div onclick="document.getElementById('proveedorDocAdicional').click()" style="flex:1; padding:0.35rem 0.5rem; border:1px dashed var(--border); border-radius:4px; cursor:pointer; font-size:0.85rem; color:var(--text-light); text-align:center;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+                                <input type="file" id="proveedorDocAdicional" accept=".pdf" style="display:none;" onchange="var fn=document.getElementById('provDocAdicionalFileName'); fn.textContent=this.files[0]?this.files[0].name:''; document.getElementById('nombreProvDocGroup').classList.toggle('hidden',!this.files[0]);">
+                                <span>Click para PDF</span>
+                                <span id="provDocAdicionalFileName" style="color:var(--success); margin-left:0.5rem;"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="nombreProvDocGroup" class="hidden" style="display:flex; align-items:center; gap:0.5rem; margin-top:0.5rem;">
+                        <label style="min-width:120px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Nombre Doc. *</label>
+                        <input type="text" id="proveedorNombreDoc" autocomplete="off" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
                     </div>
                 </form>
             </div>
