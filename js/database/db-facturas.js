@@ -1,5 +1,6 @@
 /* ========================================
    DB-FACTURAS.JS - Database operations for facturas
+   Última actualización: 2026-02-12 18:00 CST
    ======================================== */
 
 async function saveFactura(event) {
@@ -29,7 +30,8 @@ async function saveFactura(event) {
         }
         
         if (window.isEditingFactura && currentFacturaId) {
-            // Modo edición: UPDATE
+            // Modo edición: UPDATE (no incluir proveedor_id)
+            delete facturaData.proveedor_id;
             const { error } = await supabaseClient
                 .from('facturas')
                 .update(facturaData)
@@ -50,7 +52,6 @@ async function saveFactura(event) {
         await loadProveedores();
         closeModal('registrarFacturaModal');
         showProveedorDetail(currentProveedorId);
-        // Ir a pestaña facturas x pagar
         setTimeout(() => switchTab('proveedor', 'porpagar'), 100);
         
         window.isEditingFactura = false;
@@ -70,20 +71,19 @@ async function savePagoFactura(event) {
     
     try {
         const pagoFile = document.getElementById('pagoPDFFactura').files[0];
-        let pagoURL = null;
-        
-        if (pagoFile) {
-            pagoURL = await fileToBase64(pagoFile);
-        }
-        
         const fechaPago = document.getElementById('fechaPagoFactura').value;
+        
+        // Construir update solo con lo necesario
+        const updateData = { fecha_pago: fechaPago };
+        
+        // Solo incluir pago_file si se subió un PDF
+        if (pagoFile) {
+            updateData.pago_file = await fileToBase64(pagoFile);
+        }
         
         const { error } = await supabaseClient
             .from('facturas')
-            .update({
-                fecha_pago: fechaPago,
-                pago_file: pagoURL
-            })
+            .update(updateData)
             .eq('id', currentFacturaId);
         
         if (error) throw error;
@@ -124,4 +124,4 @@ async function deleteFactura(facturaId) {
     }
 }
 
-console.log('✅ DB-FACTURAS.JS cargado');
+console.log('✅ DB-FACTURAS.JS cargado (2026-02-12 18:00 CST)');
