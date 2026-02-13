@@ -1,6 +1,6 @@
 /* ========================================
    INQUILINOS-UI.JS - Inquilinos Interface Functions
-   Última actualización: 2026-02-12 13:30 CST
+   Última actualización: 2026-02-12 20:00 CST
    ======================================== */
 
 // ============================================
@@ -55,15 +55,11 @@ function showInquilinosView(view) {
 function renderInquilinosTable() {
     const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
     
-    // Mostrar mensaje de carga
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem;color:var(--primary)">⏳ Cargando inquilinos...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--primary)">⏳ Cargando inquilinos...</td></tr>';
     
-    // Usar setTimeout para permitir que el mensaje se muestre
     setTimeout(() => {
-        // Copiar array para no mutar el original
         let sortedInquilinos = [...inquilinos];
         
-        // Aplicar ordenamiento si hay columna seleccionada
         if (inquilinosSortColumn) {
             sortedInquilinos.sort((a, b) => {
                 let valA, valB;
@@ -91,23 +87,24 @@ function renderInquilinosTable() {
             });
         }
         
-        // Generar filas
         const rows = sortedInquilinos.map(inq => {
             const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
             const inactivo = !inq.contrato_activo;
-            const opacityStyle = inactivo ? 'opacity:0.4;font-style:italic;' : '';
+            const opacityStyle = inactivo ? 'color:#999;font-style:italic;' : '';
+            const contacto = (inq.contactos && inq.contactos.length > 0) ? inq.contactos[0].nombre : '';
             
             return `
                 <tr style="cursor:pointer;${opacityStyle}" onclick="showInquilinoDetail(${inq.id})">
                     <td style="font-size:0.9rem">${nombreCorto}</td>
-                    <td class="currency">${formatCurrency(inq.renta)}</td>
+                    <td style="font-size:0.85rem">${contacto}</td>
                     <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
+                    <td class="currency">${formatCurrency(inq.renta)}</td>
                 </tr>
             `;
         }).join('');
         
         if (inquilinos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No hay inquilinos</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light);padding:2rem">No hay inquilinos</td></tr>';
         } else {
             tbody.innerHTML = rows;
         }
@@ -120,8 +117,8 @@ function renderInquilinosTable() {
         if (inquilinosSortColumn) {
             const columnMap = {
                 'nombre': 0,
-                'renta': 1,
-                'vencimiento': 2
+                'vencimiento': 2,
+                'renta': 3
             };
             const thIndex = columnMap[inquilinosSortColumn];
             const th = document.querySelectorAll('#inquilinosTable th')[thIndex];
@@ -148,21 +145,27 @@ function filtrarInquilinos(query) {
     const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
     tbody.innerHTML = '';
     
-    const filtrados = inquilinos.filter(inq => inq.nombre.toLowerCase().includes(query));
+    const filtrados = inquilinos.filter(inq => {
+        const nombre = inq.nombre.toLowerCase();
+        const contacto = (inq.contactos && inq.contactos.length > 0) ? inq.contactos[0].nombre.toLowerCase() : '';
+        return nombre.includes(query) || contacto.includes(query);
+    });
     
     filtrados.forEach(inq => {
         const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
+        const contacto = (inq.contactos && inq.contactos.length > 0) ? inq.contactos[0].nombre : '';
         tbody.innerHTML += `
             <tr style="cursor: pointer;" onclick="showInquilinoDetail(${inq.id})">
                 <td style="font-size:0.9rem">${nombreCorto}</td>
-                <td class="currency">${formatCurrency(inq.renta)}</td>
+                <td style="font-size:0.85rem">${contacto}</td>
                 <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
+                <td class="currency">${formatCurrency(inq.renta)}</td>
             </tr>
         `;
     });
     
     if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron resultados</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron resultados</td></tr>';
     }
 }
 
@@ -331,7 +334,7 @@ if (inq.contactos && inq.contactos.length > 0) {
         document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
         
         // BOTÓN DE CONTRATO
-        const contratoButtonSection = document.getElementById('contratoButtonSection');
+        const contratoButtonSection = document.getElementById('contratoOriginalSection');
         if (inq.has_contrato) {
             contratoButtonSection.innerHTML = `
                 <button class="btn btn-primary" onclick="fetchAndViewContrato(${inq.id})" style="width:100%;font-size:1.1rem;padding:1rem;">
@@ -380,13 +383,12 @@ if (inq.contactos && inq.contactos.length > 0) {
         
         document.getElementById('inquilinoDetailModal').classList.add('active');
         
-        // Activar primera pestaña
-       // Asegurar que SOLO la primera pestaña esté activa
+        // Activar primera pestaña (Datos de Renta)
 document.querySelectorAll('#inquilinoDetailModal .tab').forEach(t => t.classList.remove('active'));
 document.querySelectorAll('#inquilinoDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
 
 document.querySelector('#inquilinoDetailModal .tab:nth-child(1)').classList.add('active');
-document.getElementById('inquilinoPagosTab').classList.add('active');
+document.getElementById('inquilinoRentaTab').classList.add('active');
         
     } catch (error) {
         console.error('ERROR en showInquilinoDetail:', error);
@@ -514,4 +516,4 @@ async function deleteDocumentoAdicional(docId) {
     }
 }
 
-console.log('✅ INQUILINOS-UI.JS cargado');
+console.log('✅ INQUILINOS-UI.JS cargado (2026-02-12 20:00 CST)');
