@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Última actualización: 2026-02-12 19:30 CST -->
+<!-- Última actualización: 2026-02-12 20:00 CST -->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -167,7 +167,7 @@
                             </div>
                             <div class="table-container">
                                 <table id="inquilinosTable" class="sticky-header-table">
-                                    <thead><tr><th>Empresa</th><th>Renta Mensual</th><th>Vencimiento Contrato</th></tr></thead>
+                                    <thead><tr><th class="sortable" onclick="sortInquilinos('nombre')">Inquilino</th><th>Contacto</th><th class="sortable" onclick="sortInquilinos('vencimiento')">Vencimiento Contrato</th><th style="text-align:right" class="sortable" onclick="sortInquilinos('renta')">Renta Mensual</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -257,6 +257,7 @@
                         </div>
                         <div style="padding: 1.5rem;">
                             <div class="filter-section">
+                                <input type="text" id="provFactPagSearch" placeholder="Buscar proveedor..." oninput="renderProveedoresFacturasPagadas()" autocomplete="off" style="padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.85rem; width:150px;">
                                 <label>Filtro:</label>
                                 <select id="provFactPagFilter" onchange="renderProveedoresFacturasPagadas()">
                                     <option value="anual">Anual</option>
