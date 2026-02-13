@@ -343,32 +343,33 @@ function showInquilinoDetail(id) {
                 html += '</div></div>';
                 contactosList.innerHTML = html;
             } else {
-                // DESKTOP: bordered box with cards
+                // DESKTOP: bordered box with cards, dropdown in name card
                 let html = '<div style="border:1px solid var(--border); border-radius:8px; padding:0.6rem 0.75rem;">';
-                
-                if (hasMore) {
-                    html += '<div style="margin-bottom:0.5rem;">';
-                    html += '<select id="contactoDropdownDesktop" onchange="showDesktopContactCard(this.value)" style="border:1px solid var(--border); border-radius:4px; padding:0.3rem 0.5rem; font-size:0.85rem; font-weight:600; cursor:pointer;">';
-                    inq.contactos.forEach((c, i) => {
-                        html += `<option value="${i}">${c.nombre}</option>`;
-                    });
-                    html += '</select></div>';
-                }
-                
                 html += '<div id="desktopContactCards" style="display:flex; gap:0.5rem; flex-wrap:wrap;">';
                 const telLink = first.telefono ? `<a href="tel:${first.telefono}" style="color:var(--primary); text-decoration:none;">${first.telefono}</a>` : '-';
                 const emailLink = first.email ? `<a href="mailto:${first.email}" style="color:var(--primary); text-decoration:none;">${first.email}</a>` : '-';
-                html += `<div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
-                    <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Nombre</div>
-                    <div style="font-size:0.9rem; font-weight:600;">${first.nombre}</div>
-                </div>`;
-                html += `<div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
+                
+                // Name card - with dropdown if multiple contacts
+                html += `<div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:2; min-width:160px;">
+                    <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Contacto</div>`;
+                if (hasMore) {
+                    html += '<select id="contactoDropdownDesktop" onchange="showDesktopContactCard(this.value)" style="width:100%; border:none; padding:0; font-size:0.9rem; font-weight:600; cursor:pointer; background:transparent; outline:none;">';
+                    inq.contactos.forEach((c, i) => {
+                        html += `<option value="${i}">${c.nombre}</option>`;
+                    });
+                    html += '</select>';
+                } else {
+                    html += `<div style="font-size:0.9rem; font-weight:600;">${first.nombre}</div>`;
+                }
+                html += '</div>';
+                
+                html += `<div id="dcc-telefono" style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:0.6; min-width:90px;">
                     <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Teléfono</div>
-                    <div style="font-size:0.9rem;">📞 ${telLink}</div>
+                    <div style="font-size:0.85rem;">📞 ${telLink}</div>
                 </div>`;
-                html += `<div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
+                html += `<div id="dcc-email" style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
                     <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Email</div>
-                    <div style="font-size:0.9rem;">✉️ ${emailLink}</div>
+                    <div style="font-size:0.85rem;">✉️ ${emailLink}</div>
                 </div>`;
                 html += '</div></div>';
                 contactosList.innerHTML = html;
@@ -634,20 +635,12 @@ function showDesktopContactCard(indexStr) {
     const c = inq.contactos[idx];
     const telLink = c.telefono ? `<a href="tel:${c.telefono}" style="color:var(--primary); text-decoration:none;">${c.telefono}</a>` : '-';
     const emailLink = c.email ? `<a href="mailto:${c.email}" style="color:var(--primary); text-decoration:none;">${c.email}</a>` : '-';
-    document.getElementById('desktopContactCards').innerHTML = `
-        <div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
-            <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Nombre</div>
-            <div style="font-size:0.9rem; font-weight:600;">${c.nombre}</div>
-        </div>
-        <div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
-            <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Teléfono</div>
-            <div style="font-size:0.9rem;">📞 ${telLink}</div>
-        </div>
-        <div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
-            <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Email</div>
-            <div style="font-size:0.9rem;">✉️ ${emailLink}</div>
-        </div>
-    `;
+    
+    const telDiv = document.getElementById('dcc-telefono');
+    if (telDiv) telDiv.innerHTML = `<div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Teléfono</div><div style="font-size:0.85rem;">📞 ${telLink}</div>`;
+    
+    const emailDiv = document.getElementById('dcc-email');
+    if (emailDiv) emailDiv.innerHTML = `<div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Email</div><div style="font-size:0.85rem;">✉️ ${emailLink}</div>`;
 }
 
 // ============================================
