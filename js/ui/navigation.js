@@ -11,35 +11,9 @@ let currentSubContext = null;
 let currentSearchContext = null;
 
 // ============================================
-// PDF VIEWER (OVERLAY EN MÓVIL, VENTANA EN DESKTOP)
+// PDF VIEWER - MOVIDO A db-fetch-docs.js
+// (versión con blob URLs compatible con iOS Safari)
 // ============================================
-
-function openPDFViewer(src) {
-    if (!src) return;
-    
-    const isMobile = window.innerWidth <= 768;
-    
-    if (isMobile) {
-        const overlay = document.getElementById('pdfViewerOverlay');
-        const iframe = document.getElementById('pdfViewerIframe');
-        iframe.src = src;
-        overlay.classList.remove('hidden');
-        overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    } else {
-        const newWindow = window.open();
-        newWindow.document.write(`<iframe width='100%' height='100%' src='${src}' style='border:none;'></iframe>`);
-    }
-}
-
-function closePDFViewer() {
-    const overlay = document.getElementById('pdfViewerOverlay');
-    const iframe = document.getElementById('pdfViewerIframe');
-    iframe.src = '';
-    overlay.classList.remove('active');
-    overlay.classList.add('hidden');
-    document.body.style.overflow = '';
-}
 
 // ============================================
 // MENU NAVIGATION
@@ -296,5 +270,5 @@ function logout() {
     }
 }
 
-console.log('✅ NAVIGATION.JS cargado (2026-02-12 20:30 CST)');
-console.log('✅ NAVIGATION.JS cargado');
+console.log('✅ NAVIGATION.JS cargado (2026-02-13 00:30 CST)');
+console.log('   PDF Viewer → db-fetch-docs.js (blob URLs)');
