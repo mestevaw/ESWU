@@ -1,411 +1,400 @@
 /* ========================================
-   INQUILINOS-UI.JS - Inquilinos Interface Functions
-   Última actualización: 2026-02-12 20:30 CST
+   ESWU - MAIN.JS COMPLETO
+   Última actualización: 2026-02-12 18:00 CST
+   Todas las funciones de guardado
    ======================================== */
 
 // ============================================
-// INQUILINOS - VIEWS
+// LOGIN
 // ============================================
 
-// Estado de ordenamiento
-let inquilinosSortColumn = null;
-let inquilinosSortOrder = 'asc';
+// ============================================
+// AGREGAR ESTO AL INICIO DE main.js
+// (Después de los comentarios, ANTES de document.getElementById)
+// ============================================
 
-function showInquilinosView(view) {
-    document.getElementById('inquilinosSubMenu').classList.remove('active');
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('inquilinosPage').classList.add('active');
-    
-    document.getElementById('inquilinosListView').classList.add('hidden');
-    document.getElementById('inquilinosRentasRecibidasView').classList.add('hidden');
-    document.getElementById('inquilinosVencimientoContratosView').classList.add('hidden');
-    
-    currentSubContext = 'inquilinos-' + view;
-    
-    document.getElementById('btnRegresa').classList.remove('hidden');
-    
-    if (view === 'list') {
-        document.getElementById('btnSearch').classList.remove('hidden');
-        currentSearchContext = 'inquilinos';
-    } else {
-        document.getElementById('btnSearch').classList.add('hidden');
-        currentSearchContext = null;
-    }
-    
-    document.getElementById('contentArea').classList.remove('with-submenu');
-    document.getElementById('menuSidebar').classList.add('hidden');
-    document.getElementById('contentArea').classList.add('fullwidth');
-    
-    if (view === 'list') {
-        document.getElementById('inquilinosListView').classList.remove('hidden');
-        ensureInquilinosFullLoaded().then(() => renderInquilinosTable());
-    } else if (view === 'rentasRecibidas') {
-        document.getElementById('inquilinosRentasRecibidasView').classList.remove('hidden');
-        ensureInquilinosFullLoaded().then(() => renderInquilinosRentasRecibidas());
-    } else if (view === 'vencimientoContratos') {
-        document.getElementById('inquilinosVencimientoContratosView').classList.remove('hidden');
-        ensureInquilinosFullLoaded().then(() => renderInquilinosVencimientoContratos());
-    }
+// Funciones de loading (necesarias para login)
+function showLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.remove('hidden');
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.add('hidden');
 }
 
 // ============================================
-// RENDER INQUILINOS TABLE
+// DESPUÉS DE ESTO, CONTINÚA CON:
+// document.getElementById('loginForm')...
 // ============================================
 
-function renderInquilinosTable() {
-    const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
-    
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--primary)">⏳ Cargando inquilinos...</td></tr>';
-    
-    setTimeout(() => {
-        let sortedInquilinos = [...inquilinos];
-        
-        if (inquilinosSortColumn) {
-            sortedInquilinos.sort((a, b) => {
-                let valA, valB;
-                
-                if (inquilinosSortColumn === 'nombre') {
-                    valA = a.nombre.toLowerCase();
-                    valB = b.nombre.toLowerCase();
-                    return inquilinosSortOrder === 'asc' 
-                        ? valA.localeCompare(valB) 
-                        : valB.localeCompare(valA);
-                } else if (inquilinosSortColumn === 'renta') {
-                    valA = parseFloat(a.renta) || 0;
-                    valB = parseFloat(b.renta) || 0;
-                    return inquilinosSortOrder === 'asc' 
-                        ? valA - valB 
-                        : valB - valA;
-                } else if (inquilinosSortColumn === 'vencimiento') {
-                    valA = new Date(a.fecha_vencimiento || '9999-12-31');
-                    valB = new Date(b.fecha_vencimiento || '9999-12-31');
-                    return inquilinosSortOrder === 'asc' 
-                        ? valA - valB 
-                        : valB - valA;
-                }
-                return 0;
-            });
-        }
-        
-        const rows = sortedInquilinos.map(inq => {
-            const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
-            const inactivo = !inq.contrato_activo;
-            const opacityStyle = inactivo ? 'color:#999;font-style:italic;' : '';
-            const contacto = (inq.contactos && inq.contactos.length > 0) ? inq.contactos[0].nombre : '';
-            
-            return `
-                <tr style="cursor:pointer;${opacityStyle}" onclick="showInquilinoDetail(${inq.id})">
-                    <td style="font-size:0.9rem">${nombreCorto}</td>
-                    <td style="font-size:0.85rem">${contacto}</td>
-                    <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
-                    <td class="currency">${formatCurrency(inq.renta)}</td>
-                </tr>
-            `;
-        }).join('');
-        
-        if (inquilinos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light);padding:2rem">No hay inquilinos</td></tr>';
-        } else {
-            tbody.innerHTML = rows;
-        }
-        
-        // Actualizar headers de ordenamiento
-        document.querySelectorAll('#inquilinosTable th').forEach(th => {
-            th.classList.remove('sorted-asc', 'sorted-desc');
-        });
-        
-        if (inquilinosSortColumn) {
-            const columnMap = {
-                'nombre': 0,
-                'vencimiento': 2,
-                'renta': 3
-            };
-            const thIndex = columnMap[inquilinosSortColumn];
-            const th = document.querySelectorAll('#inquilinosTable th')[thIndex];
-            if (th) {
-                th.classList.add(inquilinosSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
-            }
-        }
-    }, 100);
-}
 
-function sortInquilinos(column) {
-    if (inquilinosSortColumn === column) {
-        // Cambiar dirección
-        inquilinosSortOrder = inquilinosSortOrder === 'asc' ? 'desc' : 'asc';
-    } else {
-        // Nueva columna
-        inquilinosSortColumn = column;
-        inquilinosSortOrder = 'asc';
-    }
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
     
-    renderInquilinosTable();
-}
-function filtrarInquilinos(query) {
-    const tbody = document.getElementById('inquilinosTable').querySelector('tbody');
-    tbody.innerHTML = '';
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
     
-    const filtrados = inquilinos.filter(inq => {
-        const nombre = inq.nombre.toLowerCase();
-        const contacto = (inq.contactos && inq.contactos.length > 0) ? inq.contactos[0].nombre.toLowerCase() : '';
-        return nombre.includes(query) || contacto.includes(query);
-    });
-    
-    filtrados.forEach(inq => {
-        const nombreCorto = inq.nombre.length > 25 ? inq.nombre.substring(0, 25) + '...' : inq.nombre;
-        const contacto = (inq.contactos && inq.contactos.length > 0) ? inq.contactos[0].nombre : '';
-        tbody.innerHTML += `
-            <tr style="cursor: pointer;" onclick="showInquilinoDetail(${inq.id})">
-                <td style="font-size:0.9rem">${nombreCorto}</td>
-                <td style="font-size:0.85rem">${contacto}</td>
-                <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
-                <td class="currency">${formatCurrency(inq.renta)}</td>
-            </tr>
-        `;
-    });
-    
-    if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron resultados</td></tr>';
-    }
-}
-
-// ============================================
-// RENTAS RECIBIDAS
-// ============================================
-
-function renderInquilinosRentasRecibidas() {
-    const tbody = document.getElementById('inquilinosRentasRecibidasTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    const filterType = document.getElementById('inquilinosRentasFilter').value;
-    const year = parseInt(document.getElementById('inquilinosRentasYear').value);
-    const monthSelect = document.getElementById('inquilinosRentasMonth');
-    
-    if (filterType === 'mensual') {
-        monthSelect.classList.remove('hidden');
-    } else {
-        monthSelect.classList.add('hidden');
-    }
-    
-    const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
-    const rentas = [];
-    let totalPeriodo = 0;
-
-    inquilinos.forEach(inq => {
-        if (inq.pagos) {
-            inq.pagos.forEach(pago => {
-                const pd = new Date(pago.fecha + 'T00:00:00');
-                if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
-                    rentas.push({
-                        empresa: inq.nombre,
-                        monto: pago.monto,
-                        fecha: pago.fecha,
-                        inquilinoId: inq.id
-                    });
-                    totalPeriodo += pago.monto;
-                }
-            });
-        }
-    });
-    
-    rentas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    rentas.forEach(r => {
-        tbody.innerHTML += `
-            <tr class="clickable" style="cursor: pointer;" onclick="showInquilinoDetail(${r.inquilinoId})">
-                <td>${r.empresa}</td>
-                <td class="currency">${formatCurrency(r.monto)}</td>
-                <td>${formatDate(r.fecha)}</td>
-            </tr>
-        `;
-    });
-    
-    if (rentas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay rentas</td></tr>';
-    } else {
-        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        if (filterType === 'mensual') {
-            const row = tbody.insertRow();
-            row.style.fontWeight = 'bold';
-            row.style.backgroundColor = '#e6f2ff';
-            row.innerHTML = `<td style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${monthNames[month].toUpperCase()} ${year}:</td><td class="currency" style="color:var(--primary);font-size:1.2rem">${formatCurrency(totalPeriodo)}</td><td></td>`;
-        }
-        
-        let totalAnual = 0;
-        inquilinos.forEach(inq => {
-            if (inq.pagos) {
-                inq.pagos.forEach(pago => {
-                    const pd = new Date(pago.fecha + 'T00:00:00');
-                    if (pd.getFullYear() === year) {
-                        totalAnual += pago.monto;
-                    }
-                });
-            }
-        });
-        
-        const rowAnual = tbody.insertRow();
-        rowAnual.style.fontWeight = 'bold';
-        rowAnual.style.backgroundColor = '#d4edda';
-        rowAnual.innerHTML = `<td style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${year}:</td><td class="currency" style="color:var(--success);font-size:1.2rem">${formatCurrency(totalAnual)}</td><td></td>`;
-    }
-}
-
-// ============================================
-// VENCIMIENTO CONTRATOS
-// ============================================
-
-function renderInquilinosVencimientoContratos() {
-    const tbody = document.getElementById('inquilinosVencimientoContratosTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    inquilinos.forEach(inq => {
-        const venc = new Date(inq.fecha_vencimiento + 'T00:00:00');
-        const diffDays = Math.ceil((venc - today) / (1000 * 60 * 60 * 24));
-        let estado = '';
-        let badgeClass = '';
-        
-        if (diffDays < 0) {
-            estado = 'Vencido';
-            badgeClass = 'badge-danger';
-        } else if (diffDays <= 30) {
-            estado = 'Próximo a vencer';
-            badgeClass = 'badge-warning';
-        } else {
-            estado = 'Vigente';
-            badgeClass = 'badge-success';
-        }
-        
-        tbody.innerHTML += `
-            <tr class="clickable" style="cursor: pointer;" onclick="showInquilinoDetail(${inq.id})">
-                <td>${inq.nombre}</td>
-                <td>${formatDate(inq.fecha_inicio)}</td>
-                <td>${formatDateVencimiento(inq.fecha_vencimiento)}</td>
-                <td>${diffDays}</td>
-                <td><span class="badge ${badgeClass}">${estado}</span></td>
-            </tr>
-        `;
-    });
-
-    if (inquilinos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No hay contratos</td></tr>';
-    }
-}
-
-// ============================================
-// INQUILINO DETAIL MODAL
-// ============================================
-
-function showInquilinoDetail(id) {
-    const inq = inquilinos.find(i => i.id === id);
-    
-    if (!inq) {
-        alert('ERROR: Inquilino no encontrado con ID ' + id);
-        return;
-    }
-    
-    currentInquilinoId = id;
+    showLoading();
     
     try {
-        document.getElementById('inquilinoDetailNombre').textContent = inq.nombre;
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .select('*')
+            .eq('nombre', username)
+            .eq('password', password)
+            .eq('activo', true)
+            .single();
         
-        // INFO BOXES (ya están en el HTML como divs fijos)
-        document.getElementById('detailRenta').textContent = formatCurrency(inq.renta);
-        document.getElementById('detailM2').textContent = inq.m2 || '-';
-        document.getElementById('detailDespacho').textContent = inq.numero_despacho || '-';
-        document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
-        document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
-        
-        // CONTACTOS - separados con email clickeable
-        const contactosList = document.getElementById('detailContactosList');
-        if (inq.contactos && inq.contactos.length > 0) {
-            contactosList.innerHTML = inq.contactos.map(c => {
-                const emailLink = c.email 
-                    ? `<a href="mailto:${c.email}" style="color:var(--primary); text-decoration:none;" title="Enviar correo">${c.email}</a>` 
-                    : '<span style="color:var(--text-light);">-</span>';
-                return `
-                    <div style="display:flex; gap:0.75rem; font-size:0.9rem; padding:0.35rem 0; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--bg);">
-                        <div style="font-weight:600; min-width:100px;">${c.nombre}</div>
-                        <div style="color:var(--text-light);">📞 ${c.telefono || '-'}</div>
-                        <div>✉️ ${emailLink}</div>
-                    </div>
-                `;
-            }).join('');
-        } else {
-            contactosList.innerHTML = '<span style="color:var(--text-light); font-size:0.85rem;">No hay contactos</span>';
+        if (error || !data) {
+            throw new Error('Usuario o contraseña incorrectos');
         }
         
-        // RFC y CLABE
-        document.getElementById('detailRFC').textContent = inq.rfc || '-';
-        document.getElementById('detailClabe').textContent = inq.clabe || '-';
+        currentUser = data;
         
-        // CONTRATO ORIGINAL (recuadro con icono 📄)
-        const contratoSection = document.getElementById('contratoOriginalSection');
-        if (inq.has_contrato) {
-            contratoSection.innerHTML = `
-                <div onclick="fetchAndViewContrato(${inq.id})" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:0.6rem 0.75rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
-                    <span style="font-size:1.2rem;">📄</span>
-                    <div>
-                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Contrato Original</div>
-                        <div style="font-size:0.85rem; color:var(--primary); font-weight:600;">Ver PDF</div>
-                    </div>
-                </div>
-            `;
-        } else {
-            contratoSection.innerHTML = `
-                <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:0.6rem 0.75rem; color:var(--text-light);">
-                    <div style="font-size:0.7rem; text-transform:uppercase; font-weight:600;">Contrato Original</div>
-                    <div style="font-size:0.85rem;">No hay contrato cargado</div>
-                </div>
-            `;
-        }
+        localStorage.setItem('eswu_remembered_user', username);
+        localStorage.setItem('eswu_remembered_pass', password);
         
-        // HISTORIAL DE PAGOS CON ADEUDOS
-        const historialDiv = document.getElementById('historialPagos');
-        historialDiv.innerHTML = renderHistorialConAdeudos(inq);
+        document.getElementById('loginContainer').classList.add('hidden');
+        document.getElementById('appContainer').classList.add('active');
+        document.body.classList.add('logged-in');
         
-        // DOCUMENTOS - con editar (lápiz) y eliminar (X roja)
-        const docsDiv = document.getElementById('documentosAdicionales');
-        if (inq.documentos && inq.documentos.length > 0) {
-            const docRows = inq.documentos.map(d => {
-                const safeNombre = (d.nombre || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                return `
-                    <tr class="doc-item">
-                        <td onclick="fetchAndViewDocInquilino(${d.id})" style="cursor:pointer;">${d.nombre}</td>
-                        <td onclick="fetchAndViewDocInquilino(${d.id})" style="cursor:pointer;">${formatDate(d.fecha)}</td>
-                        <td onclick="fetchAndViewDocInquilino(${d.id})" style="cursor:pointer;">${d.usuario}</td>
-                        <td style="white-space:nowrap;">
-                            <span onclick="event.stopPropagation(); openEditDocInquilinoModal(${d.id}, '${safeNombre}')" title="Modificar datos documento" style="cursor:pointer; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
-                            <span onclick="event.stopPropagation(); deleteDocInquilinoConConfirm(${d.id}, '${safeNombre}')" title="Eliminar documento" style="cursor:pointer; color:var(--danger); font-weight:700; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-            docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:70px;"></th></tr></thead><tbody>' + docRows + '</tbody></table>';
-        } else {
-            docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos</p>';
-        }
-        
-        // NOTAS
-        document.getElementById('notasInquilino').textContent = inq.notas || 'No hay notas para este inquilino.';
-        
-        document.getElementById('inquilinoDetailModal').classList.add('active');
-        
-        // Activar primera pestaña (Historial de Pagos)
-        document.querySelectorAll('#inquilinoDetailModal .tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('#inquilinoDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
-        document.querySelector('#inquilinoDetailModal .tab:nth-child(1)').classList.add('active');
-        document.getElementById('inquilinoPagosTab').classList.add('active');
+        await initializeApp();
         
     } catch (error) {
-        console.error('ERROR en showInquilinoDetail:', error);
-        alert('Error: ' + error.message);
+        alert(error.message);
+    } finally {
+        hideLoading();
+    }
+});
+
+// ============================================
+// AUTO-LOGIN
+// ============================================
+
+window.addEventListener('DOMContentLoaded', function() {
+    const rememberedUser = localStorage.getItem('eswu_remembered_user');
+    const rememberedPass = localStorage.getItem('eswu_remembered_pass');
+    
+    if (rememberedUser && rememberedPass) {
+        document.getElementById('username').value = rememberedUser;
+        document.getElementById('password').value = rememberedPass;
+        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+    }
+    
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    
+    setTimeout(() => {
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    }, 1000);
+});
+
+// ============================================
+// INITIALIZE APP
+// ============================================
+
+async function initializeApp() {
+    showLoadingBanner('Cargando datos...');
+    
+    try {
+        await Promise.all([
+            loadInquilinos(),
+            loadProveedores(),
+            loadActivos(),
+            loadUsuarios(),
+            loadBancosDocumentos(),
+            loadEstacionamiento(),
+            loadBitacoraSemanal()
+        ]);
+        
+        populateYearSelect();
+        populateInquilinosYearSelects();
+        populateProveedoresYearSelects();
+        
+        // Marcar todas las cargas como completadas
+        inquilinosFullLoaded = true;
+        proveedoresFullLoaded = true;
+        activosLoaded = true;
+        usuariosLoaded = true;
+        bancosLoaded = true;
+        estacionamientoLoaded = true;
+        bitacoraLoaded = true;
+        
+        console.log('✅ App inicializada correctamente');
+        
+    } catch (error) {
+        console.error('❌ Error inicializando app:', error);
+        alert('Error cargando datos: ' + error.message);
+    } finally {
+        hideLoadingBanner();
+    }
+}
+
+// Variables de control de carga
+var inquilinosFullLoaded = false;
+var proveedoresFullLoaded = false;
+var activosLoaded = false;
+var usuariosLoaded = false;
+var bancosLoaded = false;
+var estacionamientoLoaded = false;
+var bitacoraLoaded = false;
+
+// ============================================
+// INQUILINOS - SAVE
+// ============================================
+
+async function saveInquilino(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const contratoFile = document.getElementById('inquilinoContrato').files[0];
+        let contratoURL = null;
+        
+        if (contratoFile) {
+            contratoURL = await fileToBase64(contratoFile);
+        }
+        
+        const inquilinoData = {
+            nombre: document.getElementById('inquilinoNombre').value,
+            clabe: document.getElementById('inquilinoClabe').value || null,
+            rfc: document.getElementById('inquilinoRFC').value || null,
+            m2: document.getElementById('inquilinoM2').value || null,
+            numero_despacho: document.getElementById('inquilinoDespacho').value || null,
+            renta: parseFloat(document.getElementById('inquilinoRenta').value),
+            fecha_inicio: document.getElementById('inquilinoFechaInicio').value,
+            fecha_vencimiento: document.getElementById('inquilinoFechaVenc').value,
+            notas: document.getElementById('inquilinoNotas').value || null
+        };
+        
+        // Solo incluir contrato_file si el usuario subió un archivo nuevo
+        if (contratoURL) {
+            inquilinoData.contrato_file = contratoURL;
+        }
+        
+        let inquilinoId;
+        
+        if (isEditMode && currentInquilinoId) {
+            const { error } = await supabaseClient
+                .from('inquilinos')
+                .update(inquilinoData)
+                .eq('id', currentInquilinoId);
+            
+            if (error) throw error;
+            
+            await supabaseClient
+                .from('inquilinos_contactos')
+                .delete()
+                .eq('inquilino_id', currentInquilinoId);
+            
+            inquilinoId = currentInquilinoId;
+        } else {
+            const { data, error } = await supabaseClient
+                .from('inquilinos')
+                .insert([inquilinoData])
+                .select();
+            
+            if (error) throw error;
+            inquilinoId = data[0].id;
+        }
+        
+        if (tempInquilinoContactos.length > 0) {
+            const contactosToInsert = tempInquilinoContactos.map(c => ({
+                inquilino_id: inquilinoId,
+                nombre: c.nombre,
+                telefono: c.telefono || null,
+                email: c.email || null
+            }));
+            
+            const { error: contactosError } = await supabaseClient
+                .from('inquilinos_contactos')
+                .insert(contactosToInsert);
+            
+            if (contactosError) throw contactosError;
+        }
+        
+        await loadInquilinos();
+        closeModal('addInquilinoModal');
+        isEditMode = false;
+        showInquilinoDetail(inquilinoId);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar inquilino: ' + error.message);
+    } finally {
+        hideLoading();
     }
 }
 
 // ============================================
-// EDIT INQUILINO
+// CONTACTOS DE INQUILINO
+// ============================================
+// Funciones movidas a inquilinos-ui.js (showAddContactoInquilinoModal, saveContactoInquilino, deleteInquilinoContacto)
+
+// ============================================
+// INQUILINOS - REGISTRAR PAGO
+// ============================================
+
+function showRegistrarPagoModal() {
+    delete window.pagoMesContext;
+    document.getElementById('pagoFecha').value = '';
+    document.getElementById('pagoCompleto').value = 'si';
+    document.getElementById('pagoMontoGroup').classList.add('hidden');
+    document.getElementById('pagoPDF').value = '';
+    document.getElementById('registrarPagoModal').classList.add('active');
+}
+
+function toggleMontoInput() {
+    const completo = document.getElementById('pagoCompleto').value;
+    const montoGroup = document.getElementById('pagoMontoGroup');
+    
+    if (completo === 'no') {
+        montoGroup.classList.remove('hidden');
+        document.getElementById('pagoMonto').required = true;
+    } else {
+        montoGroup.classList.add('hidden');
+        document.getElementById('pagoMonto').required = false;
+    }
+}
+
+async function savePagoRenta(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
+        const completo = document.getElementById('pagoCompleto').value === 'si';
+        
+        let monto;
+        if (completo) {
+            if (window.pagoMesContext) {
+                monto = window.pagoMesContext.balance;
+            } else {
+                monto = inquilino.renta;
+            }
+        } else {
+            monto = parseFloat(document.getElementById('pagoMonto').value);
+        }
+        
+        const pagoFile = document.getElementById('pagoPDF').files[0];
+        let pagoURL = null;
+        
+        if (pagoFile) {
+            pagoURL = await fileToBase64(pagoFile);
+        }
+        
+        const pagoData = {
+            inquilino_id: currentInquilinoId,
+            fecha: document.getElementById('pagoFecha').value,
+            monto: monto,
+            completo: completo,
+            pago_file: pagoURL
+        };
+        
+        const { error } = await supabaseClient
+            .from('pagos_inquilinos')
+            .insert([pagoData]);
+        
+        if (error) throw error;
+        
+        delete window.pagoMesContext;
+        
+        await loadInquilinos();
+        closeModal('registrarPagoModal');
+        showInquilinoDetail(currentInquilinoId);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al registrar pago: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// INQUILINOS - AGREGAR DOCUMENTO
+// ============================================
+
+function showAgregarDocumentoModal() {
+    document.getElementById('nuevoDocNombre').value = '';
+    document.getElementById('nuevoDocPDF').value = '';
+    const fn = document.getElementById('nuevoDocPDFFileName');
+    if (fn) fn.textContent = '';
+    document.getElementById('agregarDocumentoModal').classList.add('active');
+}
+
+async function saveDocumentoAdicional(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const inq = inquilinos.find(i => i.id === currentInquilinoId);
+        const file = document.getElementById('nuevoDocPDF').files[0];
+        
+        if (!file) {
+            throw new Error('Seleccione un archivo PDF');
+        }
+        
+        const pdfBase64 = await fileToBase64(file);
+        
+        // PREGUNTAR si es contrato original
+        const tieneContrato = inq && inq.has_contrato;
+        const mensaje = tieneContrato 
+            ? '¿Este documento es el CONTRATO ORIGINAL?\n\nNOTA: Ya existe un contrato. Si dices SÍ, se REEMPLAZARÁ el contrato anterior.'
+            : '¿Este documento es el CONTRATO ORIGINAL?\n\nSi es así, se guardará como contrato y no necesitas poner nombre.';
+        
+        const esContratoOriginal = confirm(mensaje);
+        
+        if (esContratoOriginal) {
+            const { error: contratoError } = await supabaseClient
+                .from('inquilinos')
+                .update({ contrato_file: pdfBase64 })
+                .eq('id', currentInquilinoId);
+            
+            if (contratoError) throw contratoError;
+            
+            await loadInquilinos();
+            closeModal('agregarDocumentoModal');
+            showInquilinoDetail(currentInquilinoId);
+            hideLoading();
+            return;
+        }
+        
+        const nombre = document.getElementById('nuevoDocNombre').value;
+        
+        if (!nombre) {
+            throw new Error('Ingresa el nombre del documento');
+        }
+        
+        const { error } = await supabaseClient
+            .from('inquilinos_documentos')
+            .insert([{
+                inquilino_id: currentInquilinoId,
+                nombre_documento: nombre,
+                archivo_pdf: pdfBase64,
+                fecha_guardado: new Date().toISOString().split('T')[0],
+                usuario_guardo: currentUser.nombre
+            }]);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        closeModal('agregarDocumentoModal');
+        showInquilinoDetail(currentInquilinoId);
+        setTimeout(() => switchTab('inquilino', 'docs'), 100);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// INQUILINOS - EDITAR
 // ============================================
 
 function editInquilino() {
@@ -426,338 +415,581 @@ function editInquilino() {
     document.getElementById('inquilinoFechaVenc').value = inq.fecha_vencimiento;
     document.getElementById('inquilinoNotas').value = inq.notas || '';
     
-    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto', 'showEditContactoInquilinoModal');
+    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
     
     closeModal('inquilinoDetailModal');
     document.getElementById('addInquilinoModal').classList.add('active');
 }
 
 // ============================================
-// CONTACTOS FUNCTIONS
+// INQUILINOS - ELIMINAR
 // ============================================
 
-function showAddContactoInquilinoModal() {
-    document.getElementById('contactoInquilinoForm').reset();
-    delete window.editingContactoIndex;
-    document.getElementById('addContactoInquilinoModal').classList.add('active');
-}
-
-function saveContactoInquilino(event) {
-    event.preventDefault();
-    
-    const contacto = {
-        nombre: document.getElementById('contactoInquilinoNombre').value,
-        telefono: document.getElementById('contactoInquilinoTelefono').value,
-        email: document.getElementById('contactoInquilinoEmail').value
-    };
-    
-    if (window.editingContactoIndex !== undefined) {
-        tempInquilinoContactos[window.editingContactoIndex] = contacto;
-        delete window.editingContactoIndex;
-    } else {
-        tempInquilinoContactos.push(contacto);
-    }
-    
-    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto', 'showEditContactoInquilinoModal');
-    
-    document.getElementById('contactoInquilinoForm').reset();
-    closeModal('addContactoInquilinoModal');
-}
-
-function deleteInquilinoContacto(index) {
-    tempInquilinoContactos.splice(index, 1);
-    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto', 'showEditContactoInquilinoModal');
-}
-
-function showEditContactoInquilinoModal(index) {
-    const contacto = tempInquilinoContactos[index];
-    
-    document.getElementById('contactoInquilinoNombre').value = contacto.nombre;
-    document.getElementById('contactoInquilinoTelefono').value = contacto.telefono || '';
-    document.getElementById('contactoInquilinoEmail').value = contacto.email || '';
-    
-    window.editingContactoIndex = index;
-    
-    document.getElementById('addContactoInquilinoModal').classList.add('active');
-}
-
-// ============================================
-// VIEW DOCUMENTS (on-demand via loaders.js)
-// ============================================
-
-function viewContrato() {
-    // Usa la función on-demand de loaders.js
-    if (currentInquilinoId) {
-        fetchAndViewContrato(currentInquilinoId);
-    }
-}
-
-function viewDocumento(docIdOrArchivo) {
-    // Si es un número, es un ID → usar fetch on-demand
-    if (typeof docIdOrArchivo === 'number') {
-        fetchAndViewDocInquilino(docIdOrArchivo);
-    } else if (docIdOrArchivo) {
-        // Fallback: si es base64 directo (legacy)
-        openPDFViewer(docIdOrArchivo);
-    }
-}
-
-async function deleteDocumentoAdicional(docId) {
-    showLoading();
-    try {
-        const { error } = await supabaseClient
-            .from('inquilinos_documentos')
-            .delete()
-            .eq('id', docId);
-        
-        if (error) throw error;
-        
-        await loadInquilinos();
-        showInquilinoDetail(currentInquilinoId);
-        setTimeout(() => switchTab('inquilino', 'docs'), 100);
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al eliminar documento: ' + error.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-function deleteDocInquilinoConConfirm(docId, nombreDoc) {
-    if (confirm('¿Seguro quieres eliminar ' + nombreDoc + '?')) {
-        deleteDocumentoAdicional(docId);
-    }
-}
-
-// ============================================
-// EDITAR DOCUMENTO - MODAL EN APP
-// ============================================
-
-let editingDocId = null;
-
-function openEditDocInquilinoModal(docId, nombreActual) {
-    editingDocId = docId;
-    document.getElementById('editDocNombreInput').value = nombreActual;
-    
-    const inq = inquilinos.find(i => i.id === currentInquilinoId);
-    const preguntaContrato = document.getElementById('editDocContratoQuestion');
-    const saveSection = document.getElementById('editDocSaveSection');
-    
-    if (inq && !inq.has_contrato) {
-        preguntaContrato.classList.remove('hidden');
-        saveSection.classList.add('hidden');
-    } else {
-        preguntaContrato.classList.add('hidden');
-        saveSection.classList.remove('hidden');
-    }
-    
-    document.getElementById('editDocInquilinoModal').classList.add('active');
-}
-
-async function processEditDocAsContrato() {
-    if (!editingDocId) return;
-    showLoading();
-    try {
-        const { data, error } = await supabaseClient
-            .from('inquilinos_documentos')
-            .select('archivo_pdf')
-            .eq('id', editingDocId)
-            .single();
-        
-        if (error) throw error;
-        
-        const { error: updateError } = await supabaseClient
-            .from('inquilinos')
-            .update({ contrato_file: data.archivo_pdf })
-            .eq('id', currentInquilinoId);
-        
-        if (updateError) throw updateError;
-        
-        const { error: deleteError } = await supabaseClient
-            .from('inquilinos_documentos')
-            .delete()
-            .eq('id', editingDocId);
-        
-        if (deleteError) throw deleteError;
-        
-        editingDocId = null;
-        await loadInquilinos();
-        closeModal('editDocInquilinoModal');
-        showInquilinoDetail(currentInquilinoId);
-    } catch (e) {
-        console.error('Error:', e);
-        alert('Error: ' + e.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-async function saveEditDocNombre() {
-    if (!editingDocId) return;
-    const nuevoNombre = document.getElementById('editDocNombreInput').value.trim();
-    if (!nuevoNombre) { alert('El nombre no puede estar vacío'); return; }
-    
-    showLoading();
-    try {
-        const { error } = await supabaseClient
-            .from('inquilinos_documentos')
-            .update({ nombre_documento: nuevoNombre })
-            .eq('id', editingDocId);
-        
-        if (error) throw error;
-        
-        editingDocId = null;
-        await loadInquilinos();
-        closeModal('editDocInquilinoModal');
-        showInquilinoDetail(currentInquilinoId);
-        setTimeout(() => switchTab('inquilino', 'docs'), 100);
-    } catch (e) {
-        console.error('Error:', e);
-        alert('Error: ' + e.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// HISTORIAL DE PAGOS CON ADEUDOS MENSUALES
-// ============================================
-
-function renderHistorialConAdeudos(inq) {
-    if (!inq.fecha_inicio) {
-        return '<p style="color:var(--text-light);text-align:center;padding:2rem">Sin fecha de inicio</p>';
-    }
-    
-    const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-    const renta = parseFloat(inq.renta) || 0;
-    const pagos = inq.pagos || [];
-    
-    // Generar meses desde fecha_inicio hasta hoy
-    const inicio = new Date(inq.fecha_inicio + 'T00:00:00');
-    const hoy = new Date();
-    const mesInicio = new Date(inicio.getFullYear(), inicio.getMonth(), 1);
-    const mesActual = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-    
-    const meses = [];
-    let cursor = new Date(mesInicio);
-    while (cursor <= mesActual) {
-        meses.push({ year: cursor.getFullYear(), month: cursor.getMonth() });
-        cursor.setMonth(cursor.getMonth() + 1);
-    }
-    
-    // Para cada mes, calcular pagos asociados
-    const rows = meses.map(m => {
-        const pagosMes = pagos.filter(p => {
-            const fp = new Date(p.fecha + 'T00:00:00');
-            return fp.getFullYear() === m.year && fp.getMonth() === m.month;
-        });
-        
-        const totalPagado = pagosMes.reduce((sum, p) => sum + p.monto, 0);
-        const balance = renta - totalPagado;
-        const ultimoPago = pagosMes.length > 0 ? pagosMes[0] : null;
-        const mesLabel = monthNames[m.month] + ' ' + m.year;
-        
-        return { ...m, mesLabel, totalPagado, balance, ultimoPago, pagosMes };
-    });
-    
-    // Ordenar del más reciente al más antiguo
-    rows.reverse();
-    
-    if (rows.length === 0) {
-        return '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay historial</p>';
-    }
-    
-    let html = '<table style="width:100%; font-size:0.9rem;"><thead><tr>';
-    html += '<th style="text-align:left;">Mes</th>';
-    html += '<th style="text-align:left;">Estado</th>';
-    html += '<th style="text-align:right;">Monto</th>';
-    html += '<th style="width:40px;"></th>';
-    html += '</tr></thead><tbody>';
-    
-    rows.forEach(r => {
-        if (r.balance <= 0) {
-            // PAGADO (pagó completo o más)
-            const fechaPago = r.ultimoPago ? formatDate(r.ultimoPago.fecha) : '';
-            html += `<tr style="background:#f0fdf4;">`;
-            html += `<td style="padding:0.5rem 0.4rem; font-weight:500;">${r.mesLabel}</td>`;
-            html += `<td style="padding:0.5rem 0.4rem;"><span class="badge badge-success" style="font-size:0.75rem;">Pagado</span> <small style="color:var(--text-light);">${fechaPago}</small></td>`;
-            html += `<td style="padding:0.5rem 0.4rem; text-align:right; color:var(--success); font-weight:600;">${formatCurrency(r.totalPagado)}</td>`;
-            html += `<td></td>`;
-            html += `</tr>`;
-        } else if (r.totalPagado > 0) {
-            // PAGO PARCIAL
-            const fechaPago = r.ultimoPago ? formatDate(r.ultimoPago.fecha) : '';
-            html += `<tr style="background:#fffbeb;">`;
-            html += `<td style="padding:0.5rem 0.4rem; font-weight:500;">${r.mesLabel}</td>`;
-            html += `<td style="padding:0.5rem 0.4rem;"><span class="badge badge-warning" style="font-size:0.75rem;">Adeuda</span> <small style="color:var(--text-light);">Parcial ${fechaPago}</small></td>`;
-            html += `<td style="padding:0.5rem 0.4rem; text-align:right; color:var(--danger); font-weight:600;">-${formatCurrency(r.balance)}</td>`;
-            html += `<td style="padding:0.5rem 0.4rem; text-align:center;">`;
-            html += `<span onclick="showRegistrarPagoDesdeAdeudo(${r.year}, ${r.month}, ${r.balance})" title="Registrar pago" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💲</span>`;
-            html += `</td></tr>`;
-        } else {
-            // NO HA PAGADO NADA
-            html += `<tr style="background:#fef2f2;">`;
-            html += `<td style="padding:0.5rem 0.4rem; font-weight:500;">${r.mesLabel}</td>`;
-            html += `<td style="padding:0.5rem 0.4rem;"><span class="badge badge-danger" style="font-size:0.75rem;">Adeuda</span></td>`;
-            html += `<td style="padding:0.5rem 0.4rem; text-align:right; color:var(--danger); font-weight:600;">-${formatCurrency(r.balance)}</td>`;
-            html += `<td style="padding:0.5rem 0.4rem; text-align:center;">`;
-            html += `<span onclick="showRegistrarPagoDesdeAdeudo(${r.year}, ${r.month}, ${r.balance})" title="Registrar pago" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💲</span>`;
-            html += `</td></tr>`;
-        }
-    });
-    
-    html += '</tbody></table>';
-    return html;
-}
-
-function showRegistrarPagoDesdeAdeudo(year, month, balance) {
-    const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-    
-    // Guardar contexto del mes que se está pagando
-    window.pagoMesContext = { year, month, balance };
-    
-    // Resetear el modal de pago
-    document.getElementById('pagoFecha').value = '';
-    document.getElementById('pagoCompleto').value = 'si';
-    document.getElementById('pagoMontoGroup').classList.add('hidden');
-    document.getElementById('pagoPDF').value = '';
-    
-    // Abrir modal de registrar pago
-    document.getElementById('registrarPagoModal').classList.add('active');
-}
-
-// ============================================
-// EXPORTAR INQUILINOS A EXCEL
-// ============================================
-
-function exportarInquilinosExcel() {
-    if (!inquilinos || inquilinos.length === 0) {
-        alert('No hay inquilinos para exportar');
+async function deleteInquilino() {
+    if (!confirm('¿Está seguro de eliminar este inquilino? Esta acción no se puede deshacer.')) {
         return;
     }
     
-    const data = inquilinos.map(inq => {
-        const contacto = (inq.contactos && inq.contactos.length > 0) ? inq.contactos[0] : {};
-        return {
-            'Inquilino': inq.nombre,
-            'Contacto': contacto.nombre || '',
-            'Teléfono': contacto.telefono || '',
-            'Email': contacto.email || '',
-            'Renta Mensual': inq.renta || 0,
-            'M²': inq.m2 || '',
-            'Despacho': inq.numero_despacho || '',
-            'Inicio Renta': inq.fecha_inicio || '',
-            'Vencimiento': inq.fecha_vencimiento || '',
-            'RFC': inq.rfc || '',
-            'CLABE': inq.clabe || ''
-        };
-    });
+    showLoading();
     
-    const ws = XLSX.utils.json_to_sheet(data);
-    ws['!cols'] = [{ wch: 30 }, { wch: 20 }, { wch: 15 }, { wch: 25 }, { wch: 14 }, { wch: 8 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 15 }, { wch: 20 }];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Inquilinos');
-    XLSX.writeFile(wb, `Inquilinos_${new Date().toISOString().split('T')[0]}.xlsx`);
+    try {
+        const { error } = await supabaseClient
+            .from('inquilinos')
+            .delete()
+            .eq('id', currentInquilinoId);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        closeModal('inquilinoDetailModal');
+        
+        if (currentSubContext === 'inquilinos-list') {
+            renderInquilinosTable();
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar inquilino: ' + error.message);
+    } finally {
+        hideLoading();
+    }
 }
 
-console.log('✅ INQUILINOS-UI.JS cargado (2026-02-12 20:30 CST)');
+// ============================================
+// PROVEEDORES - funciones movidas a archivos modulares:
+// db-proveedores.js, db-facturas.js, proveedor-modals.js
+// ============================================
+
+// ============================================
+// FILE INPUT LISTENERS
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const inquilinoContrato = document.getElementById('inquilinoContrato');
+    if (inquilinoContrato) {
+        inquilinoContrato.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            const display = document.getElementById('contratoFileName');
+            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
+    const nuevoDocPDF = document.getElementById('nuevoDocPDF');
+    if (nuevoDocPDF) {
+        nuevoDocPDF.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            const display = document.getElementById('nuevoDocPDFFileName');
+            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
+    const pagoPDF = document.getElementById('pagoPDF');
+    if (pagoPDF) {
+        pagoPDF.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            const display = document.getElementById('pagoPDFFileName');
+            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+    
+    const facturaDocumento = document.getElementById('facturaDocumento');
+    if (facturaDocumento) {
+        facturaDocumento.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            const display = document.getElementById('facturaDocumentoFileName');
+            if (display) display.textContent = fileName ? `Seleccionado: ${fileName}` : '';
+        });
+    }
+});
+
+console.log('✅ MAIN.JS cargado (2026-02-12 18:00 CST) - sin duplicados');
+
+// ============================================
+// ELIMINAR PROVEEDORES MIGRADOS
+// ============================================
+
+async function eliminarProveedoresMigrados() {
+    if (!confirm('¿Seguro que quieres eliminar TODOS los proveedores que dicen "migrado desde histórico"?\n\nEsta acción NO se puede deshacer.')) {
+        return;
+    }
+    
+    showLoading();
+    try {
+        const { data: proveedoresMigrados, error: searchError } = await supabaseClient
+            .from('proveedores')
+            .select('id')
+            .ilike('servicio', '%migrado desde histórico%');
+        
+        if (searchError) throw searchError;
+        
+        if (!proveedoresMigrados || proveedoresMigrados.length === 0) {
+            alert('No se encontraron proveedores con "migrado desde histórico"');
+            hideLoading();
+            return;
+        }
+        
+        const ids = proveedoresMigrados.map(p => p.id);
+        
+        const { error: deleteError } = await supabaseClient
+            .from('proveedores')
+            .delete()
+            .in('id', ids);
+        
+        if (deleteError) throw deleteError;
+        
+        await loadProveedores();
+        renderProveedoresTable();
+        
+        alert(`✅ Se eliminaron ${ids.length} proveedores migrados correctamente`);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar proveedores: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+   }
+   
+   async function terminarContratoInquilino() {
+    const fechaTerminacion = prompt('Ingresa la fecha de terminación del contrato (YYYY-MM-DD):');
+    
+    if (!fechaTerminacion) return;
+    
+    // Validar formato de fecha
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaTerminacion)) {
+        alert('Formato de fecha inválido. Usa YYYY-MM-DD (ejemplo: 2026-02-15)');
+        return;
+    }
+    
+    if (!confirm('¿Está seguro de terminar el contrato de este inquilino?')) {
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const { error } = await supabaseClient
+            .from('inquilinos')
+            .update({
+                contrato_activo: false,
+                fecha_terminacion: fechaTerminacion
+            })
+            .eq('id', currentInquilinoId);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        closeModal('inquilinoDetailModal');
+        
+        if (currentSubContext === 'inquilinos-list') {
+            renderInquilinosTable();
+        }
+        
+        alert('✅ Contrato terminado correctamente');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al terminar contrato: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+   
+   // ============================================
+// CARGA BÁSICA (RÁPIDA)
+// ============================================
+
+async function loadInquilinosBasico() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('inquilinos')
+            .select('id, nombre, renta, fecha_vencimiento, contrato_activo')
+            .order('nombre');
+        
+        if (error) throw error;
+        
+        inquilinos = data.map(inq => ({
+            id: inq.id,
+            nombre: inq.nombre,
+            renta: parseFloat(inq.renta || 0),
+            fecha_vencimiento: inq.fecha_vencimiento,
+            contrato_activo: inq.contrato_activo,
+            contactos: [],
+            pagos: [],
+            documentos: []
+        }));
+        
+    } catch (error) {
+        console.error('Error loading inquilinos básico:', error);
+        throw error;
+    }
+}
+
+async function loadProveedoresBasico() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('proveedores')
+            .select('id, nombre, servicio')
+            .order('nombre');
+        
+        if (error) throw error;
+        
+        proveedores = data.map(prov => ({
+            id: prov.id,
+            nombre: prov.nombre,
+            servicio: prov.servicio,
+            contactos: [],
+            facturas: [],
+            documentos: []
+        }));
+        
+    } catch (error) {
+        console.error('Error loading proveedores básico:', error);
+        throw error;
+    }
+}
+
+// ============================================
+// ENSURES (CARGA LAZY)
+// ============================================
+
+async function ensureInquilinosFullLoaded() {
+    if (inquilinosFullLoaded) return;
+    showLoading();
+    try {
+        await loadInquilinos();
+        inquilinosFullLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureProveedoresFullLoaded() {
+    if (proveedoresFullLoaded) return;
+    showLoading();
+    try {
+        await loadProveedores();
+        proveedoresFullLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureActivosLoaded() {
+    if (activosLoaded) return;
+    showLoading();
+    try {
+        await loadActivos();
+        populateProveedoresDropdown();
+        activosLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureUsuariosLoaded() {
+    if (usuariosLoaded) return;
+    showLoading();
+    try {
+        await loadUsuarios();
+        usuariosLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureBancosLoaded() {
+    if (bancosLoaded) return;
+    showLoading();
+    try {
+        await loadBancosDocumentos();
+        bancosLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureEstacionamientoLoaded() {
+    if (estacionamientoLoaded) return;
+    showLoading();
+    try {
+        await loadEstacionamiento();
+        estacionamientoLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+async function ensureBitacoraLoaded() {
+    if (bitacoraLoaded) return;
+    showLoading();
+    try {
+        await loadBitacoraSemanal();
+        bitacoraLoaded = true;
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// CARGA COMPLETA (LAZY)
+// ============================================
+
+// loadInquilinos() → MOVIDA a db-inquilinos.js (optimizada, sin cargar PDFs base64)
+
+// loadProveedores() → MOVIDA a db-proveedores.js (optimizada, sin cargar PDFs base64)
+
+async function loadActivos() {
+    try {
+        const { data: activosData, error: activosError } = await supabaseClient
+            .from('activos')
+            .select('*')
+            .order('nombre');
+        
+        if (activosError) throw activosError;
+        
+        // Solo contar fotos, NO cargar foto_data base64
+        const { data: fotosCount, error: fotosError } = await supabaseClient
+            .from('activos_fotos')
+            .select('id, activo_id');
+        
+        if (fotosError) throw fotosError;
+        
+        activos = activosData.map(act => ({
+            ...act,
+            fotos: (fotosCount || []).filter(f => f.activo_id === act.id)
+        }));
+        
+    } catch (error) {
+        console.error('Error loading activos:', error);
+        throw error;
+    }
+}
+
+async function loadEstacionamiento() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('estacionamiento')
+            .select('*')
+            .order('numero_espacio');
+        
+        if (error) throw error;
+        
+        estacionamiento = data;
+        
+    } catch (error) {
+        console.error('Error loading estacionamiento:', error);
+        throw error;
+    }
+}
+
+async function loadBitacoraSemanal() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('bitacora_semanal')
+            .select('id, semana_inicio, semana_texto, notas')
+            .order('semana_inicio', { ascending: false })
+            .limit(100);
+        
+        if (error) throw error;
+        
+        bitacoraSemanal = data || [];
+        
+    } catch (error) {
+        console.error('Error loading bitacora:', error);
+        bitacoraSemanal = [];
+    }
+}
+
+async function loadUsuarios() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .select('*')
+            .order('nombre');
+        
+        if (error) throw error;
+        
+        usuarios = data;
+        
+    } catch (error) {
+        console.error('Error loading usuarios:', error);
+        throw error;
+    }
+}
+
+async function loadBancosDocumentos() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('bancos_documentos')
+            .select('id, tipo, fecha_subida')
+            .order('fecha_subida', { ascending: false })
+            .limit(100);
+        
+        if (error) throw error;
+        
+        bancosDocumentos = data || [];
+        
+    } catch (error) {
+        console.error('Error loading bancos:', error);
+        bancosDocumentos = [];
+    }
+}
+
+async function saveEstacionamiento() {
+    showLoading();
+    try {
+        const inquilinoSeleccionado = document.getElementById('editEspacioInquilino').value;
+        const despacho = document.getElementById('editEspacioDespacho').value;
+        
+        const { error } = await supabaseClient
+            .from('estacionamiento')
+            .update({
+                inquilino_nombre: inquilinoSeleccionado || null,
+                numero_despacho: despacho || null
+            })
+            .eq('id', currentEstacionamientoId);
+        
+        if (error) throw error;
+        
+        await loadEstacionamiento();
+        renderEstacionamientoTable();
+        closeModal('editEstacionamientoModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function saveBitacora() {
+    showLoading();
+    try {
+        const fecha = document.getElementById('editBitacoraFecha').value;
+        const notas = document.getElementById('editBitacoraNotas').value;
+        
+        const { error } = await supabaseClient
+            .from('bitacora_semanal')
+            .update({
+                semana_inicio: fecha,
+                notas: notas
+            })
+            .eq('id', currentBitacoraId);
+        
+        if (error) throw error;
+        
+        await loadBitacoraSemanal();
+        renderBitacoraTable();
+        closeModal('editBitacoraModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar bitácora: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function saveBancoDoc(event) {
+    event.preventDefault();
+    showLoading();
+    
+    try {
+        const tipo = document.getElementById('bancoTipo').value;
+        const file = document.getElementById('bancoDocumento').files[0];
+        
+        if (!file) {
+            throw new Error('Seleccione un archivo PDF');
+        }
+        
+        const pdfBase64 = await fileToBase64(file);
+        
+        const { error } = await supabaseClient
+            .from('bancos_documentos')
+            .insert([{
+                tipo: tipo,
+                archivo_pdf: pdfBase64,
+                fecha_subida: new Date().toISOString().split('T')[0]
+            }]);
+        
+        if (error) throw error;
+        
+        await loadBancosDocumentos();
+        renderBancosTable();
+        closeModal('addBancoModal');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+// ============================================
+// AGREGAR ESTAS FUNCIONES AL FINAL DE main.js
+// (Copiar y pegar después de saveBancoDoc)
+// ============================================
+
+function populateYearSelect() {
+    const currentYear = new Date().getFullYear();
+    const yearSelect = document.getElementById('homeYear');
+    
+    if (!yearSelect) return;
+    
+    yearSelect.innerHTML = '';
+    
+    for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) option.selected = true;
+        yearSelect.appendChild(option);
+    }
+}
+
+function populateInquilinosYearSelects() {
+    const currentYear = new Date().getFullYear();
+    const select = document.getElementById('inquilinosRentasYear');
+    
+    if (!select) return;
+    
+    select.innerHTML = '';
+    
+    for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) option.selected = true;
+        select.appendChild(option);
+    }
+}
+
+function populateProveedoresYearSelects() {
+    const currentYear = new Date().getFullYear();
+    ['provFactPagYear', 'provFactPorPagYear'].forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+            select.innerHTML = '';
+            for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) option.selected = true;
+                select.appendChild(option);
+            }
+        }
+    });
+}
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+console.log('✅ Funciones populate agregadas a main.js');
