@@ -344,7 +344,7 @@ function showInquilinoDetail(id) {
         const contratoSection = document.getElementById('contratoOriginalSection');
         if (inq.has_contrato) {
             contratoSection.innerHTML = `
-                <div onclick="fetchAndViewContrato(${inq.id})" style="background:var(--bg); border-radius:6px; padding:0.4rem 0.6rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; height:100%; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
+                <div onclick="fetchAndViewContrato(${inq.id})" style="background:#e8edf3; border-radius:6px; padding:0.4rem 0.6rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; height:100%; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#e8edf3'">
                     <span style="font-size:1.1rem;">📄</span>
                     <div>
                         <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Contrato</div>
@@ -354,7 +354,7 @@ function showInquilinoDetail(id) {
             `;
         } else {
             contratoSection.innerHTML = `
-                <div style="background:var(--bg); border-radius:6px; padding:0.4rem 0.6rem; color:var(--text-light); height:100%; display:flex; align-items:center;">
+                <div style="background:#e8edf3; border-radius:6px; padding:0.4rem 0.6rem; color:var(--text-light); height:100%; display:flex; align-items:center;">
                     <div>
                         <div style="font-size:0.65rem; text-transform:uppercase; font-weight:600;">Contrato</div>
                         <div style="font-size:0.8rem;">Sin contrato</div>
@@ -378,7 +378,9 @@ function showInquilinoDetail(id) {
                     <td onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer; font-weight:600;">📄 Contrato Original</td>
                     <td onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer;">-</td>
                     <td onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer;">-</td>
-                    <td></td>
+                    <td style="white-space:nowrap;">
+                        <span onclick="event.stopPropagation(); deleteContratoOriginalConfirm(${inq.id})" title="Eliminar contrato" style="cursor:pointer; color:var(--danger); font-weight:700; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
+                    </td>
                 </tr>
             `;
         }
@@ -546,6 +548,26 @@ async function deleteDocumentoAdicional(docId) {
 function deleteDocInquilinoConConfirm(docId, nombreDoc) {
     if (confirm('¿Seguro quieres eliminar ' + nombreDoc + '?')) {
         deleteDocumentoAdicional(docId);
+    }
+}
+
+async function deleteContratoOriginalConfirm(inquilinoId) {
+    if (!confirm('¿Seguro quieres eliminar el Contrato Original?')) return;
+    showLoading();
+    try {
+        const { error } = await supabaseClient
+            .from('inquilinos')
+            .update({ contrato_file: null })
+            .eq('id', inquilinoId);
+        if (error) throw error;
+        await loadInquilinos();
+        showInquilinoDetail(inquilinoId);
+        setTimeout(() => switchTab('inquilino', 'docs'), 100);
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Error al eliminar contrato: ' + e.message);
+    } finally {
+        hideLoading();
     }
 }
 
