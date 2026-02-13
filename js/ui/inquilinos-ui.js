@@ -317,21 +317,31 @@ function showInquilinoDetail(id) {
         document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
         document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
         
-        // CONTACTOS - separados con email clickeable
+        // CONTACTOS - Desktop: cards with shadow; Mobile: just name clickable
         const contactosList = document.getElementById('detailContactosList');
+        const isMobile = window.innerWidth <= 768;
+        
         if (inq.contactos && inq.contactos.length > 0) {
-            contactosList.innerHTML = inq.contactos.map(c => {
-                const emailLink = c.email 
-                    ? `<a href="mailto:${c.email}" style="color:var(--primary); text-decoration:none;" title="Enviar correo">${c.email}</a>` 
-                    : '<span style="color:var(--text-light);">-</span>';
-                return `
-                    <div style="display:flex; gap:0.75rem; font-size:0.9rem; padding:0.35rem 0; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--bg);">
-                        <div style="font-weight:600; min-width:100px;">${c.nombre}</div>
-                        <div style="color:var(--text-light);">📞 ${c.telefono || '-'}</div>
-                        <div>✉️ ${emailLink}</div>
-                    </div>
-                `;
-            }).join('');
+            if (isMobile) {
+                // MOBILE: just clickable names
+                contactosList.innerHTML = inq.contactos.map((c, idx) => {
+                    const safeC = JSON.stringify(c).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    return `<span onclick="showContactDetail('${c.nombre.replace(/'/g,"\\'")}', '${(c.telefono||'').replace(/'/g,"\\'")}', '${(c.email||'').replace(/'/g,"\\'")}' )" style="color:var(--primary); cursor:pointer; font-size:0.9rem; font-weight:600; text-decoration:underline; margin-right:0.75rem;">${c.nombre}</span>`;
+                }).join('');
+            } else {
+                // DESKTOP: cards with shadow
+                contactosList.innerHTML = '<div style="display:flex; gap:0.5rem; flex-wrap:wrap;">' + inq.contactos.map(c => {
+                    const telLink = c.telefono ? `<a href="tel:${c.telefono}" style="color:var(--primary); text-decoration:none;">${c.telefono}</a>` : '-';
+                    const emailLink = c.email ? `<a href="mailto:${c.email}" style="color:var(--primary); text-decoration:none;">${c.email}</a>` : '-';
+                    return `
+                        <div style="background:white; border-radius:8px; padding:0.5rem 0.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.12); min-width:180px; flex:1;">
+                            <div style="font-weight:600; font-size:0.9rem; margin-bottom:0.25rem;">${c.nombre}</div>
+                            <div style="font-size:0.8rem; color:var(--text-light);">📞 ${telLink}</div>
+                            <div style="font-size:0.8rem; color:var(--text-light);">✉️ ${emailLink}</div>
+                        </div>
+                    `;
+                }).join('') + '</div>';
+            }
         } else {
             contactosList.innerHTML = '<span style="color:var(--text-light); font-size:0.85rem;">No hay contactos</span>';
         }
@@ -340,25 +350,29 @@ function showInquilinoDetail(id) {
         document.getElementById('detailRFC').textContent = inq.rfc || '-';
         document.getElementById('detailClabe').textContent = inq.clabe || '-';
         
-        // CONTRATO ORIGINAL (compacto, en línea con Renta/M²/Despacho)
+        // CONTRATO DE RENTA (con + o ♻ para cargar/recargar)
         const contratoSection = document.getElementById('contratoOriginalSection');
         if (inq.has_contrato) {
             contratoSection.innerHTML = `
-                <div onclick="fetchAndViewContrato(${inq.id})" style="background:#e8edf3; border-radius:6px; padding:0.4rem 0.6rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; height:100%; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#e8edf3'">
-                    <span style="font-size:1.1rem;">📄</span>
-                    <div>
-                        <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Contrato</div>
-                        <div style="font-size:0.85rem; color:var(--primary); font-weight:600;">Ver PDF</div>
+                <div style="background:#e8edf3; border-radius:6px; padding:0.4rem 0.6rem; display:flex; align-items:center; gap:0.3rem; height:100%;">
+                    <div onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem; flex:1;" onmouseover="this.querySelector('.ctr-label').style.color='var(--primary)'" onmouseout="this.querySelector('.ctr-label').style.color=''">
+                        <span style="font-size:1rem;">📄</span>
+                        <div>
+                            <div style="font-size:0.6rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Contrato de Renta</div>
+                            <div class="ctr-label" style="font-size:0.8rem; color:var(--primary); font-weight:600;">Ver PDF</div>
+                        </div>
                     </div>
+                    <span onclick="event.stopPropagation(); showCargarContratoModal()" title="Reemplazar contrato" style="cursor:pointer; font-size:0.95rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='transparent'">🔄</span>
                 </div>
             `;
         } else {
             contratoSection.innerHTML = `
                 <div style="background:#e8edf3; border-radius:6px; padding:0.4rem 0.6rem; color:var(--text-light); height:100%; display:flex; align-items:center;">
-                    <div>
-                        <div style="font-size:0.65rem; text-transform:uppercase; font-weight:600;">Contrato</div>
-                        <div style="font-size:0.8rem;">Sin contrato</div>
+                    <div style="flex:1;">
+                        <div style="font-size:0.6rem; text-transform:uppercase; font-weight:600;">Contrato de Renta</div>
+                        <div style="font-size:0.75rem;">Sin contrato</div>
                     </div>
+                    <span onclick="event.stopPropagation(); showCargarContratoModal()" title="Cargar contrato" style="cursor:pointer; color:var(--success); font-size:1.2rem; font-weight:700; padding:0.1rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">+</span>
                 </div>
             `;
         }
@@ -367,27 +381,11 @@ function showInquilinoDetail(id) {
         const historialDiv = document.getElementById('historialPagos');
         historialDiv.innerHTML = renderHistorialConAdeudos(inq);
         
-        // DOCUMENTOS - incluye Contrato Original + documentos adicionales
+        // DOCUMENTOS (sin contrato original - se maneja arriba)
         const docsDiv = document.getElementById('documentosAdicionales');
-        let allDocRows = '';
         
-        // Contrato Original como primera fila
-        if (inq.has_contrato) {
-            allDocRows += `
-                <tr style="background:#f0fdf4;">
-                    <td onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer; font-weight:600;">📄 Contrato Original</td>
-                    <td onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer;">-</td>
-                    <td onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer;">-</td>
-                    <td style="white-space:nowrap;">
-                        <span onclick="event.stopPropagation(); deleteContratoOriginalConfirm(${inq.id})" title="Eliminar contrato" style="cursor:pointer; color:var(--danger); font-weight:700; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
-                    </td>
-                </tr>
-            `;
-        }
-        
-        // Documentos adicionales
         if (inq.documentos && inq.documentos.length > 0) {
-            allDocRows += inq.documentos.map(d => {
+            const docRows = inq.documentos.map(d => {
                 const safeNombre = (d.nombre || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 return `
                     <tr class="doc-item">
@@ -401,10 +399,7 @@ function showInquilinoDetail(id) {
                     </tr>
                 `;
             }).join('');
-        }
-        
-        if (allDocRows) {
-            docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:70px;"></th></tr></thead><tbody>' + allDocRows + '</tbody></table>';
+            docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:70px;"></th></tr></thead><tbody>' + docRows + '</tbody></table>';
         } else {
             docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos</p>';
         }
@@ -552,7 +547,7 @@ function deleteDocInquilinoConConfirm(docId, nombreDoc) {
 }
 
 async function deleteContratoOriginalConfirm(inquilinoId) {
-    if (!confirm('¿Seguro quieres eliminar el Contrato Original?')) return;
+    if (!confirm('¿Seguro quieres eliminar el Contrato de Renta?')) return;
     showLoading();
     try {
         const { error } = await supabaseClient
@@ -562,10 +557,62 @@ async function deleteContratoOriginalConfirm(inquilinoId) {
         if (error) throw error;
         await loadInquilinos();
         showInquilinoDetail(inquilinoId);
-        setTimeout(() => switchTab('inquilino', 'docs'), 100);
     } catch (e) {
         console.error('Error:', e);
         alert('Error al eliminar contrato: ' + e.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// CONTACTO DETAIL (MOBILE)
+// ============================================
+
+function showContactDetail(nombre, telefono, email) {
+    document.getElementById('contactDetailNombre').textContent = nombre;
+    const telLink = telefono ? `<a href="tel:${telefono}" style="color:var(--primary); text-decoration:none; font-size:1rem;">${telefono}</a>` : '<span style="color:var(--text-light);">-</span>';
+    const emailLink = email ? `<a href="mailto:${email}" style="color:var(--primary); text-decoration:none; font-size:0.95rem;">${email}</a>` : '<span style="color:var(--text-light);">-</span>';
+    document.getElementById('contactDetailBody').innerHTML = `
+        <div style="margin-bottom:0.75rem;">
+            <div style="font-size:0.75rem; color:var(--text-light); text-transform:uppercase; font-weight:600; margin-bottom:0.2rem;">Teléfono</div>
+            <div>📞 ${telLink}</div>
+        </div>
+        <div>
+            <div style="font-size:0.75rem; color:var(--text-light); text-transform:uppercase; font-weight:600; margin-bottom:0.2rem;">Email</div>
+            <div>✉️ ${emailLink}</div>
+        </div>
+    `;
+    document.getElementById('contactDetailModal').classList.add('active');
+}
+
+// ============================================
+// CARGAR CONTRATO DE RENTA
+// ============================================
+
+function showCargarContratoModal() {
+    document.getElementById('contratoUploadPDF').value = '';
+    document.getElementById('contratoUploadFileName').textContent = '';
+    document.getElementById('cargarContratoModal').classList.add('active');
+}
+
+async function saveContratoRenta() {
+    const file = document.getElementById('contratoUploadPDF').files[0];
+    if (!file) { alert('Selecciona un PDF'); return; }
+    showLoading();
+    try {
+        const pdfBase64 = await fileToBase64(file);
+        const { error } = await supabaseClient
+            .from('inquilinos')
+            .update({ contrato_file: pdfBase64 })
+            .eq('id', currentInquilinoId);
+        if (error) throw error;
+        await loadInquilinos();
+        closeModal('cargarContratoModal');
+        showInquilinoDetail(currentInquilinoId);
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Error: ' + e.message);
     } finally {
         hideLoading();
     }
