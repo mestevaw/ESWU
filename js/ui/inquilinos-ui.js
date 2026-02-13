@@ -317,33 +317,64 @@ function showInquilinoDetail(id) {
         document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
         document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
         
-        // CONTACTOS - Desktop: cards with shadow; Mobile: just name clickable
+        // CONTACTOS - Desktop: cards in bordered box; Mobile: compact with dropdown
         const contactosList = document.getElementById('detailContactosList');
         const isMobile = window.innerWidth <= 768;
         
         if (inq.contactos && inq.contactos.length > 0) {
+            const first = inq.contactos[0];
+            const hasMore = inq.contactos.length > 1;
+            
             if (isMobile) {
-                // MOBILE: just clickable names
-                contactosList.innerHTML = inq.contactos.map((c, idx) => {
-                    const safeC = JSON.stringify(c).replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                    return `<span onclick="showContactDetail('${c.nombre.replace(/'/g,"\\'")}', '${(c.telefono||'').replace(/'/g,"\\'")}', '${(c.email||'').replace(/'/g,"\\'")}' )" style="color:var(--primary); cursor:pointer; font-size:0.9rem; font-weight:600; text-decoration:underline; margin-right:0.75rem;">${c.nombre}</span>`;
-                }).join('');
+                // MOBILE: compact box with dropdown
+                let html = '<div style="border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem;">';
+                html += '<div style="display:flex; align-items:center; gap:0.4rem;">';
+                html += '<span style="font-size:0.8rem;">📞</span>';
+                
+                if (hasMore) {
+                    html += '<select id="contactoDropdownMobile" onchange="showContactFromDropdown(this.value)" style="flex:1; border:1px solid var(--border); border-radius:4px; padding:0.25rem 0.4rem; font-size:0.85rem; font-weight:600; color:var(--primary); cursor:pointer; background:white;">';
+                    inq.contactos.forEach((c, i) => {
+                        html += `<option value="${i}">${c.nombre}</option>`;
+                    });
+                    html += '</select>';
+                } else {
+                    html += `<span onclick="showContactDetail('${first.nombre.replace(/'/g,"\\'")}', '${(first.telefono||'').replace(/'/g,"\\'")}', '${(first.email||'').replace(/'/g,"\\'")}' )" style="flex:1; color:var(--primary); font-weight:600; font-size:0.85rem; cursor:pointer; text-decoration:underline;">${first.nombre}</span>`;
+                }
+                html += '</div></div>';
+                contactosList.innerHTML = html;
             } else {
-                // DESKTOP: cards with shadow
-                contactosList.innerHTML = '<div style="display:flex; gap:0.5rem; flex-wrap:wrap;">' + inq.contactos.map(c => {
-                    const telLink = c.telefono ? `<a href="tel:${c.telefono}" style="color:var(--primary); text-decoration:none;">${c.telefono}</a>` : '-';
-                    const emailLink = c.email ? `<a href="mailto:${c.email}" style="color:var(--primary); text-decoration:none;">${c.email}</a>` : '-';
-                    return `
-                        <div style="background:white; border-radius:8px; padding:0.5rem 0.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.12); min-width:180px; flex:1;">
-                            <div style="font-weight:600; font-size:0.9rem; margin-bottom:0.25rem;">${c.nombre}</div>
-                            <div style="font-size:0.8rem; color:var(--text-light);">📞 ${telLink}</div>
-                            <div style="font-size:0.8rem; color:var(--text-light);">✉️ ${emailLink}</div>
-                        </div>
-                    `;
-                }).join('') + '</div>';
+                // DESKTOP: bordered box with cards
+                let html = '<div style="border:1px solid var(--border); border-radius:8px; padding:0.6rem 0.75rem;">';
+                
+                if (hasMore) {
+                    html += '<div style="margin-bottom:0.5rem;">';
+                    html += '<select id="contactoDropdownDesktop" onchange="showDesktopContactCard(this.value)" style="border:1px solid var(--border); border-radius:4px; padding:0.3rem 0.5rem; font-size:0.85rem; font-weight:600; cursor:pointer;">';
+                    inq.contactos.forEach((c, i) => {
+                        html += `<option value="${i}">${c.nombre}</option>`;
+                    });
+                    html += '</select></div>';
+                }
+                
+                html += '<div id="desktopContactCards" style="display:flex; gap:0.5rem; flex-wrap:wrap;">';
+                const telLink = first.telefono ? `<a href="tel:${first.telefono}" style="color:var(--primary); text-decoration:none;">${first.telefono}</a>` : '-';
+                const emailLink = first.email ? `<a href="mailto:${first.email}" style="color:var(--primary); text-decoration:none;">${first.email}</a>` : '-';
+                html += `<div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
+                    <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Nombre</div>
+                    <div style="font-size:0.9rem; font-weight:600;">${first.nombre}</div>
+                </div>`;
+                html += `<div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
+                    <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Teléfono</div>
+                    <div style="font-size:0.9rem;">📞 ${telLink}</div>
+                </div>`;
+                html += `<div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
+                    <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Email</div>
+                    <div style="font-size:0.9rem;">✉️ ${emailLink}</div>
+                </div>`;
+                html += '</div></div>';
+                contactosList.innerHTML = html;
             }
         } else {
-            contactosList.innerHTML = '<span style="color:var(--text-light); font-size:0.85rem;">No hay contactos</span>';
+            contactosList.innerHTML = '<div style="border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem;"><span style="color:var(--text-light); font-size:0.85rem;">No hay contactos</span></div>';
         }
         
         // RFC y CLABE
@@ -456,6 +487,7 @@ function editInquilino() {
 function showAddContactoInquilinoModal() {
     document.getElementById('contactoInquilinoForm').reset();
     delete window.editingContactoIndex;
+    document.getElementById('contactoModalTitle').textContent = 'Agregar Contacto';
     document.getElementById('addContactoInquilinoModal').classList.add('active');
 }
 
@@ -494,6 +526,7 @@ function showEditContactoInquilinoModal(index) {
     document.getElementById('contactoInquilinoEmail').value = contacto.email || '';
     
     window.editingContactoIndex = index;
+    document.getElementById('contactoModalTitle').textContent = 'Editar Contacto';
     
     document.getElementById('addContactoInquilinoModal').classList.add('active');
 }
@@ -584,6 +617,37 @@ function showContactDetail(nombre, telefono, email) {
         </div>
     `;
     document.getElementById('contactDetailModal').classList.add('active');
+}
+
+function showContactFromDropdown(indexStr) {
+    const idx = parseInt(indexStr);
+    const inq = inquilinos.find(i => i.id === currentInquilinoId);
+    if (!inq || !inq.contactos[idx]) return;
+    const c = inq.contactos[idx];
+    showContactDetail(c.nombre, c.telefono || '', c.email || '');
+}
+
+function showDesktopContactCard(indexStr) {
+    const idx = parseInt(indexStr);
+    const inq = inquilinos.find(i => i.id === currentInquilinoId);
+    if (!inq || !inq.contactos[idx]) return;
+    const c = inq.contactos[idx];
+    const telLink = c.telefono ? `<a href="tel:${c.telefono}" style="color:var(--primary); text-decoration:none;">${c.telefono}</a>` : '-';
+    const emailLink = c.email ? `<a href="mailto:${c.email}" style="color:var(--primary); text-decoration:none;">${c.email}</a>` : '-';
+    document.getElementById('desktopContactCards').innerHTML = `
+        <div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
+            <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Nombre</div>
+            <div style="font-size:0.9rem; font-weight:600;">${c.nombre}</div>
+        </div>
+        <div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
+            <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Teléfono</div>
+            <div style="font-size:0.9rem;">📞 ${telLink}</div>
+        </div>
+        <div style="background:white; border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.6rem; flex:1; min-width:120px;">
+            <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Email</div>
+            <div style="font-size:0.9rem;">✉️ ${emailLink}</div>
+        </div>
+    `;
 }
 
 // ============================================
@@ -781,7 +845,7 @@ function renderHistorialConAdeudos(inq) {
             html += `<td style="padding:0.5rem 0.4rem;"><span class="badge badge-warning" style="font-size:0.75rem;">Adeuda</span> <small style="color:var(--text-light);">Parcial ${fechaPago}</small></td>`;
             html += `<td style="padding:0.5rem 0.4rem; text-align:right; color:var(--danger); font-weight:600;">-${formatCurrency(r.balance)}</td>`;
             html += `<td style="padding:0.5rem 0.4rem; text-align:center;">`;
-            html += `<span onclick="showRegistrarPagoDesdeAdeudo(${r.year}, ${r.month}, ${r.balance})" title="Registrar pago" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💲</span>`;
+            html += `<span onclick="showRegistrarPagoDesdeAdeudo(${r.year}, ${r.month}, ${r.balance})" title="Registrar pago" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏦</span>`;
             html += `</td></tr>`;
         } else {
             // NO HA PAGADO NADA
@@ -790,13 +854,83 @@ function renderHistorialConAdeudos(inq) {
             html += `<td style="padding:0.5rem 0.4rem;"><span class="badge badge-danger" style="font-size:0.75rem;">Adeuda</span></td>`;
             html += `<td style="padding:0.5rem 0.4rem; text-align:right; color:var(--danger); font-weight:600;">-${formatCurrency(r.balance)}</td>`;
             html += `<td style="padding:0.5rem 0.4rem; text-align:center;">`;
-            html += `<span onclick="showRegistrarPagoDesdeAdeudo(${r.year}, ${r.month}, ${r.balance})" title="Registrar pago" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💲</span>`;
+            html += `<span onclick="showRegistrarPagoDesdeAdeudo(${r.year}, ${r.month}, ${r.balance})" title="Registrar pago" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏦</span>`;
             html += `</td></tr>`;
         }
     });
     
+    // Sum row
+    const totalPagos = rows.reduce((sum, r) => sum + r.totalPagado, 0);
+    const totalAdeudos = rows.reduce((sum, r) => sum + (r.balance > 0 ? r.balance : 0), 0);
+    html += `<tr style="background:#e6f2ff; font-weight:700;">`;
+    html += `<td style="padding:0.5rem 0.4rem;">TOTAL</td>`;
+    html += `<td style="padding:0.5rem 0.4rem;"></td>`;
+    html += `<td style="padding:0.5rem 0.4rem; text-align:right; color:var(--success);">${formatCurrency(totalPagos)}</td>`;
+    html += `<td></td>`;
+    html += `</tr>`;
+    if (totalAdeudos > 0) {
+        html += `<tr style="background:#fef2f2; font-weight:700;">`;
+        html += `<td style="padding:0.5rem 0.4rem;">ADEUDO</td>`;
+        html += `<td style="padding:0.5rem 0.4rem;"></td>`;
+        html += `<td style="padding:0.5rem 0.4rem; text-align:right; color:var(--danger);">-${formatCurrency(totalAdeudos)}</td>`;
+        html += `<td></td>`;
+        html += `</tr>`;
+    }
+    
     html += '</tbody></table>';
     return html;
+}
+
+// ============================================
+// EXPORT HISTORIAL DE PAGOS A EXCEL
+// ============================================
+
+function exportHistorialPagosExcel() {
+    const inq = inquilinos.find(i => i.id === currentInquilinoId);
+    if (!inq) return;
+    
+    const renta = inq.renta || 0;
+    const pagos = inq.pagos || [];
+    const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    
+    // Build same data as renderHistorialConAdeudos
+    if (!inq.fecha_inicio) { alert('No hay fecha de inicio'); return; }
+    
+    const inicio = new Date(inq.fecha_inicio + 'T00:00:00');
+    const ahora = new Date();
+    const months = [];
+    let d = new Date(inicio.getFullYear(), inicio.getMonth(), 1);
+    while (d <= ahora) {
+        months.push({ year: d.getFullYear(), month: d.getMonth() });
+        d.setMonth(d.getMonth() + 1);
+    }
+    
+    const excelData = months.map(m => {
+        const pagosMes = pagos.filter(p => {
+            const fp = new Date(p.fecha + 'T00:00:00');
+            return fp.getFullYear() === m.year && fp.getMonth() === m.month;
+        });
+        const totalPagado = pagosMes.reduce((sum, p) => sum + p.monto, 0);
+        const balance = renta - totalPagado;
+        const estado = balance <= 0 ? 'Pagado' : (totalPagado > 0 ? 'Parcial' : 'Adeuda');
+        return {
+            'Mes': monthNames[m.month] + ' ' + m.year,
+            'Renta': renta,
+            'Pagado': totalPagado,
+            'Balance': balance > 0 ? -balance : 0,
+            'Estado': estado
+        };
+    }).reverse();
+    
+    // Add totals row
+    const totalPagado = excelData.reduce((s, r) => s + r['Pagado'], 0);
+    const totalAdeudo = excelData.reduce((s, r) => s + r['Balance'], 0);
+    excelData.push({ 'Mes': 'TOTAL', 'Renta': '', 'Pagado': totalPagado, 'Balance': totalAdeudo, 'Estado': '' });
+    
+    const ws = XLSX.utils.json_to_sheet(excelData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Historial Pagos');
+    XLSX.writeFile(wb, `Historial_${inq.nombre.replace(/\s+/g,'_')}.xlsx`);
 }
 
 function showRegistrarPagoDesdeAdeudo(year, month, balance) {
