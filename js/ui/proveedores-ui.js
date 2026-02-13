@@ -73,15 +73,25 @@ function renderProveedoresTable() {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
     tbody.innerHTML = '';
     
+    const cellStyle = 'word-wrap:break-word; overflow-wrap:break-word; padding:0.4rem 0.3rem; vertical-align:top; font-size:0.8rem;';
+    
     proveedores.forEach(prov => {
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
         const row = tbody.insertRow();
+        
+        const telLink = primerContacto.telefono 
+            ? `<a href="tel:${primerContacto.telefono}" style="color:var(--primary);text-decoration:none;" onclick="event.stopPropagation();">${primerContacto.telefono}</a>` 
+            : '-';
+        const emailLink = primerContacto.email 
+            ? `<a href="mailto:${primerContacto.email}" style="color:var(--primary);text-decoration:none;" onclick="event.stopPropagation();">${primerContacto.email}</a>` 
+            : '-';
+        
         row.innerHTML = `
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
-            <td>${prov.servicio}</td>
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
-            <td>${primerContacto.telefono || '-'}</td>
-            <td>${primerContacto.email || '-'}</td>
+            <td style="${cellStyle} font-weight:500;">${prov.nombre}</td>
+            <td style="${cellStyle}">${prov.servicio || '-'}</td>
+            <td style="${cellStyle}">${primerContacto.nombre || '-'}</td>
+            <td style="${cellStyle}">${telLink}</td>
+            <td style="${cellStyle}">${emailLink}</td>
         `;
         row.style.cursor = 'pointer';
         row.onclick = () => showProveedorDetail(prov.id);
@@ -96,6 +106,8 @@ function filtrarProveedores(query) {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
     tbody.innerHTML = '';
     
+    const cellStyle = 'word-wrap:break-word; overflow-wrap:break-word; padding:0.4rem 0.3rem; vertical-align:top; font-size:0.8rem;';
+    
     const filtrados = proveedores.filter(prov => 
         prov.nombre.toLowerCase().includes(query) || 
         (prov.servicio || '').toLowerCase().includes(query) ||
@@ -105,12 +117,20 @@ function filtrarProveedores(query) {
     filtrados.forEach(prov => {
         const row = tbody.insertRow();
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
+        
+        const telLink = primerContacto.telefono 
+            ? `<a href="tel:${primerContacto.telefono}" style="color:var(--primary);text-decoration:none;" onclick="event.stopPropagation();">${primerContacto.telefono}</a>` 
+            : '-';
+        const emailLink = primerContacto.email 
+            ? `<a href="mailto:${primerContacto.email}" style="color:var(--primary);text-decoration:none;" onclick="event.stopPropagation();">${primerContacto.email}</a>` 
+            : '-';
+        
         row.innerHTML = `
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${prov.nombre}</td>
-            <td>${prov.servicio}</td>
-            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${primerContacto.nombre || '-'}</td>
-            <td>${primerContacto.telefono || '-'}</td>
-            <td>${primerContacto.email || '-'}</td>
+            <td style="${cellStyle} font-weight:500;">${prov.nombre}</td>
+            <td style="${cellStyle}">${prov.servicio || '-'}</td>
+            <td style="${cellStyle}">${primerContacto.nombre || '-'}</td>
+            <td style="${cellStyle}">${telLink}</td>
+            <td style="${cellStyle}">${emailLink}</td>
         `;
         row.style.cursor = 'pointer';
         row.onclick = () => showProveedorDetail(prov.id);
