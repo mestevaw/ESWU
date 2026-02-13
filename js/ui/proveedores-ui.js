@@ -73,8 +73,6 @@ function renderProveedoresTable() {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
     tbody.innerHTML = '';
     
-    const cellStyle = 'word-wrap:break-word; overflow-wrap:break-word; padding:0.4rem 0.3rem; vertical-align:top; font-size:0.8rem;';
-    
     proveedores.forEach(prov => {
         const primerContacto = prov.contactos && prov.contactos.length > 0 ? prov.contactos[0] : {};
         const row = tbody.insertRow();
@@ -87,11 +85,11 @@ function renderProveedoresTable() {
             : '-';
         
         row.innerHTML = `
-            <td style="${cellStyle} font-weight:500;">${prov.nombre}</td>
-            <td style="${cellStyle}">${prov.servicio || '-'}</td>
-            <td style="${cellStyle}">${primerContacto.nombre || '-'}</td>
-            <td style="${cellStyle}">${telLink}</td>
-            <td style="${cellStyle}">${emailLink}</td>
+            <td>${prov.nombre}</td>
+            <td>${prov.servicio || '-'}</td>
+            <td>${primerContacto.nombre || '-'}</td>
+            <td>${telLink}</td>
+            <td>${emailLink}</td>
         `;
         row.style.cursor = 'pointer';
         row.onclick = () => showProveedorDetail(prov.id);
@@ -105,8 +103,6 @@ function renderProveedoresTable() {
 function filtrarProveedores(query) {
     const tbody = document.getElementById('proveedoresTable').querySelector('tbody');
     tbody.innerHTML = '';
-    
-    const cellStyle = 'word-wrap:break-word; overflow-wrap:break-word; padding:0.4rem 0.3rem; vertical-align:top; font-size:0.8rem;';
     
     const filtrados = proveedores.filter(prov => 
         prov.nombre.toLowerCase().includes(query) || 
@@ -126,11 +122,11 @@ function filtrarProveedores(query) {
             : '-';
         
         row.innerHTML = `
-            <td style="${cellStyle} font-weight:500;">${prov.nombre}</td>
-            <td style="${cellStyle}">${prov.servicio || '-'}</td>
-            <td style="${cellStyle}">${primerContacto.nombre || '-'}</td>
-            <td style="${cellStyle}">${telLink}</td>
-            <td style="${cellStyle}">${emailLink}</td>
+            <td>${prov.nombre}</td>
+            <td>${prov.servicio || '-'}</td>
+            <td>${primerContacto.nombre || '-'}</td>
+            <td>${telLink}</td>
+            <td>${emailLink}</td>
         `;
         row.style.cursor = 'pointer';
         row.onclick = () => showProveedorDetail(prov.id);
@@ -188,9 +184,6 @@ function renderProveedoresFacturasPagadas() {
     });
     
     pagadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    
-    const cellStyle = 'word-wrap:break-word; overflow-wrap:break-word; padding:0.4rem 0.3rem; vertical-align:top; font-size:0.8rem;';
-    
     pagadas.forEach(f => {
         const row = tbody.insertRow();
         
@@ -203,10 +196,10 @@ function renderProveedoresFacturasPagadas() {
             : '';
         
         row.innerHTML = `
-            <td style="${cellStyle} font-weight:500;">${f.proveedor}</td>
-            <td style="${cellStyle}">${docIcon}<strong>${f.numero}</strong></td>
-            <td style="${cellStyle}">${pagoIcon}${formatDate(f.fecha)}</td>
-            <td style="${cellStyle} text-align:right;" class="currency">${formatCurrency(f.monto)}</td>
+            <td>${f.proveedor}</td>
+            <td>${docIcon}<strong>${f.numero}</strong></td>
+            <td>${pagoIcon}${formatDate(f.fecha)}</td>
+            <td class="currency">${formatCurrency(f.monto)}</td>
         `;
     });
     
@@ -264,18 +257,15 @@ function renderProveedoresFacturasPorPagar() {
     });
     
     porPagar.sort((a, b) => new Date(a.vencimiento) - new Date(b.vencimiento));
-    
-    const cellStyle = 'word-wrap:break-word; overflow-wrap:break-word; padding:0.4rem 0.3rem; vertical-align:top; font-size:0.8rem;';
-    
     porPagar.forEach(f => {
         const row = tbody.insertRow();
         const escapedNum = (f.numero).replace(/'/g, "\\'");
         row.innerHTML = `
-            <td style="${cellStyle} font-weight:500;">${f.proveedor}</td>
-            <td style="${cellStyle}">${f.numero}</td>
-            <td style="${cellStyle}" class="currency">${formatCurrency(f.monto)}</td>
-            <td style="${cellStyle}">${formatDateVencimiento(f.vencimiento)}</td>
-            <td style="${cellStyle} white-space:nowrap;" onclick="event.stopPropagation()">
+            <td>${f.proveedor}</td>
+            <td>${f.numero}</td>
+            <td class="currency">${formatCurrency(f.monto)}</td>
+            <td>${formatDateVencimiento(f.vencimiento)}</td>
+            <td style="white-space:nowrap;" onclick="event.stopPropagation()">
                 <span onclick="currentProveedorId=${f.provId}; window.facturaActionContext='standalone-porpagar'; showEditFacturaModal(${f.factId})" title="Modificar factura" style="cursor:pointer; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
                 <span onclick="currentProveedorId=${f.provId}; window.facturaActionContext='standalone-porpagar'; showPagarFacturaModal(${f.factId})" title="Dar factura x pagada" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏦</span>
                 <span onclick="window.facturaActionContext='standalone-porpagar'; deleteFacturaConConfirm(${f.factId}, '${escapedNum}')" title="Eliminar factura" style="cursor:pointer; color:var(--danger); font-size:1.1rem; font-weight:700; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
