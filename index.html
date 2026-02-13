@@ -50,7 +50,7 @@
             </div>
             <div class="header-actions">
                 <button id="btnSearch" class="btn-search hidden" onclick="toggleSearch()">🔍</button>
-                <button id="btnRegresa" class="btn-regresa-simple hidden" onclick="handleRegresa()">✖</button>
+                <button id="btnRegresa" class="btn-regresa-simple hidden" onclick="handleRegresa()" style="color:var(--danger);">✖</button>
             </div>
         </header>
 
@@ -234,9 +234,7 @@
                     <div class="card">
                        <div class="card-header" style="flex-wrap:wrap; gap:0.4rem;">
     <h2 class="card-title" style="flex:1; min-width:0; font-size:1rem;">Proveedores</h2>
-    <div style="display:flex; align-items:center; gap:0.3rem;">
-        <span onclick="toggleSearch()" title="Buscar" style="font-size:1.2rem; cursor:pointer;">🔍</span>
-        <span onclick="handleRegresa()" title="Cerrar" style="font-size:1.1rem; cursor:pointer; color:var(--danger); font-weight:700;">✖</span>
+    <div style="display:flex; align-items:center; gap:0.4rem;">
         <span onclick="exportProveedoresToExcel()" title="Exportar a Excel" style="font-size:1.2rem; cursor:pointer;">📊</span>
         <span class="btn-add-inline" onclick="showAddProveedorModal()" title="Agregar proveedor" style="font-size:1.4rem; cursor:pointer;">+</span>
     </div>
@@ -281,8 +279,13 @@
                                 </select>
                             </div>
                             <div class="table-container">
-                                <table id="proveedoresFacturasPagadasTable" class="sticky-header-table">
-                                    <thead><tr><th>Proveedor</th><th>No. Factura</th><th>Pagada en</th><th style="text-align:right">Monto</th></tr></thead>
+                                <table id="proveedoresFacturasPagadasTable" class="sticky-header-table" style="font-size:0.8rem; table-layout:fixed; width:100%;">
+                                    <thead><tr>
+                                        <th style="width:30%; word-wrap:break-word; overflow-wrap:break-word;">Proveedor</th>
+                                        <th style="width:22%; word-wrap:break-word; overflow-wrap:break-word;">No. Factura</th>
+                                        <th style="width:24%; word-wrap:break-word; overflow-wrap:break-word;">Pagada en</th>
+                                        <th style="width:24%; text-align:right; word-wrap:break-word; overflow-wrap:break-word;">Monto</th>
+                                    </tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -314,8 +317,14 @@
                                 </select>
                             </div>
                             <div class="table-container">
-                             <table id="proveedoresFacturasPorPagarTable">
-    <thead><tr><th>Proveedor</th><th>Número</th><th>Monto</th><th>Vencimiento</th><th style="width:80px">Acciones</th></tr></thead>
+                             <table id="proveedoresFacturasPorPagarTable" style="font-size:0.8rem; table-layout:fixed; width:100%;">
+    <thead><tr>
+        <th style="width:28%; word-wrap:break-word; overflow-wrap:break-word;">Proveedor</th>
+        <th style="width:18%; word-wrap:break-word; overflow-wrap:break-word;">Número</th>
+        <th style="width:20%; word-wrap:break-word; overflow-wrap:break-word;">Monto</th>
+        <th style="width:18%; word-wrap:break-word; overflow-wrap:break-word;">Vencimiento</th>
+        <th style="width:16%; word-wrap:break-word; overflow-wrap:break-word;">Acciones</th>
+    </tr></thead>
     <tbody></tbody>
 </table>
                             </div>
