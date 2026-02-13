@@ -320,11 +320,18 @@ function showInquilinoDetail(id) {
         // CONTACTOS
         const contactosList = document.getElementById('detailContactosList');
         if (inq.contactos && inq.contactos.length > 0) {
-            contactosList.innerHTML = inq.contactos.map(c => `
-                <div style="font-size:0.9rem;">
-                    <strong>${c.nombre}</strong> | Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}
-                </div>
-            `).join('');
+            contactosList.innerHTML = inq.contactos.map(c => {
+                const emailLink = c.email 
+                    ? `<a href="mailto:${c.email}" style="color:var(--primary); text-decoration:none;" title="Enviar correo">${c.email}</a>` 
+                    : '<span style="color:var(--text-light);">-</span>';
+                return `
+                    <div style="display:flex; gap:0.75rem; font-size:0.9rem; padding:0.35rem 0; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--bg);">
+                        <div style="font-weight:600; min-width:100px;">${c.nombre}</div>
+                        <div style="color:var(--text-light);">📞 ${c.telefono || '-'}</div>
+                        <div>✉️ ${emailLink}</div>
+                    </div>
+                `;
+            }).join('');
         } else {
             contactosList.innerHTML = '<span style="color:var(--text-light); font-size:0.85rem;">No hay contactos</span>';
         }
@@ -367,20 +374,26 @@ function showInquilinoDetail(id) {
             historialDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay pagos</p>';
         }
         
-        // DOCUMENTOS ADICIONALES
+        // DOCUMENTOS
         const docsDiv = document.getElementById('documentosAdicionales');
         if (inq.documentos && inq.documentos.length > 0) {
-            docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:50px;"></th></tr></thead><tbody>' +
-                inq.documentos.map(d => `
+            const docRows = inq.documentos.map(d => {
+                const safeNombre = (d.nombre || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                return `
                     <tr class="doc-item">
                         <td onclick="fetchAndViewDocInquilino(${d.id})" style="cursor:pointer;">${d.nombre}</td>
                         <td onclick="fetchAndViewDocInquilino(${d.id})" style="cursor:pointer;">${formatDate(d.fecha)}</td>
                         <td onclick="fetchAndViewDocInquilino(${d.id})" style="cursor:pointer;">${d.usuario}</td>
-                        <td><button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteDocumentoAdicional(${d.id})">×</button></td>
+                        <td style="white-space:nowrap;">
+                            <span onclick="event.stopPropagation(); editDocumentoInquilino(${d.id}, '${safeNombre}')" title="Modificar datos documento" style="cursor:pointer; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
+                            <span onclick="event.stopPropagation(); deleteDocInquilinoConConfirm(${d.id}, '${safeNombre}')" title="Eliminar documento" style="cursor:pointer; color:var(--danger); font-weight:700; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
+                        </td>
                     </tr>
-                `).join('') + '</tbody></table>';
+                `;
+            }).join('');
+            docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:70px;"></th></tr></thead><tbody>' + docRows + '</tbody></table>';
         } else {
-            docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos adicionales</p>';
+            docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos</p>';
         }
         
         // NOTAS
@@ -499,8 +512,6 @@ function viewDocumento(docIdOrArchivo) {
 }
 
 async function deleteDocumentoAdicional(docId) {
-    if (!confirm('¿Eliminar este documento?')) return;
-    
     showLoading();
     try {
         const { error } = await supabaseClient
@@ -512,9 +523,89 @@ async function deleteDocumentoAdicional(docId) {
         
         await loadInquilinos();
         showInquilinoDetail(currentInquilinoId);
+        setTimeout(() => switchTab('inquilino', 'docs'), 100);
     } catch (error) {
         console.error('Error:', error);
         alert('Error al eliminar documento: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function deleteDocInquilinoConConfirm(docId, nombreDoc) {
+    if (confirm('¿Seguro quieres eliminar ' + nombreDoc + '?')) {
+        deleteDocumentoAdicional(docId);
+    }
+}
+
+async function editDocumentoInquilino(docId, nombreActual) {
+    const nuevoNombre = prompt('Nombre del documento:', nombreActual);
+    if (nuevoNombre === null) return;
+    if (!nuevoNombre.trim()) { alert('El nombre no puede estar vacío'); return; }
+    
+    const inq = inquilinos.find(i => i.id === currentInquilinoId);
+    
+    // Si no hay contrato original, preguntar si este doc es el contrato
+    if (inq && !inq.has_contrato) {
+        const esContrato = confirm('¿Este documento es el Contrato Original?');
+        if (esContrato) {
+            showLoading();
+            try {
+                // Obtener el PDF del documento
+                const { data, error } = await supabaseClient
+                    .from('inquilinos_documentos')
+                    .select('archivo_pdf')
+                    .eq('id', docId)
+                    .single();
+                
+                if (error) throw error;
+                
+                // Mover el PDF al campo contrato_file del inquilino
+                const { error: updateError } = await supabaseClient
+                    .from('inquilinos')
+                    .update({ contrato_file: data.archivo_pdf })
+                    .eq('id', currentInquilinoId);
+                
+                if (updateError) throw updateError;
+                
+                // Eliminar la entrada de documentos
+                const { error: deleteError } = await supabaseClient
+                    .from('inquilinos_documentos')
+                    .delete()
+                    .eq('id', docId);
+                
+                if (deleteError) throw deleteError;
+                
+                await loadInquilinos();
+                showInquilinoDetail(currentInquilinoId);
+            } catch (e) {
+                console.error('Error:', e);
+                alert('Error: ' + e.message);
+            } finally {
+                hideLoading();
+            }
+            return;
+        }
+    }
+    
+    // Solo renombrar
+    if (nuevoNombre.trim() === nombreActual) return;
+    
+    showLoading();
+    try {
+        const { error } = await supabaseClient
+            .from('inquilinos_documentos')
+            .update({ nombre_documento: nuevoNombre.trim() })
+            .eq('id', docId);
+        
+        if (error) throw error;
+        
+        await loadInquilinos();
+        showInquilinoDetail(currentInquilinoId);
+        setTimeout(() => switchTab('inquilino', 'docs'), 100);
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Error: ' + e.message);
     } finally {
         hideLoading();
     }
