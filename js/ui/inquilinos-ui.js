@@ -317,7 +317,7 @@ function showInquilinoDetail(id) {
         document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
         document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
         
-        // CONTACTOS
+        // CONTACTOS - separados con email clickeable
         const contactosList = document.getElementById('detailContactosList');
         if (inq.contactos && inq.contactos.length > 0) {
             contactosList.innerHTML = inq.contactos.map(c => {
@@ -361,20 +361,11 @@ function showInquilinoDetail(id) {
             `;
         }
         
-        // HISTORIAL DE PAGOS
+        // HISTORIAL DE PAGOS CON ADEUDOS
         const historialDiv = document.getElementById('historialPagos');
-        if (inq.pagos && inq.pagos.length > 0) {
-            historialDiv.innerHTML = inq.pagos.map(p => `
-                <div class="payment-item">
-                    <div><strong>${formatDate(p.fecha)}</strong><br>${formatCurrency(p.monto)}</div>
-                    <div><span class="badge badge-success">Pagado</span><br><small style="color:var(--text-light)">${formatDate(p.fecha)}</small></div>
-                </div>
-            `).join('');
-        } else {
-            historialDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay pagos</p>';
-        }
+        historialDiv.innerHTML = renderHistorialConAdeudos(inq);
         
-        // DOCUMENTOS
+        // DOCUMENTOS - con editar (lápiz) y eliminar (X roja)
         const docsDiv = document.getElementById('documentosAdicionales');
         if (inq.documentos && inq.documentos.length > 0) {
             const docRows = inq.documentos.map(d => {
@@ -385,7 +376,7 @@ function showInquilinoDetail(id) {
                         <td onclick="fetchAndViewDocInquilino(${d.id})" style="cursor:pointer;">${formatDate(d.fecha)}</td>
                         <td onclick="fetchAndViewDocInquilino(${d.id})" style="cursor:pointer;">${d.usuario}</td>
                         <td style="white-space:nowrap;">
-                            <span onclick="event.stopPropagation(); editDocumentoInquilino(${d.id}, '${safeNombre}')" title="Modificar datos documento" style="cursor:pointer; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
+                            <span onclick="event.stopPropagation(); openEditDocInquilinoModal(${d.id}, '${safeNombre}')" title="Modificar datos documento" style="cursor:pointer; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
                             <span onclick="event.stopPropagation(); deleteDocInquilinoConConfirm(${d.id}, '${safeNombre}')" title="Eliminar documento" style="cursor:pointer; color:var(--danger); font-weight:700; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
                         </td>
                     </tr>
@@ -538,69 +529,86 @@ function deleteDocInquilinoConConfirm(docId, nombreDoc) {
     }
 }
 
-async function editDocumentoInquilino(docId, nombreActual) {
-    const nuevoNombre = prompt('Nombre del documento:', nombreActual);
-    if (nuevoNombre === null) return;
-    if (!nuevoNombre.trim()) { alert('El nombre no puede estar vacío'); return; }
+// ============================================
+// EDITAR DOCUMENTO - MODAL EN APP
+// ============================================
+
+let editingDocId = null;
+
+function openEditDocInquilinoModal(docId, nombreActual) {
+    editingDocId = docId;
+    document.getElementById('editDocNombreInput').value = nombreActual;
     
     const inq = inquilinos.find(i => i.id === currentInquilinoId);
+    const preguntaContrato = document.getElementById('editDocContratoQuestion');
+    const saveSection = document.getElementById('editDocSaveSection');
     
-    // Si no hay contrato original, preguntar si este doc es el contrato
     if (inq && !inq.has_contrato) {
-        const esContrato = confirm('¿Este documento es el Contrato Original?');
-        if (esContrato) {
-            showLoading();
-            try {
-                // Obtener el PDF del documento
-                const { data, error } = await supabaseClient
-                    .from('inquilinos_documentos')
-                    .select('archivo_pdf')
-                    .eq('id', docId)
-                    .single();
-                
-                if (error) throw error;
-                
-                // Mover el PDF al campo contrato_file del inquilino
-                const { error: updateError } = await supabaseClient
-                    .from('inquilinos')
-                    .update({ contrato_file: data.archivo_pdf })
-                    .eq('id', currentInquilinoId);
-                
-                if (updateError) throw updateError;
-                
-                // Eliminar la entrada de documentos
-                const { error: deleteError } = await supabaseClient
-                    .from('inquilinos_documentos')
-                    .delete()
-                    .eq('id', docId);
-                
-                if (deleteError) throw deleteError;
-                
-                await loadInquilinos();
-                showInquilinoDetail(currentInquilinoId);
-            } catch (e) {
-                console.error('Error:', e);
-                alert('Error: ' + e.message);
-            } finally {
-                hideLoading();
-            }
-            return;
-        }
+        preguntaContrato.classList.remove('hidden');
+        saveSection.classList.add('hidden');
+    } else {
+        preguntaContrato.classList.add('hidden');
+        saveSection.classList.remove('hidden');
     }
     
-    // Solo renombrar
-    if (nuevoNombre.trim() === nombreActual) return;
+    document.getElementById('editDocInquilinoModal').classList.add('active');
+}
+
+async function processEditDocAsContrato() {
+    if (!editingDocId) return;
+    showLoading();
+    try {
+        const { data, error } = await supabaseClient
+            .from('inquilinos_documentos')
+            .select('archivo_pdf')
+            .eq('id', editingDocId)
+            .single();
+        
+        if (error) throw error;
+        
+        const { error: updateError } = await supabaseClient
+            .from('inquilinos')
+            .update({ contrato_file: data.archivo_pdf })
+            .eq('id', currentInquilinoId);
+        
+        if (updateError) throw updateError;
+        
+        const { error: deleteError } = await supabaseClient
+            .from('inquilinos_documentos')
+            .delete()
+            .eq('id', editingDocId);
+        
+        if (deleteError) throw deleteError;
+        
+        editingDocId = null;
+        await loadInquilinos();
+        closeModal('editDocInquilinoModal');
+        showInquilinoDetail(currentInquilinoId);
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Error: ' + e.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function saveEditDocNombre() {
+    if (!editingDocId) return;
+    const nuevoNombre = document.getElementById('editDocNombreInput').value.trim();
+    if (!nuevoNombre) { alert('El nombre no puede estar vacío'); return; }
     
     showLoading();
     try {
         const { error } = await supabaseClient
             .from('inquilinos_documentos')
-            .update({ nombre_documento: nuevoNombre.trim() })
-            .eq('id', docId);
+            .update({ nombre_documento: nuevoNombre })
+            .eq('id', editingDocId);
         
         if (error) throw error;
         
+        editingDocId = null;
         await loadInquilinos();
+        closeModal('editDocInquilinoModal');
         showInquilinoDetail(currentInquilinoId);
         setTimeout(() => switchTab('inquilino', 'docs'), 100);
     } catch (e) {
@@ -609,6 +617,113 @@ async function editDocumentoInquilino(docId, nombreActual) {
     } finally {
         hideLoading();
     }
+}
+
+// ============================================
+// HISTORIAL DE PAGOS CON ADEUDOS MENSUALES
+// ============================================
+
+function renderHistorialConAdeudos(inq) {
+    if (!inq.fecha_inicio) {
+        return '<p style="color:var(--text-light);text-align:center;padding:2rem">Sin fecha de inicio</p>';
+    }
+    
+    const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const renta = parseFloat(inq.renta) || 0;
+    const pagos = inq.pagos || [];
+    
+    // Generar meses desde fecha_inicio hasta hoy
+    const inicio = new Date(inq.fecha_inicio + 'T00:00:00');
+    const hoy = new Date();
+    const mesInicio = new Date(inicio.getFullYear(), inicio.getMonth(), 1);
+    const mesActual = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    
+    const meses = [];
+    let cursor = new Date(mesInicio);
+    while (cursor <= mesActual) {
+        meses.push({ year: cursor.getFullYear(), month: cursor.getMonth() });
+        cursor.setMonth(cursor.getMonth() + 1);
+    }
+    
+    // Para cada mes, calcular pagos asociados
+    const rows = meses.map(m => {
+        const pagosMes = pagos.filter(p => {
+            const fp = new Date(p.fecha + 'T00:00:00');
+            return fp.getFullYear() === m.year && fp.getMonth() === m.month;
+        });
+        
+        const totalPagado = pagosMes.reduce((sum, p) => sum + p.monto, 0);
+        const balance = renta - totalPagado;
+        const ultimoPago = pagosMes.length > 0 ? pagosMes[0] : null;
+        const mesLabel = monthNames[m.month] + ' ' + m.year;
+        
+        return { ...m, mesLabel, totalPagado, balance, ultimoPago, pagosMes };
+    });
+    
+    // Ordenar del más reciente al más antiguo
+    rows.reverse();
+    
+    if (rows.length === 0) {
+        return '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay historial</p>';
+    }
+    
+    let html = '<table style="width:100%; font-size:0.9rem;"><thead><tr>';
+    html += '<th style="text-align:left;">Mes</th>';
+    html += '<th style="text-align:left;">Estado</th>';
+    html += '<th style="text-align:right;">Monto</th>';
+    html += '<th style="width:40px;"></th>';
+    html += '</tr></thead><tbody>';
+    
+    rows.forEach(r => {
+        if (r.balance <= 0) {
+            // PAGADO (pagó completo o más)
+            const fechaPago = r.ultimoPago ? formatDate(r.ultimoPago.fecha) : '';
+            html += `<tr style="background:#f0fdf4;">`;
+            html += `<td style="padding:0.5rem 0.4rem; font-weight:500;">${r.mesLabel}</td>`;
+            html += `<td style="padding:0.5rem 0.4rem;"><span class="badge badge-success" style="font-size:0.75rem;">Pagado</span> <small style="color:var(--text-light);">${fechaPago}</small></td>`;
+            html += `<td style="padding:0.5rem 0.4rem; text-align:right; color:var(--success); font-weight:600;">${formatCurrency(r.totalPagado)}</td>`;
+            html += `<td></td>`;
+            html += `</tr>`;
+        } else if (r.totalPagado > 0) {
+            // PAGO PARCIAL
+            const fechaPago = r.ultimoPago ? formatDate(r.ultimoPago.fecha) : '';
+            html += `<tr style="background:#fffbeb;">`;
+            html += `<td style="padding:0.5rem 0.4rem; font-weight:500;">${r.mesLabel}</td>`;
+            html += `<td style="padding:0.5rem 0.4rem;"><span class="badge badge-warning" style="font-size:0.75rem;">Adeuda</span> <small style="color:var(--text-light);">Parcial ${fechaPago}</small></td>`;
+            html += `<td style="padding:0.5rem 0.4rem; text-align:right; color:var(--danger); font-weight:600;">-${formatCurrency(r.balance)}</td>`;
+            html += `<td style="padding:0.5rem 0.4rem; text-align:center;">`;
+            html += `<span onclick="showRegistrarPagoDesdeAdeudo(${r.year}, ${r.month}, ${r.balance})" title="Registrar pago" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💲</span>`;
+            html += `</td></tr>`;
+        } else {
+            // NO HA PAGADO NADA
+            html += `<tr style="background:#fef2f2;">`;
+            html += `<td style="padding:0.5rem 0.4rem; font-weight:500;">${r.mesLabel}</td>`;
+            html += `<td style="padding:0.5rem 0.4rem;"><span class="badge badge-danger" style="font-size:0.75rem;">Adeuda</span></td>`;
+            html += `<td style="padding:0.5rem 0.4rem; text-align:right; color:var(--danger); font-weight:600;">-${formatCurrency(r.balance)}</td>`;
+            html += `<td style="padding:0.5rem 0.4rem; text-align:center;">`;
+            html += `<span onclick="showRegistrarPagoDesdeAdeudo(${r.year}, ${r.month}, ${r.balance})" title="Registrar pago" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💲</span>`;
+            html += `</td></tr>`;
+        }
+    });
+    
+    html += '</tbody></table>';
+    return html;
+}
+
+function showRegistrarPagoDesdeAdeudo(year, month, balance) {
+    const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    
+    // Guardar contexto del mes que se está pagando
+    window.pagoMesContext = { year, month, balance };
+    
+    // Resetear el modal de pago
+    document.getElementById('pagoFecha').value = '';
+    document.getElementById('pagoCompleto').value = 'si';
+    document.getElementById('pagoMontoGroup').classList.add('hidden');
+    document.getElementById('pagoPDF').value = '';
+    
+    // Abrir modal de registrar pago
+    document.getElementById('registrarPagoModal').classList.add('active');
 }
 
 // ============================================
