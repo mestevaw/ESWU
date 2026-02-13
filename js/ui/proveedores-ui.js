@@ -1,7 +1,7 @@
 /* ========================================
    PROVEEDORES UI - TODAS LAS FUNCIONES
    Diseño restaurado sesiones 3-6 + optimización sesiones 7-8
-   Última actualización: 2026-02-12 19:00 CST
+   Última actualización: 2026-02-12 20:00 CST
    ======================================== */
 
 // ============================================
@@ -128,6 +128,8 @@ function renderProveedoresFacturasPagadas() {
     const filterType = document.getElementById('provFactPagFilter').value;
     const year = parseInt(document.getElementById('provFactPagYear').value);
     const monthSelect = document.getElementById('provFactPagMonth');
+    const searchInput = document.getElementById('provFactPagSearch');
+    const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
     
     if (filterType === 'mensual') {
         monthSelect.classList.remove('hidden');
@@ -140,6 +142,9 @@ function renderProveedoresFacturasPagadas() {
     let totalPagadas = 0;
     
     proveedores.forEach(prov => {
+        // Filtrar por nombre de proveedor si hay búsqueda
+        if (searchQuery && !prov.nombre.toLowerCase().includes(searchQuery)) return;
+        
         if (prov.facturas) {
             prov.facturas.forEach(f => {
                 if (f.fecha_pago) {
@@ -713,4 +718,4 @@ function exportFacturasPorPagarToExcel() {
     XLSX.writeFile(wb, `Facturas_Por_Pagar_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
-console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 19:00 CST)');
+console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 20:00 CST)');
