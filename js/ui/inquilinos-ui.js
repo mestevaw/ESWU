@@ -340,23 +340,25 @@ function showInquilinoDetail(id) {
         document.getElementById('detailRFC').textContent = inq.rfc || '-';
         document.getElementById('detailClabe').textContent = inq.clabe || '-';
         
-        // CONTRATO ORIGINAL (recuadro con icono 📄)
+        // CONTRATO ORIGINAL (compacto, en línea con Renta/M²/Despacho)
         const contratoSection = document.getElementById('contratoOriginalSection');
         if (inq.has_contrato) {
             contratoSection.innerHTML = `
-                <div onclick="fetchAndViewContrato(${inq.id})" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:0.6rem 0.75rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
-                    <span style="font-size:1.2rem;">📄</span>
+                <div onclick="fetchAndViewContrato(${inq.id})" style="background:var(--bg); border-radius:6px; padding:0.4rem 0.6rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; height:100%; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
+                    <span style="font-size:1.1rem;">📄</span>
                     <div>
-                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Contrato Original</div>
+                        <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Contrato</div>
                         <div style="font-size:0.85rem; color:var(--primary); font-weight:600;">Ver PDF</div>
                     </div>
                 </div>
             `;
         } else {
             contratoSection.innerHTML = `
-                <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:0.6rem 0.75rem; color:var(--text-light);">
-                    <div style="font-size:0.7rem; text-transform:uppercase; font-weight:600;">Contrato Original</div>
-                    <div style="font-size:0.85rem;">No hay contrato cargado</div>
+                <div style="background:var(--bg); border-radius:6px; padding:0.4rem 0.6rem; color:var(--text-light); height:100%; display:flex; align-items:center;">
+                    <div>
+                        <div style="font-size:0.65rem; text-transform:uppercase; font-weight:600;">Contrato</div>
+                        <div style="font-size:0.8rem;">Sin contrato</div>
+                    </div>
                 </div>
             `;
         }
@@ -365,10 +367,25 @@ function showInquilinoDetail(id) {
         const historialDiv = document.getElementById('historialPagos');
         historialDiv.innerHTML = renderHistorialConAdeudos(inq);
         
-        // DOCUMENTOS - con editar (lápiz) y eliminar (X roja)
+        // DOCUMENTOS - incluye Contrato Original + documentos adicionales
         const docsDiv = document.getElementById('documentosAdicionales');
+        let allDocRows = '';
+        
+        // Contrato Original como primera fila
+        if (inq.has_contrato) {
+            allDocRows += `
+                <tr style="background:#f0fdf4;">
+                    <td onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer; font-weight:600;">📄 Contrato Original</td>
+                    <td onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer;">-</td>
+                    <td onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer;">-</td>
+                    <td></td>
+                </tr>
+            `;
+        }
+        
+        // Documentos adicionales
         if (inq.documentos && inq.documentos.length > 0) {
-            const docRows = inq.documentos.map(d => {
+            allDocRows += inq.documentos.map(d => {
                 const safeNombre = (d.nombre || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 return `
                     <tr class="doc-item">
@@ -382,7 +399,10 @@ function showInquilinoDetail(id) {
                     </tr>
                 `;
             }).join('');
-            docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:70px;"></th></tr></thead><tbody>' + docRows + '</tbody></table>';
+        }
+        
+        if (allDocRows) {
+            docsDiv.innerHTML = '<table style="width:100%"><thead><tr><th>Nombre</th><th>Fecha</th><th>Usuario</th><th style="width:70px;"></th></tr></thead><tbody>' + allDocRows + '</tbody></table>';
         } else {
             docsDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:2rem">No hay documentos</p>';
         }
