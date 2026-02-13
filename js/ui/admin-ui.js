@@ -1,6 +1,6 @@
 /* ========================================
    ADMIN-UI.JS - Admin Interface Functions
-   Última actualización: 2026-02-12 13:30 CST
+   Última actualización: 2026-02-12 19:30 CST
    ======================================== */
 
 // ============================================
@@ -517,7 +517,7 @@ function renderBitacoraTable() {
             row.style.cursor = 'pointer';
         } else {
             row.style.cursor = 'default';
-            row.style.opacity = '0.7';
+            row.style.color = '#999';
         }
         
         const notasPreview = sem.notas ? (sem.notas.length > 100 ? sem.notas.substring(0, 100) + '...' : sem.notas) : 'Sin notas';
@@ -609,4 +609,4 @@ function agregarNuevaSemana() {
     agregarSemanaBitacora();
 }
 
-console.log('✅ ADMIN-UI.JS cargado');
+console.log('✅ ADMIN-UI.JS cargado (2026-02-12 19:30 CST)');
