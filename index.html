@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Última actualización: 2026-02-12 18:30 CST -->
+<!-- Última actualización: 2026-02-12 19:00 CST -->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -235,7 +235,7 @@
                        <div class="card-header">
     <h2 class="card-title">Listado de Proveedores</h2>
     <div style="display:flex; align-items:center; gap:0.5rem;">
-        <span onclick="exportProveedoresToExcel()" title="Exportar a Excel" style="font-size:1.3rem; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">📊</span>
+        <span onclick="exportProveedoresToExcel()" title="Exportar lista a Excel" style="font-size:1.3rem; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">📊</span>
         <span class="btn-add-inline" onclick="showAddProveedorModal()" title="Agregar proveedor" style="font-size:1.5rem; cursor:pointer;">+</span>
     </div>
 </div>
@@ -253,6 +253,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title">Facturas Pagadas</h2>
+                            <span onclick="exportFacturasPagadasToExcel()" title="Exportar lista a Excel" style="font-size:1.3rem; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">📊</span>
                         </div>
                         <div style="padding: 1.5rem;">
                             <div class="filter-section">
@@ -285,6 +286,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title">Facturas Por Pagar</h2>
+                            <span onclick="exportFacturasPorPagarToExcel()" title="Exportar lista a Excel" style="font-size:1.3rem; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">📊</span>
                         </div>
                         <div style="padding: 1.5rem;">
                             <div class="filter-section">
