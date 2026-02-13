@@ -239,3 +239,122 @@ th.sorted-desc::after {
     z-index: 999998;
     pointer-events: none; /* ← AGREGADO */
 }
+
+/* ========================================
+   MOBILE: TABLAS COMPACTAS CON WRAP
+   Solo aplica en pantallas ≤768px
+   ======================================== */
+
+@media (max-width: 768px) {
+    
+    /* ── Todas las tablas: wrap y texto más chico ── */
+    table {
+        font-size: 0.78rem;
+    }
+    
+    th, td {
+        padding: 0.4rem 0.3rem;
+        white-space: normal !important;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        vertical-align: top;
+    }
+    
+    th {
+        font-size: 0.75rem;
+    }
+    
+    /* ── Proveedores: anchos fijos con wrap ── */
+    #proveedoresTable {
+        table-layout: fixed;
+    }
+    
+    #proveedoresTable thead th:nth-child(1),
+    #proveedoresTable tbody td:nth-child(1) {
+        width: 28%;
+        max-width: none;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal !important;
+    }
+    
+    #proveedoresTable thead th:nth-child(2),
+    #proveedoresTable tbody td:nth-child(2) {
+        width: 18%;
+        max-width: none;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal !important;
+    }
+    
+    #proveedoresTable thead th:nth-child(3),
+    #proveedoresTable tbody td:nth-child(3) {
+        width: 18%;
+        max-width: none;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal !important;
+    }
+    
+    #proveedoresTable thead th:nth-child(4),
+    #proveedoresTable tbody td:nth-child(4) {
+        width: 18%;
+        max-width: none;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal !important;
+    }
+    
+    #proveedoresTable thead th:nth-child(5),
+    #proveedoresTable tbody td:nth-child(5) {
+        width: 18%;
+        max-width: none;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal !important;
+    }
+    
+    /* ── Facturas Pagadas (standalone) ── */
+    #proveedoresFacturasPagadasTable {
+        table-layout: fixed;
+    }
+    
+    #proveedoresFacturasPagadasTable th,
+    #proveedoresFacturasPagadasTable td {
+        white-space: normal !important;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    /* ── Facturas Por Pagar (standalone) ── */
+    #proveedoresFacturasPorPagarTable {
+        table-layout: fixed;
+    }
+    
+    #proveedoresFacturasPorPagarTable th,
+    #proveedoresFacturasPorPagarTable td {
+        white-space: normal !important;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    /* ── Tablas dentro de modales (fichas de detalle) ── */
+    .modal table {
+        table-layout: fixed;
+        font-size: 0.78rem;
+    }
+    
+    .modal table th,
+    .modal table td {
+        padding: 0.35rem 0.3rem;
+        white-space: normal !important;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        vertical-align: top;
+    }
+    
+    /* Evitar que los iconos de acción se partan */
+    .modal table td:last-child {
+        white-space: nowrap !important;
+    }
+}
