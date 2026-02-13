@@ -157,17 +157,17 @@ async function saveInquilino(event) {
             renta: parseFloat(document.getElementById('inquilinoRenta').value),
             fecha_inicio: document.getElementById('inquilinoFechaInicio').value,
             fecha_vencimiento: document.getElementById('inquilinoFechaVenc').value,
-            contrato_file: contratoURL,
             notas: document.getElementById('inquilinoNotas').value || null
         };
+        
+        // Solo incluir contrato_file si el usuario subió un archivo nuevo
+        if (contratoURL) {
+            inquilinoData.contrato_file = contratoURL;
+        }
         
         let inquilinoId;
         
         if (isEditMode && currentInquilinoId) {
-            if (!contratoURL && inquilinos.find(i => i.id === currentInquilinoId).contrato_file) {
-                delete inquilinoData.contrato_file;
-            }
-            
             const { error } = await supabaseClient
                 .from('inquilinos')
                 .update(inquilinoData)
@@ -208,12 +208,8 @@ async function saveInquilino(event) {
         
         await loadInquilinos();
         closeModal('addInquilinoModal');
-        
-        if (currentSubContext === 'inquilinos-list') {
-            renderInquilinosTable();
-        }
-        
-        alert('✅ Inquilino guardado correctamente');
+        isEditMode = false;
+        showInquilinoDetail(inquilinoId);
         
     } catch (error) {
         console.error('Error:', error);
@@ -257,10 +253,12 @@ function deleteInquilinoContacto(index) {
 // ============================================
 
 function showRegistrarPagoModal() {
-    closeModal('inquilinoDetailModal');
-    document.getElementById('pagoForm').reset();
+    document.getElementById('pagoFecha').value = '';
+    document.getElementById('pagoCompleto').value = 'si';
     document.getElementById('pagoMontoGroup').classList.add('hidden');
-    document.getElementById('pagoPDFFileName').textContent = '';
+    document.getElementById('pagoPDF').value = '';
+    const fn = document.getElementById('pagoPDFFileName');
+    if (fn) fn.textContent = '';
     document.getElementById('registrarPagoModal').classList.add('active');
 }
 
@@ -309,9 +307,7 @@ async function savePagoRenta(event) {
         
         await loadInquilinos();
         closeModal('registrarPagoModal');
-        showInquilinoDetailModal(currentInquilinoId);
-        
-        alert('✅ Pago registrado correctamente');
+        showInquilinoDetail(currentInquilinoId);
         
     } catch (error) {
         console.error('Error:', error);
@@ -326,9 +322,10 @@ async function savePagoRenta(event) {
 // ============================================
 
 function showAgregarDocumentoModal() {
-    closeModal('inquilinoDetailModal');
-    document.getElementById('documentoForm').reset();
-    document.getElementById('nuevoDocPDFFileName').textContent = '';
+    document.getElementById('nuevoDocNombre').value = '';
+    document.getElementById('nuevoDocPDF').value = '';
+    const fn = document.getElementById('nuevoDocPDFFileName');
+    if (fn) fn.textContent = '';
     document.getElementById('agregarDocumentoModal').classList.add('active');
 }
 
@@ -352,37 +349,29 @@ async function saveDocumentoAdicional(event) {
         const pdfBase64 = await fileToBase64(file);
         
         // PREGUNTAR SIEMPRE si es contrato original
-        const mensaje = inq.contrato_file 
+        const tieneContrato = inq && inq.has_contrato;
+        const mensaje = tieneContrato 
             ? '¿Este documento es el CONTRATO ORIGINAL?\n\nNOTA: Ya existe un contrato. Si dices SÍ, se REEMPLAZARÁ el contrato anterior.'
             : '¿Este documento es el CONTRATO ORIGINAL?\n\nSi es así, se guardará como contrato y no necesitas poner nombre.';
         
         const esContratoOriginal = confirm(mensaje);
         
         if (esContratoOriginal) {
-            // Guardar/reemplazar como contrato original
             const { error: contratoError } = await supabaseClient
                 .from('inquilinos')
-                .update({
-                    contrato_file: pdfBase64
-                })
+                .update({ contrato_file: pdfBase64 })
                 .eq('id', currentInquilinoId);
             
             if (contratoError) throw contratoError;
             
             await loadInquilinos();
             closeModal('agregarDocumentoModal');
-            showInquilinoDetailModal(currentInquilinoId);
-            
-            const mensajeExito = inq.contrato_file 
-                ? '✅ Contrato Original REEMPLAZADO correctamente'
-                : '✅ Contrato Original guardado correctamente';
-            
-            alert(mensajeExito);
+            showInquilinoDetail(currentInquilinoId);
             hideLoading();
             return;
         }
         
-        // Si NO es contrato original, pedir nombre y guardar como documento adicional
+        // Si NO es contrato original, pedir nombre y guardar como documento
         const nombre = document.getElementById('nuevoDocNombre').value;
         
         if (!nombre) {
@@ -403,9 +392,8 @@ async function saveDocumentoAdicional(event) {
         
         await loadInquilinos();
         closeModal('agregarDocumentoModal');
-       showInquilinoDetailModal(currentInquilinoId);
-        
-        alert('✅ Documento agregado correctamente');
+        showInquilinoDetail(currentInquilinoId);
+        setTimeout(() => switchTab('inquilino', 'docs'), 100);
         
     } catch (error) {
         console.error('Error:', error);
@@ -468,8 +456,6 @@ async function deleteInquilino() {
         if (currentSubContext === 'inquilinos-list') {
             renderInquilinosTable();
         }
-        
-        alert('✅ Inquilino eliminado correctamente');
         
     } catch (error) {
         console.error('Error:', error);
