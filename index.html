@@ -232,16 +232,24 @@
                 <!-- Listado de Proveedores -->
                 <div id="proveedoresListView" class="hidden">
                     <div class="card">
-                       <div class="card-header">
-    <h2 class="card-title">Listado de Proveedores</h2>
-    <div style="display:flex; align-items:center; gap:0.5rem;">
-        <span onclick="exportProveedoresToExcel()" title="Exportar lista a Excel" style="font-size:1.3rem; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">📊</span>
-        <span class="btn-add-inline" onclick="showAddProveedorModal()" title="Agregar proveedor" style="font-size:1.5rem; cursor:pointer;">+</span>
+                       <div class="card-header" style="flex-wrap:wrap; gap:0.4rem;">
+    <h2 class="card-title" style="flex:1; min-width:0; font-size:1rem;">Proveedores</h2>
+    <div style="display:flex; align-items:center; gap:0.3rem;">
+        <span onclick="toggleSearch()" title="Buscar" style="font-size:1.2rem; cursor:pointer;">🔍</span>
+        <span onclick="handleRegresa()" title="Cerrar" style="font-size:1.1rem; cursor:pointer; color:var(--danger); font-weight:700;">✖</span>
+        <span onclick="exportProveedoresToExcel()" title="Exportar a Excel" style="font-size:1.2rem; cursor:pointer;">📊</span>
+        <span class="btn-add-inline" onclick="showAddProveedorModal()" title="Agregar proveedor" style="font-size:1.4rem; cursor:pointer;">+</span>
     </div>
 </div>
                         <div class="table-container">
-                            <table id="proveedoresTable" class="sticky-header-table">
-                                <thead><tr><th>Proveedor</th><th>Servicio</th><th>Contacto</th><th>Teléfono</th><th>Email</th></tr></thead>
+                            <table id="proveedoresTable" class="sticky-header-table" style="font-size:0.8rem; table-layout:fixed; width:100%;">
+                                <thead><tr>
+                                    <th style="width:28%; word-wrap:break-word; overflow-wrap:break-word;">Proveedor</th>
+                                    <th style="width:18%; word-wrap:break-word; overflow-wrap:break-word;">Servicio</th>
+                                    <th style="width:18%; word-wrap:break-word; overflow-wrap:break-word;">Contacto</th>
+                                    <th style="width:18%; word-wrap:break-word; overflow-wrap:break-word;">Teléfono</th>
+                                    <th style="width:18%; word-wrap:break-word; overflow-wrap:break-word;">Email</th>
+                                </tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
