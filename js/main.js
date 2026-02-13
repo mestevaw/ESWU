@@ -113,6 +113,15 @@ async function initializeApp() {
         populateInquilinosYearSelects();
         populateProveedoresYearSelects();
         
+        // Marcar todas las cargas como completadas
+        inquilinosFullLoaded = true;
+        proveedoresFullLoaded = true;
+        activosLoaded = true;
+        usuariosLoaded = true;
+        bancosLoaded = true;
+        estacionamientoLoaded = true;
+        bitacoraLoaded = true;
+        
         console.log('✅ App inicializada correctamente');
         
     } catch (error) {
@@ -220,45 +229,20 @@ async function saveInquilino(event) {
 }
 
 // ============================================
-// INQUILINOS - CONTACTOS
+// CONTACTOS DE INQUILINO
 // ============================================
-
-function showAddContactoInquilinoModal() {
-    document.getElementById('contactoInquilinoForm').reset();
-    document.getElementById('addContactoInquilinoModal').classList.add('active');
-}
-
-function saveContactoInquilino(event) {
-    event.preventDefault();
-    
-    const contacto = {
-        nombre: document.getElementById('contactoInquilinoNombre').value,
-        telefono: document.getElementById('contactoInquilinoTelefono').value,
-        email: document.getElementById('contactoInquilinoEmail').value
-    };
-    
-    tempInquilinoContactos.push(contacto);
-    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
-    
-    closeModal('addContactoInquilinoModal');
-}
-
-function deleteInquilinoContacto(index) {
-    tempInquilinoContactos.splice(index, 1);
-    renderContactosList(tempInquilinoContactos, 'inquilinoContactosList', 'deleteInquilinoContacto');
-}
+// Funciones movidas a inquilinos-ui.js (showAddContactoInquilinoModal, saveContactoInquilino, deleteInquilinoContacto)
 
 // ============================================
 // INQUILINOS - REGISTRAR PAGO
 // ============================================
 
 function showRegistrarPagoModal() {
+    delete window.pagoMesContext;
     document.getElementById('pagoFecha').value = '';
     document.getElementById('pagoCompleto').value = 'si';
     document.getElementById('pagoMontoGroup').classList.add('hidden');
     document.getElementById('pagoPDF').value = '';
-    const fn = document.getElementById('pagoPDFFileName');
-    if (fn) fn.textContent = '';
     document.getElementById('registrarPagoModal').classList.add('active');
 }
 
@@ -282,7 +266,17 @@ async function savePagoRenta(event) {
     try {
         const inquilino = inquilinos.find(i => i.id === currentInquilinoId);
         const completo = document.getElementById('pagoCompleto').value === 'si';
-        const monto = completo ? inquilino.renta : parseFloat(document.getElementById('pagoMonto').value);
+        
+        let monto;
+        if (completo) {
+            if (window.pagoMesContext) {
+                monto = window.pagoMesContext.balance;
+            } else {
+                monto = inquilino.renta;
+            }
+        } else {
+            monto = parseFloat(document.getElementById('pagoMonto').value);
+        }
         
         const pagoFile = document.getElementById('pagoPDF').files[0];
         let pagoURL = null;
@@ -304,6 +298,8 @@ async function savePagoRenta(event) {
             .insert([pagoData]);
         
         if (error) throw error;
+        
+        delete window.pagoMesContext;
         
         await loadInquilinos();
         closeModal('registrarPagoModal');
@@ -329,11 +325,6 @@ function showAgregarDocumentoModal() {
     document.getElementById('agregarDocumentoModal').classList.add('active');
 }
 
-/* ========================================
-   INQUILINO - DOCUMENTO - PREGUNTA SIEMPRE
-   Reemplaza saveDocumentoAdicional en main.js
-   ======================================== */
-
 async function saveDocumentoAdicional(event) {
     event.preventDefault();
     showLoading();
@@ -348,7 +339,7 @@ async function saveDocumentoAdicional(event) {
         
         const pdfBase64 = await fileToBase64(file);
         
-        // PREGUNTAR SIEMPRE si es contrato original
+        // PREGUNTAR si es contrato original
         const tieneContrato = inq && inq.has_contrato;
         const mensaje = tieneContrato 
             ? '¿Este documento es el CONTRATO ORIGINAL?\n\nNOTA: Ya existe un contrato. Si dices SÍ, se REEMPLAZARÁ el contrato anterior.'
@@ -371,7 +362,6 @@ async function saveDocumentoAdicional(event) {
             return;
         }
         
-        // Si NO es contrato original, pedir nombre y guardar como documento
         const nombre = document.getElementById('nuevoDocNombre').value;
         
         if (!nombre) {
