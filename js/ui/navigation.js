@@ -215,20 +215,14 @@ function switchTab(type, tabName) {
         document.querySelectorAll('#inquilinoDetailModal .tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('#inquilinoDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
         
-        if (tabName === 'renta') {
+        if (tabName === 'pagos') {
             document.querySelector('#inquilinoDetailModal .tab:nth-child(1)').classList.add('active');
-            document.getElementById('inquilinoRentaTab').classList.add('active');
-        } else if (tabName === 'pagos') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(2)').classList.add('active');
             document.getElementById('inquilinoPagosTab').classList.add('active');
-        } else if (tabName === 'contrato') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(3)').classList.add('active');
-            document.getElementById('inquilinoContratoTab').classList.add('active');
         } else if (tabName === 'docs') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(4)').classList.add('active');
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(2)').classList.add('active');
             document.getElementById('inquilinoDocsTab').classList.add('active');
         } else if (tabName === 'notas') {
-            document.querySelector('#inquilinoDetailModal .tab:nth-child(5)').classList.add('active');
+            document.querySelector('#inquilinoDetailModal .tab:nth-child(3)').classList.add('active');
             document.getElementById('inquilinoNotasTab').classList.add('active');
         }
     } else if (type === 'proveedor') {
@@ -302,5 +296,5 @@ function logout() {
     }
 }
 
-console.log('✅ switchTab function loaded');
+console.log('✅ NAVIGATION.JS cargado (2026-02-12 20:30 CST)');
 console.log('✅ NAVIGATION.JS cargado');
