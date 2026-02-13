@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Última actualización: 2026-02-12 19:00 CST -->
+<!-- Última actualización: 2026-02-12 19:30 CST -->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -272,8 +272,8 @@
                                 </select>
                             </div>
                             <div class="table-container">
-                                <table id="proveedoresFacturasPagadasTable">
-                                    <thead><tr><th>Proveedor</th><th>No. Factura</th><th>Pagada en</th><th>Monto</th></tr></thead>
+                                <table id="proveedoresFacturasPagadasTable" class="sticky-header-table">
+                                    <thead><tr><th>Proveedor</th><th>No. Factura</th><th>Pagada en</th><th style="text-align:right">Monto</th></tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -384,12 +384,7 @@
                     <div class="card">
                         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                             <h2 class="card-title" style="margin: 0;">Bitácora Semanal</h2>
-                            <div class="dropdown">
-                                <button class="dropdown-toggle" onclick="toggleDropdown('bitacoraMenuDropdown'); updateBitacoraMenu();" style="font-size: 1rem; padding: 0.5rem 1rem;">☰</button>
-                                <div id="bitacoraMenuDropdown" class="dropdown-content" style="right: 0; left: auto;">
-                                    <a href="#" id="bitacoraMenuAgregar" onclick="event.preventDefault(); agregarNuevaSemana(); toggleDropdown('bitacoraMenuDropdown');">Agregar Semana</a>
-                                </div>
-                            </div>
+                            <span class="btn-add-inline" onclick="agregarNuevaSemana()" title="Agregar semana" style="font-size:1.5rem; cursor:pointer;">+</span>
                         </div>
                         <div class="table-container">
                             <table id="bitacoraTable" class="sticky-header-table">
@@ -993,23 +988,22 @@
 
     <!-- Modal Edit Bitácora -->
     <div id="editBitacoraModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content" style="max-width:600px;">
+            <div class="modal-header modal-header-sticky">
                 <h2 class="modal-title">Editar Bitácora</h2>
-                <button class="close-modal" onclick="closeModal('editBitacoraModal')">×</button>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button onclick="saveBitacora()" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
+                    <button class="close-modal" onclick="closeModal('editBitacoraModal')">×</button>
+                </div>
             </div>
-            <div style="padding: 1.5rem;">
-                <div class="form-group">
-                    <label>Fecha de la Semana</label>
-                    <input type="date" id="editBitacoraFecha">
+            <div style="padding: 1rem 1.25rem;">
+                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                    <label style="min-width:110px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Semana del</label>
+                    <input type="date" id="editBitacoraFecha" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
                 </div>
-                <div class="form-group">
-                    <label>Notas</label>
-                    <textarea id="editBitacoraNotas" style="min-height: 200px"></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('editBitacoraModal')">Cancelar</button>
-                    <button type="button" class="btn btn-success" onclick="saveBitacora()">Guardar</button>
+                <div>
+                    <label style="font-weight:500; font-size:0.9rem; display:block; margin-bottom:0.35rem;">Notas</label>
+                    <textarea id="editBitacoraNotas" style="width:100%; min-height:200px; padding:0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem; resize:vertical;"></textarea>
                 </div>
             </div>
         </div>
