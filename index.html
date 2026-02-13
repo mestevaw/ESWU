@@ -438,13 +438,13 @@
                 </div>
                 <!-- Fila 2: Renta Inicio, Vence en, Contrato de Renta -->
                 <div id="filaFechasContrato" style="display:flex; gap:0.4rem; margin-bottom:0.4rem; flex-wrap:wrap;">
-                    <div style="flex:1; min-width:100px; background:var(--bg); border-radius:6px; padding:0.4rem 0.6rem;">
-                        <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Renta Inicio</div>
-                        <div style="font-size:0.9rem; font-weight:600;" id="detailFechaInicio"></div>
+                    <div style="flex:0.8; min-width:85px; background:var(--bg); border-radius:6px; padding:0.4rem 0.5rem;">
+                        <div style="font-size:0.6rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Renta Inicio</div>
+                        <div style="font-size:0.85rem; font-weight:600;" id="detailFechaInicio"></div>
                     </div>
-                    <div style="flex:1; min-width:100px; background:var(--bg); border-radius:6px; padding:0.4rem 0.6rem;">
-                        <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Vence en</div>
-                        <div style="font-size:0.9rem; font-weight:600;" id="detailFechaVenc"></div>
+                    <div style="flex:0.8; min-width:85px; background:var(--bg); border-radius:6px; padding:0.4rem 0.5rem;">
+                        <div style="font-size:0.6rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Vence en</div>
+                        <div style="font-size:0.85rem; font-weight:600;" id="detailFechaVenc"></div>
                     </div>
                     <div id="contratoOriginalSection" style="flex:1; min-width:110px;"></div>
                 </div>
@@ -1067,11 +1067,11 @@
         </div>
     </div>
 
-    <!-- Modal Cargar Contrato de Renta -->
+    <!-- Modal Cargar Contrato Renta -->
     <div id="cargarContratoModal" class="modal">
         <div class="modal-content" style="max-width:400px;">
             <div class="modal-header">
-                <h2 class="modal-title">Cargar Contrato de Renta</h2>
+                <h2 class="modal-title">Cargar Contrato Renta</h2>
                 <div style="display:flex; align-items:center; gap:0.25rem;">
                     <button onclick="saveContratoRenta()" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
                     <button class="close-modal" onclick="closeModal('cargarContratoModal')">×</button>
