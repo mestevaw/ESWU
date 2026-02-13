@@ -412,7 +412,7 @@
 
     <!-- Modal Inquilino Detail -->
     <div id="inquilinoDetailModal" class="modal">
-        <div class="modal-content modal-wide">
+        <div class="modal-content" style="max-width:1050px;">
             <div class="modal-header modal-header-sticky">
                 <h2 class="modal-title" id="inquilinoDetailNombre"></h2>
                 <div style="display:flex; align-items:center; gap:0.25rem;">
@@ -466,7 +466,7 @@
                 <!-- Pestañas -->
                 <div class="tabs-container">
                     <div class="tabs">
-                        <button class="tab active" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos</button>
+                        <button class="tab active" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos<span class="btn-add-inline" onclick="event.stopPropagation(); exportHistorialPagosExcel();" title="Exportar a Excel" style="font-size:0.85rem; margin-left:0.3rem;">📊</span></button>
                         <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos<span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoModal();" title="Agregar Documentos" style="color:var(--success);">+</span></button>
                         <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
                     </div>
@@ -525,7 +525,7 @@
                     <div style="border-top:1px solid var(--border); margin:0.75rem 0 0.5rem 0; padding-top:0.75rem;">
                         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
                             <strong style="font-size:0.9rem;">📞 Contactos</strong>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="showAddContactoInquilinoModal()" style="font-size:0.8rem; padding:0.25rem 0.5rem;">+ Agregar</button>
+                            <span onclick="showAddContactoInquilinoModal()" title="Agregar contacto" style="color:var(--success); font-size:1.4rem; font-weight:700; cursor:pointer; padding:0 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">+</span>
                         </div>
                         <div id="inquilinoContactosList"></div>
                     </div>
@@ -548,19 +548,27 @@
 
     <!-- Modal Add Contacto Inquilino -->
     <div id="addContactoInquilinoModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width:400px;">
             <div class="modal-header">
-                <h2 class="modal-title">Agregar Contacto</h2>
-                <button class="close-modal" onclick="closeModal('addContactoInquilinoModal')">×</button>
+                <h2 class="modal-title" id="contactoModalTitle">Agregar Contacto</h2>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button type="submit" form="contactoInquilinoForm" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
+                    <button class="close-modal" onclick="closeModal('addContactoInquilinoModal')">×</button>
+                </div>
             </div>
-            <div style="padding: 1.5rem;">
+            <div style="padding: 1.25rem;">
                 <form id="contactoInquilinoForm" onsubmit="saveContactoInquilino(event)">
-                    <div class="form-group"><label>Nombre *</label><input type="text" id="contactoInquilinoNombre" required autocomplete="off"></div>
-                    <div class="form-group"><label>Teléfono</label><input type="tel" id="contactoInquilinoTelefono" autocomplete="off"></div>
-                    <div class="form-group"><label>Email</label><input type="email" id="contactoInquilinoEmail" autocomplete="off"></div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeModal('addContactoInquilinoModal')">Cancelar</button>
-                        <button type="submit" class="btn btn-success">Agregar</button>
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500; font-size:0.9rem; display:block; margin-bottom:0.25rem;">Nombre *</label>
+                        <input type="text" id="contactoInquilinoNombre" required autocomplete="off" style="width:100%; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500; font-size:0.9rem; display:block; margin-bottom:0.25rem;">Teléfono</label>
+                        <input type="tel" id="contactoInquilinoTelefono" autocomplete="off" style="width:100%; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500; font-size:0.9rem; display:block; margin-bottom:0.25rem;">Email</label>
+                        <input type="email" id="contactoInquilinoEmail" autocomplete="off" style="width:100%; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
                     </div>
                 </form>
             </div>
