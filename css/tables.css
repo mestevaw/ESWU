@@ -357,4 +357,21 @@ th.sorted-desc::after {
     .modal table td:last-child {
         white-space: nowrap !important;
     }
+    
+    /* ── Inquilino Detail: hide RFC/CLABE on mobile ── */
+    #filaRfcClabe {
+        display: none !important;
+    }
+    
+    /* ── Inquilino Detail: compress dates + contrato in one line ── */
+    #filaFechasContrato {
+        flex-wrap: nowrap !important;
+        gap: 0.25rem !important;
+    }
+    
+    #filaFechasContrato > div {
+        min-width: 0 !important;
+        padding: 0.3rem 0.4rem !important;
+        font-size: 0.8rem;
+    }
 }
