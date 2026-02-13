@@ -468,7 +468,7 @@
                     <div class="tabs">
                         <button class="tab active" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos<span class="btn-add-inline" onclick="event.stopPropagation(); exportHistorialPagosExcel();" title="Exportar a Excel" style="font-size:0.85rem; margin-left:0.3rem;">📊</span></button>
                         <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos<span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoModal();" title="Agregar Documentos" style="color:var(--success);">+</span></button>
-                        <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
+                        <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas<span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarNotaModal();" title="Agregar Nota" style="color:var(--success);">+</span></button>
                     </div>
                     <div id="inquilinoPagosTab" class="tab-content active">
                         <div id="historialPagos"></div>
@@ -491,7 +491,7 @@
                 <h2 class="modal-title" id="addInquilinoTitle">Agregar Inquilino</h2>
                 <div style="display:flex; align-items:center; gap:0.25rem;">
                     <button type="submit" form="inquilinoForm" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
-                    <button class="close-modal" onclick="closeModal('addInquilinoModal')">×</button>
+                    <button class="close-modal" onclick="closeAddInquilinoModal()">×</button>
                 </div>
             </div>
             <div style="padding: 1rem 1.25rem;">
@@ -528,18 +528,6 @@
                             <span onclick="showAddContactoInquilinoModal()" title="Agregar contacto" style="color:var(--success); font-size:1.4rem; font-weight:700; cursor:pointer; padding:0 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">+</span>
                         </div>
                         <div id="inquilinoContactosList"></div>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
-                        <label style="min-width:90px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Contrato PDF</label>
-                        <div onclick="document.getElementById('inquilinoContrato').click()" style="flex:1; padding:0.35rem 0.5rem; border:1px dashed var(--border); border-radius:4px; cursor:pointer; font-size:0.85rem; color:var(--text-light); text-align:center;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
-                            <input type="file" id="inquilinoContrato" accept=".pdf" style="display:none;">
-                            <span>Click para PDF</span>
-                            <span id="contratoFileName" style="color:var(--success); margin-left:0.5rem;"></span>
-                        </div>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
-                        <label style="min-width:90px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Notas</label>
-                        <textarea id="inquilinoNotas" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem; min-height:50px;"></textarea>
                     </div>
                 </form>
             </div>
@@ -1069,6 +1057,22 @@
 
     <!-- Modal Cargar Contrato Renta -->
     <div id="cargarContratoModal" class="modal">
+
+    <!-- Modal Agregar Nota -->
+    <div id="agregarNotaModal" class="modal">
+        <div class="modal-content" style="max-width:450px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar Nota</h2>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button onclick="saveNotaInquilino()" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
+                    <button class="close-modal" onclick="closeModal('agregarNotaModal')">×</button>
+                </div>
+            </div>
+            <div style="padding: 1.25rem;">
+                <textarea id="nuevaNotaTexto" rows="5" style="width:100%; padding:0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem; resize:vertical;" placeholder="Escribe tu nota aquí..."></textarea>
+            </div>
+        </div>
+    </div>
         <div class="modal-content" style="max-width:400px;">
             <div class="modal-header">
                 <h2 class="modal-title">Cargar Contrato Renta</h2>
