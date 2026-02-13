@@ -1,6 +1,6 @@
 /* ========================================
    INQUILINOS-UI.JS - Inquilinos Interface Functions
-   Última actualización: 2026-02-12 20:00 CST
+   Última actualización: 2026-02-12 20:30 CST
    ======================================== */
 
 // ============================================
@@ -310,41 +310,46 @@ function showInquilinoDetail(id) {
     try {
         document.getElementById('inquilinoDetailNombre').textContent = inq.nombre;
         
-        // CONTACTOS EN UNA LÍNEA
-const contactosList = document.getElementById('detailContactosList');
-if (inq.contactos && inq.contactos.length > 0) {
-    contactosList.innerHTML = `
-        <div style="display:flex;flex-direction:column;gap:0.5rem;">
-            ${inq.contactos.map(c => `
-                <div>
-                    <strong>${c.nombre}</strong> | Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}
-                </div>
-            `).join('')}
-        </div>
-    `;
-} else {
-    contactosList.innerHTML = '<span style="color:var(--text-light)">No hay contactos</span>';
-}
-      document.getElementById('detailRFC').textContent = inq.rfc || '-';
-        document.getElementById('detailClabe').textContent = inq.clabe || '-';       
+        // INFO BOXES (ya están en el HTML como divs fijos)
         document.getElementById('detailRenta').textContent = formatCurrency(inq.renta);
         document.getElementById('detailM2').textContent = inq.m2 || '-';
         document.getElementById('detailDespacho').textContent = inq.numero_despacho || '-';
         document.getElementById('detailFechaInicio').textContent = formatDate(inq.fecha_inicio);
         document.getElementById('detailFechaVenc').innerHTML = formatDateVencimiento(inq.fecha_vencimiento);
         
-        // BOTÓN DE CONTRATO
-        const contratoButtonSection = document.getElementById('contratoOriginalSection');
+        // CONTACTOS
+        const contactosList = document.getElementById('detailContactosList');
+        if (inq.contactos && inq.contactos.length > 0) {
+            contactosList.innerHTML = inq.contactos.map(c => `
+                <div style="font-size:0.9rem;">
+                    <strong>${c.nombre}</strong> | Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}
+                </div>
+            `).join('');
+        } else {
+            contactosList.innerHTML = '<span style="color:var(--text-light); font-size:0.85rem;">No hay contactos</span>';
+        }
+        
+        // RFC y CLABE
+        document.getElementById('detailRFC').textContent = inq.rfc || '-';
+        document.getElementById('detailClabe').textContent = inq.clabe || '-';
+        
+        // CONTRATO ORIGINAL (recuadro con icono 📄)
+        const contratoSection = document.getElementById('contratoOriginalSection');
         if (inq.has_contrato) {
-            contratoButtonSection.innerHTML = `
-                <button class="btn btn-primary" onclick="fetchAndViewContrato(${inq.id})" style="width:100%;font-size:1.1rem;padding:1rem;">
-                    📄 Ver Contrato Original
-                </button>
+            contratoSection.innerHTML = `
+                <div onclick="fetchAndViewContrato(${inq.id})" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:0.6rem 0.75rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='var(--bg)'">
+                    <span style="font-size:1.2rem;">📄</span>
+                    <div>
+                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Contrato Original</div>
+                        <div style="font-size:0.85rem; color:var(--primary); font-weight:600;">Ver PDF</div>
+                    </div>
+                </div>
             `;
         } else {
-            contratoButtonSection.innerHTML = `
-                <div style="padding:1rem;background:var(--bg);border-radius:4px;text-align:center;color:var(--text-light);">
-                    No hay contrato cargado
+            contratoSection.innerHTML = `
+                <div style="background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:0.6rem 0.75rem; color:var(--text-light);">
+                    <div style="font-size:0.7rem; text-transform:uppercase; font-weight:600;">Contrato Original</div>
+                    <div style="font-size:0.85rem;">No hay contrato cargado</div>
                 </div>
             `;
         }
@@ -383,12 +388,11 @@ if (inq.contactos && inq.contactos.length > 0) {
         
         document.getElementById('inquilinoDetailModal').classList.add('active');
         
-        // Activar primera pestaña (Datos de Renta)
-document.querySelectorAll('#inquilinoDetailModal .tab').forEach(t => t.classList.remove('active'));
-document.querySelectorAll('#inquilinoDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
-
-document.querySelector('#inquilinoDetailModal .tab:nth-child(1)').classList.add('active');
-document.getElementById('inquilinoRentaTab').classList.add('active');
+        // Activar primera pestaña (Historial de Pagos)
+        document.querySelectorAll('#inquilinoDetailModal .tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#inquilinoDetailModal .tab-content').forEach(tc => tc.classList.remove('active'));
+        document.querySelector('#inquilinoDetailModal .tab:nth-child(1)').classList.add('active');
+        document.getElementById('inquilinoPagosTab').classList.add('active');
         
     } catch (error) {
         console.error('ERROR en showInquilinoDetail:', error);
@@ -516,4 +520,38 @@ async function deleteDocumentoAdicional(docId) {
     }
 }
 
-console.log('✅ INQUILINOS-UI.JS cargado (2026-02-12 20:00 CST)');
+// ============================================
+// EXPORTAR INQUILINOS A EXCEL
+// ============================================
+
+function exportarInquilinosExcel() {
+    if (!inquilinos || inquilinos.length === 0) {
+        alert('No hay inquilinos para exportar');
+        return;
+    }
+    
+    const data = inquilinos.map(inq => {
+        const contacto = (inq.contactos && inq.contactos.length > 0) ? inq.contactos[0] : {};
+        return {
+            'Inquilino': inq.nombre,
+            'Contacto': contacto.nombre || '',
+            'Teléfono': contacto.telefono || '',
+            'Email': contacto.email || '',
+            'Renta Mensual': inq.renta || 0,
+            'M²': inq.m2 || '',
+            'Despacho': inq.numero_despacho || '',
+            'Inicio Renta': inq.fecha_inicio || '',
+            'Vencimiento': inq.fecha_vencimiento || '',
+            'RFC': inq.rfc || '',
+            'CLABE': inq.clabe || ''
+        };
+    });
+    
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws['!cols'] = [{ wch: 30 }, { wch: 20 }, { wch: 15 }, { wch: 25 }, { wch: 14 }, { wch: 8 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 15 }, { wch: 20 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inquilinos');
+    XLSX.writeFile(wb, `Inquilinos_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+console.log('✅ INQUILINOS-UI.JS cargado (2026-02-12 20:30 CST)');
