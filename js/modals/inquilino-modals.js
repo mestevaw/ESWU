@@ -54,12 +54,13 @@ function renderContactosList(contactos, containerId, deleteCallback, editCallbac
     }
     
     container.innerHTML = contactos.map((c, idx) => `
-        <div class="contacto-item">
-            <div class="contacto-info">
-                <strong>${c.nombre}</strong><br>
-                <small>Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}</small>
+        <div style="display:flex; align-items:center; gap:0.4rem; padding:0.35rem 0; border-bottom:1px solid var(--bg);">
+            <div style="flex:1; min-width:0;">
+                <strong style="font-size:0.9rem;">${c.nombre}</strong><br>
+                <small style="color:var(--text-light);">Tel: ${c.telefono || '-'} | Email: ${c.email || '-'}</small>
             </div>
-            <button type="button" class="btn btn-sm btn-danger" onclick="${deleteCallback}(${idx})">×</button>
+            ${editCallback ? `<span onclick="${editCallback}(${idx})" title="Editar" style="cursor:pointer; font-size:0.9rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>` : ''}
+            <span onclick="${deleteCallback}(${idx})" title="Eliminar" style="cursor:pointer; color:var(--danger); font-weight:700; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
         </div>
     `).join('');
 }
