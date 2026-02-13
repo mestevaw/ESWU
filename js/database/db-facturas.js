@@ -1,7 +1,26 @@
 /* ========================================
    DB-FACTURAS.JS - Database operations for facturas
-   Última actualización: 2026-02-12 18:00 CST
+   Última actualización: 2026-02-12 19:00 CST
    ======================================== */
+
+// Función auxiliar: navegar al lugar correcto después de una acción
+function navigateAfterFacturaAction(defaultTab) {
+    const ctx = window.facturaActionContext;
+    window.facturaActionContext = null; // Limpiar
+    
+    if (ctx === 'standalone-porpagar') {
+        // Volver al listado standalone de facturas por pagar
+        renderProveedoresFacturasPorPagar();
+    } else if (ctx === 'standalone-pagadas') {
+        renderProveedoresFacturasPagadas();
+    } else {
+        // Estamos en la ficha del proveedor
+        showProveedorDetail(currentProveedorId);
+        if (defaultTab) {
+            setTimeout(() => switchTab('proveedor', defaultTab), 100);
+        }
+    }
+}
 
 async function saveFactura(event) {
     event.preventDefault();
@@ -24,13 +43,11 @@ async function saveFactura(event) {
             iva: parseFloat(document.getElementById('facturaIVA').value) || 0
         };
         
-        // Solo incluir documento_file si se subió uno nuevo
         if (docURL) {
             facturaData.documento_file = docURL;
         }
         
         if (window.isEditingFactura && currentFacturaId) {
-            // Modo edición: UPDATE (no incluir proveedor_id)
             delete facturaData.proveedor_id;
             const { error } = await supabaseClient
                 .from('facturas')
@@ -39,7 +56,6 @@ async function saveFactura(event) {
             
             if (error) throw error;
         } else {
-            // Modo nuevo: INSERT
             if (!docURL) facturaData.documento_file = null;
             
             const { error } = await supabaseClient
@@ -51,8 +67,7 @@ async function saveFactura(event) {
         
         await loadProveedores();
         closeModal('registrarFacturaModal');
-        showProveedorDetail(currentProveedorId);
-        setTimeout(() => switchTab('proveedor', 'porpagar'), 100);
+        navigateAfterFacturaAction('porpagar');
         
         window.isEditingFactura = false;
         currentFacturaId = null;
@@ -73,10 +88,8 @@ async function savePagoFactura(event) {
         const pagoFile = document.getElementById('pagoPDFFactura').files[0];
         const fechaPago = document.getElementById('fechaPagoFactura').value;
         
-        // Construir update solo con lo necesario
         const updateData = { fecha_pago: fechaPago };
         
-        // Solo incluir pago_file si se subió un PDF
         if (pagoFile) {
             updateData.pago_file = await fileToBase64(pagoFile);
         }
@@ -90,8 +103,7 @@ async function savePagoFactura(event) {
         
         await loadProveedores();
         closeModal('pagarFacturaModal');
-        showProveedorDetail(currentProveedorId);
-        setTimeout(() => switchTab('proveedor', 'pagadas'), 100);
+        navigateAfterFacturaAction('pagadas');
         
     } catch (error) {
         console.error('Error:', error);
@@ -113,8 +125,7 @@ async function deleteFactura(facturaId) {
         if (error) throw error;
         
         await loadProveedores();
-        showProveedorDetail(currentProveedorId);
-        setTimeout(() => switchTab('proveedor', 'porpagar'), 100);
+        navigateAfterFacturaAction('porpagar');
         
     } catch (error) {
         console.error('Error:', error);
@@ -124,4 +135,4 @@ async function deleteFactura(facturaId) {
     }
 }
 
-console.log('✅ DB-FACTURAS.JS cargado (2026-02-12 18:00 CST)');
+console.log('✅ DB-FACTURAS.JS cargado (2026-02-12 19:00 CST)');
