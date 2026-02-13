@@ -480,7 +480,7 @@
                 <div class="tabs-container">
                     <div class="tabs">
                         <button class="tab active" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos</button>
-                        <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos Adicionales</button>
+                        <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos<span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoModal();" title="Agregar Documentos" style="color:var(--success);">+</span></button>
                         <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
                     </div>
                     <div id="inquilinoPagosTab" class="tab-content active">
@@ -502,34 +502,58 @@
         <div class="modal-content">
             <div class="modal-header modal-header-sticky">
                 <h2 class="modal-title" id="addInquilinoTitle">Agregar Inquilino</h2>
-                <button class="close-modal" onclick="closeModal('addInquilinoModal')">×</button>
-            </div>
-            <div style="padding: 1.5rem;">
-                <div class="modal-actions-top">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addInquilinoModal')" title="Cancelar">✖️ Cancelar</button>
-                    <button type="submit" form="inquilinoForm" class="btn btn-success" title="Guardar">✔️ Guardar</button>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button type="submit" form="inquilinoForm" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
+                    <button class="close-modal" onclick="closeModal('addInquilinoModal')">×</button>
                 </div>
+            </div>
+            <div style="padding: 1rem 1.25rem;">
                 <form id="inquilinoForm" onsubmit="saveInquilino(event)">
-                    <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="inquilinoNombre" required autocomplete="off"></div>
-                    <div class="form-group"><label>CLABE</label><input type="text" id="inquilinoClabe" autocomplete="off"></div>
-                    <div class="form-group"><label>RFC</label><input type="text" id="inquilinoRFC" autocomplete="off"></div>
-                    <div class="form-group"><label>M²</label><input type="text" id="inquilinoM2" autocomplete="off"></div>
-                    <div class="form-group"><label>No. Despacho</label><input type="text" id="inquilinoDespacho" autocomplete="off"></div>
-                    <div class="form-group"><label>Renta Mensual *</label><input type="number" id="inquilinoRenta" step="0.01" required autocomplete="off"></div>
-                    <div class="form-group"><label>Fecha Inicio *</label><input type="date" id="inquilinoFechaInicio" required></div>
-                    <div class="form-group"><label>Vencimiento Contrato *</label><input type="date" id="inquilinoFechaVenc" required></div>
-                    <h3 style="margin: 1.5rem 0 1rem 0;">Contactos</h3>
-                    <div id="inquilinoContactosList" style="margin-bottom: 1rem;"></div>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="showAddContactoInquilinoModal()">+ Agregar Contacto</button>
-                    <div class="form-group" style="margin-top: 1.5rem;">
-                        <label>Contrato Original (PDF)</label>
-                        <div class="file-upload" onclick="document.getElementById('inquilinoContrato').click()">
-                            <input type="file" id="inquilinoContrato" accept=".pdf">
-                            <p>Click para seleccionar PDF del contrato</p>
-                            <p id="contratoFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="min-width:90px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Inquilino *</label>
+                        <input type="text" id="inquilinoNombre" required autocomplete="off" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="min-width:90px; font-weight:500; white-space:nowrap; font-size:0.9rem;">CLABE</label>
+                        <input type="text" id="inquilinoClabe" autocomplete="off" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="min-width:90px; font-weight:500; white-space:nowrap; font-size:0.9rem;">RFC</label>
+                        <input type="text" id="inquilinoRFC" autocomplete="off" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap;">
+                        <label style="font-weight:500; white-space:nowrap; font-size:0.9rem;">M²</label>
+                        <input type="text" id="inquilinoM2" autocomplete="off" maxlength="5" style="width:5ch; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem; text-align:center;">
+                        <label style="font-weight:500; white-space:nowrap; font-size:0.9rem; margin-left:0.5rem;">Despacho</label>
+                        <input type="text" id="inquilinoDespacho" autocomplete="off" maxlength="5" style="width:5ch; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem; text-align:center;">
+                        <label style="font-weight:500; white-space:nowrap; font-size:0.9rem; margin-left:0.5rem;">Renta *</label>
+                        <input type="number" id="inquilinoRenta" step="0.01" required autocomplete="off" style="width:10ch; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap;">
+                        <label style="font-weight:500; white-space:nowrap; font-size:0.9rem;">Inicio *</label>
+                        <input type="date" id="inquilinoFechaInicio" required style="flex:1; min-width:130px; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                        <label style="font-weight:500; white-space:nowrap; font-size:0.9rem; margin-left:0.5rem;">Vencimiento *</label>
+                        <input type="date" id="inquilinoFechaVenc" required style="flex:1; min-width:130px; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="border-top:1px solid var(--border); margin:0.75rem 0 0.5rem 0; padding-top:0.75rem;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+                            <strong style="font-size:0.9rem;">📞 Contactos</strong>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="showAddContactoInquilinoModal()" style="font-size:0.8rem; padding:0.25rem 0.5rem;">+ Agregar</button>
+                        </div>
+                        <div id="inquilinoContactosList"></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="min-width:90px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Contrato PDF</label>
+                        <div onclick="document.getElementById('inquilinoContrato').click()" style="flex:1; padding:0.35rem 0.5rem; border:1px dashed var(--border); border-radius:4px; cursor:pointer; font-size:0.85rem; color:var(--text-light); text-align:center;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+                            <input type="file" id="inquilinoContrato" accept=".pdf" style="display:none;">
+                            <span>Click para PDF</span>
+                            <span id="contratoFileName" style="color:var(--success); margin-left:0.5rem;"></span>
                         </div>
                     </div>
-                    <div class="form-group"><label>Notas</label><textarea id="inquilinoNotas"></textarea></div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <label style="min-width:90px; font-weight:500; white-space:nowrap; font-size:0.9rem;">Notas</label>
+                        <textarea id="inquilinoNotas" style="flex:1; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem; min-height:50px;"></textarea>
+                    </div>
                 </form>
             </div>
         </div>
@@ -590,11 +614,11 @@
         </div>
     </div>
 
-    <!-- Modal Agregar Documento Adicional -->
+    <!-- Modal Agregar Documento -->
     <div id="agregarDocumentoModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Agregar Documento Adicional</h2>
+                <h2 class="modal-title">Agregar Documento</h2>
                 <button class="close-modal" onclick="closeModal('agregarDocumentoModal')">×</button>
             </div>
             <div style="padding: 1.5rem;">
