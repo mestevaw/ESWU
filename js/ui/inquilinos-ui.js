@@ -386,22 +386,22 @@ function showInquilinoDetail(id) {
         const contratoSection = document.getElementById('contratoOriginalSection');
         if (inq.has_contrato) {
             contratoSection.innerHTML = `
-                <div style="background:#e8edf3; border-radius:6px; padding:0.4rem 0.6rem; display:flex; align-items:center; gap:0.3rem; height:100%;">
-                    <div onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem; flex:1;">
+                <div style="background:#e8edf3; border-radius:6px; padding:0.4rem 0.4rem; display:flex; align-items:center; gap:0.2rem; height:100%;">
+                    <div onclick="fetchAndViewContrato(${inq.id})" style="cursor:pointer; display:flex; align-items:center; gap:0.2rem; flex:1;">
                         <span style="font-size:1rem;">📄</span>
                         <div style="font-size:0.6rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Contrato Renta</div>
                     </div>
-                    <span onclick="event.stopPropagation(); showCargarContratoModal()" title="Reemplazar contrato" style="cursor:pointer; font-size:0.95rem; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='transparent'">🔄</span>
+                    <span onclick="event.stopPropagation(); showCargarContratoModal()" title="Reemplazar contrato" style="cursor:pointer; font-size:0.95rem; padding:0.1rem 0.2rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='transparent'">🔄</span>
                 </div>
             `;
         } else {
             contratoSection.innerHTML = `
-                <div style="background:#e8edf3; border-radius:6px; padding:0.4rem 0.6rem; color:var(--text-light); height:100%; display:flex; align-items:center;">
+                <div style="background:#e8edf3; border-radius:6px; padding:0.4rem 0.4rem; color:var(--text-light); height:100%; display:flex; align-items:center; gap:0.15rem;">
                     <div style="flex:1;">
                         <div style="font-size:0.6rem; text-transform:uppercase; font-weight:600;">Contrato Renta</div>
-                        <div style="font-size:0.75rem;">Sin contrato</div>
+                        <div style="font-size:0.7rem;">Sin contrato</div>
                     </div>
-                    <span onclick="event.stopPropagation(); showCargarContratoModal()" title="Cargar contrato" style="cursor:pointer; color:var(--success); font-size:1.2rem; font-weight:700; padding:0.1rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">+</span>
+                    <span onclick="event.stopPropagation(); showCargarContratoModal()" title="Cargar contrato" style="cursor:pointer; color:var(--success); font-size:1.3rem; font-weight:700; padding:0 0.2rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">+</span>
                 </div>
             `;
         }
