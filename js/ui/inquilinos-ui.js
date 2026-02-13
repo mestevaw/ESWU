@@ -8,8 +8,8 @@
 // ============================================
 
 // Estado de ordenamiento
-let inquilinosSortColumn = null;
-let inquilinosSortOrder = 'asc';
+var inquilinosSortColumn = null;
+var inquilinosSortOrder = 'asc';
 
 function showInquilinosView(view) {
     document.getElementById('inquilinosSubMenu').classList.remove('active');
@@ -533,7 +533,7 @@ function deleteDocInquilinoConConfirm(docId, nombreDoc) {
 // EDITAR DOCUMENTO - MODAL EN APP
 // ============================================
 
-let editingDocId = null;
+var editingDocId = null;
 
 function openEditDocInquilinoModal(docId, nombreActual) {
     editingDocId = docId;
