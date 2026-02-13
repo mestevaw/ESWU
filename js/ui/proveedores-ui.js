@@ -1,7 +1,7 @@
 /* ========================================
    PROVEEDORES UI - TODAS LAS FUNCIONES
    Diseño restaurado sesiones 3-6 + optimización sesiones 7-8
-   Última actualización: 2026-02-12 18:30 CST
+   Última actualización: 2026-02-12 19:00 CST
    ======================================== */
 
 // ============================================
@@ -166,22 +166,20 @@ function renderProveedoresFacturasPagadas() {
     pagadas.forEach(f => {
         const row = tbody.insertRow();
         
-        const facturaCell = f.has_documento 
-            ? `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--primary)" title="Ver PDF" onclick="event.stopPropagation(); viewFacturaDoc(${f.facturaId}, 'documento')">${f.numero}</td>`
-            : `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.numero}</td>`;
-        const fechaCell = f.has_pago
-            ? `<td style="cursor:pointer;color:var(--primary)" title="Ver PDF" onclick="event.stopPropagation(); viewFacturaDoc(${f.facturaId}, 'pago')">${formatDate(f.fecha)}</td>`
-            : `<td>${formatDate(f.fecha)}</td>`;
+        // Icono 📄 clickeable si hay PDF
+        const docIcon = f.has_documento 
+            ? `<span onclick="event.stopPropagation(); viewFacturaDoc(${f.facturaId}, 'documento')" title="Ver factura PDF" style="cursor:pointer; margin-right:0.3rem; font-size:0.9rem;">📄</span>`
+            : '';
+        const pagoIcon = f.has_pago
+            ? `<span onclick="event.stopPropagation(); viewFacturaDoc(${f.facturaId}, 'pago')" title="Ver comprobante PDF" style="cursor:pointer; margin-right:0.3rem; font-size:0.9rem;">📄</span>`
+            : '';
         
-        // Orden: Proveedor | No. Factura | Pagada en | Monto
-        row.innerHTML = `<td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>${facturaCell}${fechaCell}<td class="currency">${formatCurrency(f.monto)}</td>`;
-        
-        // Click en la fila → PDF de la factura (no ficha proveedor)
-        if (f.has_documento) {
-            row.style.cursor = 'pointer';
-            row.title = 'Ver PDF';
-            row.onclick = () => viewFacturaDoc(f.facturaId, 'documento');
-        }
+        row.innerHTML = `
+            <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${f.proveedor}</td>
+            <td>${docIcon}<strong>${f.numero}</strong></td>
+            <td>${pagoIcon}${formatDate(f.fecha)}</td>
+            <td class="currency">${formatCurrency(f.monto)}</td>
+        `;
     });
     
     if (pagadas.length === 0) {
@@ -247,9 +245,9 @@ function renderProveedoresFacturasPorPagar() {
             <td class="currency">${formatCurrency(f.monto)}</td>
             <td>${formatDateVencimiento(f.vencimiento)}</td>
             <td style="white-space:nowrap;" onclick="event.stopPropagation()">
-                <span onclick="currentProveedorId=${f.provId}; showEditFacturaModal(${f.factId})" title="Modificar factura" style="cursor:pointer; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
-                <span onclick="showPagarFacturaModal(${f.factId})" title="Dar factura x pagada" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏦</span>
-                <span onclick="deleteFacturaConConfirm(${f.factId}, '${escapedNum}')" title="Eliminar factura" style="cursor:pointer; color:var(--danger); font-size:1.1rem; font-weight:700; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
+                <span onclick="currentProveedorId=${f.provId}; window.facturaActionContext='standalone-porpagar'; showEditFacturaModal(${f.factId})" title="Modificar factura" style="cursor:pointer; font-size:1rem; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
+                <span onclick="currentProveedorId=${f.provId}; window.facturaActionContext='standalone-porpagar'; showPagarFacturaModal(${f.factId})" title="Dar factura x pagada" style="cursor:pointer; font-size:1.1rem; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏦</span>
+                <span onclick="window.facturaActionContext='standalone-porpagar'; deleteFacturaConConfirm(${f.factId}, '${escapedNum}')" title="Eliminar factura" style="cursor:pointer; color:var(--danger); font-size:1.1rem; font-weight:700; padding:0.15rem 0.3rem; border-radius:4px;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">✕</span>
             </td>
         `;
         
@@ -643,24 +641,76 @@ function exportProveedoresToExcel() {
     });
     
     const ws = XLSX.utils.json_to_sheet(data);
-    
-    // Ajustar anchos de columna
-    ws['!cols'] = [
-        { wch: 30 }, // Proveedor
-        { wch: 20 }, // Servicio
-        { wch: 25 }, // Contacto
-        { wch: 15 }, // Teléfono
-        { wch: 25 }, // Email
-        { wch: 15 }, // RFC
-        { wch: 20 }, // CLABE
-        { wch: 30 }  // Notas
-    ];
-    
+    ws['!cols'] = [{ wch: 30 }, { wch: 20 }, { wch: 25 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 30 }];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Proveedores');
-    
-    const fecha = new Date().toISOString().split('T')[0];
-    XLSX.writeFile(wb, `Proveedores_${fecha}.xlsx`);
+    XLSX.writeFile(wb, `Proveedores_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
-console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 18:30 CST)');
+// ============================================
+// EXPORTAR FACTURAS PAGADAS A EXCEL
+// ============================================
+
+function exportFacturasPagadasToExcel() {
+    const rows = [];
+    proveedores.forEach(prov => {
+        if (prov.facturas) {
+            prov.facturas.forEach(f => {
+                if (f.fecha_pago) {
+                    rows.push({
+                        'Proveedor': prov.nombre,
+                        'No. Factura': f.numero || 'S/N',
+                        'Fecha Factura': f.fecha,
+                        'Pagada en': f.fecha_pago,
+                        'Monto': f.monto,
+                        'IVA': f.iva || 0
+                    });
+                }
+            });
+        }
+    });
+    
+    if (rows.length === 0) { alert('No hay facturas pagadas para exportar'); return; }
+    rows.sort((a, b) => new Date(b['Pagada en']) - new Date(a['Pagada en']));
+    
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch: 30 }, { wch: 15 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 12 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Facturas Pagadas');
+    XLSX.writeFile(wb, `Facturas_Pagadas_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+// ============================================
+// EXPORTAR FACTURAS POR PAGAR A EXCEL
+// ============================================
+
+function exportFacturasPorPagarToExcel() {
+    const rows = [];
+    proveedores.forEach(prov => {
+        if (prov.facturas) {
+            prov.facturas.forEach(f => {
+                if (!f.fecha_pago) {
+                    rows.push({
+                        'Proveedor': prov.nombre,
+                        'No. Factura': f.numero || 'S/N',
+                        'Fecha Factura': f.fecha,
+                        'Vencimiento': f.vencimiento,
+                        'Monto': f.monto,
+                        'IVA': f.iva || 0
+                    });
+                }
+            });
+        }
+    });
+    
+    if (rows.length === 0) { alert('No hay facturas por pagar para exportar'); return; }
+    rows.sort((a, b) => new Date(a['Vencimiento']) - new Date(b['Vencimiento']));
+    
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch: 30 }, { wch: 15 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 12 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Facturas Por Pagar');
+    XLSX.writeFile(wb, `Facturas_Por_Pagar_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+console.log('✅ PROVEEDORES-UI.JS cargado (2026-02-12 19:00 CST)');
