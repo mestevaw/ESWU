@@ -322,6 +322,19 @@ function showAgregarDocumentoModal() {
     document.getElementById('nuevoDocPDF').value = '';
     const fn = document.getElementById('nuevoDocPDFFileName');
     if (fn) fn.textContent = '';
+    
+    // Mostrar/ocultar pregunta de contrato original
+    const inq = inquilinos.find(i => i.id === currentInquilinoId);
+    const pregunta = document.getElementById('nuevoDocContratoQuestion');
+    if (inq && !inq.has_contrato) {
+        pregunta.classList.remove('hidden');
+        // Reset radio a "No"
+        const radios = document.querySelectorAll('input[name="esContratoNuevoDoc"]');
+        radios.forEach(r => r.checked = (r.value === 'no'));
+    } else {
+        pregunta.classList.add('hidden');
+    }
+    
     document.getElementById('agregarDocumentoModal').classList.add('active');
 }
 
@@ -339,13 +352,9 @@ async function saveDocumentoAdicional(event) {
         
         const pdfBase64 = await fileToBase64(file);
         
-        // PREGUNTAR si es contrato original
-        const tieneContrato = inq && inq.has_contrato;
-        const mensaje = tieneContrato 
-            ? '¿Este documento es el CONTRATO ORIGINAL?\n\nNOTA: Ya existe un contrato. Si dices SÍ, se REEMPLAZARÁ el contrato anterior.'
-            : '¿Este documento es el CONTRATO ORIGINAL?\n\nSi es así, se guardará como contrato y no necesitas poner nombre.';
-        
-        const esContratoOriginal = confirm(mensaje);
+        // Verificar si marcó como contrato original
+        const radioSi = document.querySelector('input[name="esContratoNuevoDoc"][value="si"]');
+        const esContratoOriginal = radioSi && radioSi.checked;
         
         if (esContratoOriginal) {
             const { error: contratoError } = await supabaseClient
@@ -358,6 +367,7 @@ async function saveDocumentoAdicional(event) {
             await loadInquilinos();
             closeModal('agregarDocumentoModal');
             showInquilinoDetail(currentInquilinoId);
+            setTimeout(() => switchTab('inquilino', 'docs'), 100);
             hideLoading();
             return;
         }
