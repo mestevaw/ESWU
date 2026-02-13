@@ -150,13 +150,6 @@ async function saveInquilino(event) {
     showLoading();
     
     try {
-        const contratoFile = document.getElementById('inquilinoContrato').files[0];
-        let contratoURL = null;
-        
-        if (contratoFile) {
-            contratoURL = await fileToBase64(contratoFile);
-        }
-        
         const inquilinoData = {
             nombre: document.getElementById('inquilinoNombre').value,
             clabe: document.getElementById('inquilinoClabe').value || null,
@@ -165,14 +158,8 @@ async function saveInquilino(event) {
             numero_despacho: document.getElementById('inquilinoDespacho').value || null,
             renta: parseFloat(document.getElementById('inquilinoRenta').value),
             fecha_inicio: document.getElementById('inquilinoFechaInicio').value,
-            fecha_vencimiento: document.getElementById('inquilinoFechaVenc').value,
-            notas: document.getElementById('inquilinoNotas').value || null
+            fecha_vencimiento: document.getElementById('inquilinoFechaVenc').value
         };
-        
-        // Solo incluir contrato_file si el usuario subió un archivo nuevo
-        if (contratoURL) {
-            inquilinoData.contrato_file = contratoURL;
-        }
         
         let inquilinoId;
         
