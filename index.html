@@ -421,8 +421,8 @@
                 </div>
             </div>
             <div style="padding: 1.25rem; padding-top: 5rem;">
-                <!-- Fila 1: Renta, M², Despacho, Contrato Original -->
-                <div style="display:flex; gap:0.4rem; margin-bottom:0.5rem; flex-wrap:wrap;">
+                <!-- Fila 1: Renta, M², Despacho -->
+                <div style="display:flex; gap:0.4rem; margin-bottom:0.4rem; flex-wrap:wrap;">
                     <div style="flex:1; min-width:90px; background:var(--bg); border-radius:6px; padding:0.4rem 0.6rem;">
                         <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Renta</div>
                         <div style="font-size:0.95rem; font-weight:700; color:var(--primary);" id="detailRenta"></div>
@@ -435,26 +435,25 @@
                         <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Despacho</div>
                         <div style="font-size:0.95rem; font-weight:700;" id="detailDespacho"></div>
                     </div>
-                    <div id="contratoOriginalSection" style="flex:0.8; min-width:100px;"></div>
                 </div>
-                <!-- Fila 2: Inició Rentando, Contrato Vence -->
-                <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem; flex-wrap:wrap;">
-                    <div style="flex:1; min-width:120px; background:var(--bg); border-radius:6px; padding:0.5rem 0.75rem;">
-                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Inició Rentando</div>
-                        <div style="font-size:0.95rem; font-weight:600;" id="detailFechaInicio"></div>
+                <!-- Fila 2: Renta Inicio, Vence en, Contrato de Renta -->
+                <div id="filaFechasContrato" style="display:flex; gap:0.4rem; margin-bottom:0.4rem; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:100px; background:var(--bg); border-radius:6px; padding:0.4rem 0.6rem;">
+                        <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Renta Inicio</div>
+                        <div style="font-size:0.9rem; font-weight:600;" id="detailFechaInicio"></div>
                     </div>
-                    <div style="flex:1; min-width:120px; background:var(--bg); border-radius:6px; padding:0.5rem 0.75rem;">
-                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Contrato Vence</div>
-                        <div style="font-size:0.95rem; font-weight:600;" id="detailFechaVenc"></div>
+                    <div style="flex:1; min-width:100px; background:var(--bg); border-radius:6px; padding:0.4rem 0.6rem;">
+                        <div style="font-size:0.65rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Vence en</div>
+                        <div style="font-size:0.9rem; font-weight:600;" id="detailFechaVenc"></div>
                     </div>
+                    <div id="contratoOriginalSection" style="flex:1; min-width:110px;"></div>
                 </div>
                 <!-- Contactos -->
-                <div style="border:1px solid var(--border); border-radius:6px; padding:0.5rem 0.75rem; margin-bottom:0.5rem;">
-                    <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600; margin-bottom:0.25rem;">📞 Contactos</div>
+                <div style="margin-bottom:0.4rem;">
                     <div id="detailContactosList"></div>
                 </div>
-                <!-- Fila 3: RFC, CLABE -->
-                <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap;">
+                <!-- Fila RFC, CLABE (hidden on mobile) -->
+                <div id="filaRfcClabe" style="display:flex; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap;">
                     <div style="flex:1; min-width:120px; background:var(--bg); border-radius:6px; padding:0.5rem 0.75rem;">
                         <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">RFC</div>
                         <div style="font-size:0.9rem; font-weight:600;" id="detailRFC"></div>
@@ -1056,6 +1055,39 @@
                     <label style="font-weight:500; font-size:0.9rem; display:block; margin-bottom:0.35rem;">Notas</label>
                     <textarea id="editBitacoraNotas" style="width:100%; min-height:200px; padding:0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem; resize:vertical;"></textarea>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cargar Contrato de Renta -->
+    <div id="cargarContratoModal" class="modal">
+        <div class="modal-content" style="max-width:400px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Cargar Contrato de Renta</h2>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button onclick="saveContratoRenta()" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
+                    <button class="close-modal" onclick="closeModal('cargarContratoModal')">×</button>
+                </div>
+            </div>
+            <div style="padding: 1.25rem;">
+                <div onclick="document.getElementById('contratoUploadPDF').click()" style="padding:0.75rem; border:1px dashed var(--border); border-radius:4px; cursor:pointer; text-align:center; font-size:0.9rem; color:var(--text-light);" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+                    <input type="file" id="contratoUploadPDF" accept=".pdf" style="display:none;" onchange="document.getElementById('contratoUploadFileName').textContent = this.files[0] ? this.files[0].name : ''">
+                    <span>Click para seleccionar PDF</span>
+                    <span id="contratoUploadFileName" style="color:var(--success); display:block; margin-top:0.35rem;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Contacto Detail (mobile) -->
+    <div id="contactDetailModal" class="modal">
+        <div class="modal-content" style="max-width:350px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="contactDetailNombre"></h2>
+                <button class="close-modal" onclick="closeModal('contactDetailModal')">×</button>
+            </div>
+            <div style="padding: 1.25rem;">
+                <div id="contactDetailBody"></div>
             </div>
         </div>
     </div>
