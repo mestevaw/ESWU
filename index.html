@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Última actualización: 2026-02-12 20:00 CST -->
+<!-- Última actualización: 2026-02-12 20:30 CST -->
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -160,9 +160,9 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2 class="card-title">Inquilinos</h2>
-                                <div style="display:flex;gap:0.5rem;align-items:center">
-                                    <button class="btn-excel-icon" onclick="exportarInquilinosExcel()" title="Exportar a Excel">📊</button>
-                                    <button class="btn-icon-add btn-icon-add-green" onclick="showAddInquilinoModal()" title="Agregar Nuevo Inquilino">+</button>
+                                <div style="display:flex; align-items:center; gap:0.5rem;">
+                                    <span onclick="exportarInquilinosExcel()" title="Exportar lista a Excel" style="font-size:1.3rem; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">📊</span>
+                                    <span class="btn-add-inline" onclick="showAddInquilinoModal()" title="Agregar nuevo inquilino" style="font-size:1.5rem; cursor:pointer;">+</span>
                                 </div>
                             </div>
                             <div class="table-container">
@@ -426,40 +426,65 @@
                     </div>
                 </div>
                 <h2 class="modal-title" id="inquilinoDetailNombre"></h2>
-                <button class="close-modal" onclick="closeModal('inquilinoDetailModal')">×</button>
-            </div>
-            <div style="padding: 1.5rem; padding-top: 5rem;">
-                <div class="info-box">
-                    <div class="info-box-title">CONTACTOS</div>
-                    <div id="detailContactosList"></div>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <span onclick="editInquilino()" title="Modificar datos inquilino" style="cursor:pointer; font-size:1.1rem; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
+                    <button class="close-modal" onclick="closeModal('inquilinoDetailModal')">×</button>
                 </div>
-                <div class="info-box">
-                    <div class="info-box-content">
-                        <strong>RFC:</strong> <span id="detailRFC"></span> &nbsp;&nbsp;&nbsp; <strong>CLABE:</strong> <span id="detailClabe"></span>
+            </div>
+            <div style="padding: 1.25rem; padding-top: 5rem;">
+                <!-- Fila 1: Renta, M², Despacho -->
+                <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:100px; background:var(--bg); border-radius:6px; padding:0.5rem 0.75rem;">
+                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Renta</div>
+                        <div style="font-size:1rem; font-weight:700; color:var(--primary);" id="detailRenta"></div>
+                    </div>
+                    <div style="flex:0.6; min-width:80px; background:var(--bg); border-radius:6px; padding:0.5rem 0.75rem;">
+                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">M²</div>
+                        <div style="font-size:1rem; font-weight:700;" id="detailM2"></div>
+                    </div>
+                    <div style="flex:0.6; min-width:80px; background:var(--bg); border-radius:6px; padding:0.5rem 0.75rem;">
+                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Despacho</div>
+                        <div style="font-size:1rem; font-weight:700;" id="detailDespacho"></div>
                     </div>
                 </div>
+                <!-- Fila 2: Inició Rentando, Contrato Vence -->
+                <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:120px; background:var(--bg); border-radius:6px; padding:0.5rem 0.75rem;">
+                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Inició Rentando</div>
+                        <div style="font-size:0.95rem; font-weight:600;" id="detailFechaInicio"></div>
+                    </div>
+                    <div style="flex:1; min-width:120px; background:var(--bg); border-radius:6px; padding:0.5rem 0.75rem;">
+                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">Contrato Vence</div>
+                        <div style="font-size:0.95rem; font-weight:600;" id="detailFechaVenc"></div>
+                    </div>
+                </div>
+                <!-- Contactos -->
+                <div style="border:1px solid var(--border); border-radius:6px; padding:0.5rem 0.75rem; margin-bottom:0.5rem;">
+                    <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600; margin-bottom:0.25rem;">📞 Contactos</div>
+                    <div id="detailContactosList"></div>
+                </div>
+                <!-- Fila 3: RFC, CLABE -->
+                <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:120px; background:var(--bg); border-radius:6px; padding:0.5rem 0.75rem;">
+                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">RFC</div>
+                        <div style="font-size:0.9rem; font-weight:600;" id="detailRFC"></div>
+                    </div>
+                    <div style="flex:1; min-width:120px; background:var(--bg); border-radius:6px; padding:0.5rem 0.75rem;">
+                        <div style="font-size:0.7rem; color:var(--text-light); text-transform:uppercase; font-weight:600;">CLABE</div>
+                        <div style="font-size:0.9rem; font-weight:600;" id="detailClabe"></div>
+                    </div>
+                </div>
+                <!-- Contrato Original -->
+                <div id="contratoOriginalSection" style="margin-bottom:0.75rem;"></div>
+                <!-- Pestañas (sin Datos de Renta ni Contrato) -->
                 <div class="tabs-container">
                     <div class="tabs">
-                        <button class="tab active" onclick="switchTab('inquilino', 'renta')">Datos de Renta</button>
-                        <button class="tab" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos</button>
-                        <button class="tab" onclick="switchTab('inquilino', 'contrato')">Contrato Original</button>
+                        <button class="tab active" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos</button>
                         <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos Adicionales</button>
                         <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas</button>
                     </div>
-                    <div id="inquilinoRentaTab" class="tab-content active">
-                        <div class="info-grid">
-                            <div class="info-item"><div class="info-label">Renta Mensual</div><div class="info-value currency" id="detailRenta"></div></div>
-                            <div class="info-item"><div class="info-label">M²</div><div class="info-value" id="detailM2"></div></div>
-                            <div class="info-item"><div class="info-label">No. Despacho</div><div class="info-value" id="detailDespacho"></div></div>
-                            <div class="info-item"><div class="info-label">Inicio Rentando</div><div class="info-value" id="detailFechaInicio"></div></div>
-                            <div class="info-item"><div class="info-label">Vencimiento Contrato</div><div class="info-value" id="detailFechaVenc"></div></div>
-                        </div>
-                    </div>
-                    <div id="inquilinoPagosTab" class="tab-content">
+                    <div id="inquilinoPagosTab" class="tab-content active">
                         <div id="historialPagos"></div>
-                    </div>
-                    <div id="inquilinoContratoTab" class="tab-content">
-                        <div id="contratoOriginalSection"></div>
                     </div>
                     <div id="inquilinoDocsTab" class="tab-content">
                         <div id="documentosAdicionales"></div>
