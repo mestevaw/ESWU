@@ -9,11 +9,60 @@
     <title>ESWU - Sistema de Administración</title>
     <link rel="stylesheet" href="css/base.css?v=22">
     <link rel="stylesheet" href="css/layout.css?v=22">
-    <link rel="stylesheet" href="css/components.css?v=22">
+    <link rel="stylesheet" href="css/components.css?v=23">
     <link rel="stylesheet" href="css/modals.css?v=22">
-    <link rel="stylesheet" href="css/tables.css?v=22">
+    <link rel="stylesheet" href="css/tables.css?v=23">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a365d">
     <link rel="stylesheet" href="css/pages.css?v=22">
-    <link rel="stylesheet" href="css/utilities.css?v=22">
+    <link rel="stylesheet" href="css/utilities.css?v=23">
+    <style>
+        .file-drop-zone {
+            margin-top: 0.5rem;
+            padding: 0.8rem;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.82rem;
+            color: #94a3b8;
+            transition: all 0.2s;
+            cursor: default;
+        }
+        .file-drop-zone.drag-over {
+            border-color: var(--primary);
+            background: rgba(59,130,246,0.06);
+            color: var(--primary);
+        }
+        @media (max-width: 600px) {
+            .hide-mobile { display: none !important; }
+            .show-mobile-only { display: block !important; }
+            #proveedoresFacturasPorPagarTable,
+            #proveedoresFacturasPagadasTable,
+            #proveedoresTable,
+            #inquilinosTable,
+            #inquilinosRentasRecibidasTable,
+            #inquilinosVencimientoContratosTable,
+            #usuariosTable,
+            #activosTable,
+            #estacionamientoTable,
+            #bitacoraTable { display: none !important; }
+            .filter-section { flex-wrap: wrap; gap: 0.3rem; }
+            .filter-section label { font-size: 0.85rem; }
+            .filter-section select { font-size: 0.85rem; min-width: 0; }
+            .card { padding: 0; overflow: hidden; }
+            .card-header { padding: 0.6rem 0.6rem; }
+            .card .table-container { padding: 0; }
+            .card > div[style*="padding: 1.5rem"] { padding: 0.3rem !important; }
+            /* Prevent iOS text auto-sizing */
+            .show-mobile-only, .show-mobile-only * {
+                -webkit-text-size-adjust: 100%;
+                text-size-adjust: 100%;
+            }
+        }
+        @media (min-width: 601px) {
+            .show-mobile-only { display: none !important; }
+        }
+    </style>
 </head>
 <body>
     <div id="loadingOverlay" class="loading-overlay hidden">
@@ -49,6 +98,7 @@
                 <button class="btn-icon clear" onclick="clearSearch()" title="Limpiar">🧹</button>
             </div>
             <div class="header-actions">
+                <button id="btnNotif" class="btn-notif" onclick="toggleNotifPanel()" title="Notificaciones" style="position:relative; background:none; border:none; font-size:1.3rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🔔<span id="notifBadge" style="display:none; position:absolute; top:-2px; right:-2px; background:#ef4444; color:white; font-size:0.65rem; font-weight:700; min-width:16px; height:16px; border-radius:8px; justify-content:center; align-items:center; padding:0 3px;">0</span></button>
                 <button id="btnSearch" class="btn-search hidden" onclick="toggleSearch()">🔍</button>
                 <button id="btnRegresa" class="btn-regresa-simple hidden" onclick="handleRegresa()" style="color:var(--danger);">✖</button>
             </div>
@@ -61,11 +111,32 @@
         
         <div class="main-content">
             <div class="menu-sidebar" id="menuSidebar">
+                <button id="menuAdmin" class="menu-btn" onclick="showSubMenu('admin')">Admin</button>
+                <button id="menuEswu" class="menu-btn" onclick="showEswuFicha()">ESWU</button>
                 <button id="menuInquilinos" class="menu-btn" onclick="showSubMenu('inquilinos')">Inquilinos</button>
                 <button id="menuProveedores" class="menu-btn" onclick="showSubMenu('proveedores')">Proveedores</button>
-                <button id="menuAdmin" class="menu-btn" onclick="showSubMenu('admin')">Admin</button>
                 <button class="menu-btn menu-btn-secondary" onclick="logout()">Salir</button>
             </div>
+
+            <!-- MOBILE MENU (solo visible en celular) -->
+            <div id="mobileMenu" class="mobile-menu">
+                <div id="mobileMenuMain" class="mm-main">
+                    <div class="mm-buttons">
+                        <button class="mm-btn" onclick="mobileMenuSelect('admin')"><span class="mm-icon">⚙️</span> Admin</button>
+                        <button class="mm-btn" id="mmBtnEswu" onclick="mobileMenuSelect('eswu')"><span class="mm-icon">🏢</span> ESWU</button>
+                        <button class="mm-btn" id="mmBtnInquilinos" onclick="mobileMenuSelect('inquilinos')"><span class="mm-icon">👥</span> Inquilinos</button>
+                        <button class="mm-btn" id="mmBtnProveedores" onclick="mobileMenuSelect('proveedores')"><span class="mm-icon">🔧</span> Proveedores</button>
+                    </div>
+                    <div class="mm-footer"><span onclick="logout()" style="cursor:pointer; color:var(--text-light); font-size:0.82rem;">Cerrar sesión</span></div>
+                </div>
+                <div id="mobileMenuSub" class="mm-sub" style="display:none;">
+                    <div id="mmSubTitle" class="mm-sub-title"></div>
+                    <div id="mmSubButtons" class="mm-sub-buttons"></div>
+                    <button class="mm-back" onclick="mobileMenuBack()">← Menú principal</button>
+                </div>
+            </div>
+
+            <div id="eswuSubMenu" class="submenu-container" style="display:none;"></div>
 
             <div id="inquilinosSubMenu" class="submenu-container">
                 <button class="submenu-btn" onclick="showInquilinosView('list')">Listado</button>
@@ -77,16 +148,15 @@
                 <button class="submenu-btn" onclick="showProveedoresView('list')">Listado</button>
                 <button class="submenu-btn" onclick="showProveedoresView('facturasPagadas')">Facturas Pagadas</button>
                 <button class="submenu-btn" onclick="showProveedoresView('facturasPorPagar')">Facturas X Pagar</button>
+                <button class="submenu-btn" onclick="showProveedoresView('mantenimiento')">Mantenimiento</button>
             </div>
 
             <div id="adminSubMenu" class="submenu-container">
                 <button class="submenu-btn" onclick="showActivosPage()">Activos</button>
-                <button class="submenu-btn" onclick="showAdminView('bancos')">Bancos</button>
                 <button class="submenu-btn" onclick="showPageFromMenu('bitacora')">Bitácora</button>
                 <button class="submenu-btn" onclick="showContabilidadPage()">Contabilidad</button>
                 <button class="submenu-btn" onclick="showPageFromMenu('estacionamiento')">Estacionamiento</button>
                 <button class="submenu-btn" onclick="showNumerosPage()">Números</button>
-                <button class="submenu-btn" onclick="showAdminView('usuarios')">Usuarios</button>
             </div>
 
             <div id="contentArea" class="content-area">
@@ -179,7 +249,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2 class="card-title">Rentas</h2>
-                                <button class="btn-excel-icon" onclick="exportarRentasExcel()" title="Exportar a Excel">📊</button>
+                                <span onclick="exportarRentasExcel()" title="Exportar a Excel" style="font-size:1.3rem; cursor:pointer; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">📊</span>
                             </div>
                             <div style="padding: 1.5rem;">
                                 <div class="filter-section">
@@ -217,7 +287,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h2 class="card-title">Vencimiento de Contratos</h2>
-                                <button class="btn-excel-icon" onclick="exportarContratosExcel()" title="Exportar a Excel">📊</button>
+                                <span onclick="exportarContratosExcel()" title="Exportar a Excel" style="font-size:1.3rem; cursor:pointer; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">📊</span>
                             </div>
                             <div class="table-container">
                                 <table id="inquilinosVencimientoContratosTable" class="sticky-header-table">
@@ -307,10 +377,24 @@
                                 </select>
                             </div>
                             <div class="table-container">
-                             <table id="proveedoresFacturasPorPagarTable">
-    <thead><tr><th>Proveedor</th><th>Número</th><th>Monto</th><th>Vencimiento</th><th style="width:80px">Acciones</th></tr></thead>
+                             <table id="proveedoresFacturasPorPagarTable" style="width:100%;">
+    <thead><tr><th>Proveedor</th><th>Número</th><th style="text-align:right">Monto</th><th>Vencimiento</th><th style="width:70px">Acciones</th></tr></thead>
     <tbody></tbody>
 </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mantenimiento Global -->
+                <div id="proveedoresMantenimientoView" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Mantenimiento — Trabajos Pendientes</h2>
+                        </div>
+                        <div style="padding:1rem;">
+                            <div id="mantenimientoGlobalContent">
+                                <p style="text-align:center; color:var(--text-light); padding:2rem;">Cargando...</p>
                             </div>
                         </div>
                     </div>
@@ -321,7 +405,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title">Activos</h2>
-                            <button class="btn btn-primary" onclick="showAddActivoModal()">+ Agregar</button>
+                            <span class="btn-add-inline" onclick="showAddActivoModal()" title="Agregar activo" style="font-size:1.5rem; cursor:pointer;">+</span>
                         </div>
                         <div class="table-container">
                             <table id="activosTable" class="sticky-header-table">
@@ -332,14 +416,80 @@
                     </div>
                 </div>
 
+                <!-- ESWU Ficha Page -->
+                <div id="eswuDocsPage" class="page">
+                    <div class="card" style="max-width:1050px; margin:0 auto;">
+                        <div class="modal-header modal-header-sticky" style="position:sticky;top:0;z-index:10;background:white;border-bottom:1px solid var(--border);padding:0.75rem 1rem;">
+                            <h2 class="modal-title">INMOBILIARIS ESWU</h2>
+                            <div style="display:flex; align-items:center; gap:0.25rem;">
+                                <span onclick="editEswuUsuarios()" title="Administrar usuarios" style="cursor:pointer; font-size:1.1rem; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
+                                <button class="close-modal" onclick="handleRegresa()" style="position:static">×</button>
+                            </div>
+                        </div>
+                        <div style="padding:1.25rem;">
+                            <!-- Acta Constitutiva -->
+                            <div id="eswuActaSection" style="margin-bottom:0.5rem;"></div>
+                            <!-- Contactos (usuarios) -->
+                            <div style="margin-bottom:0.5rem;">
+                                <div id="eswuContactsList"></div>
+                            </div>
+                            <!-- Pestañas -->
+                            <div class="tabs-container">
+                                <div class="tabs">
+                                    <button class="tab active" onclick="switchTab('eswu', 'legales')">Documentos Legales<span class="btn-add-inline" onclick="event.stopPropagation(); uploadToEswuFolder('legales');" title="Subir documento" style="color:var(--success);">+</span></button>
+                                    <button class="tab" onclick="switchTab('eswu', 'generales')">Documentos Generales<span class="btn-add-inline" onclick="event.stopPropagation(); uploadToEswuFolder('generales');" title="Subir documento" style="color:var(--success);">+</span></button>
+                                    <button class="tab" onclick="switchTab('eswu', 'mensajes')">Mensajes<span class="btn-add-inline" onclick="event.stopPropagation(); showNuevoMensajeFicha('eswu');" title="Nuevo Mensaje" style="color:var(--success);">+</span></button>
+                                    <button class="tab" onclick="switchTab('eswu', 'bancos')">Bancos<span class="btn-add-inline" onclick="event.stopPropagation(); showAddBancoModal();" title="Agregar documento" style="color:var(--success);">+</span></button>
+                                </div>
+                                <div id="eswuLegalesTab" class="tab-content active">
+                                    <div style="margin-bottom:0.5rem;">
+                                        <input type="text" id="eswuLegalesSearch" placeholder="🔍 Buscar documento..." onkeyup="filterEswuDocs('legales')" style="width:100%;padding:0.35rem 0.6rem;border:1px solid var(--border);border-radius:4px;font-size:0.85rem;">
+                                    </div>
+                                    <div id="eswuLegalesBreadcrumb" style="margin-bottom:0.3rem;"></div>
+                                    <div id="eswuLegalesContent"></div>
+                                    <div id="dropZoneLegales" class="file-drop-zone" ondragover="event.preventDefault(); this.classList.add('drag-over');" ondragleave="this.classList.remove('drag-over');" ondrop="event.preventDefault(); this.classList.remove('drag-over'); handleEswuDrop('legales', event.dataTransfer.files);">
+                                        📁 Arrastra archivos aquí para subir
+                                    </div>
+                                </div>
+                                <div id="eswuGeneralesTab" class="tab-content">
+                                    <div style="margin-bottom:0.5rem;">
+                                        <input type="text" id="eswuGeneralesSearch" placeholder="🔍 Buscar documento..." onkeyup="filterEswuDocs('generales')" style="width:100%;padding:0.35rem 0.6rem;border:1px solid var(--border);border-radius:4px;font-size:0.85rem;">
+                                    </div>
+                                    <div id="eswuGeneralesBreadcrumb" style="margin-bottom:0.3rem;"></div>
+                                    <div id="eswuGeneralesContent"></div>
+                                    <div id="dropZoneGenerales" class="file-drop-zone" ondragover="event.preventDefault(); this.classList.add('drag-over');" ondragleave="this.classList.remove('drag-over');" ondrop="event.preventDefault(); this.classList.remove('drag-over'); handleEswuDrop('generales', event.dataTransfer.files);">
+                                        📁 Arrastra archivos aquí para subir
+                                    </div>
+                                </div>
+                                <div id="eswuMensajesTab" class="tab-content">
+                                    <div id="eswuMensajesFicha"></div>
+                                </div>
+                                <div id="eswuBancosTab" class="tab-content">
+                                    <div class="table-container">
+                                        <table id="eswuBancosTable" class="sticky-header-table">
+                                            <thead><tr><th style="cursor:pointer;" onclick="toggleDocSort('eswuBancosTable', 0)">Archivo ▲</th><th>Año</th><th>Mes</th><th>Tipo</th></tr></thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                    <div class="file-drop-zone" ondragover="event.preventDefault(); this.classList.add('drag-over');" ondragleave="this.classList.remove('drag-over');" ondrop="event.preventDefault(); this.classList.remove('drag-over'); handleBancoDrop(event.dataTransfer.files);">
+                                        📁 Arrastra documentos bancarios aquí
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Contabilidad Page -->
                 <div id="contabilidadPage" class="page">
                     <div class="card">
                         <div class="card-header" style="flex-wrap:wrap; gap:0.5rem;">
-                            <h2 class="card-title">Contabilidad - Documentos</h2>
+                            <div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:0;">
+                                <span id="contabilidadHomeBtn" onclick="contabilidadGoHome()" title="Inicio Contabilidad" style="display:none; font-size:1.1rem; cursor:pointer; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">←</span>
+                                <h2 id="contabilidadTitle" class="card-title" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Contabilidad</h2>
+                            </div>
                             <div style="display:flex; align-items:center; gap:0.4rem;">
-                                <span id="contabilidadUploadBtn" onclick="uploadToCurrentFolder()" title="Subir documento" style="display:none; color:var(--primary); font-size:1.3rem; cursor:pointer; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">📤</span>
-                                <span id="contabilidadHomeBtn" onclick="contabilidadGoHome()" title="Inicio Contabilidad" style="display:none; font-size:1.3rem; cursor:pointer; padding:0.15rem 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">🏠</span>
+                                <span id="contabilidadUploadBtn" onclick="uploadToCurrentFolder()" title="Subir documento" style="display:none; color:var(--success); font-size:1.6rem; font-weight:700; cursor:pointer; padding:0 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">+</span>
                             </div>
                         </div>
                         <div style="padding:1rem; position:relative;">
@@ -352,8 +502,6 @@
                                     <button onclick="searchContabilidadDocs()" style="padding:0.4rem 0.6rem; background:var(--primary); color:white; border:none; border-radius:4px; cursor:pointer; font-size:0.9rem;">🔍</button>
                                 </div>
                             </div>
-                            <!-- Breadcrumb -->
-                            <div id="contabilidadBreadcrumb" style="display:none; margin-bottom:0.75rem; font-size:0.85rem;"></div>
                             <!-- Años -->
                             <div id="contabilidadAnios" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;"></div>
                             <!-- Content area (months, subfolders, files) -->
@@ -362,37 +510,6 @@
                     </div>
                 </div>
 
-                <div id="adminUsuariosPage" class="page">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Usuarios</h2>
-                            <span onclick="showAddUsuarioModal()" title="Agregar usuario" style="color:var(--success); font-size:1.6rem; font-weight:700; cursor:pointer; padding:0 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">+</span>
-                        </div>
-                        <div class="table-container">
-                            <table id="usuariosTable" class="sticky-header-table">
-                                <thead><tr><th>Nombre</th><th>Email</th><th>Password</th><th>Nivel</th><th>Estado</th><th style="width:40px;"></th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="adminBancosPage" class="page">
-                    <div class="card">
-                        <div class="card-header" style="flex-wrap:wrap; gap:0.5rem;">
-                            <h2 class="card-title">Bancos - Documentos</h2>
-                            <span onclick="showAddBancoModal()" title="Agregar documento" style="color:var(--success); font-size:1.6rem; font-weight:700; cursor:pointer; padding:0 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">+</span>
-                        </div>
-                        <div class="table-container">
-                            <table id="bancosTable" class="sticky-header-table">
-                                <thead><tr><th>Archivo</th><th>Año</th><th>Mes</th><th>Tipo</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                        <!-- Vinculación tool area -->
-                        <div id="bancoVinculacionArea" style="display:none; padding:1rem; border-top:1px solid var(--border);"></div>
-                    </div>
-                </div>
 
                 <div id="estacionamientoPage" class="page">
                     <div class="card">
@@ -429,10 +546,24 @@
                     </div>
                 </div>
 
-            </div>
-        </div>
+                <!-- Mensajes / Notificaciones Page -->
+                <div id="mensajesPage" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Notificaciones</h2>
+                        </div>
+                        <div style="padding:0 1rem;">
+                            <div style="display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:1rem;">
+                                <button class="tab active" data-tab="alertas" onclick="switchMensajesTab('alertas')" style="position:relative; padding:0.6rem 1rem; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-2px; cursor:pointer; font-size:0.9rem; font-weight:500;">⚠️ Alertas <span id="tabBadgeAlertas" style="display:none; background:#ef4444; color:white; font-size:0.65rem; font-weight:700; min-width:16px; height:16px; border-radius:8px; justify-content:center; align-items:center; padding:0 3px; margin-left:0.3rem; vertical-align:middle;">0</span></button>
+                                <button class="tab" data-tab="recibidos" onclick="switchMensajesTab('recibidos')" style="position:relative; padding:0.6rem 1rem; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-2px; cursor:pointer; font-size:0.9rem; font-weight:500;">✉️ Mensajes <span id="tabBadgeMensajes" style="display:none; background:#ef4444; color:white; font-size:0.65rem; font-weight:700; min-width:16px; height:16px; border-radius:8px; justify-content:center; align-items:center; padding:0 3px; margin-left:0.3rem; vertical-align:middle;">0</span></button>
+                                <button class="tab" data-tab="avisos" onclick="switchMensajesTab('avisos')" style="position:relative; padding:0.6rem 1rem; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-2px; cursor:pointer; font-size:0.9rem; font-weight:500;">📢 Avisos <span id="tabBadgeAvisos" style="display:none; background:#ef4444; color:white; font-size:0.65rem; font-weight:700; min-width:16px; height:16px; border-radius:8px; justify-content:center; align-items:center; padding:0 3px; margin-left:0.3rem; vertical-align:middle;">0</span></button>
+                            </div>
+                            <div id="mensajesContent" style="min-height:200px;"></div>
+                        </div>
+                    </div>
+                </div>
 
-<!-- ========== FIN PARTE 2 ========== -->
+            </div> -->
 <!-- CONTINÚA EN PARTE 3 (MODALS) -->
         <!-- ========== PARTE 3 de 3 ========== -->
 <!-- PEGA ESTO JUSTO DESPUÉS DE LA PARTE 2 -->
@@ -501,7 +632,7 @@
                     <div class="tabs">
                         <button class="tab active" onclick="switchTab('inquilino', 'pagos')">Historial de Pagos<span class="btn-add-inline" onclick="event.stopPropagation(); exportHistorialPagosExcel();" title="Exportar a Excel" style="font-size:0.85rem; margin-left:0.3rem;">📊</span></button>
                         <button class="tab" onclick="switchTab('inquilino', 'docs')">Documentos<span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoModal();" title="Agregar Documentos" style="color:var(--success);">+</span></button>
-                        <button class="tab" onclick="switchTab('inquilino', 'notas')">Notas<span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarNotaModal();" title="Agregar Nota" style="color:var(--success);">+</span></button>
+                        <button class="tab" onclick="switchTab('inquilino', 'notas')">Mensajes<span class="btn-add-inline" onclick="event.stopPropagation(); showNuevoMensajeFicha('inquilino');" title="Nuevo Mensaje" style="color:var(--success);">+</span></button>
                     </div>
                     <div id="inquilinoPagosTab" class="tab-content active">
                         <div id="historialPagos"></div>
@@ -510,7 +641,7 @@
                         <div id="documentosAdicionales"></div>
                     </div>
                     <div id="inquilinoNotasTab" class="tab-content">
-                        <p id="notasInquilino"></p>
+                        <div id="inquilinoMensajesFicha"></div>
                     </div>
                 </div>
             </div>
@@ -561,6 +692,16 @@
                             <span onclick="showAddContactoInquilinoModal()" title="Agregar contacto" style="color:var(--success); font-size:1.4rem; font-weight:700; cursor:pointer; padding:0 0.3rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">+</span>
                         </div>
                         <div id="inquilinoContactosList"></div>
+                    </div>
+                    <div id="terminarContratoSection" class="hidden" style="border-top:1px solid var(--border); margin:0.75rem 0 0.5rem 0; padding-top:0.75rem;">
+                        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                            <strong style="font-size:0.9rem; color:var(--danger);">⚠️ Terminar Contrato</strong>
+                            <select id="terminarContratoSelect" onchange="toggleTerminarContratoFecha()" style="padding:0.3rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.85rem;">
+                                <option value="no">No</option>
+                                <option value="si">Sí, terminar</option>
+                            </select>
+                            <input type="date" id="terminarContratoFecha" class="hidden" style="padding:0.3rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.85rem;">
+                        </div>
                     </div>
                 </form>
             </div>
@@ -696,8 +837,9 @@
                     <div class="tabs" id="proveedorTabs">
                         <button class="tab active" onclick="switchTab('proveedor', 'pagadas')">Facturas Pagadas</button>
                         <button class="tab" onclick="switchTab('proveedor', 'porpagar')">Facturas X Pagar<span class="btn-add-inline" onclick="event.stopPropagation(); showRegistrarFacturaModal();" title="Agregar factura">+</span></button>
-                        <button class="tab" onclick="switchTab('proveedor', 'docs')">Documentos Adicionales<span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoProveedorModal();" title="Agregar documento">+</span></button>
-                        <button class="tab" onclick="switchTab('proveedor', 'notas')">Notas<span class="btn-add-inline" onclick="event.stopPropagation(); showEditNotasProveedorModal();" title="Editar notas">+</span></button>
+                        <button class="tab" onclick="switchTab('proveedor', 'docs')">Documentos<span class="btn-add-inline" onclick="event.stopPropagation(); showAgregarDocumentoProveedorModal();" title="Agregar documento">+</span></button>
+                        <button class="tab" onclick="switchTab('proveedor', 'mantenimiento')">Mantenimiento<span class="btn-add-inline" onclick="event.stopPropagation(); showNuevoTrabajoModal();" title="Nuevo trabajo" style="color:var(--success);">+</span></button>
+                        <button class="tab" onclick="switchTab('proveedor', 'notas')">Mensajes<span class="btn-add-inline" onclick="event.stopPropagation(); showNuevoMensajeFicha('proveedor');" title="Nuevo Mensaje" style="color:var(--success);">+</span></button>
                     </div>
                     <div id="proveedorPagadasTab" class="tab-content active">
                         <div id="facturasPagadas"></div>
@@ -708,8 +850,11 @@
                     <div id="proveedorDocsTab" class="tab-content">
                         <div id="proveedorDocumentosAdicionales"></div>
                     </div>
+                    <div id="proveedorMantenimientoTab" class="tab-content">
+                        <div id="proveedorMantenimientoContent"></div>
+                    </div>
                     <div id="proveedorNotasTab" class="tab-content">
-                        <div id="proveedorNotasContent"></div>
+                        <div id="proveedorMensajesFicha"></div>
                     </div>
                 </div>
             </div>
@@ -932,7 +1077,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title" id="addActivoTitle">Agregar Activo</h2>
-                <button class="close-modal" onclick="closeModal('addActivoModal')">×</button>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button type="submit" form="activoForm" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">💾</button>
+                    <button class="close-modal" onclick="closeModal('addActivoModal')">×</button>
+                </div>
             </div>
             <div style="padding: 1.5rem;">
                 <form id="activoForm" onsubmit="saveActivo(event)">
@@ -948,15 +1096,10 @@
                     <div class="form-group"><label>Notas</label><textarea id="activoNotas"></textarea></div>
                     <div class="form-group">
                         <label>Fotos</label>
-                        <div class="file-upload" onclick="document.getElementById('activoFotos').click()">
-                            <input type="file" id="activoFotos" accept="image/*" multiple>
-                            <p>Click para seleccionar fotos</p>
-                            <p id="activoFotosFileName" style="color: var(--success); margin-top: 0.5rem;"></p>
+                        <div id="activoDropZone" class="file-drop-zone" style="cursor:pointer; min-height:60px; display:flex; align-items:center; justify-content:center;" onclick="activoSelectFotos()" ondragover="event.preventDefault(); this.classList.add('drag-over');" ondragleave="this.classList.remove('drag-over');" ondrop="event.preventDefault(); this.classList.remove('drag-over'); addActivoFotos(event.dataTransfer.files);">
+                            📷 Arrastra fotos aquí o haz clic para seleccionar
                         </div>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeModal('addActivoModal')">Cancelar</button>
-                        <button type="submit" class="btn btn-success">Guardar</button>
+                        <div id="activoPendingFotos" style="margin-top:0.3rem;"></div>
                     </div>
                 </form>
             </div>
@@ -968,7 +1111,11 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title" id="activoDetailNombre"></h2>
-                <button class="close-modal" onclick="closeModal('activoDetailModal')">×</button>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <span onclick="editActivo()" title="Editar" style="cursor:pointer; font-size:1.1rem; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">✏️</span>
+                    <span onclick="deleteActivo()" title="Eliminar" style="cursor:pointer; font-size:1.1rem; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">🗑️</span>
+                    <button class="close-modal" onclick="closeModal('activoDetailModal')">×</button>
+                </div>
             </div>
             <div style="padding: 1.5rem;">
                 <div class="info-grid">
@@ -979,10 +1126,6 @@
                 <div class="info-item" style="margin-top: 1rem;"><div class="info-label">Notas</div><div class="info-value" id="detailActivoNotas"></div></div>
                 <h3 style="margin: 1.5rem 0 1rem 0;">Fotos</h3>
                 <div id="photoGallery" class="photo-gallery"></div>
-                <div class="modal-actions" style="margin-top: 1.5rem;">
-                    <button class="btn btn-primary" onclick="editActivo()">Editar</button>
-                    <button class="btn btn-danger" onclick="deleteActivo()">Eliminar</button>
-                </div>
             </div>
         </div>
     </div>
@@ -1030,6 +1173,131 @@
     </div>
 
     <!-- Modal Add Banco -->
+    <!-- Modal Subir Documento Contabilidad -->
+    <div id="contabilidadUploadModal" class="modal">
+        <div class="modal-content" style="max-width:450px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="contabilidadUploadTitle">Subir Documento</h2>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <span id="btnSaveContabilidadUpload" onclick="saveContabilidadUpload()" title="Guardar" style="font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s; opacity:0.4; pointer-events:none;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">💾</span>
+                    <button class="close-modal" onclick="cancelContabilidadUpload()">×</button>
+                </div>
+            </div>
+            <div style="padding:1.25rem;">
+                <div id="contabilidadUploadPath" style="margin-bottom:0.75rem; padding:0.4rem 0.6rem; background:#f0f9ff; border:1px solid #bfdbfe; border-radius:6px; font-size:0.82rem; color:var(--primary); font-weight:500;"></div>
+                <div id="contabilidadDropArea" class="file-drop-zone" style="cursor:pointer; min-height:80px; display:flex; align-items:center; justify-content:center;" onclick="contabilidadSelectFiles()" ondragover="event.preventDefault(); this.classList.add('drag-over');" ondragleave="this.classList.remove('drag-over');" ondrop="event.preventDefault(); this.classList.remove('drag-over'); addContabilidadFiles(event.dataTransfer.files);">
+                    📁 Arrastra archivos aquí o haz clic para seleccionar
+                </div>
+                <div id="contabilidadPendingList" style="margin-top:0.5rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Trabajo Mantenimiento -->
+    <div id="nuevoTrabajoModal" class="modal">
+        <div class="modal-content" style="max-width:450px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Trabajo</h2>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button type="submit" form="nuevoTrabajoForm" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">💾</button>
+                    <button class="close-modal" onclick="closeModal('nuevoTrabajoModal')">×</button>
+                </div>
+            </div>
+            <div style="padding:1.25rem;">
+                <form id="nuevoTrabajoForm" onsubmit="saveNuevoTrabajo(event)">
+                    <div style="margin-bottom:0.6rem;">
+                        <label style="font-weight:500; font-size:0.9rem; display:block; margin-bottom:0.2rem;">Activo</label>
+                        <select id="trabajoActivo" style="width:100%; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                            <option value="">-- Sin activo específico --</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom:0.6rem;">
+                        <label style="font-weight:500; font-size:0.9rem; display:block; margin-bottom:0.2rem;">Descripción *</label>
+                        <input type="text" id="trabajoDescripcion" required placeholder="Ej: Mantenimiento elevador" style="width:100%; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                    <div style="display:flex; gap:0.5rem; margin-bottom:0.6rem;">
+                        <div style="flex:1;">
+                            <label style="font-weight:500; font-size:0.9rem; display:block; margin-bottom:0.2rem;">Fecha solicitud</label>
+                            <input type="date" id="trabajoFechaSolicitud" style="width:100%; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-weight:500; font-size:0.9rem; display:block; margin-bottom:0.2rem;">Entrega estimada</label>
+                            <input type="date" id="trabajoFechaEntrega" style="width:100%; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                        </div>
+                    </div>
+                    <div style="margin-bottom:0.6rem;">
+                        <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.9rem; cursor:pointer;">
+                            <input type="checkbox" id="trabajoEsRecurrente" onchange="toggleRecurrenciaFields()">
+                            <span style="font-weight:500;">Es recurrente</span>
+                        </label>
+                    </div>
+                    <div id="trabajoRecurrenciaFields" style="display:none; margin-bottom:0.6rem; padding:0.5rem; background:#f8fafc; border:1px solid var(--border); border-radius:4px;">
+                        <label style="font-weight:500; font-size:0.85rem; display:block; margin-bottom:0.2rem;">Frecuencia</label>
+                        <select id="trabajoFrecuencia" style="width:100%; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                            <option value="">-- Seleccione --</option>
+                            <option value="mensual">Mensual</option>
+                            <option value="semestral">Semestral</option>
+                            <option value="anual">Anual</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom:0.4rem;">
+                        <label style="font-weight:500; font-size:0.9rem; display:block; margin-bottom:0.2rem;">Notas</label>
+                        <textarea id="trabajoNotas" rows="2" placeholder="Notas adicionales..." style="width:100%; padding:0.4rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.9rem; resize:vertical;"></textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalle Trabajo Mantenimiento -->
+    <div id="trabajoDetailModal" class="modal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="trabajoDetailTitle">Detalle Trabajo</h2>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <span id="btnDeleteTrabajo" onclick="deleteTrabajo()" title="Eliminar trabajo" style="cursor:pointer; font-size:1.1rem; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fed7d7'" onmouseout="this.style.background='transparent'">🗑️</span>
+                    <button class="close-modal" onclick="closeModal('trabajoDetailModal')">×</button>
+                </div>
+            </div>
+            <div style="padding:1.25rem;">
+                <!-- Estado -->
+                <div id="trabajoEstadoBar" style="display:flex; gap:0.3rem; margin-bottom:1rem; flex-wrap:wrap;"></div>
+                <!-- Info -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:1rem;">
+                    <div><span style="font-size:0.75rem; color:var(--text-light);">Activo</span><div id="trabajoDetailActivo" style="font-size:0.88rem; font-weight:500;">—</div></div>
+                    <div><span style="font-size:0.75rem; color:var(--text-light);">Proveedor</span><div id="trabajoDetailProveedor" style="font-size:0.88rem; font-weight:500;">—</div></div>
+                    <div><span style="font-size:0.75rem; color:var(--text-light);">Solicitud</span><div id="trabajoDetailFechaSolicitud" style="font-size:0.88rem;">—</div></div>
+                    <div><span style="font-size:0.75rem; color:var(--text-light);">Entrega estimada</span><div id="trabajoDetailFechaEntrega" style="font-size:0.88rem;">—</div></div>
+                </div>
+                <div id="trabajoDetailRecurrencia" style="display:none; margin-bottom:0.75rem; padding:0.3rem 0.5rem; background:#f0f9ff; border-radius:4px; font-size:0.82rem; color:var(--primary);">🔄 Recurrente</div>
+                <!-- Notas del trabajo -->
+                <div id="trabajoDetailNotas" style="margin-bottom:1rem;"></div>
+                <!-- Bitácora -->
+                <div style="margin-bottom:0.75rem;">
+                    <div style="font-size:0.85rem; font-weight:600; margin-bottom:0.4rem; color:var(--text);">Bitácora</div>
+                    <div id="trabajoDetailBitacora" style="max-height:150px; overflow-y:auto; margin-bottom:0.5rem; border:1px solid var(--border); border-radius:6px; padding:0.4rem;"></div>
+                    <div style="display:flex; gap:0.3rem;">
+                        <input type="text" id="trabajoBitacoraInput" placeholder="Agregar nota..." style="flex:1; padding:0.35rem 0.5rem; border:1px solid var(--border); border-radius:4px; font-size:0.85rem;" onkeypress="if(event.key==='Enter') addBitacoraNota()">
+                        <button onclick="addBitacoraNota()" style="padding:0.35rem 0.6rem; background:var(--primary); color:white; border:none; border-radius:4px; cursor:pointer; font-size:0.85rem;">+</button>
+                    </div>
+                </div>
+                <!-- Fotos placeholder -->
+                <div style="margin-bottom:0.75rem;">
+                    <div style="font-size:0.85rem; font-weight:600; margin-bottom:0.4rem; color:var(--text);">Fotos</div>
+                    <div id="trabajoDetailFotos" style="min-height:40px;"></div>
+                    <div class="file-drop-zone" style="margin-top:0.3rem; cursor:pointer; font-size:0.82rem;" onclick="selectTrabajoFotos()" ondragover="event.preventDefault(); this.classList.add('drag-over');" ondragleave="this.classList.remove('drag-over');" ondrop="event.preventDefault(); this.classList.remove('drag-over'); handleTrabajoFotosDrop(event.dataTransfer.files);">
+                        📷 Arrastra fotos aquí o haz clic
+                    </div>
+                </div>
+                <!-- Factura -->
+                <div style="margin-bottom:0.5rem;">
+                    <div style="font-size:0.85rem; font-weight:600; margin-bottom:0.4rem; color:var(--text);">Factura / Pago</div>
+                    <div id="trabajoDetailFactura"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="addBancoModal" class="modal">
         <div class="modal-content" style="max-width:400px;">
             <div class="modal-header">
@@ -1083,7 +1351,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">Editar Espacio <span id="editEspacioNumero"></span></h2>
-                <button class="close-modal" onclick="closeModal('editEstacionamientoModal')">×</button>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button onclick="saveEstacionamiento()" title="Guardar" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</button>
+                    <button class="close-modal" onclick="closeModal('editEstacionamientoModal')">×</button>
+                </div>
             </div>
             <div style="padding: 1.5rem;">
                 <div class="form-group">
@@ -1093,10 +1364,6 @@
                 <div class="form-group">
                     <label>Número de Despacho</label>
                     <input type="text" id="editEspacioDespacho" disabled style="background: var(--bg)">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('editEstacionamientoModal')">Cancelar</button>
-                    <button type="button" class="btn btn-success" onclick="saveEstacionamiento()">Guardar</button>
                 </div>
             </div>
         </div>
@@ -1259,11 +1526,109 @@
         </div>
     </div>
 
+    <!-- Modal: Detalle Mensaje -->
+    <div id="detalleMensajeModal" class="modal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="detalleMensajeAsunto"></h2>
+                <button class="close-modal" onclick="closeModal('detalleMensajeModal')">×</button>
+            </div>
+            <div style="padding:1rem 1.25rem;">
+                <div style="display:flex; gap:1rem; margin-bottom:0.75rem; font-size:0.85rem; color:var(--text-light);">
+                    <div><strong>De:</strong> <span id="detalleMensajeDe"></span></div>
+                    <div><strong>Para:</strong> <span id="detalleMensajePara"></span></div>
+                </div>
+                <div style="font-size:0.8rem; color:var(--text-light); margin-bottom:1rem;" id="detalleMensajeFecha"></div>
+                <div style="white-space:pre-wrap; font-size:0.9rem; line-height:1.5; padding:0.75rem; background:var(--bg); border-radius:6px;" id="detalleMensajeContenido"></div>
+                <div style="display:flex; gap:0.5rem; margin-top:1rem; justify-content:flex-end;">
+                    <button id="btnResponderMensaje" style="background:var(--primary);color:white;border:none;padding:0.45rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.85rem;">↩️ Responder</button>
+                    <button id="btnEliminarMensaje" style="background:var(--danger);color:white;border:none;padding:0.45rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.85rem;">🗑️ Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Nuevo Mensaje -->
+    <div id="nuevoMensajeModal" class="modal">
+        <div class="modal-content" style="max-width:540px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Mensaje</h2>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button type="submit" form="nuevoMensajeForm" title="Enviar" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:0.25rem 0.4rem;border-radius:4px;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">📤</button>
+                    <button class="close-modal" onclick="closeModal('nuevoMensajeModal')">×</button>
+                </div>
+            </div>
+            <div style="padding:1rem 1.25rem;">
+                <form id="nuevoMensajeForm" onsubmit="submitNuevoMensaje(event)">
+                    <input type="hidden" id="mensajeRefTipo" value="">
+                    <input type="hidden" id="mensajeRefId" value="">
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500;font-size:0.9rem;display:block;margin-bottom:0.25rem;">Para:</label>
+                        <select id="mensajeDestinatario" style="width:100%;padding:0.4rem 0.5rem;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;"></select>
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500;font-size:0.9rem;display:block;margin-bottom:0.25rem;">Asunto: *</label>
+                        <input type="text" id="mensajeAsunto" required autocomplete="off" style="width:100%;padding:0.4rem 0.5rem;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;">
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500;font-size:0.9rem;display:block;margin-bottom:0.25rem;">Mensaje: *</label>
+                        <textarea id="mensajeContenido" required rows="6" style="width:100%;padding:0.4rem 0.5rem;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;resize:vertical;"></textarea>
+                    </div>
+                    <div style="margin-bottom:0.25rem;">
+                        <input type="file" id="mensajeAdjuntoInput" multiple accept=".pdf,.xlsx,.xls,.doc,.docx,.csv,.jpg,.jpeg,.png" style="display:none;">
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.4rem;">
+                            <span id="btnAdjuntarDocs" style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.35rem 0.7rem;border:1px dashed var(--border);border-radius:6px;font-size:0.85rem;color:var(--text-light);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-light)'">📎 Adjuntar archivo local</span>
+                            <span id="btnElegirDrive" onclick="toggleDrivePicker()" style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.35rem 0.7rem;border:1px dashed var(--border);border-radius:6px;font-size:0.85rem;color:var(--text-light);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#16a34a';this.style.color='#16a34a'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-light)'">📁 Elegir de Drive</span>
+                        </div>
+                        <div id="drivePickerArea" style="display:none;margin-top:0.4rem;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+                            <div id="drivePickerBreadcrumb" style="padding:0.35rem 0.6rem;background:#f8fafc;border-bottom:1px solid var(--border);font-size:0.8rem;"></div>
+                            <div id="drivePickerContents" style="max-height:200px;overflow-y:auto;"></div>
+                        </div>
+                        <div id="mensajeDropZone" class="file-drop-zone" ondragover="event.preventDefault(); this.classList.add('drag-over');" ondragleave="this.classList.remove('drag-over');" ondrop="event.preventDefault(); this.classList.remove('drag-over'); handleMensajeDrop(event.dataTransfer.files);">
+                            📎 Arrastra archivos aquí para adjuntar
+                        </div>
+                        <div id="mensajeAdjuntosList" style="margin-top:0.4rem;"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Nuevo Aviso -->
+    <div id="nuevoAvisoModal" class="modal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Aviso</h2>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <button type="submit" form="nuevoAvisoForm" title="Publicar" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:0.25rem 0.4rem;border-radius:4px;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">📤</button>
+                    <button class="close-modal" onclick="closeModal('nuevoAvisoModal')">×</button>
+                </div>
+            </div>
+            <div style="padding:1rem 1.25rem;">
+                <form id="nuevoAvisoForm" onsubmit="submitNuevoAviso(event)">
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500;font-size:0.9rem;display:block;margin-bottom:0.25rem;">Título: *</label>
+                        <input type="text" id="avisoTitulo" required autocomplete="off" style="width:100%;padding:0.4rem 0.5rem;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;">
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500;font-size:0.9rem;display:block;margin-bottom:0.25rem;">Contenido: *</label>
+                        <textarea id="avisoContenido" required rows="4" style="width:100%;padding:0.4rem 0.5rem;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;resize:vertical;"></textarea>
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500;font-size:0.9rem;display:block;margin-bottom:0.25rem;">Fecha de expiración (opcional):</label>
+                        <input type="date" id="avisoExpiracion" style="width:100%;padding:0.4rem 0.5rem;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div id="pdfViewerOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10001;">
         <div style="position:absolute; top:0; right:0; padding:0.75rem; z-index:10002;">
             <button onclick="closePDFViewer()" style="background:var(--danger); color:white; border:none; border-radius:50%; width:44px; height:44px; font-size:1.5rem; font-weight:700; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.4);">✕</button>
         </div>
         <iframe id="pdfViewerIframe" style="width:100%; height:100%; border:none;"></iframe>
+        <img id="pdfViewerImg" style="display:none; max-width:100%; max-height:100%; width:auto; height:auto; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); object-fit:contain; border-radius:4px;">
     </div>
 
   <!-- Supabase Library -->
@@ -1275,23 +1640,78 @@
     
     <!-- JavaScript Files -->
     <script>console.log('%c ESWU v22 ', 'background:#1a365d;color:white;font-size:14px;padding:4px 8px;border-radius:4px;');</script>
-    <script src="js/config.js?v=22"></script>
-    <script src="js/google-drive.js?v=22"></script>
+    <!-- Modal: ESWU Editar Usuario -->
+    <div id="eswuEditUsuarioModal" class="modal">
+        <div class="modal-content" style="max-width:400px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="eswuEditUsuarioTitle">Editar Usuario</h2>
+                <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <span onclick="document.getElementById('eswuEditUsuarioForm').requestSubmit()" title="Guardar" style="cursor:pointer; font-size:1.2rem; padding:0.25rem 0.4rem; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'">💾</span>
+                    <button class="close-modal" onclick="closeModal('eswuEditUsuarioModal')">×</button>
+                </div>
+            </div>
+            <div style="padding:1rem 1.25rem;">
+                <form id="eswuEditUsuarioForm" onsubmit="saveEswuUsuario(event)">
+                    <input type="hidden" id="eswuUsuarioId" value="">
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500;font-size:0.85rem;display:block;margin-bottom:0.2rem;">Nombre:</label>
+                        <input type="text" id="eswuUsuarioNombre" required style="width:100%;padding:0.35rem 0.5rem;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;">
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500;font-size:0.85rem;display:block;margin-bottom:0.2rem;">Email:</label>
+                        <input type="email" id="eswuUsuarioEmail" style="width:100%;padding:0.35rem 0.5rem;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;">
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500;font-size:0.85rem;display:block;margin-bottom:0.2rem;">Password:</label>
+                        <input type="text" id="eswuUsuarioPassword" required style="width:100%;padding:0.35rem 0.5rem;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;">
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-weight:500;font-size:0.85rem;display:block;margin-bottom:0.2rem;">Nivel:</label>
+                        <select id="eswuUsuarioNivel" style="width:100%;padding:0.35rem 0.5rem;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;">
+                            <option value="1">1 - Admin</option>
+                            <option value="2">2 - Edita</option>
+                            <option value="3">3 - Consulta</option>
+                            <option value="4">4 - Contabilidad</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;">
+                            <input type="checkbox" id="eswuUsuarioActivo" checked> Activo
+                        </label>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js?v=23"></script>
+    <script src="js/google-drive.js?v=32"></script>
     <script src="js/database/db-core.js?v=22"></script>
-    <script src="js/database/db-inquilinos.js?v=22"></script>
+    <script src="js/database/db-inquilinos.js?v=23"></script>
     <script src="js/database/db-proveedores.js?v=22"></script>
     <script src="js/database/db-facturas.js?v=22"></script>
     <script src="js/database/db-fetch-docs.js?v=22"></script>
-    <script src="js/ui/navigation.js?v=22"></script>
+    <script src="js/database/db-admin.js?v=24"></script>
+    <script src="js/database/db-mensajes.js?v=23"></script>
+    <script src="js/ui/navigation.js?v=28"></script>
     <script src="js/ui/tables.js?v=22"></script>
-    <script src="js/ui/inquilinos-ui.js?v=22"></script>
-    <script src="js/ui/proveedores-ui.js?v=22"></script>
-    <script src="js/ui/admin-ui.js?v=22"></script>
-    <script src="js/ui/numeros-ui.js?v=22"></script>
-    <script src="js/modals/modals.js?v=22"></script>
+    <script src="js/ui/inquilinos-ui.js?v=31"></script>
+    <script src="js/ui/proveedores-ui.js?v=34"></script>
+    <script src="js/ui/mantenimiento-ui.js?v=2"></script>
+    <script src="js/ui/contabilidad-ui.js?v=25"></script>
+    <script src="js/ui/eswu-ui.js?v=31"></script>
+    <script src="js/ui/admin-ui.js?v=33"></script>
+    <script src="js/ui/numeros-ui.js?v=23"></script>
+    <script src="js/ui/mensajes-ui.js?v=29"></script>
+    <script src="js/modals/modals.js?v=23"></script>
     <script src="js/modals/inquilino-modals.js?v=22"></script>
     <script src="js/modals/proveedor-modals.js?v=22"></script>
-    <script src="js/main.js?v=22"></script>
+    <script src="js/main.js?v=24"></script>
+    <script>
+        // Prevent browser from opening files dropped outside drop zones
+        document.addEventListener('dragover', function(e) { e.preventDefault(); });
+        document.addEventListener('drop', function(e) { e.preventDefault(); });
+    </script>
 </body>
 </html>
 
