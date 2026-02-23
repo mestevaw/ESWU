@@ -24,12 +24,16 @@ function showAdminView(view) {
         document.getElementById('adminUsuariosPage').classList.add('active');
         ensureUsuariosLoaded().then(() => renderUsuariosTable());
     } else if (view === 'bancos') {
-        document.getElementById('adminBancosPage').classList.add('active');
-        ensureBancosLoaded().then(() => renderBancosTable());
+        // Bancos moved to ESWU ficha
+        if (typeof showEswuFicha === 'function') {
+            showEswuFicha();
+            setTimeout(function() { switchTab('eswu', 'bancos'); }, 300);
+        }
     }
 }
 
 function showActivosPage() {
+    if (isMobile()) hideMobileMenu();
     document.getElementById('adminSubMenu').classList.remove('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('activosPage').classList.add('active');
@@ -46,164 +50,7 @@ function showActivosPage() {
     ensureActivosLoaded().then(() => renderActivosTable());
 }
 
-function showNumerosPage() {
-    document.getElementById('adminSubMenu').classList.remove('active');
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('numerosPage').classList.add('active');
-    
-    currentSubContext = 'admin-numeros';
-    
-    document.getElementById('btnRegresa').classList.remove('hidden');
-    document.getElementById('btnSearch').classList.add('hidden');
-    
-    document.getElementById('contentArea').classList.remove('with-submenu');
-    document.getElementById('menuSidebar').classList.add('hidden');
-    document.getElementById('contentArea').classList.add('fullwidth');
-    
-    ensureInquilinosFullLoaded().then(() => {
-        ensureProveedoresFullLoaded().then(() => {
-            updateHomeView();
-        });
-    });
-}
-
-// ============================================
-// NÚMEROS PAGE (HOME)
-// ============================================
-
-function toggleHomeTable(tableName) {
-    const ingresosContainer = document.getElementById('homeIngresosContainer');
-    const pagosContainer = document.getElementById('homePagosContainer');
-    
-    if (currentHomeTable === tableName) {
-        ingresosContainer.classList.add('hidden');
-        pagosContainer.classList.add('hidden');
-        currentHomeTable = null;
-    } else {
-        if (tableName === 'ingresos') {
-            ingresosContainer.classList.remove('hidden');
-            pagosContainer.classList.add('hidden');
-            renderHomeIngresos();
-        } else if (tableName === 'pagos') {
-            ingresosContainer.classList.add('hidden');
-            pagosContainer.classList.remove('hidden');
-            renderHomePagosDetalle();
-        }
-        currentHomeTable = tableName;
-    }
-}
-
-function updateHomeView() {
-    const filterType = document.getElementById('homeFilter').value;
-    const year = parseInt(document.getElementById('homeYear').value);
-    const monthSelect = document.getElementById('homeMonth');
-    
-    if (filterType === 'mensual') {
-        monthSelect.classList.remove('hidden');
-    } else {
-        monthSelect.classList.add('hidden');
-    }
-    
-    const month = filterType === 'mensual' ? parseInt(monthSelect.value) : null;
-    let totalIngresos = 0;
-    let totalGastos = 0;
-    
-    inquilinos.forEach(inq => {
-        if (inq.pagos) {
-            inq.pagos.forEach(pago => {
-                const pd = new Date(pago.fecha + 'T00:00:00');
-                if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
-                    totalIngresos += pago.monto;
-                }
-            });
-        }
-    });
-    
-    proveedores.forEach(prov => {
-        if (prov.facturas) {
-            prov.facturas.forEach(fact => {
-                if (fact.fecha_pago) {
-                    const pd = new Date(fact.fecha_pago + 'T00:00:00');
-                    if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
-                        totalGastos += fact.monto;
-                    }
-                }
-            });
-        }
-    });
-    
-    document.getElementById('summaryIngresos').textContent = formatCurrency(totalIngresos);
-    document.getElementById('summaryGastos').textContent = formatCurrency(totalGastos);
-    document.getElementById('summaryNeto').textContent = formatCurrency(totalIngresos - totalGastos);
-    
-    if (currentHomeTable === 'ingresos') {
-        renderHomeIngresos();
-    } else if (currentHomeTable === 'pagos') {
-        renderHomePagosDetalle();
-    }
-}
-
-function renderHomeIngresos() {
-    const filterType = document.getElementById('homeFilter').value;
-    const year = parseInt(document.getElementById('homeYear').value);
-    const month = filterType === 'mensual' ? parseInt(document.getElementById('homeMonth').value) : null;
-    
-    const tbody = document.getElementById('homeIngresosTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    const pagos = [];
-    let total = 0;
-    
-    inquilinos.forEach(inq => {
-        if (inq.pagos) {
-            inq.pagos.forEach(pago => {
-                const pd = new Date(pago.fecha + 'T00:00:00');
-                if (pd.getFullYear() === year && (month === null || pd.getMonth() === month)) {
-                    pagos.push({
-                        inquilino: inq.nombre,
-                        inquilinoId: inq.id,
-                        fecha: pago.fecha,
-                        monto: pago.monto
-                    });
-                    total += pago.monto;
-                }
-            });
-        }
-    });
-    
-    pagos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    pagos.forEach(p => {
-        tbody.innerHTML += `
-            <tr class="clickable" style="cursor: pointer;" onclick="showInquilinoDetail(${p.inquilinoId})">
-                <td>${p.inquilino}</td>
-                <td>${formatDate(p.fecha)}</td>
-                <td class="currency">${formatCurrency(p.monto)}</td>
-            </tr>
-        `;
-    });
-    
-    if (pagos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-light)">No hay ingresos</td></tr>';
-    } else {
-        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        if (filterType === 'mensual') {
-            tbody.innerHTML += `<tr style="font-weight:bold;background:#e6f2ff"><td colspan="2" style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${monthNames[month].toUpperCase()} ${year}:</td><td class="currency" style="color:var(--primary);font-size:1.2rem">${formatCurrency(total)}</td></tr>`;
-        }
-        
-        let totalAnual = 0;
-        inquilinos.forEach(inq => {
-            if (inq.pagos) {
-                inq.pagos.forEach(pago => {
-                    const pd = new Date(pago.fecha + 'T00:00:00');
-                    if (pd.getFullYear() === year) {
-                        totalAnual += pago.monto;
-                    }
-                });
-            }
-        });
-        
-        tbody.innerHTML += `<tr style="font-weight:bold;background:#d4edda"><td colspan="2" style="text-align:right;padding:1rem;font-size:1.1rem">TOTAL ${year}:</td><td class="currency" style="color:var(--success);font-size:1.2rem">${formatCurrency(totalAnual)}</td></tr>`;
-    }
-}
+// showNumerosPage, toggleHomeTable, updateHomeView, renderHomeIngresos → en numeros-ui.js
 
 async function renderHomePagosDetalle() {
     await ensureProveedoresFullLoaded();
@@ -300,8 +147,20 @@ function renderUsuariosTable() {
     const tbody = document.getElementById('usuariosTable').querySelector('tbody');
     tbody.innerHTML = '';
     
+    // Mobile container
+    var mobileDiv = document.getElementById('usuariosMobileCards');
+    if (!mobileDiv) {
+        mobileDiv = document.createElement('div');
+        mobileDiv.id = 'usuariosMobileCards';
+        mobileDiv.className = 'show-mobile-only';
+        var tableContainer = document.getElementById('usuariosTable').parentElement;
+        tableContainer.parentElement.appendChild(mobileDiv);
+    }
+    mobileDiv.innerHTML = '';
+    
     const nivelLabels = { 1: 'Admin', 2: 'Edita', 3: 'Consulta', 4: 'Contabilidad' };
     
+    // DESKTOP
     usuarios.forEach(u => {
         const estadoBadge = u.activo 
             ? '<span class="badge badge-success">Activo</span>' 
@@ -322,7 +181,33 @@ function renderUsuariosTable() {
     
     if (usuarios.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-light)">No hay usuarios</td></tr>';
+        mobileDiv.innerHTML = '<p class="mc-empty">No hay usuarios</p>';
+        return;
     }
+    
+    // MOBILE
+    var h = '<div class="mc-list"><div class="mc-header">';
+    h += '<div class="mc-header-line"><span>Usuario</span><span>Nivel</span></div>';
+    h += '<div class="mc-header-line"><span>Email</span><span>Estado</span></div>';
+    h += '</div>';
+    
+    usuarios.forEach((u, idx) => {
+        var nivelLabel = nivelLabels[u.nivel] || 'N' + u.nivel;
+        var mcBadge = u.activo ? 'mc-badge-success' : 'mc-badge-danger';
+        var estado = u.activo ? 'Activo' : 'Inactivo';
+        var email = u.email || '—';
+        if (email.length > 25) email = email.substring(0, 23) + '…';
+        
+        h += '<div onclick="showUsuarioDetail(' + u.id + ')" class="mc-row' + (idx % 2 ? ' mc-row-odd' : '') + '">';
+        h += '<div class="mc-line"><div class="mc-title">' + u.nombre + '</div>';
+        h += '<span class="mc-meta-right">' + nivelLabel + '</span></div>';
+        h += '<div class="mc-line"><span class="mc-meta">' + email + '</span>';
+        h += '<span class="mc-badge ' + mcBadge + '">' + estado + '</span></div>';
+        h += '</div>';
+    });
+    
+    h += '</div>';
+    mobileDiv.innerHTML = h;
 }
 
 function showUsuarioDetail(id) {
@@ -383,55 +268,9 @@ async function saveUsuario(event) {
 // ============================================
 
 function renderBancosTable() {
-    const tbody = document.getElementById('bancosTable').querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    var mesesNombres = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    
-    // Sort by año desc, mes desc
-    var sorted = [...bancosDocumentos].sort((a, b) => {
-        if (b.anio !== a.anio) return (b.anio || 0) - (a.anio || 0);
-        return (b.mes || 0) - (a.mes || 0);
-    });
-    
-    var lastMonth = null;
-    var shadeToggle = true; // start true so first toggle makes it false = white
-    
-    sorted.forEach(b => {
-        var anio = b.anio || '';
-        var mes = b.mes ? mesesNombres[b.mes] : '';
-        var monthKey = '' + (b.anio || 0) + '-' + (b.mes || 0);
-        var tipo = b.tipo || 'Documento';
-        var nombre = b.nombre_archivo || '—';
-        var clickAction = '';
-        var rowStyle = '';
-        
-        // Toggle shade when month changes
-        if (monthKey !== lastMonth) {
-            shadeToggle = !shadeToggle;
-            lastMonth = monthKey;
-        }
-        
-        var bgColor = shadeToggle ? 'background:#f0f4f8;' : '';
-        
-        if (b.google_drive_file_id) {
-            var safeName = (b.nombre_archivo || tipo).replace(/'/g, "\\'");
-            clickAction = `onclick="viewDriveFileInline('${b.google_drive_file_id}', '${safeName}')"`;
-            rowStyle = 'cursor:pointer;';
-        }
-        
-        tbody.innerHTML += `
-            <tr ${clickAction} style="${rowStyle}${bgColor}">
-                <td style="font-size:0.85rem; word-break:break-word;">${nombre}</td>
-                <td>${anio}</td>
-                <td>${mes}</td>
-                <td>${tipo}</td>
-            </tr>
-        `;
-    });
-    
-    if (bancosDocumentos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay documentos</td></tr>';
+    // Bancos moved to ESWU ficha - redirect
+    if (typeof renderEswuBancosTable === 'function') {
+        renderEswuBancosTable();
     }
 }
 
@@ -659,6 +498,18 @@ function renderActivosTable() {
     const tbody = document.getElementById('activosTable').querySelector('tbody');
     tbody.innerHTML = '';
     
+    // Mobile container
+    var mobileDiv = document.getElementById('activosMobileCards');
+    if (!mobileDiv) {
+        mobileDiv = document.createElement('div');
+        mobileDiv.id = 'activosMobileCards';
+        mobileDiv.className = 'show-mobile-only';
+        var tableContainer = document.getElementById('activosTable').parentElement;
+        tableContainer.parentElement.appendChild(mobileDiv);
+    }
+    mobileDiv.innerHTML = '';
+    
+    // DESKTOP
     activos.forEach(act => {
         tbody.innerHTML += `
             <tr style="cursor: pointer;" onclick="showActivoDetail(${act.id})">
@@ -672,7 +523,31 @@ function renderActivosTable() {
     
     if (activos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light)">No hay activos</td></tr>';
+        mobileDiv.innerHTML = '<p class="mc-empty">No hay activos</p>';
+        return;
     }
+    
+    // MOBILE
+    var h = '<div class="mc-list"><div class="mc-header">';
+    h += '<div class="mc-header-line"><span>Activo</span><span>Próx. Mant.</span></div>';
+    h += '<div class="mc-header-line"><span>Proveedor</span><span>Último Mant.</span></div>';
+    h += '</div>';
+    
+    activos.forEach((act, idx) => {
+        var nombre = act.nombre.length > 30 ? act.nombre.substring(0, 28) + '…' : act.nombre;
+        var prov = act.proveedor || '—';
+        if (prov.length > 25) prov = prov.substring(0, 23) + '…';
+        
+        h += '<div onclick="showActivoDetail(' + act.id + ')" class="mc-row' + (idx % 2 ? ' mc-row-odd' : '') + '">';
+        h += '<div class="mc-line"><div class="mc-title">' + nombre + '</div>';
+        h += '<span class="mc-meta-right">' + formatDate(act.proximo_mant) + '</span></div>';
+        h += '<div class="mc-line"><span class="mc-meta">' + prov + '</span>';
+        h += '<span class="mc-meta-right">' + formatDate(act.ultimo_mant) + '</span></div>';
+        h += '</div>';
+    });
+    
+    h += '</div>';
+    mobileDiv.innerHTML = h;
 }
 
 function showActivoDetail(id) {
@@ -698,6 +573,191 @@ function showActivoDetail(id) {
 }
 
 // ============================================
+// ACTIVOS: SAVE / EDIT / DELETE
+// ============================================
+
+var activoPendingFotoFiles = [];
+
+function activoSelectFotos() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+    input.onchange = function() {
+        if (input.files.length) addActivoFotos(input.files);
+    };
+    input.click();
+}
+
+function addActivoFotos(fileList) {
+    for (var i = 0; i < fileList.length; i++) {
+        activoPendingFotoFiles.push(fileList[i]);
+    }
+    renderActivoPendingFotos();
+}
+
+function removeActivoFoto(idx) {
+    activoPendingFotoFiles.splice(idx, 1);
+    renderActivoPendingFotos();
+}
+
+function renderActivoPendingFotos() {
+    var div = document.getElementById('activoPendingFotos');
+    if (!div) return;
+    if (activoPendingFotoFiles.length === 0) { div.innerHTML = ''; return; }
+    var html = '';
+    activoPendingFotoFiles.forEach(function(f, i) {
+        html += '<div style="display:flex; align-items:center; gap:0.4rem; padding:0.25rem 0; border-bottom:1px solid #f1f5f9; font-size:0.82rem;">';
+        html += '<span>📷</span><span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + f.name + '</span>';
+        html += '<span onclick="removeActivoFoto(' + i + ')" style="cursor:pointer; color:var(--danger); font-weight:700;">✕</span>';
+        html += '</div>';
+    });
+    div.innerHTML = html;
+}
+
+async function saveActivo(event) {
+    event.preventDefault();
+    
+    var nombre = document.getElementById('activoNombre').value.trim();
+    var ultimoMant = document.getElementById('activoUltimoMant').value;
+    var proximoMant = document.getElementById('activoProximoMant').value;
+    var proveedor = document.getElementById('activoProveedor').value;
+    var notas = document.getElementById('activoNotas').value.trim();
+    
+    if (!nombre) { alert('Ingresa un nombre'); return; }
+    
+    showLoading();
+    try {
+        var record = {
+            nombre: nombre,
+            ultimo_mant: ultimoMant || null,
+            proximo_mant: proximoMant || null,
+            proveedor: proveedor || null,
+            notas: notas || null
+        };
+        
+        var activoId;
+        
+        if (isEditMode && currentActivoId) {
+            var { error } = await supabaseClient
+                .from('activos')
+                .update(record)
+                .eq('id', currentActivoId);
+            if (error) throw error;
+            activoId = currentActivoId;
+        } else {
+            var { data, error } = await supabaseClient
+                .from('activos')
+                .insert([record])
+                .select('id');
+            if (error) throw error;
+            activoId = data && data[0] ? data[0].id : null;
+        }
+        
+        // Upload photos to Drive if any
+        if (activoPendingFotoFiles.length > 0 && activoId && isGoogleConnected()) {
+            var provNombre = (proveedor || 'General').replace(/[\/\\]/g, '-');
+            var activoNombreSafe = nombre.replace(/[\/\\]/g, '-');
+            var fechaHoy = new Date().toISOString().split('T')[0];
+            
+            // Folder: Activos/{NombreActivo}/
+            var activosFolder = await findOrCreateSubfolder('Activos', null);
+            var activoFolder = await findOrCreateSubfolder(activoNombreSafe, activosFolder);
+            
+            // Count existing photos
+            var { data: existingFotos } = await supabaseClient
+                .from('activos_fotos')
+                .select('id')
+                .eq('activo_id', activoId);
+            var existingCount = (existingFotos || []).length;
+            
+            for (var i = 0; i < activoPendingFotoFiles.length; i++) {
+                var file = activoPendingFotoFiles[i];
+                var num = existingCount + i + 1;
+                var ext = file.name.split('.').pop() || 'jpg';
+                var autoName = activoNombreSafe + ' ' + fechaHoy + ' (' + num + ').' + ext;
+                
+                var renamedFile = new File([file], autoName, { type: file.type });
+                var result = await uploadFileToDrive(renamedFile, activoFolder);
+                
+                if (result && result.id) {
+                    await supabaseClient.from('activos_fotos').insert([{
+                        activo_id: activoId,
+                        foto_name: autoName,
+                        foto_data: 'drive:' + result.id
+                    }]);
+                }
+            }
+        } else if (activoPendingFotoFiles.length > 0 && activoId) {
+            // Fallback: store as base64 if Drive not connected
+            for (var j = 0; j < activoPendingFotoFiles.length; j++) {
+                var fotoFile = activoPendingFotoFiles[j];
+                var base64 = await fileToBase64(fotoFile);
+                await supabaseClient.from('activos_fotos').insert([{
+                    activo_id: activoId,
+                    foto_name: fotoFile.name,
+                    foto_data: base64
+                }]);
+            }
+        }
+        
+        activoPendingFotoFiles = [];
+        closeModal('addActivoModal');
+        await loadActivos();
+        renderActivosTable();
+        
+    } catch (e) {
+        alert('Error: ' + e.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function editActivo() {
+    var act = activos.find(function(a) { return a.id === currentActivoId; });
+    if (!act) return;
+    
+    isEditMode = true;
+    document.getElementById('addActivoTitle').textContent = 'Editar Activo';
+    document.getElementById('activoNombre').value = act.nombre || '';
+    document.getElementById('activoUltimoMant').value = act.ultimo_mant || '';
+    document.getElementById('activoProximoMant').value = act.proximo_mant || '';
+    document.getElementById('activoNotas').value = act.notas || '';
+    
+    populateProveedoresDropdown();
+    document.getElementById('activoProveedor').value = act.proveedor || '';
+    
+    activoPendingFotoFiles = [];
+    var pendingDiv = document.getElementById('activoPendingFotos');
+    if (pendingDiv) pendingDiv.innerHTML = '';
+    
+    closeModal('activoDetailModal');
+    document.getElementById('addActivoModal').classList.add('active');
+}
+
+async function deleteActivo() {
+    if (!currentActivoId) return;
+    if (!confirm('¿Eliminar este activo y todas sus fotos?')) return;
+    
+    showLoading();
+    try {
+        // Delete fotos first
+        await supabaseClient.from('activos_fotos').delete().eq('activo_id', currentActivoId);
+        
+        var { error } = await supabaseClient.from('activos').delete().eq('id', currentActivoId);
+        if (error) throw error;
+        
+        closeModal('activoDetailModal');
+        await loadActivos();
+        renderActivosTable();
+    } catch (e) {
+        alert('Error: ' + e.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
 // ESTACIONAMIENTO
 // ============================================
 
@@ -705,6 +765,18 @@ function renderEstacionamientoTable() {
     const tbody = document.getElementById('estacionamientoTable').querySelector('tbody');
     tbody.innerHTML = '';
     
+    // Mobile container
+    var mobileDiv = document.getElementById('estacionamientoMobileCards');
+    if (!mobileDiv) {
+        mobileDiv = document.createElement('div');
+        mobileDiv.id = 'estacionamientoMobileCards';
+        mobileDiv.className = 'show-mobile-only';
+        var tableContainer = document.getElementById('estacionamientoTable').parentElement;
+        tableContainer.parentElement.appendChild(mobileDiv);
+    }
+    mobileDiv.innerHTML = '';
+    
+    // DESKTOP
     estacionamiento.forEach(esp => {
         const espacioCell = `<span class="estacionamiento-espacio" style="background: ${esp.color_asignado}">${esp.numero_espacio}</span>`;
         const inquilinoText = esp.inquilino_nombre || '-';
@@ -718,6 +790,31 @@ function renderEstacionamientoTable() {
             </tr>
         `;
     });
+    
+    if (estacionamiento.length === 0) {
+        mobileDiv.innerHTML = '<p class="mc-empty">No hay espacios</p>';
+        return;
+    }
+    
+    // MOBILE
+    var h = '<div class="mc-list"><div class="mc-header">';
+    h += '<div class="mc-header-line"><span>Espacio</span><span>Despacho</span></div>';
+    h += '<div class="mc-header-line"><span>Inquilino</span><span></span></div>';
+    h += '</div>';
+    
+    estacionamiento.forEach((esp, idx) => {
+        var inquilino = esp.inquilino_nombre || '—';
+        if (inquilino.length > 30) inquilino = inquilino.substring(0, 28) + '…';
+        
+        h += '<div onclick="showEditEstacionamientoModal(' + esp.id + ')" class="mc-row' + (idx % 2 ? ' mc-row-odd' : '') + '">';
+        h += '<div class="mc-line"><div class="mc-title" style="flex:none;"><span class="mc-espacio" style="background:' + esp.color_asignado + ';">' + esp.numero_espacio + '</span></div>';
+        h += '<span class="mc-meta-right">' + (esp.numero_despacho || '—') + '</span></div>';
+        h += '<div class="mc-line"><span class="mc-meta">' + inquilino + '</span></div>';
+        h += '</div>';
+    });
+    
+    h += '</div>';
+    mobileDiv.innerHTML = h;
 }
 
 function showEditEstacionamientoModal(espacioId) {
@@ -744,44 +841,23 @@ function showEditEstacionamientoModal(espacioId) {
 let estacionamientoSortOrder = { espacio: 'asc', inquilino: 'asc' };
 
 function sortEstacionamiento(columna) {
-    const tbody = document.getElementById('estacionamientoTable').querySelector('tbody');
-    
-    let sortedData = [...estacionamiento];
-    
     if (columna === 'espacio') {
-        sortedData.sort((a, b) => {
+        estacionamiento.sort((a, b) => {
             const numA = parseInt(a.numero_espacio);
             const numB = parseInt(b.numero_espacio);
             return estacionamientoSortOrder.espacio === 'asc' ? numA - numB : numB - numA;
         });
         estacionamientoSortOrder.espacio = estacionamientoSortOrder.espacio === 'asc' ? 'desc' : 'asc';
     } else if (columna === 'inquilino') {
-        sortedData.sort((a, b) => {
+        estacionamiento.sort((a, b) => {
             const nameA = (a.inquilino_nombre || '').toLowerCase();
             const nameB = (b.inquilino_nombre || '').toLowerCase();
-            if (estacionamientoSortOrder.inquilino === 'asc') {
-                return nameA.localeCompare(nameB);
-            } else {
-                return nameB.localeCompare(nameA);
-            }
+            return estacionamientoSortOrder.inquilino === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
         });
         estacionamientoSortOrder.inquilino = estacionamientoSortOrder.inquilino === 'asc' ? 'desc' : 'asc';
     }
     
-    tbody.innerHTML = '';
-    sortedData.forEach(esp => {
-        const espacioCell = `<span class="estacionamiento-espacio" style="background: ${esp.color_asignado}">${esp.numero_espacio}</span>`;
-        const inquilinoText = esp.inquilino_nombre || '-';
-        const despachoText = esp.numero_despacho || '-';
-        
-        tbody.innerHTML += `
-            <tr onclick="showEditEstacionamientoModal(${esp.id})" style="cursor:pointer">
-                <td>${espacioCell}</td>
-                <td>${inquilinoText}</td>
-                <td>${despachoText}</td>
-            </tr>
-        `;
-    });
+    renderEstacionamientoTable();
 }
 
 // ============================================
@@ -796,8 +872,20 @@ function renderBitacoraTable() {
     
     tbody.innerHTML = '';
     
+    // Mobile container
+    var mobileDiv = document.getElementById('bitacoraMobileCards');
+    if (!mobileDiv) {
+        mobileDiv = document.createElement('div');
+        mobileDiv.id = 'bitacoraMobileCards';
+        mobileDiv.className = 'show-mobile-only';
+        var tableContainer = document.getElementById('bitacoraTable').parentElement;
+        tableContainer.parentElement.appendChild(mobileDiv);
+    }
+    mobileDiv.innerHTML = '';
+    
     if (!bitacoraSemanal || bitacoraSemanal.length === 0) {
         tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-light);padding:2rem">No hay bitácora semanal</td></tr>';
+        mobileDiv.innerHTML = '<p class="mc-empty">No hay bitácora semanal</p>';
         return;
     }
     
@@ -807,9 +895,19 @@ function renderBitacoraTable() {
         return bitacoraSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
     });
     
+    _renderBitacoraRows(sorted, tbody);
+    _renderBitacoraMobile(sorted, mobileDiv);
+    
+    const th = document.querySelector('#bitacoraTable th.sortable');
+    if (th) {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        th.classList.add(bitacoraSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    }
+}
+
+function _renderBitacoraRows(sorted, tbody) {
     sorted.forEach((sem, index) => {
         const row = tbody.insertRow();
-        
         const esEditable = index < 2;
         
         if (esEditable) {
@@ -822,7 +920,6 @@ function renderBitacoraTable() {
         
         const notasPreview = sem.notas ? (sem.notas.length > 100 ? sem.notas.substring(0, 100) + '...' : sem.notas) : 'Sin notas';
         const notasCompletas = sem.notas || 'Sin notas';
-        
         const semanaTexto = sem.semana_texto ? sem.semana_texto.replace('Semana del', '').trim() : '';
         
         row.innerHTML = `
@@ -830,12 +927,27 @@ function renderBitacoraTable() {
             <td class="bitacora-notas-hover" data-notas="${notasCompletas.replace(/"/g, '&quot;').replace(/\n/g, '&#10;')}">${notasPreview}</td>
         `;
     });
+}
+
+function _renderBitacoraMobile(sorted, mobileDiv) {
+    var h = '<div class="mc-list"><div class="mc-header">';
+    h += '<div class="mc-header-line"><span>Semana</span></div>';
+    h += '</div>';
     
-    const th = document.querySelector('#bitacoraTable th.sortable');
-    if (th) {
-        th.classList.remove('sorted-asc', 'sorted-desc');
-        th.classList.add(bitacoraSortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
-    }
+    sorted.forEach((sem, idx) => {
+        var semanaTexto = sem.semana_texto ? sem.semana_texto.replace('Semana del', '').trim() : '';
+        var notas = sem.notas || 'Sin notas';
+        var notasPreview = notas.length > 60 ? notas.substring(0, 58) + '…' : notas;
+        var esEditable = idx < 2;
+        
+        h += '<div' + (esEditable ? ' onclick="showEditBitacoraModal(' + sem.id + ')"' : '') + ' class="mc-row' + (idx % 2 ? ' mc-row-odd' : '') + '"' + (!esEditable ? ' style="opacity:0.5;"' : '') + '>';
+        h += '<div class="mc-line"><div class="mc-title">' + semanaTexto + '</div></div>';
+        h += '<div class="mc-line"><span class="mc-meta">' + notasPreview + '</span></div>';
+        h += '</div>';
+    });
+    
+    h += '</div>';
+    mobileDiv.innerHTML = h;
 }
 
 function sortBitacora() {
@@ -858,19 +970,20 @@ function filtrarBitacora(query) {
         return bitacoraSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
     });
     
-    sorted.forEach(sem => {
-        const notasPreview = sem.notas ? (sem.notas.substring(0, 100) + '...') : 'Sin notas';
-        const notasCompletas = sem.notas || 'Sin notas';
-        tbody.innerHTML += `
-            <tr onclick="showEditBitacoraModal(${sem.id})" style="cursor:pointer">
-                <td><strong>${sem.semana_texto}</strong></td>
-                <td class="bitacora-notas-hover" data-notas="${notasCompletas.replace(/"/g, '&quot;')}">${notasPreview}</td>
-            </tr>
-        `;
-    });
+    _renderBitacoraRows(sorted, tbody);
     
     if (sorted.length === 0) {
         tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-light);padding:2rem">No se encontraron resultados</td></tr>';
+    }
+    
+    // Update mobile
+    var mobileDiv = document.getElementById('bitacoraMobileCards');
+    if (mobileDiv) {
+        if (sorted.length === 0) {
+            mobileDiv.innerHTML = '<p class="mc-empty">No se encontraron resultados</p>';
+        } else {
+            _renderBitacoraMobile(sorted, mobileDiv);
+        }
     }
 }
 
@@ -909,948 +1022,65 @@ function agregarNuevaSemana() {
     agregarSemanaBitacora();
 }
 
-console.log('✅ ADMIN-UI.JS v12 cargado');
-
-// ============================================
-// CONTABILIDAD - DOCUMENTOS
-// ============================================
-
-var contabilidadCarpetas = [];
-var contabilidadAnioSeleccionado = null;
-var editingCarpetaId = null;
-var contabilidadNavStack = []; // breadcrumb: [{label, folderId}]
-var currentDriveFolderId = null;
-
-function showContabilidadPage() {
-    document.getElementById('adminSubMenu').classList.remove('active');
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('contabilidadPage').classList.add('active');
-    
-    currentSubContext = 'admin-contabilidad';
-    
-    document.getElementById('btnRegresa').classList.remove('hidden');
-    document.getElementById('btnSearch').classList.add('hidden');
-    
-    document.getElementById('contentArea').classList.remove('with-submenu');
-    document.getElementById('menuSidebar').classList.add('hidden');
-    document.getElementById('contentArea').classList.add('fullwidth');
-    
-    contabilidadNavStack = [];
-    currentDriveFolderId = null;
-    loadContabilidadCarpetas();
-}
-
-async function loadContabilidadCarpetas() {
+async function agregarSemanaBitacora() {
+    showLoading();
     try {
-        const { data, error } = await supabaseClient
-            .from('contabilidad_carpetas')
-            .select('*')
-            .order('anio', { ascending: false })
-            .order('mes', { ascending: true });
-        if (error) throw error;
-        contabilidadCarpetas = data || [];
-        // Only render if on contabilidad page
-        if (document.getElementById('contabilidadPage') && document.getElementById('contabilidadPage').classList.contains('active')) {
-            renderContabilidadContent();
+        // Calcular siguiente lunes a partir de la última semana o hoy
+        var ultimaFecha = null;
+        if (bitacoraSemanal && bitacoraSemanal.length > 0) {
+            var sorted = [...bitacoraSemanal].sort(function(a, b) {
+                return new Date(b.semana_inicio) - new Date(a.semana_inicio);
+            });
+            ultimaFecha = new Date(sorted[0].semana_inicio + 'T00:00:00');
         }
-        // Check if next year needs creation (Nov+)
-        setTimeout(checkAutoCreateNextYear, 2000);
-    } catch (e) {
-        console.error('Error cargando contabilidad:', e);
-    }
-}
-
-function renderContabilidadContent() {
-    const connected = isGoogleConnected();
-    
-    // Show/hide connect bar and search
-    if (!connected) {
-        document.getElementById('gdriveConnectBar').style.display = 'flex';
-        document.getElementById('gdriveConnectBar').innerHTML = '<span style="font-size:0.85rem; color:var(--text-light);">Google Drive no conectado.</span> <span onclick="googleSignIn()" style="font-size:0.85rem; color:var(--primary); cursor:pointer; text-decoration:underline;">Reconectar</span>';
-    } else {
-        document.getElementById('gdriveConnectBar').style.display = 'none';
-    }
-    document.getElementById('contabilidadSearchBar').style.display = 'block';
-    
-    // If we're navigating inside a Drive folder, show that
-    if (connected && contabilidadNavStack.length > 0) {
-        renderBreadcrumb();
-        navigateToDriveFolder(currentDriveFolderId);
-        return;
-    }
-    
-    // Otherwise show years + months
-    document.getElementById('contabilidadBreadcrumb').style.display = 'none';
-    document.getElementById('contabilidadUploadBtn').style.display = 'none';
-    renderContabilidadYearsAndMonths();
-}
-
-function renderContabilidadYearsAndMonths() {
-    const aniosDiv = document.getElementById('contabilidadAnios');
-    const contentDiv = document.getElementById('contabilidadContent');
-    
-    const anios = [...new Set(contabilidadCarpetas.map(c => c.anio))].sort((a, b) => b - a);
-    
-    if (anios.length === 0) {
-        aniosDiv.innerHTML = '';
-        var emptyHtml = '<p style="color:var(--text-light);">No hay carpetas registradas.</p>';
-        if (isGoogleConnected() && currentUser && currentUser.nivel === 1) {
-            emptyHtml += '<div style="margin-top:0.5rem;"><span onclick="importarAniosExistentes()" style="font-size:0.85rem; color:var(--primary); cursor:pointer; text-decoration:underline;">📥 Importar años existentes de Google Drive</span></div>';
-        }
-        contentDiv.innerHTML = emptyHtml;
-        return;
-    }
-    
-    if (!contabilidadAnioSeleccionado || !anios.includes(contabilidadAnioSeleccionado)) {
-        contabilidadAnioSeleccionado = anios[0];
-    }
-    
-    // Year buttons
-    aniosDiv.innerHTML = anios.map(a => {
-        const isActive = a === contabilidadAnioSeleccionado;
-        return `<button onclick="selectContabilidadAnio(${a})" style="padding:0.5rem 1rem; border-radius:6px; border:2px solid ${isActive ? 'var(--primary)' : 'var(--border)'}; background:${isActive ? 'var(--primary)' : 'white'}; color:${isActive ? 'white' : 'var(--text)'}; font-weight:600; font-size:1rem; cursor:pointer; transition:all 0.2s;">${a}</button>`;
-    }).join('');
-    
-    // Month cards
-    const mesesAnio = contabilidadCarpetas.filter(c => c.anio === contabilidadAnioSeleccionado);
-    const mesesNombres = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    const connected = isGoogleConnected();
-    
-    if (mesesAnio.length === 0) {
-        contentDiv.innerHTML = '<p style="color:var(--text-light); margin-top:1rem;">No hay carpetas para este año.</p>';
-        return;
-    }
-    
-    contentDiv.innerHTML = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:0.5rem;">' +
-        mesesAnio.map(c => {
-            const mesNum = String(c.mes).padStart(2, '0');
-            const mesNombre = mesesNombres[c.mes] || 'Mes ' + c.mes;
-            const folderId = extractFolderId(c.google_drive_url);
-            
-            // If connected, clicking opens inside the app; otherwise opens in Drive
-            const clickAction = connected && folderId
-                ? `onclick="openMonthFolder(${c.anio}, '${mesNombre}', '${folderId}')"`
-                : `onclick="window.open('${c.google_drive_url}', '_blank')"`;
-            
-            return `
-                <div ${clickAction} style="background:white; border:1px solid var(--border); border-radius:8px; padding:0.6rem 0.8rem; display:flex; align-items:center; gap:0.5rem; cursor:pointer; transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow='none'">
-                    <span style="font-size:1.3rem;">📁</span>
-                    <div>
-                        <div style="font-weight:600; font-size:0.95rem;">${mesNum}. ${mesNombre}</div>
-                        <div style="font-size:0.7rem; color:var(--text-light);">${connected ? 'Ver contenido' : 'Abrir en Drive'}</div>
-                    </div>
-                </div>
-            `;
-        }).join('') + '</div>';
-    
-    // Add import link at bottom (only for nivel 1 admin when connected)
-    if (connected && currentUser && currentUser.nivel === 1) {
-        contentDiv.innerHTML += '<div style="margin-top:1rem; text-align:center; display:flex; flex-direction:column; gap:0.4rem; align-items:center;">'
-            + '<span onclick="importarAniosExistentes()" style="font-size:0.8rem; color:var(--primary); cursor:pointer; text-decoration:underline;">📥 Importar años existentes de Google Drive</span>'
-            + '<span onclick="sincronizarIndiceCompleto()" style="font-size:0.8rem; color:var(--primary); cursor:pointer; text-decoration:underline;">🔄 Sincronizar índice de documentos</span>'
-            + '</div>';
-    }
-}
-
-function selectContabilidadAnio(anio) {
-    contabilidadAnioSeleccionado = anio;
-    contabilidadNavStack = [];
-    currentDriveFolderId = null;
-    renderContabilidadYearsAndMonths();
-}
-
-// ============================================
-// DRIVE FOLDER NAVIGATION
-// ============================================
-
-function openMonthFolder(anio, mesNombre, folderId) {
-    contabilidadNavStack = [{ label: anio + ' > ' + mesNombre, folderId: null }];
-    currentDriveFolderId = folderId;
-    renderBreadcrumb();
-    navigateToDriveFolder(folderId);
-}
-
-function openDriveSubfolder(name, folderId) {
-    contabilidadNavStack.push({ label: name, folderId: currentDriveFolderId });
-    currentDriveFolderId = folderId;
-    renderBreadcrumb();
-    navigateToDriveFolder(folderId);
-}
-
-function contabilidadGoHome() {
-    navigateBackTo(-1);
-}
-
-function navigateBackTo(index) {
-    if (index < 0) {
-        // Go back to years/months view
-        contabilidadNavStack = [];
-        currentDriveFolderId = null;
-        document.getElementById('contabilidadBreadcrumb').style.display = 'none';
-        document.getElementById('contabilidadUploadBtn').style.display = 'none';
-        document.getElementById('contabilidadHomeBtn').style.display = 'none';
-        document.getElementById('contabilidadAnios').style.display = 'flex';
-        // Clear search
-        document.getElementById('contabilidadSearchInput').value = '';
-        renderContabilidadYearsAndMonths();
-        return;
-    }
-    
-    // Navigate to specific breadcrumb level
-    const target = contabilidadNavStack[index];
-    contabilidadNavStack = contabilidadNavStack.slice(0, index + 1);
-    
-    if (index === 0) {
-        // Back to month level - re-enter the month folder
-        const folderId = extractFolderId(
-            contabilidadCarpetas.find(c => {
-                const label = c.anio + ' > ' + (['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'][c.mes] || '');
-                return label === target.label;
-            })?.google_drive_url
-        );
-        currentDriveFolderId = folderId;
-    } else {
-        currentDriveFolderId = contabilidadNavStack[index - 1]?.folderId || currentDriveFolderId;
-    }
-    
-    renderBreadcrumb();
-    navigateToDriveFolder(currentDriveFolderId);
-}
-
-function renderBreadcrumb() {
-    const bcDiv = document.getElementById('contabilidadBreadcrumb');
-    bcDiv.style.display = 'block';
-    document.getElementById('contabilidadAnios').style.display = 'none';
-    
-    let html = '<span onclick="navigateBackTo(-1)" style="cursor:pointer; color:var(--primary); font-weight:600;"><span style="background:#fed7d7;padding:0.1rem 0.25rem;border-radius:3px;">📁</span> Contabilidad</span>';
-    
-    contabilidadNavStack.forEach((item, i) => {
-        html += ' <span style="color:var(--text-light);"> › </span> ';
-        if (i < contabilidadNavStack.length - 1) {
-            html += `<span onclick="navigateBackTo(${i})" style="cursor:pointer; color:var(--primary);">${item.label}</span>`;
+        
+        var nuevaFecha;
+        if (ultimaFecha) {
+            // Siguiente lunes después de la última semana
+            nuevaFecha = new Date(ultimaFecha);
+            nuevaFecha.setDate(nuevaFecha.getDate() + 7);
         } else {
-            html += `<span style="font-weight:600; color:var(--text);">${item.label}</span>`;
+            // No hay semanas, usar el lunes de esta semana
+            nuevaFecha = new Date();
+            var dia = nuevaFecha.getDay();
+            var diff = dia === 0 ? -6 : 1 - dia; // lunes = 1
+            nuevaFecha.setDate(nuevaFecha.getDate() + diff);
         }
-    });
-    
-    bcDiv.innerHTML = html;
-}
-
-async function navigateToDriveFolder(folderId) {
-    const contentDiv = document.getElementById('contabilidadContent');
-    contentDiv.innerHTML = '<p style="text-align:center; color:var(--text-light); padding:2rem;">⏳ Cargando...</p>';
-    
-    // Show home button when navigating
-    document.getElementById('contabilidadHomeBtn').style.display = 'inline';
-    
-    try {
-        const { folders, files } = await listDriveFolder(folderId);
+        nuevaFecha.setHours(0, 0, 0, 0);
         
-        // Only show upload when there are NO subfolders (final folder)
-        document.getElementById('contabilidadUploadBtn').style.display = folders.length === 0 ? 'inline' : 'none';
+        var fechaStr = nuevaFecha.toISOString().split('T')[0];
         
-        let html = '';
+        // Generar semana_texto: "Semana del DD Mon YYYY"
+        var mesesCortos = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        var semanaTexto = 'Semana del ' + nuevaFecha.getDate() + ' ' + mesesCortos[nuevaFecha.getMonth()] + ' ' + nuevaFecha.getFullYear();
         
-        // Subfolders
-        if (folders.length > 0) {
-            html += '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:0.5rem; margin-bottom:1rem;">';
-            folders.forEach(f => {
-                html += `
-                    <div onclick="openDriveSubfolder('${f.name.replace(/'/g, "\\'")}', '${f.id}')" style="background:white; border:1px solid var(--border); border-radius:8px; padding:0.6rem 0.8rem; display:flex; align-items:center; gap:0.5rem; cursor:pointer; transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow='none'">
-                        <span style="font-size:1.3rem;">📁</span>
-                        <div style="font-weight:600; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${f.name}</div>
-                    </div>
-                `;
-            });
-            html += '</div>';
-        }
-        
-        // Files
-        if (files.length > 0) {
-            html += '<div style="border:1px solid var(--border); border-radius:8px; overflow:hidden;">';
-            files.forEach((f, i) => {
-                const icon = getFileIcon(f.name, f.mimeType);
-                const size = formatFileSize(f.size);
-                const bgColor = i % 2 === 0 ? 'white' : 'var(--bg)';
-                html += `
-                    <div onclick="viewDriveFileInline('${f.id}', '${f.name.replace(/'/g, "\\'")}')" style="display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0.8rem; background:${bgColor}; cursor:pointer; border-bottom:1px solid var(--border); transition:background 0.15s; flex-wrap:wrap;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='${bgColor}'">
-                        <span style="font-size:1.1rem;">${icon}</span>
-                        <div style="flex:1; min-width:150px;">
-                            <div style="font-size:0.88rem; font-weight:500; word-break:break-word;">${f.name}</div>
-                        </div>
-                        <span style="font-size:0.75rem; color:var(--text-light); white-space:nowrap;">${size}</span>
-                    </div>
-                `;
-            });
-            html += '</div>';
-        }
-        
-        if (folders.length === 0 && files.length === 0) {
-            html = '<p style="text-align:center; color:var(--text-light); padding:2rem;">📭 Carpeta vacía</p>';
-        }
-        
-        contentDiv.innerHTML = html;
-        
-        // Silently index files in Supabase for fast search
-        if (files.length > 0 && contabilidadNavStack.length >= 2) {
-            indexFilesToSupabase(files);
-        }
-        
-    } catch (e) {
-        console.error('Error navigating folder:', e);
-        contentDiv.innerHTML = `<p style="text-align:center; color:var(--danger); padding:2rem;">Error: ${e.message}</p>`;
-    }
-}
-
-function getFileIcon(name, mimeType) {
-    const ext = (name || '').split('.').pop().toLowerCase();
-    if (ext === 'pdf') return '📄';
-    if (['xls', 'xlsx', 'csv'].includes(ext)) return '📊';
-    if (['doc', 'docx'].includes(ext)) return '📝';
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return '🖼️';
-    if (['zip', 'rar'].includes(ext)) return '📦';
-    if (mimeType && mimeType.includes('spreadsheet')) return '📊';
-    if (mimeType && mimeType.includes('document')) return '📝';
-    return '📎';
-}
-
-// ============================================
-// UPLOAD TO CURRENT FOLDER
-// ============================================
-
-function uploadToCurrentFolder() {
-    if (!currentDriveFolderId) {
-        alert('Navega a una carpeta primero');
-        return;
-    }
-    if (!isGoogleConnected()) {
-        alert('Conecta con Google Drive primero');
-        return;
-    }
-    
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.pdf,.xlsx,.xls,.doc,.docx,.csv,.jpg,.jpeg,.png';
-    input.multiple = true;
-    input.onchange = async function() {
-        if (!input.files.length) return;
-        showLoading();
-        try {
-            // Parse path info
-            var pathLabel = contabilidadNavStack[0] ? contabilidadNavStack[0].label : '';
-            var parts = pathLabel.split(' > ');
-            var anio = parseInt(parts[0]) || 0;
-            var mesNombre = (parts[1] || '').trim();
-            var mesNum = MESES_NOMBRES.indexOf(mesNombre);
-            var subcarpeta = contabilidadNavStack.length >= 2 ? contabilidadNavStack[1].label : '';
-            
-            for (const file of input.files) {
-                var result = await uploadFileToDrive(file, currentDriveFolderId);
-                
-                // Index in Supabase
-                if (result && result.id && anio && mesNum > 0 && subcarpeta) {
-                    await supabaseClient
-                        .from('contabilidad_documentos')
-                        .insert([{
-                            nombre: file.name,
-                            anio: anio,
-                            mes: mesNum,
-                            subcarpeta: subcarpeta,
-                            google_drive_file_id: result.id,
-                            size_bytes: file.size || 0,
-                            mime_type: file.type || ''
-                        }]);
-                }
-            }
-            // Refresh folder view
-            await navigateToDriveFolder(currentDriveFolderId);
-        } catch (e) {
-            console.error('Error uploading:', e);
-            alert('Error al subir: ' + e.message);
-        } finally {
+        // Verificar que no exista ya
+        var yaExiste = bitacoraSemanal.some(function(s) { return s.semana_inicio === fechaStr; });
+        if (yaExiste) {
+            alert('La semana del ' + fechaStr + ' ya existe.');
             hideLoading();
-        }
-    };
-    input.click();
-}
-
-// ============================================
-// SEARCH
-// ============================================
-
-// ============================================
-// INDEX FILES TO SUPABASE (silent background)
-// ============================================
-
-async function indexFilesToSupabase(files) {
-    // Parse current path from nav stack
-    // navStack[0] = "2026 > Enero", navStack[1] = "Facturas proveedores"
-    var pathLabel = contabilidadNavStack[0] ? contabilidadNavStack[0].label : '';
-    var parts = pathLabel.split(' > ');
-    var anio = parseInt(parts[0]) || 0;
-    var mesNombre = (parts[1] || '').trim();
-    var mesNum = MESES_NOMBRES.indexOf(mesNombre);
-    if (mesNum < 1) mesNum = 0;
-    
-    var subcarpeta = contabilidadNavStack.length >= 2 ? contabilidadNavStack[1].label : '';
-    
-    if (!anio || !mesNum || !subcarpeta) return;
-    
-    for (var i = 0; i < files.length; i++) {
-        var f = files[i];
-        if (f.mimeType === 'application/vnd.google-apps.folder') continue;
-        
-        try {
-            // Check if already indexed
-            var { data: existing } = await supabaseClient
-                .from('contabilidad_documentos')
-                .select('id')
-                .eq('google_drive_file_id', f.id)
-                .limit(1);
-            
-            if (existing && existing.length > 0) continue;
-            
-            // Index it
-            await supabaseClient
-                .from('contabilidad_documentos')
-                .insert([{
-                    nombre: f.name,
-                    anio: anio,
-                    mes: mesNum,
-                    subcarpeta: subcarpeta,
-                    google_drive_file_id: f.id,
-                    size_bytes: parseInt(f.size) || 0,
-                    mime_type: f.mimeType || ''
-                }]);
-        } catch (e) {
-            // Silent fail - indexing is best-effort
-        }
-    }
-}
-
-// Also index when uploading
-var _originalUploadFileToDrive = typeof uploadFileToDrive === 'function' ? uploadFileToDrive : null;
-
-// ============================================
-// SEARCH (Supabase-powered)
-// ============================================
-
-async function searchContabilidadDocs() {
-    const term = document.getElementById('contabilidadSearchInput').value.trim();
-    if (!term) return;
-    
-    const contentDiv = document.getElementById('contabilidadContent');
-    contentDiv.innerHTML = '<p style="text-align:center; color:var(--text-light); padding:2rem;">🔍 Buscando...</p>';
-    
-    // Hide years, show breadcrumb
-    document.getElementById('contabilidadAnios').style.display = 'none';
-    document.getElementById('contabilidadBreadcrumb').style.display = 'block';
-    document.getElementById('contabilidadBreadcrumb').innerHTML = '<span onclick="navigateBackTo(-1)" style="cursor:pointer; color:var(--primary); font-weight:600;"><span style="background:#fed7d7;padding:0.1rem 0.25rem;border-radius:3px;">📁</span> Contabilidad</span> <span style="color:var(--text-light);"> › </span> <span style="font-weight:600;">Búsqueda: "' + term + '"</span>';
-    document.getElementById('contabilidadUploadBtn').style.display = 'none';
-    document.getElementById('contabilidadHomeBtn').style.display = 'inline';
-    
-    try {
-        // Search in Supabase
-        const { data: results, error } = await supabaseClient
-            .from('contabilidad_documentos')
-            .select('*')
-            .ilike('nombre', '%' + term + '%')
-            .order('anio', { ascending: false })
-            .order('mes', { ascending: true })
-            .limit(50);
-        
-        if (error) throw error;
-        
-        if (!results || results.length === 0) {
-            contentDiv.innerHTML = '<p style="text-align:center; color:var(--text-light); padding:2rem;">No se encontraron documentos con "' + term + '"</p>';
             return;
         }
         
-        let html = '<div style="border:1px solid var(--border); border-radius:8px; overflow:hidden;">';
-        results.forEach((doc, i) => {
-            const icon = getFileIcon(doc.nombre, doc.mime_type);
-            const size = formatFileSize(doc.size_bytes);
-            const bgColor = i % 2 === 0 ? 'white' : 'var(--bg)';
-            const displayName = doc.nombre.length > 60 ? doc.nombre.substring(0, 57) + '...' : doc.nombre;
-            const mesNombre = MESES_NOMBRES[doc.mes] || '';
-            const monthYear = mesNombre + ' ' + doc.anio;
-            const safeName = doc.nombre.replace(/'/g, "\\'");
-            html += `
-                <div onclick="viewDriveFileInline('${doc.google_drive_file_id}', '${safeName}')" style="display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0.8rem; background:${bgColor}; cursor:pointer; border-bottom:1px solid var(--border); transition:background 0.15s; flex-wrap:wrap;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='${bgColor}'">
-                    <span style="font-size:1.1rem;">${icon}</span>
-                    <div style="flex:1; min-width:120px;">
-                        <div style="font-size:0.88rem; font-weight:500; word-break:break-word;" title="${doc.nombre}">${displayName}</div>
-                    </div>
-                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
-                        <span style="font-size:0.72rem; color:var(--primary); white-space:nowrap;">${monthYear}</span>
-                        <span style="font-size:0.72rem; color:var(--text-light); white-space:nowrap;">${doc.subcarpeta}</span>
-                        <span style="font-size:0.72rem; color:var(--text-light); white-space:nowrap;">${size}</span>
-                    </div>
-                </div>
-            `;
-        });
-        html += '</div>';
-        contentDiv.innerHTML = html;
+        var { error } = await supabaseClient
+            .from('bitacora_semanal')
+            .insert([{
+                semana_inicio: fechaStr,
+                semana_texto: semanaTexto,
+                notas: ''
+            }]);
         
-    } catch (e) {
-        console.error('Error searching:', e);
-        contentDiv.innerHTML = `<p style="text-align:center; color:var(--danger); padding:2rem;">Error: ${e.message}</p>`;
-    }
-}
-
-// ============================================
-// CREATE YEAR STRUCTURE IN GOOGLE DRIVE
-// ============================================
-
-var SUBCARPETAS_MES = [
-    'Evidencias para materialidad',
-    'Facturas emitidas',
-    'Facturas proveedores',
-    'Pagos proveedores',
-    'Repse empresas',
-    'Reportes financieros'
-];
-
-var MESES_NOMBRES = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-
-function showCrearEstructuraAnio() {
-    if (!isGoogleConnected()) {
-        alert('Conecta con Google Drive primero');
-        return;
-    }
-    
-    // Find the parent folder (Inmobiliaris ESWU)
-    // We need any existing year folder to find its parent
-    const anyCarpeta = contabilidadCarpetas[0];
-    if (!anyCarpeta) {
-        alert('Primero agrega al menos un mes manualmente para que el sistema conozca la carpeta raíz.');
-        return;
-    }
-    
-    const anioActual = new Date().getFullYear();
-    const anioSiguiente = anioActual + 1;
-    const anio = prompt('¿Qué año quieres crear? (ej: ' + anioSiguiente + ')', anioSiguiente);
-    
-    if (!anio || isNaN(anio)) return;
-    
-    const existe = contabilidadCarpetas.some(c => c.anio === parseInt(anio));
-    if (existe) {
-        if (!confirm('Ya existen carpetas para ' + anio + '. ¿Quieres crear los meses faltantes?')) return;
-    }
-    
-    crearEstructuraAnio(parseInt(anio));
-}
-
-async function crearEstructuraAnio(anio) {
-    if (!isGoogleConnected()) {
-        alert('Conecta con Google Drive primero');
-        return;
-    }
-    
-    showLoading();
-    
-    try {
-        // Find parent folder ID from an existing year folder
-        const anyCarpeta = contabilidadCarpetas[0];
-        const existingFolderId = extractFolderId(anyCarpeta.google_drive_url);
+        if (error) throw error;
         
-        // Get parent of existing month folder (which is the year folder)
-        // Then get parent of year folder (which is the root)
-        // We need to find the root "Inmobiliaris ESWU" folder
-        const existingInfo = await fetch(`https://www.googleapis.com/drive/v3/files/${existingFolderId}?fields=parents&key=${GOOGLE_API_KEY}`, {
-            headers: { 'Authorization': 'Bearer ' + gdriveAccessToken }
-        });
-        const existingData = await existingInfo.json();
-        const yearFolderParent = existingData.parents ? existingData.parents[0] : null;
+        await loadBitacoraSemanal();
+        renderBitacoraTable();
         
-        if (!yearFolderParent) {
-            throw new Error('No se pudo encontrar la carpeta padre');
-        }
-        
-        // Get parent of year folder (root Inmobiliaris ESWU)
-        const yearFolderInfo = await fetch(`https://www.googleapis.com/drive/v3/files/${yearFolderParent}?fields=parents&key=${GOOGLE_API_KEY}`, {
-            headers: { 'Authorization': 'Bearer ' + gdriveAccessToken }
-        });
-        const yearFolderData = await yearFolderInfo.json();
-        const rootFolderId = yearFolderData.parents ? yearFolderData.parents[0] : yearFolderParent;
-        
-        // Check if year folder already exists
-        const yearQuery = `name = '${anio}' and '${rootFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-        const yearSearch = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(yearQuery)}&fields=files(id,name)&key=${GOOGLE_API_KEY}`, {
-            headers: { 'Authorization': 'Bearer ' + gdriveAccessToken }
-        });
-        const yearSearchData = await yearSearch.json();
-        
-        var yearFolder;
-        if (yearSearchData.files && yearSearchData.files.length > 0) {
-            yearFolder = yearSearchData.files[0];
-            console.log('Carpeta año existente:', yearFolder.name);
-        } else {
-            yearFolder = await createDriveFolder(String(anio), rootFolderId);
-            console.log('Carpeta año creada:', yearFolder.name);
-        }
-        
-        // Determine which months to create
-        const existingMeses = contabilidadCarpetas.filter(c => c.anio === anio).map(c => c.mes);
-        
-        for (var mes = 1; mes <= 12; mes++) {
-            if (existingMeses.includes(mes)) {
-                console.log('Mes ' + mes + ' ya existe, saltando');
-                continue;
-            }
-            
-            var mesNum = String(mes).padStart(2, '0');
-            var mesNombre = MESES_NOMBRES[mes].toUpperCase();
-            var monthFolderName = mesNum + '. ' + mesNombre;
-            
-            // Create month folder
-            var monthFolder = await createDriveFolder(monthFolderName, yearFolder.id);
-            console.log('Creado:', monthFolderName);
-            
-            // Create subcarpetas
-            for (var s = 0; s < SUBCARPETAS_MES.length; s++) {
-                await createDriveFolder(SUBCARPETAS_MES[s], monthFolder.id);
-            }
-            
-            // Save to Supabase
-            var driveUrl = 'https://drive.google.com/drive/folders/' + monthFolder.id;
-            var { error } = await supabaseClient
-                .from('contabilidad_carpetas')
-                .insert([{
-                    anio: anio,
-                    mes: mes,
-                    nombre_mes: MESES_NOMBRES[mes],
-                    google_drive_url: driveUrl
-                }]);
-            
-            if (error) console.error('Error guardando mes ' + mes + ':', error);
-        }
-        
-        alert('✅ Estructura de ' + anio + ' creada exitosamente');
-        await loadContabilidadCarpetas();
-        
-    } catch (e) {
-        console.error('Error creando estructura:', e);
-        alert('Error: ' + e.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// AUTO-CHECK: CREATE NEXT YEAR (NOV 1)
-// ============================================
-
-function checkAutoCreateNextYear() {
-    var today = new Date();
-    if (today.getMonth() >= 10) { // November = 10 (0-indexed)
-        var nextYear = today.getFullYear() + 1;
-        var exists = contabilidadCarpetas.some(c => c.anio === nextYear);
-        if (!exists && isGoogleConnected()) {
-            console.log('📁 Auto-creando estructura para ' + nextYear + '...');
-            crearEstructuraAnio(nextYear);
-        }
-    }
-}
-
-// ============================================
-// IMPORT EXISTING YEARS FROM GOOGLE DRIVE
-// ============================================
-
-async function importarAniosExistentes() {
-    if (!isGoogleConnected()) {
-        alert('Conecta con Google Drive primero');
-        return;
-    }
-    
-    if (contabilidadCarpetas.length === 0) {
-        alert('Primero agrega al menos un mes manualmente (con el +) para que el sistema conozca la carpeta raíz en Drive.');
-        return;
-    }
-    
-    if (!confirm('Esto escaneará tu Google Drive y registrará todos los años/meses que encuentre. ¿Continuar?')) return;
-    
-    showLoading();
-    
-    try {
-        // Step 1: Find the root folder (parent of the year folders)
-        // Get an existing month folder → its parent is the year → its parent is the root
-        var anyCarpeta = contabilidadCarpetas[0];
-        var monthFolderId = extractFolderId(anyCarpeta.google_drive_url);
-        
-        // Get month folder's parent (year folder)
-        var monthInfo = await fetch(`https://www.googleapis.com/drive/v3/files/${monthFolderId}?fields=parents&key=${GOOGLE_API_KEY}`, {
-            headers: { 'Authorization': 'Bearer ' + gdriveAccessToken }
-        });
-        var monthData = await monthInfo.json();
-        var yearFolderId = monthData.parents ? monthData.parents[0] : null;
-        
-        if (!yearFolderId) throw new Error('No se pudo encontrar la carpeta del año');
-        
-        // Get year folder's parent (root: Inmobiliaris ESWU)
-        var yearInfo = await fetch(`https://www.googleapis.com/drive/v3/files/${yearFolderId}?fields=parents&key=${GOOGLE_API_KEY}`, {
-            headers: { 'Authorization': 'Bearer ' + gdriveAccessToken }
-        });
-        var yearData = await yearInfo.json();
-        var rootFolderId = yearData.parents ? yearData.parents[0] : null;
-        
-        if (!rootFolderId) throw new Error('No se pudo encontrar la carpeta raíz');
-        
-        console.log('Carpeta raíz encontrada:', rootFolderId);
-        
-        // Step 2: List all year folders in root
-        var { folders: yearFolders } = await listDriveFolder(rootFolderId);
-        var yearFoldersFiltered = yearFolders.filter(f => /^\d{4}$/.test(f.name));
-        
-        console.log('Años encontrados:', yearFoldersFiltered.map(f => f.name));
-        
-        var totalImported = 0;
-        var totalSkipped = 0;
-        
-        // Step 3: For each year, list month folders
-        for (var y = 0; y < yearFoldersFiltered.length; y++) {
-            var yearFolder = yearFoldersFiltered[y];
-            var anio = parseInt(yearFolder.name);
-            
-            var { folders: monthFolders } = await listDriveFolder(yearFolder.id);
-            
-            for (var m = 0; m < monthFolders.length; m++) {
-                var mFolder = monthFolders[m];
-                
-                // Parse month number from folder name (e.g., "01. ENERO" → 1)
-                var mesMatch = mFolder.name.match(/^(\d{1,2})/);
-                if (!mesMatch) continue;
-                
-                var mesNum = parseInt(mesMatch[1]);
-                if (mesNum < 1 || mesNum > 12) continue;
-                
-                // Check if already exists in Supabase
-                var exists = contabilidadCarpetas.some(c => c.anio === anio && c.mes === mesNum);
-                if (exists) {
-                    totalSkipped++;
-                    continue;
-                }
-                
-                // Register in Supabase
-                var driveUrl = 'https://drive.google.com/drive/folders/' + mFolder.id;
-                var { error } = await supabaseClient
-                    .from('contabilidad_carpetas')
-                    .insert([{
-                        anio: anio,
-                        mes: mesNum,
-                        nombre_mes: MESES_NOMBRES[mesNum],
-                        google_drive_url: driveUrl
-                    }]);
-                
-                if (error) {
-                    console.error('Error registrando ' + anio + '/' + mesNum + ':', error);
-                } else {
-                    totalImported++;
-                    console.log('✅ Registrado:', anio, MESES_NOMBRES[mesNum]);
-                }
-            }
-        }
-        
-        alert('✅ Importación completada!\n\n' + totalImported + ' meses importados\n' + totalSkipped + ' ya existían (saltados)');
-        await loadContabilidadCarpetas();
-        
-    } catch (e) {
-        console.error('Error importando:', e);
-        alert('Error: ' + e.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// SYNC FULL DOCUMENT INDEX
-// ============================================
-
-async function sincronizarIndiceCompleto() {
-    if (!isGoogleConnected()) {
-        alert('Conecta con Google Drive primero');
-        return;
-    }
-    
-    if (!confirm('Esto escaneará todas las carpetas en Drive y registrará los documentos en el índice de búsqueda. Puede tomar unos minutos. ¿Continuar?')) return;
-    
-    showLoading();
-    var totalIndexed = 0;
-    var totalSkipped = 0;
-    
-    try {
-        for (var c = 0; c < contabilidadCarpetas.length; c++) {
-            var carpeta = contabilidadCarpetas[c];
-            var monthFolderId = extractFolderId(carpeta.google_drive_url);
-            if (!monthFolderId) continue;
-            
-            var anio = carpeta.anio;
-            var mesNum = carpeta.mes;
-            var mesNombre = MESES_NOMBRES[mesNum] || '';
-            
-            console.log('📁 Escaneando ' + anio + ' ' + mesNombre + '...');
-            
-            // List subfolders in month
-            var { folders: subfolders } = await listDriveFolder(monthFolderId);
-            
-            for (var s = 0; s < subfolders.length; s++) {
-                var sub = subfolders[s];
-                
-                // List files in subfolder
-                var { files } = await listDriveFolder(sub.id);
-                
-                for (var f = 0; f < files.length; f++) {
-                    var file = files[f];
-                    if (file.mimeType === 'application/vnd.google-apps.folder') continue;
-                    
-                    // Check if already indexed
-                    var { data: existing } = await supabaseClient
-                        .from('contabilidad_documentos')
-                        .select('id')
-                        .eq('google_drive_file_id', file.id)
-                        .limit(1);
-                    
-                    if (existing && existing.length > 0) {
-                        totalSkipped++;
-                        continue;
-                    }
-                    
-                    // Index it
-                    var { error } = await supabaseClient
-                        .from('contabilidad_documentos')
-                        .insert([{
-                            nombre: file.name,
-                            anio: anio,
-                            mes: mesNum,
-                            subcarpeta: sub.name,
-                            google_drive_file_id: file.id,
-                            size_bytes: parseInt(file.size) || 0,
-                            mime_type: file.mimeType || ''
-                        }]);
-                    
-                    if (!error) {
-                        totalIndexed++;
-                    } else {
-                        console.error('Error indexando:', file.name, error);
-                    }
-                }
-            }
-        }
-        
-        alert('✅ Sincronización completada!\n\n' + totalIndexed + ' documentos indexados\n' + totalSkipped + ' ya existían');
-        
-    } catch (e) {
-        console.error('Error sincronizando:', e);
-        alert('Error: ' + e.message + '\n\nSe indexaron ' + totalIndexed + ' documentos antes del error.');
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// CARPETA CRUD
-// ============================================
-
-function showAddCarpetaModal() {
-    editingCarpetaId = null;
-    document.getElementById('addCarpetaTitle').textContent = 'Agregar Carpeta';
-    document.getElementById('carpetaAnio').value = new Date().getFullYear();
-    document.getElementById('carpetaMes').value = '';
-    document.getElementById('carpetaURL').value = '';
-    document.getElementById('addCarpetaModal').classList.add('active');
-}
-
-function editCarpetaContabilidad(id) {
-    const c = contabilidadCarpetas.find(x => x.id === id);
-    if (!c) return;
-    editingCarpetaId = id;
-    document.getElementById('addCarpetaTitle').textContent = 'Editar Carpeta';
-    document.getElementById('carpetaAnio').value = c.anio;
-    document.getElementById('carpetaMes').value = c.mes;
-    document.getElementById('carpetaURL').value = c.google_drive_url;
-    document.getElementById('addCarpetaModal').classList.add('active');
-}
-
-async function saveCarpetaContabilidad(event) {
-    event.preventDefault();
-    showLoading();
-    
-    const mesesNombres = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    const mes = parseInt(document.getElementById('carpetaMes').value);
-    
-    const data = {
-        anio: parseInt(document.getElementById('carpetaAnio').value),
-        mes: mes,
-        nombre_mes: mesesNombres[mes] || '',
-        google_drive_url: document.getElementById('carpetaURL').value.trim()
-    };
-    
-    try {
-        if (editingCarpetaId) {
-            const { error } = await supabaseClient
-                .from('contabilidad_carpetas')
-                .update(data)
-                .eq('id', editingCarpetaId);
-            if (error) throw error;
-        } else {
-            const { error } = await supabaseClient
-                .from('contabilidad_carpetas')
-                .insert([data]);
-            if (error) throw error;
-        }
-        
-        closeModal('addCarpetaModal');
-        contabilidadAnioSeleccionado = data.anio;
-        await loadContabilidadCarpetas();
     } catch (e) {
         console.error('Error:', e);
-        alert('Error: ' + e.message);
+        alert('Error al agregar semana: ' + e.message);
     } finally {
         hideLoading();
     }
 }
 
-async function deleteCarpetaContabilidad(id, label) {
-    if (!confirm('¿Eliminar carpeta ' + label + '?')) return;
-    showLoading();
-    try {
-        const { error } = await supabaseClient
-            .from('contabilidad_carpetas')
-            .delete()
-            .eq('id', id);
-        if (error) throw error;
-        await loadContabilidadCarpetas();
-    } catch (e) {
-        alert('Error: ' + e.message);
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// NIVEL 4 - RESTRICCIÓN
-// ============================================
-
-function applyUserLevel() {
-    const nivel = (currentUser && currentUser.nivel) || 1;
-    
-    if (nivel === 4) {
-        // Level 4: solo ve Contabilidad y Salir en el menú
-        document.getElementById('menuInquilinos').style.display = 'none';
-        document.getElementById('menuProveedores').style.display = 'none';
-        // Replace "Admin" with "Contabilidad" direct link
-        const adminBtn = document.getElementById('menuAdmin');
-        adminBtn.textContent = 'Contabilidad';
-        adminBtn.onclick = function() { showContabilidadPage(); };
-        
-        // Auto-navigate to Contabilidad
-        showContabilidadPage();
-    } else {
-        // Niveles 1-3: todo visible
-        document.getElementById('menuInquilinos').style.display = '';
-        document.getElementById('menuProveedores').style.display = '';
-        const adminBtn = document.getElementById('menuAdmin');
-        adminBtn.textContent = 'Admin';
-        adminBtn.onclick = function() { showSubMenu('admin'); };
-    }
-}
+console.log('✅ ADMIN-UI.JS v12 cargado');
