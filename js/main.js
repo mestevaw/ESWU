@@ -127,10 +127,17 @@ async function initializeApp() {
         
         console.log('✅ App inicializada correctamente');
         
-        // Initialize Google Drive (non-blocking, auto-reconnects if previously connected)
+        // Google Drive: solo nivel 1 intenta auto-reconectar.
+        // Nivel 2/3/4 no necesitan Drive al entrar — se pedira
+        // solo en el momento que alguien nivel 1 intente subir algo.
         try {
             if (typeof initGoogleDrive === 'function') {
                 initGoogleDrive();
+                if (currentUser && currentUser.nivel === 1) {
+                    if (typeof tryAutoConnectNivel1 === 'function') {
+                        setTimeout(tryAutoConnectNivel1, 500);
+                    }
+                }
             }
         } catch (e) {
             console.log('Google Drive init diferido');
