@@ -300,19 +300,11 @@ function bindAdjuntoListeners() {
 
 var _drivePickerStack = []; // [{label, folderId}]
 
-async function toggleDrivePicker() {
-    if (typeof isGoogleConnected !== 'function' || !isGoogleConnected()) {
-        // Intentar conectar automáticamente
-        if (typeof googleSignIn === 'function') {
-            googleSignIn();
-            return;
-        }
-        alert('Conecta Google Drive primero');
-        return;
-    }
-    var area = document.getElementById('drivePickerArea');
-    if (!area) return;
-    var isVisible = area.style.display !== 'none';
+function toggleDrivePicker() {
+    requestDriveForUpload(async function() {
+        var area = document.getElementById('drivePickerArea');
+        if (!area) return;
+        var isVisible = area.style.display !== 'none';
     if (isVisible) {
         area.style.display = 'none';
     } else {
@@ -327,6 +319,7 @@ async function toggleDrivePicker() {
             loadDrivePickerFolder('root');
         }
     }
+    });
 }
 
 async function loadDrivePickerFolder(folderId) {
@@ -559,13 +552,12 @@ async function submitNuevoMensaje(event) {
     
     // Subir archivos a Google Drive
     if (mensajePendingFiles.length > 0) {
-        if (typeof isGoogleConnected !== 'function' || !isGoogleConnected()) {
-            if (typeof googleSignIn === 'function') {
-                alert('Conectando a Google Drive... Intenta enviar de nuevo después de conectar.');
-                googleSignIn();
-            } else {
-                alert('Para adjuntar documentos, conecta Google Drive primero.');
-            }
+        if (!isGoogleConnected()) {
+            // Guardar estado del mensaje y pedir Drive
+            requestDriveForUpload(function() {
+                // Re-intentar envío al conectar
+                enviarMensaje();
+            });
             return;
         }
         
