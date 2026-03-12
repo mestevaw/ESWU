@@ -1,6 +1,8 @@
 /* ========================================
-   GOOGLE-DRIVE.JS v1
-   OAuth + Drive API for Contabilidad
+   js/google-drive.js
+   Última actualización: 2026-03-12
+   V2 - Auto-connect solo nivel 1. Sin bloqueos para nivel 2/4.
+        Upload solicita Drive en el momento, no al entrar.
    ======================================== */
 
 var gdriveAccessToken = null;
@@ -8,13 +10,17 @@ var gdriveTokenClient = null;
 var gdriveInitialized = false;
 var gdriveAutoConnectAttempted = false;
 
+// Callback pendiente: cuando alguien intenta subir y Drive no está conectado,
+// guardamos la acción aquí y la ejecutamos al conectar.
+var _pendingDriveCallback = null;
+
 // ============================================
 // INITIALIZATION
 // ============================================
 
 function initGoogleDrive() {
     if (gdriveInitialized) return;
-    
+
     try {
         gdriveTokenClient = google.accounts.oauth2.initTokenClient({
             client_id: GOOGLE_CLIENT_ID,
@@ -23,18 +29,20 @@ function initGoogleDrive() {
         });
         gdriveInitialized = true;
         console.log('✅ Google Drive API inicializada');
-        
-        // Try silent auto-connect if previously connected
-        if (!gdriveAutoConnectAttempted && localStorage.getItem('gdrive_was_connected') === 'true') {
-            gdriveAutoConnectAttempted = true;
-            tryAutoConnect();
-        }
     } catch (e) {
         console.error('Error inicializando Google Drive:', e);
     }
 }
 
-function tryAutoConnect() {
+// Solo llamado desde main.js para nivel 1 (auto-reconnect silencioso)
+function tryAutoConnectNivel1() {
+    if (gdriveAutoConnectAttempted || gdriveAccessToken) return;
+    if (localStorage.getItem('gdrive_was_connected') !== 'true') return;
+    if (!gdriveTokenClient) {
+        initGoogleDrive();
+        if (!gdriveTokenClient) return;
+    }
+    gdriveAutoConnectAttempted = true;
     try {
         gdriveTokenClient.requestAccessToken({ prompt: '' });
     } catch (e) {
@@ -44,36 +52,68 @@ function tryAutoConnect() {
 
 function handleGoogleAuthResponse(response) {
     if (response.error) {
-        if (response.error === 'user_denied' || response.error === 'access_denied') {
-            console.log('Google: acceso denegado o cancelado');
-        } else {
+        if (response.error !== 'user_denied' && response.error !== 'access_denied') {
             console.error('Google Auth error:', response.error);
         }
+        _pendingDriveCallback = null;
         return;
     }
-    
+
     gdriveAccessToken = response.access_token;
     localStorage.setItem('gdrive_was_connected', 'true');
     console.log('✅ Google Drive conectado');
-    
-    // Refresh contabilidad view
+
+    // Refresh contabilidad if open
     if (typeof renderContabilidadContent === 'function') {
         renderContabilidadContent();
     }
+
+    // Execute any pending upload action
+    if (_pendingDriveCallback) {
+        var cb = _pendingDriveCallback;
+        _pendingDriveCallback = null;
+        setTimeout(cb, 300);
+    }
+
+    // Background sync of pending files (silent, no UI)
+    if (typeof syncPendientesBackground === 'function') {
+        setTimeout(syncPendientesBackground, 1000);
+    }
 }
 
+// Llamado manualmente (botón Conectar en contabilidad, o al subir)
 function googleSignIn() {
-    if (!gdriveTokenClient) {
-        initGoogleDrive();
-    }
-    
+    if (!gdriveTokenClient) initGoogleDrive();
+
     if (gdriveAccessToken) {
-        if (typeof renderContabilidadContent === 'function') {
-            renderContabilidadContent();
-        }
+        if (typeof renderContabilidadContent === 'function') renderContabilidadContent();
         return;
     }
-    
+
+    gdriveTokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+// ============================================
+// PEDIR DRIVE SOLO AL MOMENTO DE SUBIR
+// Uso: requestDriveForUpload(function() { /* subir */ });
+// ============================================
+
+function requestDriveForUpload(callback) {
+    if (isGoogleConnected()) {
+        callback();
+        return;
+    }
+
+    // Guardar acción y pedir conexión
+    _pendingDriveCallback = callback;
+
+    if (!gdriveTokenClient) initGoogleDrive();
+    if (!gdriveTokenClient) {
+        alert('Google Drive no disponible. Recarga la página e intenta de nuevo.');
+        _pendingDriveCallback = null;
+        return;
+    }
+
     gdriveTokenClient.requestAccessToken({ prompt: 'consent' });
 }
 
@@ -389,4 +429,4 @@ async function getOrCreateProveedorFolder(proveedorNombre) {
     return await createDriveFolder(proveedorNombre, proveedoresParentId);
 }
 
-console.log('✅ GOOGLE-DRIVE.JS v2 cargado');
+console.log('✅ GOOGLE-DRIVE.JS V2 cargado');
