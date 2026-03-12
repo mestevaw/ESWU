@@ -72,28 +72,27 @@ function renderEswuActa() {
     div.innerHTML = html;
 }
 
-async function selectEswuActa() {
-    if (typeof isGoogleConnected !== 'function' || !isGoogleConnected()) { alert('Conecta Google Drive primero'); return; }
-    if (!eswuFolderIds.legales) eswuFolderIds.legales = await findEswuFolder(ESWU_FOLDER_NAMES.legales);
-    if (!eswuFolderIds.legales) { alert('No se encontró DOCUMENTOS LEGALES'); return; }
-    
-    showLoading();
-    try {
-        var result = await listDriveFolder(eswuFolderIds.legales);
-        var files = (result.folders || []).concat(result.files || []);
-        hideLoading();
-        if (files.length === 0) { alert('No hay archivos en DOCUMENTOS LEGALES'); return; }
-        
-        var selected = prompt('Selecciona el número:\n\n' + files.map(function(n, i) { return (i+1) + '. ' + n.name; }).join('\n'));
-        if (selected) {
-            var idx = parseInt(selected) - 1;
-            if (idx >= 0 && idx < files.length) {
-                localStorage.setItem('eswu_acta_file_id', files[idx].id);
-                localStorage.setItem('eswu_acta_file_name', files[idx].name);
-                renderEswuActa();
+function selectEswuActa() {
+    requestDriveForUpload(async function() {
+        if (!eswuFolderIds.legales) eswuFolderIds.legales = await findEswuFolder(ESWU_FOLDER_NAMES.legales);
+        if (!eswuFolderIds.legales) { alert('No se encontr\u00f3 DOCUMENTOS LEGALES'); return; }
+        showLoading();
+        try {
+            var result = await listDriveFolder(eswuFolderIds.legales);
+            var files = (result.folders || []).concat(result.files || []);
+            hideLoading();
+            if (files.length === 0) { alert('No hay archivos en DOCUMENTOS LEGALES'); return; }
+            var selected = prompt('Selecciona el n\u00famero:\n\n' + files.map(function(n, i) { return (i+1) + '. ' + n.name; }).join('\n'));
+            if (selected) {
+                var idx = parseInt(selected) - 1;
+                if (idx >= 0 && idx < files.length) {
+                    localStorage.setItem('eswu_acta_file_id', files[idx].id);
+                    localStorage.setItem('eswu_acta_file_name', files[idx].name);
+                    renderEswuActa();
+                }
             }
-        }
-    } catch (e) { hideLoading(); alert('Error: ' + e.message); }
+        } catch (e) { hideLoading(); alert('Error: ' + e.message); }
+    });
 }
 
 // ============================================
@@ -213,13 +212,14 @@ async function loadEswuDocsTab(tipo, retryCount) {
     var contentDiv = document.getElementById('eswu' + cap(tipo) + 'Content');
     if (!contentDiv) return;
     retryCount = retryCount || 0;
-    
+
     if (typeof isGoogleConnected !== 'function' || !isGoogleConnected()) {
-        if (retryCount < 3) {
+        // Nivel 1: probablemente esta auto-conectando, esperar una vez brevemente
+        if (currentUser && currentUser.nivel === 1 && retryCount < 1) {
             contentDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:1rem;">Conectando a Google Drive...</p>';
-            setTimeout(function() { loadEswuDocsTab(tipo, retryCount + 1); }, 2000);
+            setTimeout(function() { loadEswuDocsTab(tipo, retryCount + 1); }, 2500);
         } else {
-            contentDiv.innerHTML = '<div style="text-align:center;padding:1.5rem;"><p style="color:var(--text-light);margin-bottom:0.5rem;">No se pudo conectar a Google Drive.</p><button onclick="googleSignIn()" style="background:var(--primary);color:white;border:none;padding:0.35rem 0.7rem;border-radius:6px;cursor:pointer;font-size:0.85rem;">Conectar</button></div>';
+            contentDiv.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:1.5rem;font-size:0.9rem;">Los documentos se cargan cuando Google Drive est\u00e9 conectado.</p>';
         }
         return;
     }
@@ -349,35 +349,35 @@ function filterEswuDocs(tipo) {
 // UPLOAD TO CURRENT FOLDER
 // ============================================
 
-async function uploadToEswuFolder(tipo) {
-    if (typeof isGoogleConnected !== 'function' || !isGoogleConnected()) { alert('Conecta Google Drive primero'); return; }
-    
-    var targetFolder = eswuCurrentFolders[tipo] || eswuFolderIds[tipo];
-    if (!targetFolder) {
-        eswuFolderIds[tipo] = await findEswuFolder(ESWU_FOLDER_NAMES[tipo]);
-        targetFolder = eswuFolderIds[tipo];
-        if (!targetFolder) { alert('No se encontró "' + ESWU_FOLDER_NAMES[tipo] + '"'); return; }
-    }
-    
-    var input = document.createElement('input');
-    input.type = 'file';
-    input.multiple = true;
-    input.accept = '.pdf,.xlsx,.xls,.doc,.docx,.csv,.jpg,.jpeg,.png,.txt';
-    input.onchange = async function() {
-        if (!input.files.length) return;
-        showLoading();
-        try {
-            for (var i = 0; i < input.files.length; i++) {
-                await uploadFileToDrive(input.files[i], targetFolder);
-            }
-            await renderEswuFolder(tipo, targetFolder);
-        } catch (e) {
-            alert('Error al subir: ' + e.message);
-        } finally {
-            hideLoading();
+function uploadToEswuFolder(tipo) {
+    requestDriveForUpload(async function() {
+        var targetFolder = eswuCurrentFolders[tipo] || eswuFolderIds[tipo];
+        if (!targetFolder) {
+            eswuFolderIds[tipo] = await findEswuFolder(ESWU_FOLDER_NAMES[tipo]);
+            targetFolder = eswuFolderIds[tipo];
+            if (!targetFolder) { alert('No se encontr\u00f3 "' + ESWU_FOLDER_NAMES[tipo] + '"'); return; }
         }
-    };
-    input.click();
+
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = true;
+        input.accept = '.pdf,.xlsx,.xls,.doc,.docx,.csv,.jpg,.jpeg,.png,.txt';
+        input.onchange = async function() {
+            if (!input.files.length) return;
+            showLoading();
+            try {
+                for (var i = 0; i < input.files.length; i++) {
+                    await uploadFileToDrive(input.files[i], targetFolder);
+                }
+                await renderEswuFolder(tipo, targetFolder);
+            } catch (e) {
+                alert('Error al subir: ' + e.message);
+            } finally {
+                hideLoading();
+            }
+        };
+        input.click();
+    });
 }
 
 // ============================================
@@ -540,33 +540,26 @@ function renderBancosTable() {
 // DRAG & DROP for document tabs (inline handlers in HTML)
 // ============================================
 
-async function handleEswuDrop(tipo, files) {
-    if (typeof isGoogleConnected !== 'function' || !isGoogleConnected()) {
-        alert('Conecta Google Drive primero');
-        return;
-    }
-    
-    var targetFolder = eswuCurrentFolders[tipo] || eswuFolderIds[tipo];
-    if (!targetFolder) {
-        eswuFolderIds[tipo] = await findEswuFolder(ESWU_FOLDER_NAMES[tipo]);
-        targetFolder = eswuFolderIds[tipo];
+function handleEswuDrop(tipo, files) {
+    requestDriveForUpload(async function() {
+        var targetFolder = eswuCurrentFolders[tipo] || eswuFolderIds[tipo];
         if (!targetFolder) {
-            alert('No se encontró "' + ESWU_FOLDER_NAMES[tipo] + '"');
-            return;
+            eswuFolderIds[tipo] = await findEswuFolder(ESWU_FOLDER_NAMES[tipo]);
+            targetFolder = eswuFolderIds[tipo];
+            if (!targetFolder) { alert('No se encontr\u00f3 "' + ESWU_FOLDER_NAMES[tipo] + '"'); return; }
         }
-    }
-    
-    showLoading();
-    try {
-        for (var i = 0; i < files.length; i++) {
-            await uploadFileToDrive(files[i], targetFolder);
+        showLoading();
+        try {
+            for (var i = 0; i < files.length; i++) {
+                await uploadFileToDrive(files[i], targetFolder);
+            }
+            await renderEswuFolder(tipo, targetFolder);
+        } catch (e) {
+            alert('Error al subir: ' + e.message);
+        } finally {
+            hideLoading();
         }
-        await renderEswuFolder(tipo, targetFolder);
-    } catch (e) {
-        alert('Error al subir: ' + e.message);
-    } finally {
-        hideLoading();
-    }
+    });
 }
 
 // Handle banco drop - open modal with file pre-loaded
